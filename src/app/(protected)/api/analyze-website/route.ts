@@ -75,7 +75,7 @@
 // }
 
 import { NextResponse } from "next/server"
-import puppeteer from "puppeteer"
+import puppeteer from "puppeteer-core"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
