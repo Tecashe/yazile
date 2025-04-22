@@ -1242,21 +1242,6 @@ const Trigger = ({ id }: Props) => {
                 <Keywords id={id} />
               </div>
 
-              {/* <div>
-                <h3 className="text-lg font-medium mb-3">Select Posts to Monitor</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <PostButton id={id} />
-                  <ScheduledPostsSelector
-                    userId={id}
-                    onSelectPost={(post) => {
-                      console.log("Selected scheduled post:", post)
-                      // Handle adding the post to the automation
-                    }}
-                    selectedPosts={[]}
-                  />
-                </div>
-              </div> */}
-
               {responseType === "SMARTAI" || 50>20 && (
                 <div>
                   <h3 className="text-lg font-medium mb-3">Analyze Your Business</h3>
@@ -1269,17 +1254,6 @@ const Trigger = ({ id }: Props) => {
                 </div>
               )}
 
-              {/* <div>
-                <h3 className="text-lg font-medium mb-3">Create Response Template</h3>
-                <TemplateEditor
-                  initialTemplate={data?.data?.listener?.prompt || ""}
-                  keywords={data?.data?.keywords?.map((k) => k.word) || []}
-                  onSave={(template) => {
-                    console.log("Template saved:", template)
-                    // Handle saving the template
-                  }}
-                />
-              </div> */}
             </div>
 
             <Button
