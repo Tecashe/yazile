@@ -1,6 +1,4 @@
 import { Suspense } from "react"
-// import { getServerSession } from "next-auth/next"
-// import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

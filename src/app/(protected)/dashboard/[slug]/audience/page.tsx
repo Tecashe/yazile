@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import Header from "@/components/global/audience/Header"
-import  InstagramDashboard  from "../_components/insta/profile"
 import ClientList from "@/components/global/audience/ClientList"
 import PromoComposer from "@/components/global/audience/PromoComposer"
 import AnalyticsSection from "@/components/global/audience/AnalyticsSection"
