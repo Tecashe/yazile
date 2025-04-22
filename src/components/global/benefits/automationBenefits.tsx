@@ -19,7 +19,7 @@ const benefits = [
   {
     emoji: "",
     title: "Save Time",
-    description: "Handle repetitive tasks automatically, freeing up your time for more important work.",
+    description: "Handle repetitive tasks automatically",
     image: "/instagram-automation-1.svg",
   },
   {
