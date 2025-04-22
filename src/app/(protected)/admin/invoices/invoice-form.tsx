@@ -72,7 +72,7 @@ export function InvoiceForm({ invoice }: { invoice?: any }) {
     name: "items",
   })
 
-  // Load users
+  
   useEffect(() => {
     async function loadUsers() {
       try {
@@ -91,7 +91,7 @@ export function InvoiceForm({ invoice }: { invoice?: any }) {
     loadUsers()
   }, [])
 
-  // Calculate totals when items change
+  
   useEffect(() => {
     const items = form.watch("items")
     const calculatedSubtotal = items.reduce((sum, item) => {
