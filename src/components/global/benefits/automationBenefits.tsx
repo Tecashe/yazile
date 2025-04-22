@@ -7,7 +7,7 @@ const benefits = [
   {
     emoji: "",
     title: "Enhanced customer Journey",
-    description: "Let AI deal with the task of converting customers",
+    description: "Let AI deal with the task of converting potential customers",
     image: "/instagram-automation-5.svg",
   },
   {
@@ -19,7 +19,7 @@ const benefits = [
   {
     emoji: "",
     title: "Save Time",
-    description: "Handle repetitive tasks automatically",
+    description: "Handle repetitive tasks automatically, freeing up your time for more important work.",
     image: "/instagram-automation-1.svg",
   },
   {
