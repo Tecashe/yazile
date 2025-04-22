@@ -7,7 +7,7 @@ const benefits = [
   {
     emoji: "",
     title: "Enhanced customer Journey",
-    description: "Let AI deal with the task of converting potential customers",
+    description: "Let AI deal with the task of converting customers",
     image: "/instagram-automation-5.svg",
   },
   {
