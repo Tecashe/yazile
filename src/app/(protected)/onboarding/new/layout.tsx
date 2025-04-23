@@ -429,6 +429,8 @@
 //   );
 // }
 
+'use client'
+
 import { Suspense } from "react";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Loader2 } from "lucide-react";
