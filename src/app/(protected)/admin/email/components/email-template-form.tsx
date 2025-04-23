@@ -2339,7 +2339,7 @@ export function EmailTemplateForm({
       </div>
 
       <Tabs defaultValue="design" className="w-full" value={activeTab} onValueChange={handleTabChange}>
-        <div className="bg-white sticky top-0 z-10 pb-2">
+        <div className="bg-green sticky top-0 z-10 pb-2">
           <TabsList className="w-full mb-6">
             <TabsTrigger value="design" className="flex-1">
               Design
