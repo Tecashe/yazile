@@ -724,9 +724,16 @@
 //     </Dialog>
 //   )
 // }
+
+
+
+
+
+
+
 "use client"
 
-import { useEffect, useRef, useState, useMemo, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Slider } from "@/components/ui/slider"
@@ -756,8 +763,6 @@ type DrawingAction = {
 export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const contextRef = useRef<CanvasRenderingContext2D | null>(null)
-  const textInputRef = useRef<HTMLInputElement>(null)
-  
   const [isDrawing, setIsDrawing] = useState(false)
   const [color, setColor] = useState("#ffffff")
   const [brushSize, setBrushSize] = useState(3)
@@ -768,21 +773,20 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
   const [textInput, setTextInput] = useState("")
   const [textPosition, setTextPosition] = useState({ x: 0, y: 0 })
   const [isAddingText, setIsAddingText] = useState(false)
+  const textInputRef = useRef<HTMLInputElement>(null)
+  const channelRef = useRef<any>(null)
 
   // Initialize canvas
   useEffect(() => {
     if (!canvasRef.current || !isOpen) return
 
     const canvas = canvasRef.current
-    const dpr = window.devicePixelRatio || 1
-    const rect = canvas.getBoundingClientRect()
-    
-    canvas.width = rect.width * dpr
-    canvas.height = rect.height * dpr
+    canvas.width = canvas.offsetWidth * 2
+    canvas.height = canvas.offsetHeight * 2
 
     const context = canvas.getContext("2d")
     if (context) {
-      context.scale(dpr, dpr)
+      context.scale(2, 2) // For high DPI displays
       context.lineCap = "round"
       context.lineJoin = "round"
       context.strokeStyle = color
@@ -791,20 +795,32 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
 
       // Fill with dark background
       context.fillStyle = "#1a1a1a"
-      context.fillRect(0, 0, rect.width, rect.height)
+      context.fillRect(0, 0, canvas.width, canvas.height)
     }
   }, [isOpen])
 
+  // Update context when color or brush size changes
+  useEffect(() => {
+    if (!contextRef.current) return
+    
+    const ctx = contextRef.current
+    ctx.strokeStyle = color
+    ctx.lineWidth = brushSize
+  }, [color, brushSize])
+
   // Set up Pusher for real-time collaboration
   useEffect(() => {
-    if (!chatId || !pusherClient || !isOpen) return
+    if (!chatId || !isOpen) return
 
+    // Create a channel for this specific whiteboard
     const channel = pusherClient.subscribe(`whiteboard-${chatId}`)
+    channelRef.current = channel
 
     channel.bind("draw-action", (data: DrawingAction) => {
       if (!contextRef.current) return
       applyAction(data)
-      setActions((prev) => [...prev, data])
+      // Add to local actions without triggering another send
+      setActions(prev => [...prev, data])
     })
 
     return () => {
@@ -812,124 +828,23 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
     }
   }, [chatId, isOpen])
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isAddingText) {
-        setIsAddingText(false)
-        setTextInput("")
-      }
-      if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        undoLastAction()
-      }
-      if (e.key === "y" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        redoLastAction()
-      }
-    }
+  // Drawing handlers
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!contextRef.current || isAddingText) return
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isAddingText, actions, redoStack])
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-  const applyAction = useCallback((action: DrawingAction) => {
-    if (!contextRef.current) return
-    const ctx = contextRef.current
-
-    switch (action.type) {
-      case "pencil-start":
-        ctx.strokeStyle = action.color || color
-        ctx.lineWidth = action.width || brushSize
-        ctx.beginPath()
-        ctx.moveTo(action.x, action.y)
-        break
-        
-      case "pencil-move":
-        ctx.lineTo(action.x, action.y)
-        ctx.stroke()
-        break
-        
-      case "eraser-start":
-        ctx.globalCompositeOperation = "destination-out"
-        ctx.beginPath()
-        ctx.moveTo(action.x, action.y)
-        break
-        
-      case "eraser-move":
-        ctx.lineTo(action.x, action.y)
-        ctx.stroke()
-        ctx.globalCompositeOperation = "source-over"
-        break
-        
-      case "rectangle":
-        ctx.strokeStyle = action.color || color
-        ctx.lineWidth = action.width || brushSize
-        ctx.beginPath()
-        ctx.rect(action.x, action.y, action.endX! - action.x, action.endY! - action.y)
-        ctx.stroke()
-        break
-        
-      case "circle":
-        ctx.strokeStyle = action.color || color
-        ctx.lineWidth = action.width || brushSize
-        ctx.beginPath()
-        const radius = Math.sqrt(Math.pow(action.endX! - action.x, 2) + Math.pow(action.endY! - action.y, 2))
-        ctx.arc(action.x, action.y, radius, 0, 2 * Math.PI)
-        ctx.stroke()
-        break
-        
-      case "text":
-        ctx.fillStyle = action.color || color
-        ctx.font = `${action.width || 16}px sans-serif`
-        ctx.fillText(action.text || "", action.x, action.y)
-        break
-        
-      case "clear":
-        ctx.fillStyle = "#1a1a1a"
-        ctx.fillRect(0, 0, canvasRef.current!.width, canvasRef.current!.height)
-        break
-    }
-  }, [color, brushSize])
-
-  const redrawCanvas = useCallback(() => {
-    if (!contextRef.current || !canvasRef.current) return
-
-    const ctx = contextRef.current
-    const rect = canvasRef.current.getBoundingClientRect()
-
-    ctx.fillStyle = "#1a1a1a"
-    ctx.fillRect(0, 0, rect.width, rect.height)
-
-    actions.forEach((action) => applyAction(action))
-  }, [actions, applyAction])
-
-  const sendDrawAction = async (action: DrawingAction) => {
-    try {
-      await fetch(`/api/whiteboard/${chatId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(action),
-      })
-    } catch (error) {
-      console.error("Error sending drawing action:", error)
-    }
-  }
-
-  const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!contextRef.current || !canvasRef.current) return
-
-    const rect = canvasRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.clientX - rect.left)
+    const y = (e.clientY - rect.top)
 
     if (mode === "text") {
       setTextPosition({ x, y })
       setIsAddingText(true)
       setTimeout(() => {
         textInputRef.current?.focus()
-        textInputRef.current?.select()
-      }, 50)
+      }, 100)
       return
     }
 
@@ -937,7 +852,6 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
     setStartPos({ x, y })
 
     const ctx = contextRef.current
-    let action: DrawingAction
 
     if (mode === "pencil") {
       ctx.globalCompositeOperation = "source-over"
@@ -945,62 +859,91 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
       ctx.lineWidth = brushSize
       ctx.beginPath()
       ctx.moveTo(x, y)
-      action = { type: "pencil-start", x, y, color, width: brushSize }
+
+      // Send to Pusher
+      const action = {
+        type: "pencil-start",
+        x,
+        y,
+        color,
+        width: brushSize,
+      }
+      sendDrawAction(action)
+      setActions(prev => [...prev, action])
     } else if (mode === "eraser") {
       ctx.globalCompositeOperation = "destination-out"
       ctx.beginPath()
       ctx.moveTo(x, y)
-      action = { type: "eraser-start", x, y, width: brushSize * 2 }
-    } else {
+
+      // Send to Pusher
+      const action = {
+        type: "eraser-start",
+        x,
+        y,
+        width: brushSize * 2, // Eraser is usually bigger
+      }
+      sendDrawAction(action)
+      setActions(prev => [...prev, action])
+    }
+  }
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !contextRef.current || isAddingText) return
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.clientX - rect.left)
+    const y = (e.clientY - rect.top)
+
+    const ctx = contextRef.current
+
+    if (mode === "pencil") {
+      ctx.lineTo(x, y)
+      ctx.stroke()
+
+      // Send to Pusher
+      const action = {
+        type: "pencil-move",
+        x,
+        y,
+        color,
+        width: brushSize,
+      }
+      sendDrawAction(action)
+      setActions(prev => [...prev, action])
+    } else if (mode === "eraser") {
+      ctx.lineTo(x, y)
+      ctx.stroke()
+
+      // Send to Pusher
+      const action = {
+        type: "eraser-move",
+        x,
+        y,
+        width: brushSize * 2,
+      }
+      sendDrawAction(action)
+      setActions(prev => [...prev, action])
+    }
+  }
+
+  const endDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!contextRef.current) return
+    
+    if (!isDrawing && mode !== "rectangle" && mode !== "circle") {
       return
     }
 
-    sendDrawAction(action)
-    setActions((prev) => [...prev, action])
-  }, [mode, color, brushSize])
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-  const draw = useMemo(() => {
-    let lastTime = 0
-    return (e: React.MouseEvent<HTMLCanvasElement>) => {
-      const now = Date.now()
-      if ((now - lastTime < 16 && mode !== "text") || !isDrawing || !contextRef.current || !canvasRef.current) {
-        return
-      }
-      lastTime = now
-
-      const rect = canvasRef.current.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      const ctx = contextRef.current
-      let action: DrawingAction
-
-      if (mode === "pencil") {
-        ctx.lineTo(x, y)
-        ctx.stroke()
-        action = { type: "pencil-move", x, y, color, width: brushSize }
-      } else if (mode === "eraser") {
-        ctx.lineTo(x, y)
-        ctx.stroke()
-        action = { type: "eraser-move", x, y, width: brushSize * 2 }
-      } else {
-        return
-      }
-
-      sendDrawAction(action)
-      setActions((prev) => [...prev, action])
-    }
-  }, [isDrawing, mode, color, brushSize])
-
-  const endDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !contextRef.current || !canvasRef.current) return
-
-    const rect = canvasRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.clientX - rect.left)
+    const y = (e.clientY - rect.top)
 
     const ctx = contextRef.current
-    let action: DrawingAction | null = null
 
     if (mode === "rectangle") {
       ctx.strokeStyle = color
@@ -1008,7 +951,9 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
       ctx.beginPath()
       ctx.rect(startPos.x, startPos.y, x - startPos.x, y - startPos.y)
       ctx.stroke()
-      action = {
+
+      // Send to Pusher
+      const action = {
         type: "rectangle",
         x: startPos.x,
         y: startPos.y,
@@ -1017,6 +962,8 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
         color,
         width: brushSize,
       }
+      sendDrawAction(action)
+      setActions(prev => [...prev, action])
     } else if (mode === "circle") {
       ctx.strokeStyle = color
       ctx.lineWidth = brushSize
@@ -1024,7 +971,9 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
       const radius = Math.sqrt(Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2))
       ctx.arc(startPos.x, startPos.y, radius, 0, 2 * Math.PI)
       ctx.stroke()
-      action = {
+
+      // Send to Pusher
+      const action = {
         type: "circle",
         x: startPos.x,
         y: startPos.y,
@@ -1033,20 +982,17 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
         color,
         width: brushSize,
       }
+      sendDrawAction(action)
+      setActions(prev => [...prev, action])
     } else if (mode === "eraser") {
       ctx.globalCompositeOperation = "source-over"
     }
 
-    if (action) {
-      sendDrawAction(action)
-      setActions((prev) => [...prev, action!])
-    }
-
     setIsDrawing(false)
     ctx.closePath()
-  }, [isDrawing, mode, color, brushSize, startPos])
+  }
 
-  const handleTextSubmit = useCallback(() => {
+  const handleTextSubmit = () => {
     if (!textInput.trim() || !contextRef.current) {
       setIsAddingText(false)
       return
@@ -1057,6 +1003,7 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
     ctx.font = `${brushSize * 5}px sans-serif`
     ctx.fillText(textInput, textPosition.x, textPosition.y)
 
+    // Send to Pusher
     const action = {
       type: "text",
       x: textPosition.x,
@@ -1066,52 +1013,233 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
       width: brushSize * 5,
     }
     sendDrawAction(action)
-    setActions((prev) => [...prev, action])
+    setActions(prev => [...prev, action])
 
     setTextInput("")
     setIsAddingText(false)
-  }, [textInput, textPosition, color, brushSize])
+  }
 
-  const clearCanvas = useCallback(() => {
+  const clearCanvas = () => {
     if (!contextRef.current || !canvasRef.current) return
 
     const ctx = contextRef.current
-    const rect = canvasRef.current.getBoundingClientRect()
-    
     ctx.fillStyle = "#1a1a1a"
-    ctx.fillRect(0, 0, rect.width, rect.height)
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
-    const action = { type: "clear", x: 0, y: 0 }
+    // Send to Pusher
+    const action = {
+      type: "clear",
+      x: 0,
+      y: 0,
+    }
     sendDrawAction(action)
+
+    // Clear actions
     setActions([])
     setRedoStack([])
 
-    toast({ title: "Canvas Cleared", description: "The whiteboard has been cleared" })
-  }, [])
+    toast({
+      title: "Canvas Cleared",
+      description: "The whiteboard has been cleared",
+    })
+  }
 
-  const undoLastAction = useCallback(() => {
-    if (actions.length === 0) return
+  const undoLastAction = () => {
+    if (actions.length === 0 || !contextRef.current || !canvasRef.current) return
 
+    // Pop the last action and add to redo stack
     const lastAction = actions[actions.length - 1]
-    setRedoStack((prev) => [...prev, lastAction])
-    setActions((prev) => prev.slice(0, prev.length - 1))
+    setRedoStack(prev => [...prev, lastAction])
+    setActions(prev => prev.slice(0, prev.length - 1))
+
+    // Redraw everything
     redrawCanvas()
 
-    toast({ title: "Undo", description: "Last action undone" })
-  }, [actions, redrawCanvas])
+    toast({
+      title: "Undo",
+      description: "Last action undone",
+    })
+  }
 
-  const redoLastAction = useCallback(() => {
-    if (redoStack.length === 0) return
+  const redoLastAction = () => {
+    if (redoStack.length === 0 || !contextRef.current) return
 
+    // Pop the last redo action and add back to actions
     const actionToRedo = redoStack[redoStack.length - 1]
-    setActions((prev) => [...prev, actionToRedo])
-    setRedoStack((prev) => prev.slice(0, prev.length - 1))
+    setActions(prev => [...prev, actionToRedo])
+    setRedoStack(prev => prev.slice(0, prev.length - 1))
+
+    // Apply the action
     applyAction(actionToRedo)
+    // Send to pusher
+    sendDrawAction(actionToRedo)
 
-    toast({ title: "Redo", description: "Action redone" })
-  }, [redoStack, applyAction])
+    toast({
+      title: "Redo",
+      description: "Action redone",
+    })
+  }
 
-  const downloadCanvas = useCallback(() => {
+  const redrawCanvas = () => {
+    if (!contextRef.current || !canvasRef.current) return
+
+    const ctx = contextRef.current
+
+    // Clear canvas
+    ctx.fillStyle = "#1a1a1a"
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+
+    // Redraw all actions
+    actions.forEach(action => {
+      applyAction(action)
+    })
+  }
+
+  const applyAction = (action: DrawingAction) => {
+    if (!contextRef.current) return
+
+    const ctx = contextRef.current
+
+    if (action.type === "pencil-start") {
+      ctx.globalCompositeOperation = "source-over"
+      ctx.strokeStyle = action.color || color
+      ctx.lineWidth = action.width || brushSize
+      ctx.beginPath()
+      ctx.moveTo(action.x, action.y)
+    } else if (action.type === "pencil-move") {
+      ctx.strokeStyle = action.color || color
+      ctx.lineWidth = action.width || brushSize
+      ctx.lineTo(action.x, action.y)
+      ctx.stroke()
+    } else if (action.type === "eraser-start") {
+      ctx.globalCompositeOperation = "destination-out"
+      ctx.beginPath()
+      ctx.moveTo(action.x, action.y)
+    } else if (action.type === "eraser-move") {
+      ctx.globalCompositeOperation = "destination-out"
+      ctx.lineTo(action.x, action.y)
+      ctx.stroke()
+      ctx.globalCompositeOperation = "source-over"
+    } else if (action.type === "rectangle") {
+      ctx.globalCompositeOperation = "source-over"
+      ctx.strokeStyle = action.color || color
+      ctx.lineWidth = action.width || brushSize
+      ctx.beginPath()
+      ctx.rect(action.x, action.y, action.endX! - action.x, action.endY! - action.y)
+      ctx.stroke()
+    } else if (action.type === "circle") {
+      ctx.globalCompositeOperation = "source-over"
+      ctx.strokeStyle = action.color || color
+      ctx.lineWidth = action.width || brushSize
+      ctx.beginPath()
+      const radius = Math.sqrt(Math.pow(action.endX! - action.x, 2) + Math.pow(action.endY! - action.y, 2))
+      ctx.arc(action.x, action.y, radius, 0, 2 * Math.PI)
+      ctx.stroke()
+    } else if (action.type === "text") {
+      ctx.globalCompositeOperation = "source-over"
+      ctx.fillStyle = action.color || color
+      ctx.font = `${action.width || 16}px sans-serif`
+      ctx.fillText(action.text || "", action.x, action.y)
+    } else if (action.type === "clear") {
+      ctx.fillStyle = "#1a1a1a"
+      ctx.fillRect(0, 0, canvasRef.current!.width, canvasRef.current!.height)
+    }
+  }
+
+  // const sendDrawAction = async (action: DrawingAction) => {
+  //   try {
+  //     // For local development, we'll use the pusher client directly
+  //     // In production, this would be sent to the server
+  //     if (channelRef.current) {
+  //       channelRef.current.trigger("draw-action", action);
+  //     }
+      
+  //     // This would be the server call in a real app
+  //     await fetch(`/api/whiteboard/${chatId}`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(action),
+  //     })
+  //   } catch (error) {
+  //     console.error("Error sending drawing action:", error)
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to sync drawing action",
+  //       variant: "destructive",
+  //     })
+  //   }
+  // }
+
+  // const downloadCanvas = () => {
+  //   if (!canvasRef.current) return
+
+  //   const canvas = canvasRef.current
+  //   const dataUrl = canvas.toDataURL("image/png")
+
+  //   const a = document.createElement("a")
+  //   a.href = dataUrl
+  //   a.download = `whiteboard-${chatId}-${new Date().toISOString().slice(0, 10)}.png`
+  //   document.body.appendChild(a)
+  //   a.click()
+  //   document.body.removeChild(a)
+
+  //   toast({
+  //     title: "Download Complete",
+  //     description: "Whiteboard image has been downloaded",
+  //   })
+  // }
+
+  // const saveWhiteboard = async () => {
+  //   if (!canvasRef.current) return
+
+  //   const canvas = canvasRef.current
+  //   const dataUrl = canvas.toDataURL("image/png")
+
+  //   try {
+  //     // In a real app, this would save to the server
+  //     // For now, we'll just show a success message
+  //     toast({
+  //       title: "Whiteboard Saved",
+  //       description: "Your whiteboard has been saved to the chat",
+  //     })
+      
+  //     // This would be the server call in a real app
+  //     await fetch(`/api/whiteboard/${chatId}/save`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         imageData: dataUrl,
+  //         actions: actions,
+  //       }),
+  //     })
+  //   } catch (error) {
+  //     console.error("Error saving whiteboard:", error)
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to save whiteboard",
+  //       variant: "destructive",
+  //     })
+  //   }
+  // }
+  const sendDrawAction = async (action: DrawingAction) => {
+    try {
+      await fetch(`/api/whiteboard/${chatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(action),
+      })
+    } catch (error) {
+      console.error("Error sending drawing action:", error)
+    }
+  }
+
+  const downloadCanvas = () => {
     if (!canvasRef.current) return
 
     const canvas = canvasRef.current
@@ -1124,10 +1252,13 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
     a.click()
     document.body.removeChild(a)
 
-    toast({ title: "Download Complete", description: "Whiteboard image has been downloaded" })
-  }, [chatId])
+    toast({
+      title: "Download Complete",
+      description: "Whiteboard image has been downloaded",
+    })
+  }
 
-  const saveWhiteboard = useCallback(async () => {
+  const saveWhiteboard = async () => {
     if (!canvasRef.current) return
 
     const canvas = canvasRef.current
@@ -1136,8 +1267,13 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
     try {
       const response = await fetch(`/api/whiteboard/${chatId}/save`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageData: dataUrl, actions }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageData: dataUrl,
+          actions: actions,
+        }),
       })
 
       if (response.ok) {
@@ -1157,31 +1293,56 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
         variant: "destructive",
       })
     }
-  }, [chatId, actions])
+  }
 
   const colorOptions = [
-    "#ffffff", "#ff5555", "#5af78e", "#57c7ff", 
-    "#f1fa8c", "#bd93f9", "#ff79c6", "#8be9fd", "#ffb86c"
+    "#ffffff", // white
+    "#ff5555", // red
+    "#5af78e", // green
+    "#57c7ff", // blue
+    "#f1fa8c", // yellow
+    "#bd93f9", // purple
+    "#ff79c6", // pink
+    "#8be9fd", // cyan
+    "#ffb86c", // orange
   ]
 
-  const handleTouch = useCallback((type: string, e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (mode === "text") return
-    e.preventDefault()
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (!canvasRef.current || !contextRef.current) return;
+      
+      // Store the image data
+      const tempCanvas = document.createElement('canvas');
+      const tempContext = tempCanvas.getContext('2d');
+      if (!tempContext) return;
+      
+      tempCanvas.width = canvasRef.current.width;
+      tempCanvas.height = canvasRef.current.height;
+      tempContext.drawImage(canvasRef.current, 0, 0);
+      
+      // Resize canvas
+      canvasRef.current.width = canvasRef.current.offsetWidth * 2;
+      canvasRef.current.height = canvasRef.current.offsetHeight * 2;
+      
+      // Reset context properties after resize
+      const ctx = contextRef.current;
+      ctx.scale(2, 2);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = brushSize;
+      
+      // Redraw content
+      ctx.drawImage(tempCanvas, 0, 0);
+    };
     
-    const touch = e.touches[0]
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-    
-    const mouseEvent = new MouseEvent(type, {
-      clientX: touch.clientX,
-      clientY: touch.clientY,
-      bubbles: true,
-    })
-    canvasRef.current?.dispatchEvent(mouseEvent)
-  }, [mode])
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [color, brushSize]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="max-w-5xl w-full h-[80vh] p-0 bg-gray-900 border-gray-700">
         <DialogHeader className="p-4 border-b border-gray-800">
           <DialogTitle className="text-white">Collaborative Whiteboard</DialogTitle>
@@ -1189,23 +1350,52 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
 
         <div className="flex flex-col h-full">
           {/* Toolbar */}
-          <div className="flex items-center gap-2 p-2 border-b border-gray-800 bg-gray-800">
+          <div className="flex flex-wrap items-center gap-2 p-2 border-b border-gray-800 bg-gray-800">
             <div className="flex items-center gap-1">
-              {(["pencil", "eraser", "rectangle", "circle", "text"] as DrawingMode[]).map((tool) => (
-                <Button
-                  key={tool}
-                  variant={mode === tool ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setMode(tool)}
-                  className="h-8 w-8"
-                >
-                  {tool === "pencil" && <Pencil className="h-4 w-4" />}
-                  {tool === "eraser" && <Eraser className="h-4 w-4" />}
-                  {tool === "rectangle" && <Square className="h-4 w-4" />}
-                  {tool === "circle" && <Circle className="h-4 w-4" />}
-                  {tool === "text" && <Type className="h-4 w-4" />}
-                </Button>
-              ))}
+              <Button
+                variant={mode === "pencil" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setMode("pencil")}
+                className="h-8 w-8"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant={mode === "eraser" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setMode("eraser")}
+                className="h-8 w-8"
+              >
+                <Eraser className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant={mode === "rectangle" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setMode("rectangle")}
+                className="h-8 w-8"
+              >
+                <Square className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant={mode === "circle" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setMode("circle")}
+                className="h-8 w-8"
+              >
+                <Circle className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant={mode === "text" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setMode("text")}
+                className="h-8 w-8"
+              >
+                <Type className="h-4 w-4" />
+              </Button>
             </div>
 
             <div className="h-8 border-l border-gray-700 mx-1"></div>
@@ -1213,7 +1403,7 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="icon" className="h-8 w-8">
-                  <div className="h-4 w-4 rounded-full" style={{ backgroundColor: color }} />
+                  <div className="h-4 w-4 rounded-full" style={{ backgroundColor: color }}></div>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2 bg-gray-800 border-gray-700">
@@ -1233,7 +1423,7 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
                     type="color"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    className="h-8 w-full bg-transparent border-0 cursor-pointer"
+                    className="h-8 w-full bg-transparent border-0"
                   />
                 </div>
               </PopoverContent>
@@ -1288,7 +1478,7 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
 
             <Button variant="default" size="sm" onClick={saveWhiteboard} className="h-8">
               <Save className="h-4 w-4 mr-2" />
-              Save
+              Save to Chat
             </Button>
           </div>
 
@@ -1296,24 +1486,42 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
           <div className="relative flex-1 overflow-hidden">
             <canvas
               ref={canvasRef}
-              className="absolute inset-0 w-full h-full touch-none cursor-crosshair bg-gray-900"
-              onPointerDown={startDrawing}
-              onPointerMove={draw}
-              onPointerUp={endDrawing}
-              onPointerLeave={endDrawing}
-              onContextMenu={(e) => e.preventDefault()}
-              onTouchStart={(e) => handleTouch("mousedown", e)}
-              onTouchMove={(e) => handleTouch("mousemove", e)}
-              onTouchEnd={(e) => handleTouch("mouseup", e)}
+              className="absolute inset-0 w-full h-full touch-none cursor-crosshair"
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={endDrawing}
+              onMouseLeave={endDrawing}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                const touch = e.touches[0]
+                const mouseEvent = new MouseEvent("mousedown", {
+                  clientX: touch.clientX,
+                  clientY: touch.clientY,
+                })
+                canvasRef.current?.dispatchEvent(mouseEvent)
+              }}
+              onTouchMove={(e) => {
+                e.preventDefault()
+                const touch = e.touches[0]
+                const mouseEvent = new MouseEvent("mousemove", {
+                  clientX: touch.clientX,
+                  clientY: touch.clientY,
+                })
+                canvasRef.current?.dispatchEvent(mouseEvent)
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault()
+                const mouseEvent = new MouseEvent("mouseup")
+                canvasRef.current?.dispatchEvent(mouseEvent)
+              }}
             />
 
             {isAddingText && (
               <div
-                className="absolute z-50"
+                className="absolute"
                 style={{
-                  left: `${textPosition.x}px`,
-                  top: `${textPosition.y}px`,
-                  transform: "translateY(-100%)",
+                  left: textPosition.x,
+                  top: textPosition.y,
                 }}
               >
                 <input
@@ -1322,21 +1530,20 @@ export function CollaborativeWhiteboard({ chatId, isOpen, onClose }: WhiteboardP
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleTextSubmit()
-                    if (e.key === "Escape") {
+                    if (e.key === "Enter") {
+                      handleTextSubmit()
+                    } else if (e.key === "Escape") {
                       setIsAddingText(false)
                       setTextInput("")
                     }
                   }}
                   onBlur={handleTextSubmit}
-                  className="bg-gray-800 border border-gray-700 text-white p-2 rounded shadow-lg"
+                  className="bg-gray-800 border border-gray-700 text-white p-1 rounded"
                   style={{
                     fontSize: `${brushSize * 5}px`,
                     color: color,
-                    minWidth: "200px",
                   }}
                   autoFocus
-                  placeholder="Type text..."
                 />
               </div>
             )}

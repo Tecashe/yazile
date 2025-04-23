@@ -82,3 +82,4 @@ export function WhiteboardMessage({ imageData }: WhiteboardMessageProps) {
     </div>
   )
 }
+
