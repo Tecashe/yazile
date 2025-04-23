@@ -3108,6 +3108,7 @@ export function EmailTemplateForm({
 
         <TabsContent value="settings">
           <div className="space-y-6">
+          <Form {...form}>  
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl flex items-center">
@@ -3237,6 +3238,7 @@ export function EmailTemplateForm({
                 </div>
               </CardContent>
             </Card>
+            </Form>
           </div>
         </TabsContent>
       </Tabs>
