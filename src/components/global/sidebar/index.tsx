@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 import ChatalLogo from "@/svgs/chatal-logo"
-import YazilLogo from "@/svgs/chatal-logo"
+import YazilLogo from "@/svgs/yazil-logo"
 import { Separator } from "@/components/ui/separator"
 import UpgradeCard from "./upgrade"
 import UpgradedCard from "./upgraded"
