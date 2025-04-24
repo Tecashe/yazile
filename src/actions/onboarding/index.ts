@@ -944,10 +944,11 @@ function getPlatformUrl(platform: string, username: string): string {
 
 
 export async function setThisUserType(type: 'influencer' | 'regular') {
+  const user = await onCurrentUser()
   const userid = await onUserInfor()
-  const userId = userid.data?.id
+  const userId = userid.data?.clerkId
 
-  if (!userId) {
+  if (!user) {
     throw new Error('Unauthorized')
   }
 
