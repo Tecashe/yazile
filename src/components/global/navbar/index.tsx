@@ -11,6 +11,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { SIDEBAR_MENU, type SideBarItemProps, type SideBarGroupProps } from "@/constants/menu"
 import ChatalLogo from "@/svgs/chatal-logo"
+import YazilLogo from "@/svgs/chatal-logo"
 import { useClerk } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -237,7 +238,10 @@ const Navbar = ({ slug }: Props) => {
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4">
               <motion.div transition={{ duration: 0.5 }}>
-                <ChatalLogo width={60} height={60} color="#0066cc" />
+              
+                <YazilLogo width={60} height={60} color="#0066cc" />
+
+                {/* <ChatalLogo width={60} height={60} color="#0066cc" /> */}
               </motion.div>
             </div>
             <div className="px-16 m-2">
