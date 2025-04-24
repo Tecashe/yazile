@@ -59,16 +59,21 @@
 import { redirect } from 'next/navigation'
 import { client } from '@/lib/prisma'
 import { onCurrentUser } from '@/actions/user'
+import { onUserInfor } from '@/actions/user'
+
 
 const Page = async () => {
   const user = await onCurrentUser()
+  const thisuser =  await onUserInfor()
+  const userId = thisuser.data?.id
+
 
   if (!user) {
     return redirect('/sign-in')
   }
 
   const userInfo = await client.user.findUnique({
-    where: { clerkId: user.id },
+    where: { clerkId: userId },
     select: {
       isABusiness: true,
       isInfluencer: true,
