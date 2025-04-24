@@ -67,6 +67,7 @@ import {
   updateOnboardingStep,
   saveOnboardingData,
   completeOnboarding,
+  setThisUserType,
 } from "@/actions/onboarding"
 
 // Import the SMS verification server actions
@@ -932,12 +933,27 @@ export default function OnboardingPage() {
     }
   }
 
+//   'use client'
+// import { setUserType } from '@/actions/setUserType'
+
+// const setUserAndAdvance = async (type: 'influencer' | 'regular') => {
+//   try {
+//     await setUserType(type)
+//     // go to the next step or redirect
+//     setStep((prev) => prev + 1)
+//   } catch (error) {
+//     console.error('Failed to update user type:', error)
+//   }
+// }
+
+
   // Update setUserAndAdvance to minimize loading state
   const setUserAndAdvance = async (type: "regular" | "influencer") => {
     try {
       // Only show loading during the initialization, not between steps
       setIsStepTransitioning(true)
-      setUserType(type)
+      await setUserType(type)
+      await setThisUserType(type)
 
       // Initialize onboarding with the selected user type
       const stepsCount = type === "influencer" ? 10 : 8
@@ -1457,7 +1473,7 @@ export default function OnboardingPage() {
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
                         variant="outline"
-                        className="flex h-auto w-full items-start justify-start gap-4 p-4 text-left"
+                        className="flex h-auto w-full items-start justify-start gap-2 p-2 text-left"
                         onClick={() => setUserAndAdvance("influencer")}
                       >
                         <div className="rounded-full bg-primary/10 p-2">

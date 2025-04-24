@@ -19,6 +19,8 @@ model User {
   phone            String?            @unique
   phoneVerified    Boolean            @default(false)
   isAdmin          Boolean            @default(false)
+  isInfluencer     Boolean            @default(false)
+  isABusiness      Boolean            @default(false)
   createdAt        DateTime           @default(now())
   subscription     Subscription?
   integrations     Integrations[]

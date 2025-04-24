@@ -941,3 +941,28 @@ function getPlatformUrl(platform: string, username: string): string {
       return ""
   }
 }
+
+
+export async function setThisUserType(type: 'influencer' | 'regular') {
+  const userid = await onUserInfor()
+  const userId = userid.data?.id
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const isInfluencer = type === 'influencer'
+  const isABusiness = type === 'regular'
+
+  const updatedUser = await client.user.update({
+    where: {
+      clerkId: userId,
+    },
+    data: {
+      isInfluencer,
+      isABusiness,
+    },
+  })
+
+  return updatedUser
+}
