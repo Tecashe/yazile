@@ -45,7 +45,7 @@ export default function BusinessManager() {
   //bg-gradient-to-br from-gray-900 to-gray-800
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="flex justify-center items-center h-screen">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -63,7 +63,8 @@ export default function BusinessManager() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+    //bg-gradient-to-br from-gray-900 to-gray-800
+    <div className="min-h-screen  py-12 px-4 sm:px-6 lg:px-8">
       <Card className="max-w-4xl w-full mx-auto bg-gray-800 border-gray-700 overflow-hidden shadow-2xl">
         <CardHeader className="bg-gray-700 py-6">
           <CardTitle className="text-2xl font-bold text-center text-white flex items-center justify-center">
