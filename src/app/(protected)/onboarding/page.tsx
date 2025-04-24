@@ -31,15 +31,16 @@ import { onUserInfor } from '@/actions/user'
 
 const Page = async () => {
   const user = await onCurrentUser()
-  const userId =  await onUserInfor()
+  const thisuser =  await onUserInfor()
+  const userid = thisuser.data?.id
 
   if (!user) {
     return redirect('/sign-in')
   }
 
   const [userBusiness, userInfluencer] = await Promise.all([
-    client.business.findFirst({ where: { userId: userId } }),
-    client.influencer.findFirst({ where: { userId: userId } }),
+    client.business.findFirst({ where: { userId: userid } }),
+    client.influencer.findFirst({ where: { userId: userid } }),
   ])
 
   if (userBusiness) {
