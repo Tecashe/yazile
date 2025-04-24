@@ -27,17 +27,19 @@
 import { redirect } from 'next/navigation'
 import { client } from '@/lib/prisma'
 import { onCurrentUser } from '@/actions/user'
+import { onUserInfor } from '@/actions/user'
 
 const Page = async () => {
   const user = await onCurrentUser()
+  const userId =  await onUserInfor()
 
   if (!user) {
     return redirect('/sign-in')
   }
 
   const [userBusiness, userInfluencer] = await Promise.all([
-    client.business.findFirst({ where: { userId: user.id } }),
-    client.influencer.findFirst({ where: { userId: user.id } }),
+    client.business.findFirst({ where: { userId: userId } }),
+    client.influencer.findFirst({ where: { userId: userId } }),
   ])
 
   if (userBusiness) {
