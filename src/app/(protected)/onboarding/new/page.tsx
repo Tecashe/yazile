@@ -1015,7 +1015,7 @@ export default function OnboardingPage() {
         }, 300)
 
         // Upload the file
-        const response = await fetch("/api/upload", {
+        const response = await fetch("/api/uploadprofile", {
           method: "POST",
           body: formData,
         })
