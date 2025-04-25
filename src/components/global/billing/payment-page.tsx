@@ -5125,7 +5125,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
                 <Info className="h-5 w-5 text-blue-500 mr-2 shrink-0" />
                 <span>
                   PayPal protects your payment information with industry-leading security and fraud prevention systems.
-                  You are always protected if the item doesn't arrive or is significantly different than described.
+                  You are always protected if the item doesn&apos;t arrive or is significantly different than described.
                 </span>
               </div>
             </div>
