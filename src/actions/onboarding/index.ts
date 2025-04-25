@@ -500,7 +500,7 @@ export const updateOnboardingStep = async (
     })
 
     if (status === "COMPLETED" && stepNumber === progress.totalSteps) {
-      await finalizeOnboarding(user.id, progress.userType, progress.steps)
+      await finalizeOnboarding(userId||user.id, progress.userType, progress.steps)
     }
 
     return {
@@ -615,7 +615,7 @@ export const updateOnboardingStepp = async (
 
     // If this is the final step and it's completed, update the user's profile
     if (status === "COMPLETED" && stepNumber === progress.totalSteps) {
-      await finalizeOnboarding(user.id, progress.userType, progress.steps)
+      await finalizeOnboarding(userId||user.id, progress.userType, progress.steps)
     }
 
     return {
