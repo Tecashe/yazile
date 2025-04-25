@@ -239,7 +239,7 @@ const Navbar = ({ slug }: Props) => {
             <div className="flex items-center justify-between p-4">
               <motion.div transition={{ duration: 0.5 }}>
               
-                <YazilLogo width={60} height={60} color="#0066cc" />
+                <YazilLogo width={150} height={150} color="#0066cc" />
 
                 {/* <ChatalLogo width={60} height={60} color="#0066cc" /> */}
               </motion.div>
