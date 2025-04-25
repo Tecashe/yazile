@@ -65,7 +65,7 @@ import { onUserInfor } from '@/actions/user'
 const Page = async () => {
   const user = await onCurrentUser()
   const thisuser =  await onUserInfor()
-  const userId = thisuser.data?.id
+  const userId = thisuser.data?.clerkId
 
 
   if (!user) {
