@@ -13,7 +13,7 @@ import { SIDEBAR_MENU, type SideBarItemProps, type SideBarGroupProps } from "@/c
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp,Instagram } from "lucide-react"
 import { useClerk } from "@clerk/nextjs"
 import UserProfile from "./userProfile"
 import { motion, AnimatePresence } from "framer-motion"
@@ -249,7 +249,16 @@ const Sidebar = ({ slug }: Props) => {
         "
       >
         <div className="flex items-center justify-center p-2">
-          <YazilLogo width={150} height={150} color="#0066cc" />
+          {/* <YazilLogo width={150} height={150} color="#0066cc" /> */}
+           <Link href="/" className="flex items-center space-x-2">
+              <div className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center">
+                <Instagram className="h-5 w-5 text-white" />
+                <div className="absolute inset-0 rounded-full bg-blue-500 blur-sm -z-10 opacity-50"></div>
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
+                Yazil
+              </span>
+            </Link>
           
           {/* <ChatalLogo width={60} height={60} color="#0066cc" /> */}
         </div>
