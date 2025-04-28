@@ -260,7 +260,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
   }
 
   const subtotal = items.reduce((acc, item) => acc + item.price, 0)
-  const discount = useSpecialOffer ? 25 : 0
+  const discount = useSpecialOffer ? (subtotal-(0.25*subtotal)) : 0
   const tax = (subtotal - discount) * 0.08
   const total = subtotal - discount + tax
 

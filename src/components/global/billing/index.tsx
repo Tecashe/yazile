@@ -1627,69 +1627,69 @@ export default function PricingSection() {
       icon: <Crown className="h-5 w-5" />,
       idealFor: ["Small businesses", "Growing teams", "Professional services"],
     },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      description: "Advanced features for large organizations",
-      price: {
-        monthly: 99,
-        annually: 990,
-      },
-      features: [
-        {
-          name: "Unlimited integrations",
-          icon: <Users className="h-4 w-4" />,
-          included: true,
-          description: "Connect unlimited platforms or services to your account.",
-        },
-        {
-          name: "Enterprise analytics",
-          icon: <Sparkles className="h-4 w-4" />,
-          included: true,
-          description: "Advanced analytics with custom dashboards, AI insights, and predictive modeling.",
-        },
-        {
-          name: "24/7 dedicated support",
-          icon: <Clock className="h-4 w-4" />,
-          included: true,
-          description: "Dedicated account manager and priority support with guaranteed response times.",
-        },
-        {
-          name: "Custom branding",
-          icon: <Star className="h-4 w-4" />,
-          included: true,
-          description: "Complete white-labeling and custom branding options with design services.",
-        },
-        {
-          name: "Enterprise security",
-          icon: <Shield className="h-4 w-4" />,
-          included: true,
-          description: "Enterprise-grade security with SSO, SAML, custom security policies, and compliance features.",
-        },
-        {
-          name: "Full API access",
-          icon: <Zap className="h-4 w-4" />,
-          included: true,
-          description: "Unlimited API access with dedicated endpoints and custom development support.",
-        },
-        {
-          name: "Advanced compliance",
-          icon: <CheckCircle2 className="h-4 w-4" />,
-          included: true,
-          description: "HIPAA, GDPR, SOC2 compliance and custom compliance reporting.",
-        },
-        {
-          name: "Custom development",
-          icon: <Laptop className="h-4 w-4" />,
-          included: true,
-          description: "Custom feature development and platform extensions.",
-        },
-      ],
-      popular: false,
-      color: "from-amber-500 to-orange-600",
-      icon: <Zap className="h-5 w-5" />,
-      idealFor: ["Large organizations", "Enterprise companies", "High-compliance industries"],
-    },
+    // {
+    //   id: "enterprise",
+    //   name: "Enterprise",
+    //   description: "Advanced features for large organizations",
+    //   price: {
+    //     monthly: 99,
+    //     annually: 990,
+    //   },
+    //   features: [
+    //     {
+    //       name: "Unlimited integrations",
+    //       icon: <Users className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Connect unlimited platforms or services to your account.",
+    //     },
+    //     {
+    //       name: "Enterprise analytics",
+    //       icon: <Sparkles className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Advanced analytics with custom dashboards, AI insights, and predictive modeling.",
+    //     },
+    //     {
+    //       name: "24/7 dedicated support",
+    //       icon: <Clock className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Dedicated account manager and priority support with guaranteed response times.",
+    //     },
+    //     {
+    //       name: "Custom branding",
+    //       icon: <Star className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Complete white-labeling and custom branding options with design services.",
+    //     },
+    //     {
+    //       name: "Enterprise security",
+    //       icon: <Shield className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Enterprise-grade security with SSO, SAML, custom security policies, and compliance features.",
+    //     },
+    //     {
+    //       name: "Full API access",
+    //       icon: <Zap className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Unlimited API access with dedicated endpoints and custom development support.",
+    //     },
+    //     {
+    //       name: "Advanced compliance",
+    //       icon: <CheckCircle2 className="h-4 w-4" />,
+    //       included: true,
+    //       description: "HIPAA, GDPR, SOC2 compliance and custom compliance reporting.",
+    //     },
+    //     {
+    //       name: "Custom development",
+    //       icon: <Laptop className="h-4 w-4" />,
+    //       included: true,
+    //       description: "Custom feature development and platform extensions.",
+    //     },
+    //   ],
+    //   popular: false,
+    //   color: "from-amber-500 to-orange-600",
+    //   icon: <Zap className="h-5 w-5" />,
+    //   idealFor: ["Large organizations", "Enterprise companies", "High-compliance industries"],
+    // },
   ]
 
   // Function to handle plan selection and redirect to payment page
