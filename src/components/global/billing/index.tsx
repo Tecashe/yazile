@@ -1334,7 +1334,7 @@ import React from "react"
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import {
   Check,
   X,
@@ -1426,6 +1426,10 @@ export default function PricingSection() {
   const activePlan = data?.data?.subscription?.plan || "FREE"
   const router = useRouter()
   const { toast } = useToast()
+
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : ""
 
   const [teamSize, setTeamSize] = useState<string | null>(null)
   const [useCase, setUseCase] = useState<string | null>(null)
@@ -1716,7 +1720,7 @@ export default function PricingSection() {
     sessionStorage.setItem("selectedPlan", JSON.stringify(planDetails))
 
     // Redirect to payment page
-    router.push(`/payment?plan=${plan.id}&billing=${billingCycle}`)
+    router.push(`/dashboard/${slug}/payment?plan=${plan.id}&billing=${billingCycle}`)
   }
 
   // Function to activate free plan

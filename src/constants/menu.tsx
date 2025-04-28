@@ -135,12 +135,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         icon: colorIcon(Clock, "text-blue-400"),
       },
 
-      // Financial group
-      {
-        id: uuid(),
-        label: "Payment",
-        icon: colorIcon(CreditCard, "text-purple-400"),
-      },
+      // // Financial group
+      // {
+      //   id: uuid(),
+      //   label: "Payment",
+      //   icon: colorIcon(CreditCard, "text-purple-400"),
+      // },
       {
         id: uuid(),
         label: "Pricing",
@@ -151,11 +151,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Integrations",
         icon: colorIcon(Gift, "text-pink-400"),
       },
-      // {
-      //   id: uuid(),
-      //   label: "",
-      //   icon: colorIcon(Award, "text-amber-400"),
-      // },
+      
 
       {
         id: uuid(),
