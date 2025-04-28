@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from "react"
@@ -63,10 +62,10 @@ interface RawConversation {
 }
 
 const BOT_NAME = "AiAssist"
-const BOT_AVATAR = "/fancy-profile-pic.svg"
+const BOT_AVATAR = "/placeholder.svg"
 
-const BOT_ID = "17841444435951291"
-const EXCLUDED_CHAT_ID = "17841444435951291"
+// const BOT_ID = "17841444435951291"
+const EXCLUDED_CHAT_ID = "584570891408693"
 
 interface AutomationChatsProps {
   automationId: string
