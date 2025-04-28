@@ -90,54 +90,39 @@
 
 //   return redirect('/onboarding/new')
 // }
-
-// export default Page
 import { redirect } from 'next/navigation'
 import { client } from '@/lib/prisma'
 import { onCurrentUser } from '@/actions/user'
-import { onUserInfor } from '@/actions/user'
 
 const Page = async () => {
-  // Get the authenticated user
+  // Step 1: Get the currently signed-in user from Clerk
   const user = await onCurrentUser()
-  
+
   if (!user) {
+    // Step 2: If no user, force them to sign in
     return redirect('/sign-in')
   }
-  
-  try {
-    // Get user info
-    const thisuser = await onUserInfor()
-    const userId = thisuser?.data?.clerkId
-    
-    // Check if userId exists before querying
-    if (!userId) {
-      console.error("No clerkId found in user data:", thisuser)
-      return redirect('/onboarding/new') // Redirect to onboarding if no ID
-    }
-    
-    // Now query with a valid userId
-    const userInfo = await client.user.findUnique({
-      where: { clerkId: userId },
-      select: {
-        isABusiness: true,
-        isInfluencer: true,
-      },
-    })
-    
-    if (userInfo?.isABusiness) {
-      return redirect('/dashboard')
-    }
-    
-    if (userInfo?.isInfluencer) {
-      return redirect('/influencers')
-    }
-    
-    return redirect('/onboarding/new')
-  } catch (error) {
-    console.error("Error in onboarding page:", error)
-    return redirect('/onboarding/new') // Fallback redirect
+
+  // Step 3: Fetch user info from your Prisma database
+  const userInfo = await client.user.findUnique({
+    where: { clerkId: user.id }, // clerkId matches Clerk's user.id
+    select: {
+      isABusiness: true,
+      isInfluencer: true,
+    },
+  })
+
+  // Step 4: If they already have a role, send them where they belong
+  if (userInfo?.isABusiness) {
+    return redirect('/dashboard')
   }
+
+  if (userInfo?.isInfluencer) {
+    return redirect('/influencer')
+  }
+
+  // Step 5: If no role yet (completely fresh), send to onboarding
+  return redirect('/onboarding/new')
 }
 
 export default Page
