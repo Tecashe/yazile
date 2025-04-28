@@ -4276,45 +4276,47 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
   }
 
 
-  const processApplePayPayments = async (): Promise<PaymentResult> => {
-    try {
-      const response = await fetch("/api/apple-pay/session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: Math.round(total * 100),
-          currency: "usd",
-          items,
-        }),
-      })
+  // const processApplePayPayments = async (): Promise<PaymentResult> => {
+  //   try {
+  //     const response = await fetch("/api/apple-pay/session", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         amount: Math.round(total * 100),
+  //         currency: "usd",
+  //         items,
+  //       }),
+  //     })
 
-      if (!response.ok) {
-        throw new Error("Failed to create Apple Pay session")
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to create Apple Pay session")
+  //     }
 
-      const data = await response.json()
+  //     const data = await response.json()
 
-      // In a real implementation, you would use the Apple Pay JS API
-      // with the session data returned from the server
+  //     // In a real implementation, you would use the Apple Pay JS API
+  //     // with the session data returned from the server
 
-      return { success: true, transactionId: `AP-${Date.now()}` }
-    } catch (error) {
-      console.error("Apple Pay error:", error)
-      return { success: false, error: "Failed to process Apple Pay payment" }
-    }
-  }
+  //     return { success: true, transactionId: `AP-${Date.now()}` }
+  //   } catch (error) {
+  //     console.error("Apple Pay error:", error)
+  //     return { success: false, error: "Failed to process Apple Pay payment" }
+  //   }
+  // }
 
 
-  // Process Apple Pay payment
+
+  // Process Apple Pay payment tbd
   const processApplePayPayment = async (): Promise<PaymentResult> => {
     try {
-      // Check if Apple Pay is available
-      // if (typeof window !== 'undefined' && window.ApplePaySession && ApplePaySession.canMakePayments()) {
-      //   throw new Error("Apple Pay is not available on this device")
-      // }
-
+      if (
+        (typeof window !== "undefined" && !("ApplePaySession" in window)) ||
+        !(window as any).ApplePaySession?.canMakePayments()
+      ) {
+        throw new Error("Apple Pay is not available on this device")
+      }
       // Create Apple Pay session
       const response = await fetch("/api/payments/apple-pay/session", {
         method: "POST",
@@ -4367,6 +4369,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
       return { success: false, error: error instanceof Error ? error.message : "Failed to process Apple Pay payment" }
     }
   }
+
 
   // Process Google Pay payment
   const processGooglePayPayment = async (): Promise<PaymentResult> => {
@@ -4573,6 +4576,34 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
       return null
     }
   }
+
+  // Fix the getWalletBalance function with proper fetch syntax
+  const getWalletBalance = async () => {
+    try {
+      const response = await fetch("/api/payments/wallet/balance", {
+        headers: {
+          "X-User-Id": user?.id || "",
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to get wallet balance")
+      }
+
+      const data = await response.json()
+      setWalletBalance(data.balance)
+      return data.balance
+    } catch (error) {
+      console.error("Wallet error:", error)
+      return null
+    }
+  }
+
+ 
+
+ 
+
 
   // Get wallet balance
   // const getWalletBalance = async () => {
@@ -4956,7 +4987,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
                   {cardType && (
                     <div className="h-10 w-14 bg-white/20 rounded-md grid place-items-center p-1">
                       <img
-                        src={CARD_TYPES[cardType].icon || "/placeholder.svg?height=40&width=56"}
+                        src={CARD_TYPES[cardType].icon || "/placeholdera.svg?height=40&width=56"}
                         alt={cardType}
                         className="max-h-full"
                       />

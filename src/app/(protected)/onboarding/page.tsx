@@ -85,7 +85,7 @@ const Page = async () => {
   }
 
   if (userInfo?.isInfluencer) {
-    return redirect('/influencer')
+    return redirect('/influencers')
   }
 
   return redirect('/onboarding/new')
