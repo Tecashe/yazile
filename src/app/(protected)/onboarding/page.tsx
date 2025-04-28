@@ -93,6 +93,7 @@
 import { redirect } from 'next/navigation'
 import { client } from '@/lib/prisma'
 import { onCurrentUser } from '@/actions/user'
+import { onUserInfor } from '@/actions/user'
 
 const Page = async () => {
   // Step 1: Get the currently signed-in user from Clerk
@@ -104,8 +105,11 @@ const Page = async () => {
   }
 
   // Step 3: Fetch user info from your Prisma database
+  const thisuser =  await onUserInfor()
+  const userId = thisuser.data?.clerkId
+
   const userInfo = await client.user.findUnique({
-    where: { clerkId: user.id }, // clerkId matches Clerk's user.id
+    where: { clerkId: userId }, // clerkId matches Clerk's user.id
     select: {
       isABusiness: true,
       isInfluencer: true,
