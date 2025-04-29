@@ -266,7 +266,7 @@ const Sidebar = ({ slug }: Props) => {
         <div className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
           {SIDEBAR_MENU.map((group) => renderGroup(group))}
         </div>
-
+{/* 
         <div className="px-16">
           <Separator orientation="horizontal" className="bg-[#333336]" />
         </div>
@@ -302,7 +302,7 @@ const Sidebar = ({ slug }: Props) => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </div> */}
 
         <div className="px-16">
           <Separator orientation="horizontal" className="bg-[#333336]" />

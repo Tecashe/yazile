@@ -260,7 +260,7 @@ const Navbar = ({ slug }: Props) => {
             <div className="px-16 m-2">
               <Separator orientation="horizontal" className="bg-[#333336]" />
             </div>
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <motion.button
                 onClick={toggleSubscriptionPlan}
                 className="w-full text-left px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md flex items-center justify-between"
@@ -291,7 +291,7 @@ const Navbar = ({ slug }: Props) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div> */}
             <div className="relative">
               <UserProfile onSignOut={signOut} />
             </div>
