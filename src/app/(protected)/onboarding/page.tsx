@@ -89,27 +89,51 @@
 //   }
 
 //   return redirect('/onboarding/new')
+
 // }
+
+
+
+
+// import { onBoardUser } from '@/actions/user'
+
+
+// type Props = {}
+
+// const Page = async (props: Props) => {
+//   const user = await onBoardUser()
+//   if (user.status === 200 || user.status === 201) {
+//     return redirect(`dashboard/${user.data?.firstname}-${user.data?.lastname}`)
+//     // return redirect(`/onboarding`)
+//   }
+
+//   return redirect('/sign-in')
+// }
+
+// export default Page
+
+
 import { redirect } from 'next/navigation'
 import { client } from '@/lib/prisma'
+import { onBoardUser } from '@/actions/user'
 import { onCurrentUser } from '@/actions/user'
 import { onUserInfor } from '@/actions/user'
 
 const Page = async () => {
   // Step 1: Get the currently signed-in user from Clerk
-  const user = await onCurrentUser()
+  const user = await onBoardUser()
 
-  if (!user) {
+  if (user.status === 200 || user.status === 201) {
     // Step 2: If no user, force them to sign in
     return redirect('/sign-in')
   }
 
   // Step 3: Fetch user info from your Prisma database
   const thisuser =  await onUserInfor()
-  const userId = thisuser.data?.clerkId
+  const userId = thisuser.data?.id
 
   const userInfo = await client.user.findUnique({
-    where: { clerkId: userId }, // clerkId matches Clerk's user.id
+    where: { id: userId }, // clerkId matches Clerk's user.id
     select: {
       isABusiness: true,
       isInfluencer: true,
