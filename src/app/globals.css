@@ -209,8 +209,6 @@
   animation: subtleShimmer 3s ease-in-out infinite;
 }
 
-/* Add any other global styles here */
-
 @keyframes automation-shimmer {
   0% {
     background-position: -100% 0;

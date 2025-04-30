@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Yazil | Automate > Engage > Grow",
-  description: "Next-Level DM Automations",
+  description: "Next-Level Business Automations",
 };
 
 export default function RootLayout({
