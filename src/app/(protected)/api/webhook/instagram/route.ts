@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
           })
           if (business) {
             businessVariables = {
-              business_name: business.businessName || "",
-              welcome_message: business.welcomeMessage || "",
+              business_name: business.businessName || "Test Name",
+              welcome_message: business.welcomeMessage || "Test",
               business_industry: business.industry || "",
               business_type: business.businessType || "",
               business_description: business.businessDescription || "",
