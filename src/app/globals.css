@@ -433,3 +433,28 @@
   opacity: 1;
   transition: opacity 0.3s ease 0.1s;
 }
+
+
+/* Add to your global.css */
+.dark .glassEffect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(30, 30, 30, 0.7);
+  border-color: hsl(var(--border));
+}
+
+.dark .glow {
+  box-shadow: 0 0 15px rgba(51, 82, 204, 0.3);
+}
+
+.dark .glowHover:hover {
+  box-shadow: 0 0 20px rgba(51, 82, 204, 0.4);
+}
+
+/* Enhance the radial gradient for dark mode */
+.dark .radial--gradient--automations {
+  background-image: radial-gradient(
+    at top left,
+    rgba(51, 82, 204, 0.08) 40%,
+    hsl(var(--background)) 60%
+  );
+}

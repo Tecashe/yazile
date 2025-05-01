@@ -54,6 +54,9 @@
 
 // export default Layout
 
+
+
+
 import { UserChat } from "./_components/chats/chats"
 import { verifyDashboardAccess } from "@/lib/auth"
 import {
@@ -84,41 +87,54 @@ const Layout = async ({ children, params }: Props) => {
 
   return (
     <HydrationBoundary state={dehydrate(query)}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Sidebar with subtle shadow and smooth transition */}
-        <Sidebar slug={params.slug} className="fixed inset-y-0 z-30 hidden w-64 border-r border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out lg:block" />
+      <div className={cn(
+        "min-h-screen bg-background text-foreground radial--gradient--automations",
+        "transition-colors duration-300 ease-in-out"
+      )}>
+        {/* Sidebar with dark theme variables */}
+        <Sidebar 
+          slug={params.slug} 
+          className={cn(
+            "fixed inset-y-0 z-30 hidden w-64 border-r border-sidebar-border",
+            "bg-sidebar text-sidebar-foreground shadow-sm transition-all duration-300",
+            "ease-in-out hover:shadow-md"
+          )} 
+        />
         
-        {/* Main content area with professional spacing */}
+        {/* Main content area */}
         <div className="lg:pl-64">
-          {/* Sticky navbar with glass morphism effect */}
+          {/* Glass morphism navbar */}
           <Navbar 
-            slug={params.slug} 
+            slug={params.slug}
             className={cn(
-              "sticky top-0 z-20 bg-white/80 backdrop-blur-md",
-              "border-b border-gray-200 transition-shadow duration-200",
-              "shadow-sm hover:shadow-md"
+              "sticky top-0 z-20 bg-background/80 backdrop-blur-md",
+              "border-b border-border transition-shadow duration-200",
+              "shadow-sm hover:shadow-md glassEffect"
             )}
           />
           
-          {/* Content container with elegant padding and max-width */}
+          {/* Content container with subtle gradient */}
           <main className="px-4 py-6 sm:px-6 lg:px-8">
             <div className={cn(
-              "mx-auto max-w-7xl rounded-xl bg-white p-6",
-              "shadow-xs transition-all duration-300",
-              "hover:shadow-sm border border-gray-100"
+              "mx-auto max-w-7xl rounded-lg bg-card p-6",
+              "shadow-xs transition-all duration-300 border border-border",
+              "hover:shadow-sm radial--double--gradient--cards--top",
+              "radial--double--gradient--cards--bottom"
             )}>
               {children}
             </div>
           </main>
           
-          {/* Chat widget with subtle positioning */}
-          <div className="fixed bottom-6 right-6 z-40 transition-transform hover:scale-105">
-            <UserChat 
-              userId={user.id} 
-              userName={user.fullName} 
-              className="shadow-lg"
-            />
-          </div>
+          {/* Floating chat widget */}
+          <UserChat 
+            userId={user.id} 
+            userName={user.fullName}
+            className={cn(
+              "fixed bottom-6 right-6 z-40 shadow-lg glow",
+              "transition-transform hover:scale-105 hover:glowHover",
+              "bg-card border border-border"
+            )}
+          />
         </div>
       </div>
     </HydrationBoundary>

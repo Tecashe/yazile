@@ -217,6 +217,11 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      boxShadow: {
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'glow': '0 0 15px rgba(51, 82, 204, 0.3)',
+        'glow-hover': '0 0 20px rgba(51, 82, 204, 0.4)',
+      },
     },
   },
   plugins: [require("tailwindcss-animate"), tailwindScrollbar],
