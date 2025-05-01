@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 type Props = {
   slug: string
+  className?: string;
 }
 
 const Sidebar = ({ slug }: Props) => {

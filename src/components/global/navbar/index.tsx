@@ -24,6 +24,7 @@ import ArrowTrigger from "@/components/global/arrow/arrowTrigger"
 
 type Props = {
   slug: string
+  className?: string;
 }
 
 const Navbar = ({ slug }: Props) => {

@@ -23,6 +23,7 @@ interface UserChatProps {
   userId: string
   userName: string
   isPage?: boolean
+  className?: string;
 }
 
 type Message = {
