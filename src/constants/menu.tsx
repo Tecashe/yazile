@@ -119,11 +119,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
     label: "System",
     items: [
       // Communication group
-      {
-        id: uuid(),
-        label: "Chat",
-        icon: colorIcon(MessageCircle, "text-green-400"),
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Chat",
+      //   icon: colorIcon(MessageCircle, "text-green-400"),
+      // },
       {
         id: uuid(),
         label: "Whatsapp",
