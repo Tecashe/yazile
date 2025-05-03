@@ -1,3 +1,5 @@
+'use client'
+
 import FlipCardGrid from "@/components/global/desktopcards/FlipCardGrid";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
