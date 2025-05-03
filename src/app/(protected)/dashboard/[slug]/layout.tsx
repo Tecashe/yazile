@@ -1,9 +1,6 @@
 
 import { UserChat } from "./_components/chats/chats"
 import { verifyDashboardAccess } from "@/lib/auth"
-
-
-
 import {
   dehydrate,
   HydrationBoundary,

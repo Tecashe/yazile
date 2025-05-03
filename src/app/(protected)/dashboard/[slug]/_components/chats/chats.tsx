@@ -585,7 +585,7 @@ export function UserChat({ userId, userName, isPage = false }: UserChatProps) {
               <CardHeader className="p-4 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-9 w-9">
-                    <AvatarFallback>AD</AvatarFallback>
+                    <AvatarFallback>@</AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="font-semibold text-sm">Support Chat</h3>
