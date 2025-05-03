@@ -21,6 +21,7 @@ import AIPerformance from "./_components/dash/AIPerformance"
 import EngagementInsights from "./_components/dash/EngagementInsights"
 import HashtagCloud from "./_components/dash/HashtagCloud"
 import type { Automation, Conversation } from "@/types/dashboard"
+import DesktopCards from './_components/cards'
 
 export default async function DashboardPage() {
   const user = await onCurrentUser()
@@ -34,6 +35,8 @@ export default async function DashboardPage() {
           <DoubleGradientCard key={card.id} {...card} />
         ))}
       </div>
+       
+       <DesktopCards/>
 
       <div className="flex gap-5 lg:flex-row flex-col">
         <EngagementInsights />
