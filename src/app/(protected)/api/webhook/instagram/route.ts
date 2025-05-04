@@ -466,7 +466,7 @@ import { storeConversationMessage } from "@/actions/chats/queries"
 import { createMarketingInfoAction } from "@/actions/details"
 import type { VoiceflowVariables } from "@/types/voiceflow"
 
-type InstagramQuickReply = {
+type InstagramQuickReplyE = {
   content_type: 'text';
   title: string;
   payload: string;
@@ -477,7 +477,54 @@ type VoiceflowResponseWithButtons = {
   buttons?: { name: string; payload: string }[];
 };
 
+
+/**
+ * Instagram Quick Reply button type
+ */
+type InstagramQuickReply = {
+  content_type: 'text';
+  title: string;
+  payload: string;
+};
+
+/**
+ * Transforms Voiceflow buttons to Instagram-compatible quick replies
+ * Handles both string and non-string payloads
+ */
 function transformButtonsToInstagram(
+  buttons?: { name: string; payload: string | object | any }[]
+): InstagramQuickReply[] | undefined {
+  if (!buttons || buttons.length === 0) return undefined;
+
+  // Instagram allows max 11 quick replies and has character limits
+  return buttons.slice(0, 11).map(button => {
+    // Convert name to string and trim to Instagram's limit
+    const buttonName = String(button.name || "").substring(0, 20);
+    
+    // Safely handle various payload types
+    let buttonPayload: string;
+    if (typeof button.payload === 'string') {
+      buttonPayload = button.payload.substring(0, 1000); // String payloads can use substring directly
+    } else if (button.payload === null || button.payload === undefined) {
+      buttonPayload = buttonName; // Fallback to using the button name as payload
+    } else {
+      // For objects or other types, stringify them first
+      try {
+        buttonPayload = JSON.stringify(button.payload).substring(0, 1000);
+      } catch (e) {
+        buttonPayload = String(button.payload).substring(0, 1000);
+      }
+    }
+    
+    return {
+      content_type: 'text',
+      title: buttonName,
+      payload: buttonPayload
+    };
+  });
+}
+
+function transformButtonsToInstagramE(
   buttons?: { name: string; payload: string }[]
 ): InstagramQuickReply[] | undefined {
   if (!buttons || buttons.length === 0) return undefined;
