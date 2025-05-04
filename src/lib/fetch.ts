@@ -150,6 +150,49 @@ export const sendDM = async (
     recipient: {
       id: recieverId,
     },
+    messaging_type: "RESPONSE", // Add this required parameter
+    message: {
+      text: prompt,
+    },
+  };
+
+  if (quickReplies && quickReplies.length > 0) {
+    messagePayload.message.quick_replies = quickReplies;
+  }
+
+  console.log("Sending payload to Instagram:", JSON.stringify(messagePayload, null, 2));
+
+  try {
+    const response = await axios.post(
+      `${process.env.INSTAGRAM_BASE_URL}/v18.0/${userId}/messages`, // Using a confirmed working API version
+      messagePayload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    
+    console.log("Instagram API response:", JSON.stringify(response.data, null, 2));
+    return response;
+  } catch (error) {
+    console.error("Error sending DM to Instagram:", "error.response?.data || error.message ||" );
+    throw error;
+  }
+};
+
+export const sendDMe = async (
+  userId: string,
+  recieverId: string,
+  prompt: string,
+  token: string,
+  quickReplies?: InstagramQuickReply[]
+) => {
+  const messagePayload: any = {
+    recipient: {
+      id: recieverId,
+    },
     message: {
       text: prompt,
     },
