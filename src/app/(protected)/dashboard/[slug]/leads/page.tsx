@@ -1321,9 +1321,9 @@ export default async function LeadsPage() {
   const user = await onUserInfor()
   const userId = user.data?.id
 
-  if (!userId) {
-    redirect("/sign-in")
-  }
+  // if (!userId) {
+  //   redirect("/sign-in")
+  // }
 
   // Fetch leads for the current user
   const leads = await client.lead.findMany({
