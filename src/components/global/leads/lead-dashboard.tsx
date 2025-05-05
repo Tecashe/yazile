@@ -839,12 +839,16 @@
 
 "use client"
 
+
+import { BarChart,Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { LeadCard } from "./lead-card"
+
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowUpRight, BarChart, Loader, PlusCircle, RefreshCw, Send } from "lucide-react"
+import { ArrowUpRight, Loader, PlusCircle, RefreshCw, Send } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
@@ -1029,6 +1033,7 @@ export default function LeadDashboard({ leads, leadStats, workflows }: LeadDashb
         <div className="flex items-center justify-between mb-4">
           <TabsList>
             <TabsTrigger value="leads">Leads</TabsTrigger>
+            <TabsTrigger value="lead">Lead</TabsTrigger>
             <TabsTrigger value="workflows">n8n Workflows</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -1156,6 +1161,25 @@ export default function LeadDashboard({ leads, leadStats, workflows }: LeadDashb
           </Card>
         </TabsContent>
 
+        <TabsContent value="lead" className="mt-4">
+           {loading ? (
+             <div className="flex justify-center items-center h-48">
+               <Loader className="h-8 w-8 animate-spin text-muted-foreground" />
+             </div>
+           ) : filteredLeads.length > 0 ? (
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+               {filteredLeads.map((lead) => (
+                 <LeadCard key={lead.id} lead={lead} onSendToN8n={handleSendToN8n} />
+               ))}
+             </div>
+           ) : (
+             <div className="text-center p-8">
+               <h3 className="font-medium text-lg">No leads found</h3>
+               <p className="text-muted-foreground mt-1">No leads match the current filter criteria.</p>
+             </div>
+           )}
+         </TabsContent>       
+
         <TabsContent value="workflows">
           <Card>
             <CardHeader>
@@ -1210,7 +1234,8 @@ export default function LeadDashboard({ leads, leadStats, workflows }: LeadDashb
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics">
+        
+        <TabsContent value="analytics" className="mt-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -1218,12 +1243,14 @@ export default function LeadDashboard({ leads, leadStats, workflows }: LeadDashb
                 <CardDescription>Breakdown of leads by qualification status</CardDescription>
               </CardHeader>
               <CardContent className="h-80">
-                {/* We'll use a dynamic import for recharts to avoid TypeScript errors */}
-                <div className="h-full w-full flex items-center justify-center">
-                  {/* This is a placeholder - you'll need to implement the actual chart */}
-                  <BarChart className="h-16 w-16 text-muted-foreground" />
-                  <p className="ml-4 text-muted-foreground">Analytics visualization will render here</p>
-                </div>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={statusChartData}>
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
 
@@ -1233,11 +1260,14 @@ export default function LeadDashboard({ leads, leadStats, workflows }: LeadDashb
                 <CardDescription>Number of leads by score range</CardDescription>
               </CardHeader>
               <CardContent className="h-80">
-                {/* This is a placeholder - you'll need to implement the actual chart */}
-                <div className="h-full w-full flex items-center justify-center">
-                  <BarChart className="h-16 w-16 text-muted-foreground" />
-                  <p className="ml-4 text-muted-foreground">Score distribution chart will render here</p>
-                </div>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={scoreDistribution}>
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
