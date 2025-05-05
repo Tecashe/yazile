@@ -48,6 +48,10 @@ model User {
   whatsAppRules        WhatsAppRule[]
   whatsAppTemplates    WhatsAppTemplate[]
 
+  leads             Lead[]
+  leadScoringRules  LeadScoringRule[]
+  n8nWorkflows      N8nWorkflow[]
+
   influencers       Influencer[]
   campaigns         Campaign[]
   influencerLists   InfluencerList[]
@@ -211,6 +215,7 @@ model Automation {
   trigger        Trigger[]
   listener       Listener?
   posts          Post[]
+  leads          Lead[]
   dms            Dms[]
   messages       Message[]
   conversations  Conversation[]
@@ -1550,3 +1555,139 @@ model InfluencerRating {
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Lead Qualification Models
+model Lead {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  automationId      String?        @db.Uuid
+  automation        Automation?    @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  instagramUserId   String
+  pageId            String
+  name              String?
+  email             String?
+  phone             String?
+  score             Int            @default(0)
+  status            LeadStatus     @default(NEW)
+  source            String         @default("instagram")
+  firstContactDate  DateTime       @default(now())
+  lastContactDate   DateTime       @default(now())
+  qualifiedDate     DateTime?
+  convertedDate     DateTime?
+  notes             String?
+  tags              String[]
+  metadata          Json?
+  sentToN8n         Boolean        @default(false)
+  n8nWorkflowId     String?
+  n8nExecutionId    String?
+  interactions      LeadInteraction[]
+  qualificationData LeadQualificationData?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([automationId])
+  @@index([status])
+  @@index([instagramUserId])
+  @@index([sentToN8n])
+}
+
+model LeadInteraction {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId            String         @db.Uuid
+  lead              Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type              String         // message, comment, reaction
+  content           String?
+  direction         String         // inbound, outbound
+  sentiment         Float?         // -1.0 to 1.0
+  intent            Json?          // Detected intents like purchase_intent, information_request
+  timestamp         DateTime       @default(now())
+  metadata          Json?
+
+  @@index([leadId])
+  @@index([timestamp])
+}
+
+model LeadQualificationData {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId            String         @unique @db.Uuid
+  lead              Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  engagementScore   Int            @default(0)
+  intentScore       Int            @default(0)
+  sentimentScore    Int            @default(0)
+  demographicScore  Int            @default(0)
+  frequencyScore    Int            @default(0)
+  recencyScore      Int            @default(0)
+  qualificationData Json?
+  aiAnalysis        Json?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model LeadScoringRule {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  ruleType          String         // keyword, sentiment, frequency, recency, etc.
+  condition         String         // contains, equals, greater_than, etc.
+  value             String         // The value to compare against
+  score             Int            // Points to add/subtract when rule matches
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([ruleType])
+}
+
+model N8nWorkflow {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  workflowId        String         // ID in n8n system
+  triggerUrl        String?        // Webhook URL to trigger this workflow
+  isActive          Boolean        @default(true)
+  lastExecuted      DateTime?
+  executionCount    Int            @default(0)
+  successCount      Int            @default(0)
+  failureCount      Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([workflowId])
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFYING
+  QUALIFIED
+  DISQUALIFIED
+  CONVERTED
+  NURTURING
+  LOST
+}
