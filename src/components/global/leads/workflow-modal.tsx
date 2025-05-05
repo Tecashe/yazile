@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -8,15 +10,20 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 
-export default function WorkflowModal({ isOpen, onClose }) {
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [workflowId, setWorkflowId] = useState("")
-  const [triggerUrl, setTriggerUrl] = useState("")
-  const [isActive, setIsActive] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+interface WorkflowModalProps {
+  isOpen: boolean
+  onClose: () => void
+}
 
-  const handleSubmit = async (e) => {
+export default function WorkflowModal({ isOpen, onClose }: WorkflowModalProps) {
+  const [name, setName] = useState<string>("")
+  const [description, setDescription] = useState<string>("")
+  const [workflowId, setWorkflowId] = useState<string>("")
+  const [triggerUrl, setTriggerUrl] = useState<string>("")
+  const [isActive, setIsActive] = useState<boolean>(true)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name || !workflowId) {
@@ -50,7 +57,7 @@ export default function WorkflowModal({ isOpen, onClose }) {
       window.location.reload()
     } catch (error) {
       console.error("Error creating workflow:", error)
-      alert("Error creating workflow: ")
+      alert("Error creating workflow: " + (error as Error).message)
     } finally {
       setIsSubmitting(false)
     }

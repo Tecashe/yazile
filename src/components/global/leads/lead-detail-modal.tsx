@@ -11,13 +11,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Send, MessageSquare, BarChart, User } from "lucide-react"
+import type { Lead, LeadInteraction } from "@/types/lead"
 
-export default function LeadDetailModal({ lead, isOpen, onClose, workflows, onSendToN8n }) {
-  const [status, setStatus] = useState(lead.status)
-  const [notes, setNotes] = useState(lead.notes || "")
-  const [selectedWorkflow, setSelectedWorkflow] = useState(workflows[0]?.workflowId || "")
+// Define types for the workflow object
+interface Workflow {
+  id: string
+  workflowId: string
+  name: string
+  description?: string
+  webhookUrl?: string
+  isActive: boolean
+}
 
-  const handleStatusChange = async (newStatus) => {
+// Define props for the LeadDetailModal component
+interface LeadDetailModalProps {
+  lead: Lead
+  isOpen: boolean
+  onClose: () => void
+  workflows: Workflow[]
+  onSendToN8n: (leadId: string, workflowId: string) => Promise<void>
+}
+
+export default function LeadDetailModal({ lead, isOpen, onClose, workflows, onSendToN8n }: LeadDetailModalProps) {
+  const [status, setStatus] = useState<string>(lead.status)
+  const [notes, setNotes] = useState<string>(lead.notes || "")
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string>(workflows[0]?.workflowId || "")
+
+  const handleStatusChange = async (newStatus: string) => {
     try {
       const response = await fetch(`/api/leads/${lead.id}/status`, {
         method: "PATCH",
@@ -34,15 +54,17 @@ export default function LeadDetailModal({ lead, isOpen, onClose, workflows, onSe
       setStatus(newStatus)
     } catch (error) {
       console.error("Error updating lead status:", error)
-      alert("Error updating lead status: " + error.message)
+      alert("Error updating lead status: " + (error as Error).message)
     }
   }
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | Date | null | undefined): string => {
+    if (!dateString) return "N/A"
     return new Date(dateString).toLocaleString()
   }
 
-  const getSentimentEmoji = (score) => {
+  const getSentimentEmoji = (score: number | null | undefined): string => {
+    if (!score) return "😐"
     if (score > 2) return "😀"
     if (score > 0) return "🙂"
     if (score === 0) return "😐"
@@ -138,31 +160,36 @@ export default function LeadDetailModal({ lead, isOpen, onClose, workflows, onSe
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {lead.interactions.map((interaction) => (
-                    <div
-                      key={interaction.id}
-                      className={`p-3 rounded-lg ${
-                        interaction.direction === "inbound" ? "bg-muted ml-auto" : "bg-primary text-primary-foreground"
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-medium">
-                          {interaction.direction === "inbound" ? "Customer" : "Bot"}
-                        </span>
-                        <span className="text-xs">{formatDate(interaction.timestamp)}</span>
+                  {lead.interactions &&
+                    lead.interactions.map((interaction: LeadInteraction) => (
+                      <div
+                        key={interaction.id}
+                        className={`p-3 rounded-lg ${
+                          interaction.direction === "inbound"
+                            ? "bg-muted ml-auto"
+                            : "bg-primary text-primary-foreground"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-xs font-medium">
+                            {interaction.direction === "inbound" ? "Customer" : "Bot"}
+                          </span>
+                          <span className="text-xs">{formatDate(interaction.timestamp)}</span>
+                        </div>
+                        <p>{interaction.content}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-xs">
+                            Sentiment: {getSentimentEmoji(interaction.sentiment)}
+                            {interaction.sentiment ? interaction.sentiment.toFixed(2) : "N/A"}
+                          </span>
+                          {interaction.intent &&
+                            typeof interaction.intent === "object" &&
+                            "purchaseIntent" in interaction.intent && (
+                              <span className="text-xs">Intent: {(interaction.intent as any).purchaseIntent}/10</span>
+                            )}
+                        </div>
                       </div>
-                      <p>{interaction.content}</p>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-xs">
-                          Sentiment: {getSentimentEmoji(interaction.sentiment || 0)}
-                          {interaction.sentiment ? interaction.sentiment.toFixed(2) : "N/A"}
-                        </span>
-                        {interaction.intent?.purchaseIntent && (
-                          <span className="text-xs">Intent: {interaction.intent.purchaseIntent}/10</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -211,7 +238,7 @@ export default function LeadDetailModal({ lead, isOpen, onClose, workflows, onSe
                       </div>
                       <div className="flex justify-between">
                         <span>Last Contact:</span>
-                        <span>{formatDate(lead.lastContactDate)}</span>
+                        <span>{formatDate(lead.lastContactDate || lead.lastInteractionAt)}</span>
                       </div>
                       {lead.qualifiedDate && (
                         <div className="flex justify-between">
@@ -262,7 +289,7 @@ export default function LeadDetailModal({ lead, isOpen, onClose, workflows, onSe
                     <div>
                       <Label htmlFor="source">Source</Label>
                       <div id="source" className="p-2 border rounded-md bg-muted">
-                        {lead.source}
+                        {lead.source || "Unknown"}
                       </div>
                     </div>
                   </div>
