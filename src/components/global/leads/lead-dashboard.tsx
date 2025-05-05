@@ -1033,7 +1033,7 @@ export default function LeadDashboard({ leads, leadStats, workflows }: LeadDashb
         <div className="flex items-center justify-between mb-4">
           <TabsList>
             <TabsTrigger value="leads">Leads</TabsTrigger>
-            <TabsTrigger value="lead">Lead</TabsTrigger>
+            <TabsTrigger value="lead">LeadCards</TabsTrigger>
             <TabsTrigger value="workflows">n8n Workflows</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
