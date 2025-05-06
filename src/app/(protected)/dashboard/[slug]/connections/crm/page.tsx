@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server"
+
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { client } from "@/lib/prisma"
@@ -7,10 +7,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { PlusCircle, Settings, Database } from "lucide-react"
 import { onUserInfor } from "@/actions/user"
+import { useRouter, usePathname  } from "next/navigation"
 
 export default async function CrmIntegrationsPage() {
     const user = await onUserInfor()
     const  userId  = user.data?.id
+    
+    const pathname = usePathname()
+    const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+    const slug = slugMatch ? slugMatch[1] : ""
 
   if (!userId) {
     redirect("/sign-in")
@@ -30,7 +35,7 @@ export default async function CrmIntegrationsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">CRM Integrations</h1>
         <Button asChild>
-          <Link href="/dashboard/integrations/crm/new">
+          <Link href={`/dashboard/${slug}/connections/crm/new`}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Integration
           </Link>
