@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -35,6 +35,11 @@ export function CrmIntegrationForm() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState<string>("HUBSPOT")
+  
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : ""
+    
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,7 +73,8 @@ export function CrmIntegrationForm() {
         description: "Your CRM integration has been created successfully.",
       })
 
-      router.push("/dashboard/integrations/crm")
+
+      router.push(`/dashboard/${slug}/connections/crm`)
       router.refresh()
     } catch (error) {
       toast({

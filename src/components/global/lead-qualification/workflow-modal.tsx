@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +32,10 @@ export function WorkflowModal({ isOpen, onClose, workflows }: WorkflowModalProps
   const [isActive, setIsActive] = useState<boolean>(true)
   const [connectionId, setConnectionId] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : ""
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,7 +124,9 @@ export function WorkflowModal({ isOpen, onClose, workflows }: WorkflowModalProps
                 <Button
                   variant="link"
                   className="h-auto p-0 text-xs"
-                  onClick={() => router.push("/dashboard/integrations/n8n/new")}
+                  
+                  onClick={() => router.push(`/dashboard/${slug}/connections/new`)}
+                  
                 >
                   Create a new n8n connection
                 </Button>

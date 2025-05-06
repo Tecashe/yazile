@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -37,6 +37,10 @@ export function N8nConnectionForm() {
     },
   })
 
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : ""
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
@@ -58,7 +62,7 @@ export function N8nConnectionForm() {
         description: "Your n8n connection has been created successfully.",
       })
 
-      router.push("/dashboard/integrations/n8n")
+      router.push(`/dashboard/${slug}/connections`)
       router.refresh()
     } catch (error) {
       toast({
