@@ -866,7 +866,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
         {error.message || "We encountered an error while loading the form."}
       </p>
       <div className="flex justify-center gap-4">
-        <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/connections/n8n`)}>
+        <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/connections/`)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Connections
         </Button>
@@ -955,7 +955,7 @@ function NewN8nConnectionContent() {
 
       // Redirect with success message
       router.push(
-        `/dashboard/${slug}/connections/n8n?success=${encodeURIComponent("n8n connection created successfully")}`,
+        `/dashboard/${slug}/connections/?success=${encodeURIComponent("n8n connection created successfully")}`,
       )
     } catch (err) {
       console.error("Error creating n8n connection:", err)
@@ -970,7 +970,7 @@ function NewN8nConnectionContent() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Add n8n Connection</h1>
         <Button variant="outline" asChild>
-          <Link href={`/dashboard/${slug}/connections/n8n`}>
+          <Link href={`/dashboard/${slug}/connections`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Link>
@@ -1066,7 +1066,7 @@ function NewN8nConnectionContent() {
 
                 <div className="flex gap-4">
                   <Button type="button" variant="outline" asChild>
-                    <Link href={`/dashboard/${slug}/connections/n8n`}>Cancel</Link>
+                    <Link href={`/dashboard/${slug}/connections`}>Cancel</Link>
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting && <Loader className="mr-2 h-4 w-4 animate-spin" />}
@@ -1091,7 +1091,7 @@ export default function NewN8nConnectionPage() {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
-      onReset={() => router.push(`/dashboard/${slug}/connections/n8n/new`)}
+      onReset={() => router.push(`/dashboard/${slug}/connections/new`)}
     >
       <NewN8nConnectionContent />
     </ErrorBoundary>
