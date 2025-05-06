@@ -1,4 +1,5 @@
-import { auth } from "@clerk/nextjs/server"
+'use client'
+
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { client } from "@/lib/prisma"
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { PlusCircle, Settings, Workflow, ExternalLink } from "lucide-react"
 import { onUserInfor } from "@/actions/user"
-import { useSearchParams, useRouter, usePathname  } from "next/navigation"
+import { useRouter, usePathname  } from "next/navigation"
 
 export default async function N8nIntegrationsPage() {
     const user = await onUserInfor()
