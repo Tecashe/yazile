@@ -1311,19 +1311,71 @@
 // }
 
 
-import { onUserInfor } from "@/actions/user"
+// import { onUserInfor } from "@/actions/user"
+// import { redirect } from "next/navigation"
+// import { client } from "@/lib/prisma"
+// import LeadDashboard from "@/components/global/leads/lead-dashboard"
+// import type { Lead } from "@/types/lead"
+
+// export default async function LeadsPage() {
+//   const user = await onUserInfor()
+//   const userId = user.data?.id
+
+//   // if (!userId) {
+//   //   redirect("/sign-in")
+//   // }
+
+//   // Fetch leads for the current user
+//   const leads = await client.lead.findMany({
+//     where: { userId },
+//     include: {
+//       qualificationData: true,
+//       interactions: {
+//         orderBy: { timestamp: "desc" },
+//         take: 5,
+//       },
+//     },
+//     orderBy: { updatedAt: "desc" },
+//   })
+
+//   // Transform the leads to match the expected Lead type
+//   const leadsWithTotalInteractions = leads.map((lead) => ({
+//     ...lead,
+//     totalInteractions: lead.interactions.length, // you can change this if a real total count is needed
+//   })) as Lead[]
+
+//   // Fetch lead statistics
+//   const leadStats = {
+//     total: await client.lead.count({ where: { userId } }),
+//     new: await client.lead.count({ where: { userId, status: "NEW" } }),
+//     qualifying: await client.lead.count({ where: { userId, status: "QUALIFYING" } }),
+//     qualified: await client.lead.count({ where: { userId, status: "QUALIFIED" } }),
+//     converted: await client.lead.count({ where: { userId, status: "CONVERTED" } }),
+//     disqualified: await client.lead.count({ where: { userId, status: "DISQUALIFIED" } }),
+//   }
+
+//   // Fetch n8n workflows
+//   const workflows = await client.n8nWorkflow.findMany({
+//     where: { userId },
+//   })
+
+//   return <LeadDashboard leads={leadsWithTotalInteractions} leadStats={leadStats} workflows={workflows} />
+// }
+
+
+
 import { redirect } from "next/navigation"
 import { client } from "@/lib/prisma"
-import LeadDashboard from "@/components/global/leads/lead-dashboard"
-import type { Lead } from "@/types/lead"
+import { LeadDashboard } from "@/components/global/lead-qualification/lead-dashboard"
+import { onUserInfor } from "@/actions/user"
 
 export default async function LeadsPage() {
   const user = await onUserInfor()
-  const userId = user.data?.id
+  const  userId  = user.data?.id
 
-  // if (!userId) {
-  //   redirect("/sign-in")
-  // }
+  if (!userId) {
+    redirect("/sign-in")
+  }
 
   // Fetch leads for the current user
   const leads = await client.lead.findMany({
@@ -1335,29 +1387,32 @@ export default async function LeadsPage() {
         take: 5,
       },
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { lastContactDate: "desc" },
   })
 
-  // Transform the leads to match the expected Lead type
-  const leadsWithTotalInteractions = leads.map((lead) => ({
-    ...lead,
-    totalInteractions: lead.interactions.length, // you can change this if a real total count is needed
-  })) as Lead[]
-
   // Fetch lead statistics
-  const leadStats = {
+  const stats = {
     total: await client.lead.count({ where: { userId } }),
+    qualified: await client.lead.count({ where: { userId, status: "QUALIFIED" } }),
+    nurturing: await client.lead.count({ where: { userId, status: "NURTURING" } }),
     new: await client.lead.count({ where: { userId, status: "NEW" } }),
     qualifying: await client.lead.count({ where: { userId, status: "QUALIFYING" } }),
-    qualified: await client.lead.count({ where: { userId, status: "QUALIFIED" } }),
     converted: await client.lead.count({ where: { userId, status: "CONVERTED" } }),
     disqualified: await client.lead.count({ where: { userId, status: "DISQUALIFIED" } }),
+    lost: await client.lead.count({ where: { userId, status: "LOST" } }),
+    averageScore: leads.length > 0 ? leads.reduce((sum, lead) => sum + lead.score, 0) / leads.length : 0,
   }
 
   // Fetch n8n workflows
-  const workflows = await client.n8nWorkflow.findMany({
-    where: { userId },
+  const workflows = await client.n8nWorkflowConfig.findMany({
+    where: {
+      connection: {
+        userId,
+      },
+      workflowType: "LEAD_QUALIFICATION",
+      isActive: true,
+    },
   })
 
-  return <LeadDashboard leads={leadsWithTotalInteractions} leadStats={leadStats} workflows={workflows} />
+  return <LeadDashboard leads={leads} stats={stats} workflows={workflows} />
 }

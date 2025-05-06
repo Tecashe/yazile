@@ -50,7 +50,12 @@ model User {
 
   leads             Lead[]
   leadScoringRules  LeadScoringRule[]
+  leadQualificationRule LeadQualificationRule[]
+  leadNurturingSequence LeadNurturingSequence[]
+  crmIntegration    CrmIntegration[]
+  n8nConnection     N8nConnection[]
   n8nWorkflows      N8nWorkflow[]
+  leadTag           LeadTag[]
 
   influencers       Influencer[]
   campaigns         Campaign[]
@@ -1690,4 +1695,207 @@ enum LeadStatus {
   CONVERTED
   NURTURING
   LOST
+}
+
+
+
+/////////////////////
+
+
+
+
+// n8n Integration Models
+model N8nConnection {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  n8nUrl            String
+  apiKey            String
+  isActive          Boolean        @default(true)
+  lastConnected     DateTime       @default(now())
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  workflows         N8nWorkflowConfig[]
+
+  @@index([userId])
+}
+
+model N8nWorkflowConfig {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  connectionId      String         @db.Uuid
+  connection        N8nConnection  @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  workflowId        String         // ID in n8n system
+  workflowType      WorkflowType   @default(LEAD_QUALIFICATION)
+  triggerUrl        String         // Webhook URL to trigger this workflow
+  webhookUrl        String?        // Webhook URL for n8n to call back
+  isActive          Boolean        @default(true)
+  lastExecuted      DateTime?
+  executionCount    Int            @default(0)
+  successCount      Int            @default(0)
+  failureCount      Int            @default(0)
+  configuration     Json?          // Workflow-specific configuration
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([connectionId])
+  @@index([workflowType])
+}
+
+// CRM Integration Models
+model CrmIntegration {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          CrmProvider
+  name              String
+  apiKey            String
+  apiSecret         String?
+  baseUrl           String?
+  isActive          Boolean        @default(true)
+  lastSynced        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  mappings          CrmFieldMapping[]
+
+  @@index([userId])
+  @@index([provider])
+}
+
+model CrmFieldMapping {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  integrationId     String         @db.Uuid
+  integration       CrmIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  localField        String         // Field in our system
+  remoteField       String         // Field in CRM
+  isRequired        Boolean        @default(false)
+  transformFunction String?        // Optional JS function to transform data
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([integrationId])
+}
+
+// Enhanced Lead Qualification Models
+model LeadQualificationRule {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  scoreType         ScoreType      @default(OVERALL)
+  operator          RuleOperator   @default(GREATER_THAN)
+  threshold         Int            // Value to compare against
+  weight            Int            @default(1)  // Importance of this rule
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([scoreType])
+}
+
+model LeadNurturingSequence {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  steps             LeadNurturingStep[]
+
+  @@index([userId])
+}
+
+model LeadNurturingStep {
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sequenceId        String               @db.Uuid
+  sequence          LeadNurturingSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  stepNumber        Int
+  name              String
+  type              NurturingStepType    @default(MESSAGE)
+  content           String?
+  delayDays         Int                  @default(0)
+  delayHours        Int                  @default(0)
+  conditions        Json?                // Conditions for executing this step
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([sequenceId])
+  @@index([type])
+}
+
+model LeadActivity {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId            String         @db.Uuid
+  activityType      String         // email_sent, message_sent, viewed_page, etc.
+  description       String?
+  metadata          Json?
+  timestamp         DateTime       @default(now())
+
+  @@index([leadId])
+  @@index([activityType])
+  @@index([timestamp])
+}
+
+model LeadTag {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String         @db.Uuid
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  color             String         @default("#6366F1") // Default indigo color
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+// Enums for the new models
+enum WorkflowType {
+  LEAD_QUALIFICATION
+  LEAD_NURTURING
+  CRM_SYNC
+  NOTIFICATION
+  CUSTOM
+}
+
+enum CrmProvider {
+  HUBSPOT
+  SALESFORCE
+  ZOHO
+  PIPEDRIVE
+  AIRTABLE
+  NOTION
+  CUSTOM
+}
+
+enum ScoreType {
+  OVERALL
+  ENGAGEMENT
+  INTENT
+  SENTIMENT
+  FREQUENCY
+  RECENCY
+}
+
+enum RuleOperator {
+  GREATER_THAN
+  LESS_THAN
+  EQUAL_TO
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN_OR_EQUAL
+}
+
+enum NurturingStepType {
+  MESSAGE
+  EMAIL
+  WEBHOOK
+  DELAY
+  CONDITION
+  CRM_UPDATE
 }

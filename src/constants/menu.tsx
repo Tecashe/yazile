@@ -26,6 +26,7 @@ import {
   Instagram,
 } from "lucide-react"
 import type React from "react"
+import { ZapDouToneBlack } from "@/icons"
 
 export type SideBarItemProps = {
   id: string
@@ -150,6 +151,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         id: uuid(),
         label: "Integrations",
         icon: colorIcon(Gift, "text-pink-400"),
+      },
+      {
+        id: uuid(),
+        label: "Connections",
+        icon: colorIcon(ZapDouToneBlack, "text-teal-400"),
       },
       
 
