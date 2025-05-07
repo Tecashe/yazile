@@ -56,7 +56,10 @@ model User {
   n8nConnection     N8nConnection[]
   n8nWorkflows      N8nWorkflow[]
   leadTag           LeadTag[]
+  userWorkflow      UserWorkflow[]
+  customWorkflowRequest  CustomWorkflowRequest[]
 
+ 
   influencers       Influencer[]
   campaigns         Campaign[]
   influencerLists   InfluencerList[]
@@ -1898,4 +1901,270 @@ enum NurturingStepType {
   DELAY
   CONDITION
   CRM_UPDATE
+}
+
+
+//////////////////
+
+////////////////////////
+
+
+// New models for n8n Integration Platform
+
+model WorkflowTemplate {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String
+  description       String              @db.Text
+  category          WorkflowCategory
+  icon              String?
+  featured          Boolean             @default(false)
+  popular           Boolean             @default(false)
+  complexity        WorkflowComplexity  @default(MEDIUM)
+  estimatedSetupTime Int                @default(15) // in minutes
+  requiredIntegrations String[]
+  configurationSchema Json               // JSON schema for configuration form
+  n8nTemplateId     String?             // ID of template in n8n system
+  visualRepresentation Json?            // Simplified visual representation of workflow steps
+  expectedOutcomes  String[]            // Array of expected outcomes
+  useCases          String[]            // Array of use cases
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  isActive          Boolean             @default(true)
+  
+  // Relations
+  userWorkflows     UserWorkflow[]
+  customRequests    CustomWorkflowRequest[]
+
+  @@index([category])
+  @@index([featured])
+  @@index([popular])
+}
+
+
+
+
+
+model UserWorkflow {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String              @db.Uuid
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId        String              @db.Uuid
+  template          WorkflowTemplate    @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  name              String              // User-defined name
+  configuration     Json                // User's configuration values
+  n8nWorkflowId     String?             // ID of the actual workflow in n8n
+  webhookUrl        String?             // Webhook URL for this workflow instance
+  status            WorkflowStatus      @default(DRAFT)
+  isActive          Boolean             @default(false)
+  lastActivated     DateTime?
+  lastDeactivated   DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relations
+  executions        WorkflowExecution[]
+  credentials       WorkflowCredential[]
+
+  @@index([userId])
+  @@index([templateId])
+  @@index([status])
+  @@index([isActive])
+}
+
+model WorkflowExecution {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId        String              @db.Uuid
+  workflow          UserWorkflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  n8nExecutionId    String?             // ID of execution in n8n
+  status            ExecutionStatus     @default(PENDING)
+  startedAt         DateTime            @default(now())
+  completedAt       DateTime?
+  duration          Int?                // Duration in milliseconds
+  success           Boolean?
+  errorMessage      String?
+  inputData         Json?               // Input data (sanitized)
+  outputData        Json?               // Output data (sanitized)
+  resourceUsage     Json?               // CPU, memory, etc.
+  businessImpact    Json?               // Business metrics (emails sent, etc.)
+  
+  // Relations
+  events            ExecutionEvent[]
+
+  @@index([workflowId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model ExecutionEvent {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  executionId       String              @db.Uuid
+  execution         WorkflowExecution   @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  timestamp         DateTime            @default(now())
+  eventType         String              // step_started, step_completed, error, etc.
+  nodeId            String?             // ID of the node in n8n
+  nodeName          String?             // Name of the node in n8n
+  message           String?
+  data              Json?
+
+  @@index([executionId])
+  @@index([timestamp])
+  @@index([eventType])
+}
+
+model WorkflowCredential {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId        String              @db.Uuid
+  workflow          UserWorkflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  name              String              // Name of the credential
+  type              String              // api_key, oauth, etc.
+  value             String              // Encrypted credential value
+  expiresAt         DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([workflowId])
+}
+
+
+model CustomWorkflowRequest {
+  id                String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String                  @db.Uuid
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId        String?                 @db.Uuid
+  template          WorkflowTemplate?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  title             String
+  businessObjective String                  @db.Text
+  requiredIntegrations String[]
+  processDescription String                 @db.Text
+  exampleDataUrl    String?                 // URL to uploaded example data
+  budget            Float?
+  urgency           RequestUrgency          @default(NORMAL)
+  status            CustomRequestStatus     @default(SUBMITTED)
+  aiSuggestions     Json?                   // AI-generated suggestions
+  adminNotes        String?                 @db.Text
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  
+  // Relations
+  messages          CustomRequestMessage[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model CustomRequestMessage {
+  id                String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestId         String                  @db.Uuid
+  request           CustomWorkflowRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  senderId          String                  @db.Uuid
+  isFromAdmin       Boolean                 @default(false)
+  message           String                  @db.Text
+  attachmentUrl     String?
+  createdAt         DateTime                @default(now())
+
+  @@index([requestId])
+  @@index([createdAt])
+}
+
+model WorkflowAnalytics {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String              @db.Uuid
+  date              DateTime            @default(now())
+  totalExecutions   Int                 @default(0)
+  successfulExecutions Int              @default(0)
+  failedExecutions  Int                 @default(0)
+  averageDuration   Float?              // Average duration in milliseconds
+  resourceUsage     Json?               // Aggregated resource usage
+  businessImpact    Json?               // Aggregated business metrics
+  
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+model WorkflowNotification {
+  id                String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String                  @db.Uuid
+  workflowId        String?                 @db.Uuid
+  executionId       String?                 @db.Uuid
+  type              NotificationType
+  title             String
+  message           String
+  isRead            Boolean                 @default(false)
+  createdAt         DateTime                @default(now())
+  
+  @@index([userId])
+  @@index([workflowId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// Enums for n8n Integration Platform
+enum WorkflowCategory {
+  MARKETING
+  SALES
+  CUSTOMER_SUPPORT
+  DATA_PROCESSING
+  DOCUMENT_MANAGEMENT
+  SOCIAL_MEDIA
+  COMMUNICATION
+  INTEGRATION
+  UTILITY
+  CUSTOM
+}
+
+enum WorkflowComplexity {
+  SIMPLE
+  MEDIUM
+  COMPLEX
+}
+
+enum WorkflowStatus {
+  DRAFT
+  CONFIGURING
+  READY
+  ACTIVE
+  INACTIVE
+  ERROR
+  ARCHIVED
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELED
+  TIMEOUT
+}
+
+enum RequestUrgency {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum CustomRequestStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  IN_DEVELOPMENT
+  READY_FOR_TESTING
+  COMPLETED
+  REJECTED
+  CANCELED
+}
+
+enum NotificationType {
+  EXECUTION_STARTED
+  EXECUTION_COMPLETED
+  EXECUTION_FAILED
+  WORKFLOW_ACTIVATED
+  WORKFLOW_DEACTIVATED
+  WORKFLOW_ERROR
+  CUSTOM_REQUEST_UPDATE
+  SYSTEM_NOTIFICATION
 }
