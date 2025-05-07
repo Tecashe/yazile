@@ -11,7 +11,7 @@ import {
   Chat,
   ZapDouToneBlack
 } from '@/icons'
-import { MessageCircle,Send, BarChart2, Users, Calendar, Zap, FileText, HelpCircle, Sparkles, Target, Palette, Megaphone, Clock, TargetIcon, PersonStanding, Gift, Group, Award } from 'lucide-react'
+import { MessageCircle,Send, BarChart2, Users, Calendar, Zap, FileText, HelpCircle, Sparkles, Target, Palette, Megaphone, Clock, TargetIcon, PersonStanding, Gift, Group, Award, Cog } from 'lucide-react'
 
 export const PAGE_BREAD_CRUMBS: string[] = [
   'contacts',
@@ -21,6 +21,7 @@ export const PAGE_BREAD_CRUMBS: string[] = [
   'settings',
   'audience',
   'information',
+  'agent',
   'schedule',
   'posting',
   'leads',
@@ -49,6 +50,7 @@ export const PAGE_ICON: Props = {
   POSTING: <InstagramDuoToneBlue />,
   SCHEDULE: <Clock />,
   INFORMATION:<PencilDuoToneBlack/>,
+  AGENT:<Cog/>,
   CUSTOMIZE:<TargetIcon/>,
   LEADS:<PersonStanding/>,
   WHATSAPP:<Chat/>,
