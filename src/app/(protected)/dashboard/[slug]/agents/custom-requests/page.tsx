@@ -13,7 +13,7 @@ export default async function CustomRequestsPage() {
   const session = await onUserInfor()
 
   if (!session?.data?.id) {
-    redirect("/login")
+    redirect("/sign-in")
   }
 
   return (

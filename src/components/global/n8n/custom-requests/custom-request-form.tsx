@@ -312,7 +312,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { type RequestUrgency, WorkflowCategory } from "@prisma/client"
 
@@ -333,6 +333,8 @@ interface CustomRequestFormProps {
 
 export function CustomRequestForm({ templateId, onSuccess }: CustomRequestFormProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slug = pathname.match(/^\/dashboard\/([^/]+)/)
 
   // State
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -424,7 +426,8 @@ export function CustomRequestForm({ templateId, onSuccess }: CustomRequestFormPr
         onSuccess(data.id)
       } else {
         // Redirect to the custom request detail page
-        router.push(`/custom-requests/${data.id}`)
+        //router.push(`/custom-requests/${data.id}`)
+       router.push( `/dashboard/${slug}/agents/custom-requests/${data.id}`)
       }
     } catch (error) {
       console.error("Error submitting custom request:", error)

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { format, formatDistanceToNow } from "date-fns"
 import { Search, SlidersHorizontal, PlusCircle, ChevronRight } from "lucide-react"
 import type { CustomRequestStatus, RequestUrgency } from "@prisma/client"
@@ -69,6 +69,8 @@ export function CustomRequestList({
   urgencyFilter = "ALL",
 }: CustomRequestListProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slug = pathname.match(/^\/dashboard\/([^/]+)/)
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -120,6 +122,7 @@ export function CustomRequestList({
   // Handle creating a new request
   const handleCreateRequest = () => {
     router.push("/custom-requests/new")
+    router.push( `/dashboard/${slug}/agents/custom-requests/new`)
   }
 
   // Filter requests based on search query
