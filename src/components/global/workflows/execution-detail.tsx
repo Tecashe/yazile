@@ -185,7 +185,7 @@ export function ExecutionDetail({ workflowId, executionId }: ExecutionDetailProp
         <CardHeader>
           <CardTitle>Execution Not Found</CardTitle>
           <CardDescription>
-            The requested execution could not be found or you don't have permission to view it.
+            The requested execution could not be found or you dont have permission to view it.
           </CardDescription>
         </CardHeader>
         <CardFooter>

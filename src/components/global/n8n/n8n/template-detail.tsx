@@ -343,7 +343,7 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
             <Card>
               <CardHeader>
                 <CardTitle>My Workflows Using This Template</CardTitle>
-                <CardDescription>Workflows you've created from this template</CardDescription>
+                <CardDescription>Workflows you have created from this template</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

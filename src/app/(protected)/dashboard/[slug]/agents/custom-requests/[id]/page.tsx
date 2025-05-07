@@ -234,7 +234,7 @@ const getStatusBadgeVariant = (status: string) => {
               <div className="text-center py-6 text-muted-foreground">
                 <AlertCircle className="mx-auto h-8 w-8 mb-2" />
                 <p>No updates yet</p>
-                <p className="text-sm">We'll notify you when there are updates to your request</p>
+                <p className="text-sm">We will notify you when there are updates to your request</p>
               </div>
             )}
           </CardContent>

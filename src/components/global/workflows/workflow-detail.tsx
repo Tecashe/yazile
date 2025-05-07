@@ -141,7 +141,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
         <CardHeader>
           <CardTitle>Workflow Not Found</CardTitle>
           <CardDescription>
-            The requested workflow could not be found or you don't have permission to view it.
+            The requested workflow could not be found or you dont have permission to view it.
           </CardDescription>
         </CardHeader>
         <CardFooter>
