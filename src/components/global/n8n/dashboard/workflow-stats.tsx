@@ -94,7 +94,7 @@ export function WorkflowStats({ userId, period = "all" }: WorkflowStatsProps) {
           <p className="text-muted-foreground">Create your first workflow to see statistics.</p>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => router.push(`/dashboard/${slug}/agents/workflows/new`)}>Create Workflow</Button>
+          <Button onClick={() => router.push(`dashboard/${slug}/agents/workflows/new`)}>Create Workflow</Button>
         </CardFooter>
       </Card>
     )
