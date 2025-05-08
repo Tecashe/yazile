@@ -122,7 +122,7 @@ export function CustomRequestList({
   // Handle creating a new request
   const handleCreateRequest = () => {
     router.push("/custom-requests/new")
-    router.push( `/dashboard/${slug}/agents/custom-requests/new`)
+    // router.push( `/dashboard/${slug}/agents/custom-requests/new`)
   }
 
   // Filter requests based on search query
