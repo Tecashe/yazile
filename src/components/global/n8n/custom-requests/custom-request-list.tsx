@@ -70,7 +70,10 @@ export function CustomRequestList({
 }: CustomRequestListProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const slug = pathname.match(/^\/dashboard\/([^/]+)/)
+  //const slug = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -311,7 +314,7 @@ export function CustomRequestList({
             <Card
               key={request.id}
               className="hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => router.push(`/custom-requests/${request.id}`)}
+              onClick={() => router.push(`dashboard/${slug}/custom-requests/${request.id}`)}
             >
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row justify-between gap-4">

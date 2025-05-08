@@ -87,21 +87,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
     id: uuid(),
     label: "Agents",
     items: [
-      // {
-      //   id: uuid(),
-      //   label: "Workflows",
-      //   icon: colorIcon(Webhook, "text-cyan-400"),
-      // },
-      // {
-      //   id: uuid(),
-      //   label: "Templates",
-      //   icon: colorIcon(Album, "text-cyan-400"),
-      // },
-      // {
-      //   id: uuid(),
-      //   label: "Request",
-      //   icon: colorIcon(Cog, "text-cyan-400"),
-      // },
+  
       {
         id: uuid(),
         label: "Agents",
