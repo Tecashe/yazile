@@ -53,17 +53,7 @@ const Sidebar = ({ slug }: Props) => {
       return `${basePath}/influencer${parentPath}/${itemPath}`
     }
     
-    if (groupLabel.toLowerCase() === "automate") {
-      // If this is a direct child of the agent group (not a subitem)
-      if (!parentPath) {
-        return `${basePath}/agents/${itemPath}`
-      }
-
-      // For subitems in the agent group, use the parent path
-      return `${basePath}/agents${parentPath}/${itemPath}`
-    }
-
-
+    
     // For all other groups, direct path without group name
     return `${basePath}/${itemPath}`
   }

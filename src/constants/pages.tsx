@@ -11,7 +11,7 @@ import {
   Chat,
   ZapDouToneBlack
 } from '@/icons'
-import { MessageCircle,Send, BarChart2, Users, Calendar, Zap, FileText, HelpCircle, Sparkles, Target, Palette, Megaphone, Clock, TargetIcon, PersonStanding, Gift, Group, Award, Cog, Webhook } from 'lucide-react'
+import { MessageCircle,Send, BarChart2, Users, Calendar, Zap, FileText, HelpCircle, Sparkles, Target, Palette, Megaphone, Clock, TargetIcon, PersonStanding, Gift, Group, Award, Cog, Webhook, Layout, ChartArea } from 'lucide-react'
 
 export const PAGE_BREAD_CRUMBS: string[] = [
   'contacts',
@@ -54,8 +54,9 @@ export const PAGE_ICON: Props = {
   AGENTS: <Webhook />,
   INFORMATION:<PencilDuoToneBlack/>,
   WORKFLOWS:<Webhook/>,
-  TEMPLATES:<Cog/>,
-  REQUEST:<Cog/>,
+  STATS:<ChartArea/>,
+  TEMPLATES:<Layout/>,
+  REQUESTS:<Cog/>,
   CUSTOMIZE:<TargetIcon/>,
   LEADS:<PersonStanding/>,
   WHATSAPP:<Chat/>,

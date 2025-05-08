@@ -29,6 +29,8 @@ import {
   Album,
   Cpu,
   Split,
+  GitGraph,
+  ChartAreaIcon,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -85,19 +87,40 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
   },
   {
     id: uuid(),
-    label: "Automate",
+    label: "AI Agents",
     items: [
-  
       {
         id: uuid(),
-        label: "Agents",
-        icon: colorIcon(Cpu, "text-pink-400"),
-        subItems: [
-          { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
-          { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
-          { id: uuid(), label: "Custom-requests", icon: colorIcon(Split, "text-purple-400", 18) },
-        ],
+        label: "Stats",
+        icon: colorIcon(ChartAreaIcon, "text-indigo-400"),
       },
+      {
+        id: uuid(),
+        label: "Workflows",
+        icon: colorIcon(Webhook, "text-indigo-400"),
+      },
+      {
+        id: uuid(),
+        label: "Templates",
+        icon: colorIcon(Layout, "text-indigo-400"),
+      },
+      {
+        id: uuid(),
+        label: "Requests",
+        icon: colorIcon(Cog, "text-indigo-400"),
+      },
+  
+  
+      // {
+      //   id: uuid(),
+      //   label: "Agents",
+      //   icon: colorIcon(Cpu, "text-pink-400"),
+      //   subItems: [
+      //     { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
+      //     { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
+      //     { id: uuid(), label: "Custom-requests", icon: colorIcon(Split, "text-purple-400", 18) },
+      //   ],
+      // },
       // {
       //   id: uuid(),
       //   label: "Influencers",
@@ -108,12 +131,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       //     { id: uuid(), label: "Import", icon: colorIcon(Upload, "text-green-400", 18) },
       //   ],
       // },
-      // {
-      //   id: uuid(),
-      //   label: "Portal",
-      //   icon: colorIcon(PanelTop, "text-indigo-400"),
-      //   subItems: [{ id: uuid(), label: "Settings", icon: colorIcon(Settings, "text-gray-400", 18) }],
-      // },
+       {
+        id: uuid(),
+        label: "Portal",
+        icon: colorIcon(PanelTop, "text-indigo-400"),
+        subItems: [{ id: uuid(), label: "Settings", icon: colorIcon(Settings, "text-gray-400", 18) }],
+      },
     ],
   },
   {

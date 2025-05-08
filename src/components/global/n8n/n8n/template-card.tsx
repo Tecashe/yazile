@@ -42,13 +42,13 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
 
   // Handle view template detail
   const handleViewTemplate = () => {
-    router.push(`/templates/${template.id}`)
+    router.push(`dashboard/${slug}/agents/templates/${template.id}`)
   }
 
   // Handle create workflow from template
   const handleCreateWorkflow = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering the card click
-    router.push(`/workflows/new?templateId=${template.id}`)
+    router.push(`dashboard/${slug}/agents/workflows/new?templateId=${template.id}`)
   }
 
   // Format complexity for display
