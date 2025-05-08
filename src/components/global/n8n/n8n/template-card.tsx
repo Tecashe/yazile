@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Clock, Zap, BarChart3 } from "lucide-react"
 import type { WorkflowCategory, WorkflowComplexity } from "@prisma/client"
 
@@ -34,16 +34,21 @@ interface TemplateCardProps {
 
 export function TemplateCard({ template, showCategory = true, showFooter = true }: TemplateCardProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
+
 
   // Handle view template detail
   const handleViewTemplate = () => {
-    router.push(`/templates/${template.id}`)
+    router.push(`dashboard/${slug}/templates/${template.id}`)
   }
 
   // Handle create workflow from template
   const handleCreateWorkflow = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering the card click
-    router.push(`/workflows/new?templateId=${template.id}`)
+    router.push(`dashboard/${slug}/workflows/new?templateId=${template.id}`)
   }
 
   // Format complexity for display

@@ -70,7 +70,6 @@ export function CustomRequestList({
 }: CustomRequestListProps) {
   const router = useRouter()
   const pathname = usePathname()
-  //const slug = pathname.match(/^\/dashboard\/([^/]+)/)
   const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
   const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
 

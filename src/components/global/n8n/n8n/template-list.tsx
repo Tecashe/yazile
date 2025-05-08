@@ -366,7 +366,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Search, SlidersHorizontal } from "lucide-react"
 import { WorkflowCategory, WorkflowComplexity } from "@prisma/client"
 
@@ -438,6 +438,11 @@ export function TemplateList({
 }: TemplateListProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
+
 
   // States
   const [isLoading, setIsLoading] = useState(true)
@@ -702,7 +707,8 @@ export function TemplateList({
           {filteredTemplates.length === 0 ? (
             <div className="text-center py-12 bg-background rounded-lg border border-dashed">
               <p>You haven&apos;t created any workflows from templates yet</p>
-              <Button className="mt-4" onClick={() => router.push("/workflows/new")}>
+              <Button className="mt-4" onClick={() => router.push(`dashboard/${slug}/agents/workflows/new`)}>
+              
                 Create Your First Workflow
               </Button>
             </div>
@@ -718,7 +724,7 @@ export function TemplateList({
 
       {totalTemplates > filteredTemplates.length && !searchQuery && activeTab === "all" && (
         <div className="flex justify-center mt-4">
-          <Button variant="outline" onClick={() => router.push("/templates")}>
+          <Button variant="outline" onClick={() => router.push(`dashboard/${slug}/agents/workflows/new`)}>
             View All Templates
           </Button>
         </div>

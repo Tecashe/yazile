@@ -334,7 +334,9 @@ interface CustomRequestFormProps {
 export function CustomRequestForm({ templateId, onSuccess }: CustomRequestFormProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const slug = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
 
   // State
   const [isSubmitting, setIsSubmitting] = useState(false)
