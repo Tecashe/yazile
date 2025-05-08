@@ -87,40 +87,19 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
   },
   {
     id: uuid(),
-    label: "AI Agents",
+    label: "Aiagents",
     items: [
-      {
-        id: uuid(),
-        label: "Stats",
-        icon: colorIcon(ChartAreaIcon, "text-indigo-400"),
-      },
-      {
-        id: uuid(),
-        label: "Workflows",
-        icon: colorIcon(Webhook, "text-indigo-400"),
-      },
-      {
-        id: uuid(),
-        label: "Templates",
-        icon: colorIcon(Layout, "text-indigo-400"),
-      },
-      {
-        id: uuid(),
-        label: "Requests",
-        icon: colorIcon(Cog, "text-indigo-400"),
-      },
   
-  
-      // {
-      //   id: uuid(),
-      //   label: "Agents",
-      //   icon: colorIcon(Cpu, "text-pink-400"),
-      //   subItems: [
-      //     { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
-      //     { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
-      //     { id: uuid(), label: "Custom-requests", icon: colorIcon(Split, "text-purple-400", 18) },
-      //   ],
-      // },
+      {
+        id: uuid(),
+        label: "Agents",
+        icon: colorIcon(Cpu, "text-pink-400"),
+        subItems: [
+          { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
+          { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
+          { id: uuid(), label: "Custom-requests", icon: colorIcon(Split, "text-purple-400", 18) },
+        ],
+      },
       // {
       //   id: uuid(),
       //   label: "Influencers",
