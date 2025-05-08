@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Activity, CheckCircle, XCircle, Zap } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
@@ -36,6 +36,10 @@ interface WorkflowStats {
 
 export function WorkflowStats({ userId, period = "all" }: WorkflowStatsProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -90,7 +94,7 @@ export function WorkflowStats({ userId, period = "all" }: WorkflowStatsProps) {
           <p className="text-muted-foreground">Create your first workflow to see statistics.</p>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => router.push("/workflows/new")}>Create Workflow</Button>
+          <Button onClick={() => router.push(`/dashboard/${slug}/agents/workflows/new`)}>Create Workflow</Button>
         </CardFooter>
       </Card>
     )
@@ -188,9 +192,9 @@ export function WorkflowStats({ userId, period = "all" }: WorkflowStatsProps) {
               </div>
               <Button
                 variant="outline"
-                size="sm"
+                size="sm"     
                 onClick={() =>
-                  router.push(`/workflows/${stats.lastExecution?.workflowId}/executions/${stats.lastExecution?.id}`)
+                  router.push(`/dashboard/${slug}/agents/workflows/${stats.lastExecution?.workflowId}/executions/${stats.lastExecution?.id}`)
                 }
               >
                 View Details

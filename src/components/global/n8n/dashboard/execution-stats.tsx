@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Calendar, ArrowUpRight, ArrowDownRight, Clock } from "lucide-react"
 import { format, subDays } from "date-fns"
 
@@ -34,6 +34,11 @@ interface ExecutionStats {
 
 export function ExecutionStats({ userId, period: initialPeriod = "week" }: ExecutionStatsProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
+  
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -153,7 +158,7 @@ export function ExecutionStats({ userId, period: initialPeriod = "week" }: Execu
           <p className="text-muted-foreground">Run your workflows to see execution statistics.</p>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => router.push("/workflows")}>View Workflows</Button>
+          <Button onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>View Workflows</Button>
         </CardFooter>
       </Card>
     )
@@ -285,7 +290,7 @@ export function ExecutionStats({ userId, period: initialPeriod = "week" }: Execu
           </div>
         </CardContent>
         <CardFooter>
-          <Button variant="outline" onClick={() => router.push("/workflows")}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>
             View All Workflows
           </Button>
         </CardFooter>

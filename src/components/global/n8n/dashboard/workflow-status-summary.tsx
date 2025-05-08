@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Zap, AlertCircle, PauseCircle, FileEdit, Archive } from "lucide-react"
 import type { WorkflowStatus } from "@prisma/client"
 
@@ -29,6 +29,10 @@ export function WorkflowStatusSummary({
   showActions = true,
 }: WorkflowStatusSummaryProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+    
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -140,7 +144,7 @@ export function WorkflowStatusSummary({
         <CardContent>
           <div className="text-center py-6 text-muted-foreground">
             <p>No workflows found</p>
-            <Button variant="outline" className="mt-2" onClick={() => router.push("/workflows/new")}>
+            <Button variant="outline" className="mt-2" onClick={() => router.push(`dashboard/${slug}/agents/workflows/new`)}>
               Create Your First Workflow
             </Button>
           </div>
@@ -181,7 +185,7 @@ export function WorkflowStatusSummary({
       </CardContent>
       {showActions && (
         <CardFooter>
-          <Button variant="outline" className="w-full" onClick={() => router.push("/workflows")}>
+          <Button variant="outline" className="w-full" onClick={() => router.push(`dashboard/${slug}/agents/workflows`)}>
             View All Workflows
           </Button>
         </CardFooter>

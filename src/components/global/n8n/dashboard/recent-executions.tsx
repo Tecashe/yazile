@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
 import type { ExecutionStatus } from "@prisma/client"
 import { CheckCircle2, XCircle, Clock, Play, PauseCircle, Timer, ChevronRight } from "lucide-react"
@@ -42,6 +42,10 @@ export function RecentExecutions({
   showViewAll = true,
 }: RecentExecutionsProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -115,7 +119,7 @@ export function RecentExecutions({
 
   // Handle view execution detail
   const handleViewExecution = (workflowId: string, executionId: string) => {
-    router.push(`/workflows/${workflowId}/executions/${executionId}`)
+    router.push(`dashboard/${slug}/agents/workflows/${workflowId}/executions/${executionId}`)
   }
 
   // Render loading state
@@ -148,7 +152,7 @@ export function RecentExecutions({
         <CardContent>
           <div className="text-center py-6 text-muted-foreground">
             <p>No executions found</p>
-            <Button variant="outline" className="mt-2" onClick={() => router.push("/workflows")}>
+            <Button variant="outline" className="mt-2" onClick={() => router.push(`dashboard/${slug}/agents/workflows`)}>
               View Workflows
             </Button>
           </div>
@@ -208,7 +212,7 @@ export function RecentExecutions({
       </CardContent>
       {showViewAll && totalExecutions > executions.length && (
         <CardFooter>
-          <Button variant="outline" className="w-full" onClick={() => router.push("/workflows/executions")}>
+          <Button variant="outline" className="w-full" onClick={() => router.push(`dashboard/${slug}/agents/workflows/executions`)}>
             View All Executions
           </Button>
         </CardFooter>
