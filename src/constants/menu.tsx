@@ -27,6 +27,8 @@ import {
   Webhook,
   Cog,
   Album,
+  Cpu,
+  Split,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -85,29 +87,29 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
     id: uuid(),
     label: "Agents",
     items: [
-      {
-        id: uuid(),
-        label: "Workflows",
-        icon: colorIcon(Webhook, "text-cyan-400"),
-      },
-      {
-        id: uuid(),
-        label: "Templates",
-        icon: colorIcon(Album, "text-cyan-400"),
-      },
-      {
-        id: uuid(),
-        label: "Request",
-        icon: colorIcon(Cog, "text-cyan-400"),
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Workflows",
+      //   icon: colorIcon(Webhook, "text-cyan-400"),
+      // },
+      // {
+      //   id: uuid(),
+      //   label: "Templates",
+      //   icon: colorIcon(Album, "text-cyan-400"),
+      // },
+      // {
+      //   id: uuid(),
+      //   label: "Request",
+      //   icon: colorIcon(Cog, "text-cyan-400"),
+      // },
       {
         id: uuid(),
         label: "Agents",
-        icon: colorIcon(Target, "text-pink-400"),
+        icon: colorIcon(Cpu, "text-pink-400"),
         subItems: [
-          { id: uuid(), label: "Workflows", icon: colorIcon(PlusCircle, "text-green-400", 18) },
+          { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
           { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
-          { id: uuid(), label: "Custom-request", icon: colorIcon(BarChart2, "text-purple-400", 18) },
+          { id: uuid(), label: "Custom-requests", icon: colorIcon(Split, "text-purple-400", 18) },
         ],
       },
       // {
