@@ -370,14 +370,16 @@ const Sidebar = ({ slug }: Props) => {
     }
 
     // Special case for AI Agents group
-    if (groupLabel.toLowerCase() === "aiagents") {
+    if (groupLabel.toLowerCase() === "ai agents") {
       // For direct children of AI Agents
       if (!parentPath) {
         return `${basePath}/agents/${itemPath}`
       }
 
-      // For subitems in the AI Agents group
-      return `${basePath}/agents${parentPath}/${itemPath}`
+      // For subitems in the AI Agents group, we need to handle the case where the parent is "Agents"
+      const formattedParentPath = parentPath.startsWith("/agents") ? parentPath.replace("/agents", "") : parentPath
+
+      return `${basePath}/agents${formattedParentPath}/${itemPath}`
     }
 
     // For all other groups, direct path without group name
