@@ -121,8 +121,8 @@ export function CustomRequestList({
 
   // Handle creating a new request
   const handleCreateRequest = () => {
-    router.push("/custom-requests/new")
-    // router.push( `/dashboard/${slug}/agents/custom-requests/new`)
+    // router.push("/custom-requests/new")
+    router.push(`/dashboard/${slug}/agents/custom-requests/new`)
   }
 
   // Filter requests based on search query
@@ -348,7 +348,7 @@ export function CustomRequestList({
 
       {totalRequests > filteredRequests.length && !searchQuery && (
         <div className="flex justify-center mt-4">
-          <Button variant="outline" onClick={() => router.push("/custom-requests")}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/custom-requests`)}>
             View All Requests
           </Button>
         </div>
