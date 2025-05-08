@@ -62,7 +62,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Automations",
-        icon: colorIcon(Zap, "text-yellow-400"),
+        icon: colorIcon(Zap, "text-maroon-400"),
       },
       {
         id: uuid(),
@@ -72,7 +72,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Messages",
-        icon: colorIcon(MessageCircle, "text-green-400"),
+        icon: colorIcon(MessageCircle, "text-amber-400"),
       },
       {
         id: uuid(),
@@ -97,19 +97,19 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       },
       {
         id: uuid(),
-        label: "custom-requests",
+        label: "Request",
         icon: colorIcon(Cog, "text-cyan-400"),
       },
-      // {
-      //   id: uuid(),
-      //   label: "Campaigns",
-      //   icon: colorIcon(Target, "text-pink-400"),
-      //   subItems: [
-      //     { id: uuid(), label: "Create New", icon: colorIcon(PlusCircle, "text-green-400", 18) },
-      //     { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
-      //     { id: uuid(), label: "Analytics", icon: colorIcon(BarChart2, "text-purple-400", 18) },
-      //   ],
-      // },
+      {
+        id: uuid(),
+        label: "Agents",
+        icon: colorIcon(Target, "text-pink-400"),
+        subItems: [
+          { id: uuid(), label: "Workflows", icon: colorIcon(PlusCircle, "text-green-400", 18) },
+          { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
+          { id: uuid(), label: "Custom-request", icon: colorIcon(BarChart2, "text-purple-400", 18) },
+        ],
+      },
       // {
       //   id: uuid(),
       //   label: "Influencers",
@@ -132,12 +132,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
     id: uuid(),
     label: "System",
     items: [
-      // Communication group
-      // {
-      //   id: uuid(),
-      //   label: "Chat",
-      //   icon: colorIcon(MessageCircle, "text-green-400"),
-      // },
       {
         id: uuid(),
         label: "Whatsapp",
@@ -148,13 +142,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Posting",
         icon: colorIcon(Clock, "text-blue-400"),
       },
-
-      // // Financial group
-      // {
-      //   id: uuid(),
-      //   label: "Payment",
-      //   icon: colorIcon(CreditCard, "text-purple-400"),
-      // },
       {
         id: uuid(),
         label: "Pricing",
@@ -175,7 +162,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Opportunities",
-        icon: colorIcon(Award, "text-green-400"),
+        icon: colorIcon(Award, "text-magenta-400"),
       },
 
 
@@ -183,12 +170,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Information",
-        icon: colorIcon(Info, "text-cyan-400"),
+        icon: colorIcon(Info, "text-indigo-400"),
       },
       {
         id: uuid(),
         label: "Help",
-        icon: colorIcon(HelpCircle, "text-blue-400"),
+        icon: colorIcon(HelpCircle, "text-violet-400"),
       },
     ],
   },
