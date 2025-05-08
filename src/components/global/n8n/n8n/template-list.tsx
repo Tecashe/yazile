@@ -707,7 +707,7 @@ export function TemplateList({
           {filteredTemplates.length === 0 ? (
             <div className="text-center py-12 bg-background rounded-lg border border-dashed">
               <p>You haven&apos;t created any workflows from templates yet</p>
-              <Button className="mt-4" onClick={() => router.push(`/agents/workflows/new`)}>
+              <Button className="mt-4" onClick={() => router.push(`/workflows/new`)}>
               
                 Create Your First Workflow
               </Button>
@@ -724,7 +724,7 @@ export function TemplateList({
 
       {totalTemplates > filteredTemplates.length && !searchQuery && activeTab === "all" && (
         <div className="flex justify-center mt-4">
-          <Button variant="outline" onClick={() => router.push(`/agents/workflows/new`)}>
+          <Button variant="outline" onClick={() => router.push(`/templates`)}>
             View All Templates
           </Button>
         </div>

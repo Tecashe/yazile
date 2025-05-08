@@ -52,16 +52,16 @@ const Sidebar = ({ slug }: Props) => {
       // For subitems in the Influencer group, use the parent path
       return `${basePath}/influencer${parentPath}/${itemPath}`
     }
+    
     if (groupLabel.toLowerCase() === "agents") {
       // If this is a direct child of the Influencer group (not a subitem)
       if (!parentPath) {
-        return `${basePath}/${itemPath}`
+        return `${basePath}/agents/${itemPath}`
       }
 
       // For subitems in the Influencer group, use the parent path
-      return `${basePath}/${parentPath}/${itemPath}`
+      return `${basePath}/agent${parentPath}/${itemPath}`
     }
-
 
 
     // For all other groups, direct path without group name
