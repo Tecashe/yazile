@@ -85,7 +85,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
   },
   {
     id: uuid(),
-    label: "Agents",
+    label: "Automate",
     items: [
   
       {
