@@ -386,6 +386,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/hooks/use-toast"
 import { TemplateCard } from "./template-card"
+import Link from "next/link"
 
 // Types for our component
 interface TemplateListProps {
@@ -708,8 +709,9 @@ export function TemplateList({
             <div className="text-center py-12 bg-background rounded-lg border border-dashed">
               <p>You haven&apos;t created any workflows from templates yet</p>
               <Button className="mt-4" onClick={() => router.push(`/workflows/new`)}>
-              
-                Create Your First Workflow
+              <Link href={`/dashboard/${slug}/agents/workflows/new}`}>
+              Create Your First Workflow
+            </Link>
               </Button>
             </div>
           ) : (
@@ -724,9 +726,14 @@ export function TemplateList({
 
       {totalTemplates > filteredTemplates.length && !searchQuery && activeTab === "all" && (
         <div className="flex justify-center mt-4">
-          <Button variant="outline" onClick={() => router.push(`/templates`)}>
+          <Button variant="outline" asChild>
+            <Link href={`/dashboard/${slug}/agents/templates}`}>
             View All Templates
+            </Link>
           </Button>
+          {/* <Button variant="outline" onClick={() => router.push(`/templates`)}>
+            View All Templates
+          </Button> */}
         </div>
       )}
     </div>
