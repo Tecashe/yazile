@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { Loader2, ChevronRight, AlertCircle, Lock } from "lucide-react"
 import type { WorkflowStatus } from "@prisma/client"
 
@@ -51,6 +51,10 @@ interface WorkflowData {
 
 export function WorkflowConfigurationForm({ workflowId, activateAfterSave = false }: WorkflowConfigurationFormProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -245,7 +249,7 @@ export function WorkflowConfigurationForm({ workflowId, activateAfterSave = fals
       })
 
       // Redirect to workflow detail page
-      router.push(`/workflows/${workflowId}`)
+      router.push(`/dashboard/${slug}/agents/workflows/${workflowId}`)
     } catch (error) {
       console.error("Error activating workflow:", error)
       toast({

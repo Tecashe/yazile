@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { Loader2, PlusCircle, KeyRound, Trash, Check, Lock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -95,6 +95,10 @@ export function WorkflowCredentialsForm({
   onUpdate,
 }: WorkflowCredentialsFormProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
   // State
   const [isAddingCredential, setIsAddingCredential] = useState(false)
@@ -465,7 +469,7 @@ export function WorkflowCredentialsForm({
             if (onUpdate) {
               onUpdate()
             } else {
-              router.push(`/workflows/${workflowId}`)
+              router.push(`/dashboard/${slug}/agents/workflows/${workflowId}`)
             }
           }}
         >

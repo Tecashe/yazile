@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { formatDistanceToNow, format } from "date-fns"
 import { InfoIcon, LinkIcon, Clock, Zap, Activity, Calendar, Trash } from "lucide-react"
 
@@ -33,6 +33,10 @@ interface WorkflowDetailProps {
 
 export function WorkflowDetail({ workflowId, showExecutionHistory = true }: WorkflowDetailProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -98,7 +102,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
         description: "Your workflow has been successfully deleted",
       })
 
-      router.push("/workflows")
+      router.push(`/dashboard/${slug}/agents/workflows`)
     } catch (error) {
       console.error("Error deleting workflow:", error)
       toast({
@@ -145,7 +149,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Button onClick={() => router.push("/workflows")}>Return to Workflows</Button>
+          <Button onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>Return to Workflows</Button>
         </CardFooter>
       </Card>
     )
@@ -247,7 +251,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
                     <Button
                       variant="link"
                       className="h-auto p-0"
-                      onClick={() => router.push(`/workflows/${workflowId}/configure`)}
+                      onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/configure`)}
                     >
                       Configure now
                     </Button>
@@ -256,7 +260,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
               </div>
             </CardContent>
             <CardFooter className="border-t pt-6 flex justify-between">
-              <Button variant="outline" onClick={() => router.push(`/workflows/${workflowId}/configure`)}>
+              <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/configure`)}>
                 <InfoIcon className="mr-2 h-4 w-4" />
                 Edit Configuration
               </Button>
@@ -323,7 +327,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
               <CardFooter>
                 <Button
                   variant="outline"
-                  onClick={() => router.push(`/workflows/${workflowId}/configure?tab=credentials`)}
+                  onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/configure?tab=credentials`)}
                 >
                   Manage Credentials
                 </Button>
@@ -347,7 +351,7 @@ export function WorkflowDetail({ workflowId, showExecutionHistory = true }: Work
                 <ExecutionHistory workflowId={workflowId} limit={10} />
               </CardContent>
               <CardFooter>
-                <Button variant="outline" onClick={() => router.push(`/workflows/${workflowId}/executions`)}>
+                <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions`)}>
                   View All Executions
                 </Button>
               </CardFooter>

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Check, Loader2 } from "lucide-react"
 import { WorkflowCategory, type WorkflowComplexity } from "@prisma/client"
 
@@ -94,6 +94,10 @@ export function CreateWorkflowForm({
   preSelectedCategory,
 }: CreateWorkflowFormProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
 
   // State
   const [isLoading, setIsLoading] = useState(false)
@@ -206,7 +210,7 @@ export function CreateWorkflowForm({
 
       if (redirectAfterCreate) {
         // Redirect to the workflow configuration page
-        router.push(`/workflows/${workflow.id}/configure`)
+        router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}/configure`)
       } else {
         // Reset the form
         setSelectedTemplateId(null)

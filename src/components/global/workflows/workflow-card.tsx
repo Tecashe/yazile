@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
 import { MoreHorizontal, PlayCircle, Settings, Trash } from "lucide-react"
 import type { WorkflowStatus } from "@prisma/client"
@@ -42,18 +42,22 @@ interface WorkflowCardProps {
 
 export function WorkflowCard({ workflow, onDelete }: WorkflowCardProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
   // Format dates
   const updatedAtFormatted = formatDistanceToNow(new Date(workflow.updatedAt), { addSuffix: true })
 
   // Handle view workflow detail
   const handleViewWorkflow = () => {
-    router.push(`/workflows/${workflow.id}`)
+    router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}`)
   }
 
   // Handle workflow configuration
   const handleConfigureWorkflow = () => {
-    router.push(`/workflows/${workflow.id}/configure`)
+    router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}/configure`)
   }
 
   // Handle workflow execution
@@ -87,7 +91,7 @@ export function WorkflowCard({ workflow, onDelete }: WorkflowCardProps) {
       })
 
       // Redirect to execution details page
-      router.push(`/workflows/${workflow.id}/executions/${execution.id}`)
+      router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}/executions/${execution.id}`)
     } catch (error) {
       console.error("Error executing workflow:", error)
       toast({

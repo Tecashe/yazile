@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { format, formatDistanceToNow } from "date-fns"
 import type { ExecutionStatus } from "@prisma/client"
 import {
@@ -48,6 +48,10 @@ interface Execution {
 
 export function ExecutionHistory({ workflowId, limit = 5, showWorkflowInfo = false }: ExecutionHistoryProps) {
   const router = useRouter()
+  const pathname = usePathname()
+    const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+    const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -121,7 +125,7 @@ export function ExecutionHistory({ workflowId, limit = 5, showWorkflowInfo = fal
 
   // Handle view execution detail
   const handleViewExecution = (executionId: string) => {
-    router.push(`/workflows/${workflowId}/executions/${executionId}`)
+    router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions/${executionId}`)
   }
 
   // Render loading state
@@ -144,7 +148,7 @@ export function ExecutionHistory({ workflowId, limit = 5, showWorkflowInfo = fal
       <Card className="p-6 text-center">
         <div className="space-y-2">
           <p className="text-muted-foreground">No executions found for this workflow</p>
-          <Button variant="outline" onClick={() => router.push(`/workflows/${workflowId}`)}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}`)}>
             Back to Workflow
           </Button>
         </div>
@@ -223,7 +227,7 @@ export function ExecutionHistory({ workflowId, limit = 5, showWorkflowInfo = fal
 
       {totalExecutions > executions.length && (
         <div className="flex justify-center">
-          <Button variant="outline" onClick={() => router.push(`/workflows/${workflowId}/executions`)}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions`)}>
             View All ({totalExecutions}) Executions
           </Button>
         </div>

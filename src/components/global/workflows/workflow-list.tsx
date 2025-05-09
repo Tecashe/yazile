@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams,usePathname } from "next/navigation"
 import { PlusCircle, Search, SlidersHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -72,6 +72,11 @@ export function WorkflowList({
 }: WorkflowListProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+   const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
+
 
   // States
   const [isLoading, setIsLoading] = useState(true)
@@ -122,7 +127,7 @@ export function WorkflowList({
 
   // Handle creating a new workflow
   const handleCreateWorkflow = () => {
-    router.push("/workflows/nnnnnnew")
+    router.push(`/dashboard/${slug}/agents//workflows/new`)
   }
 
   // Filter workflows based on search query

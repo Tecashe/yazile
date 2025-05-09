@@ -7,7 +7,7 @@ import { AlertTitle } from "@/components/ui/alert"
 import { Alert } from "@/components/ui/alert"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname} from "next/navigation"
 import { format } from "date-fns"
 import type { ExecutionStatus } from "@prisma/client"
 import {
@@ -40,6 +40,10 @@ interface ExecutionDetailProps {
 
 export function ExecutionDetail({ workflowId, executionId }: ExecutionDetailProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+
 
   // State
   const [isLoading, setIsLoading] = useState(true)
@@ -146,7 +150,7 @@ export function ExecutionDetail({ workflowId, executionId }: ExecutionDetailProp
       })
 
       // Redirect to the new execution
-      router.push(`/workflows/${workflowId}/executions/${newExecution.id}`)
+      router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions/${newExecution.id}`)
     } catch (error) {
       console.error("Error retrying execution:", error)
       toast({
@@ -189,7 +193,7 @@ export function ExecutionDetail({ workflowId, executionId }: ExecutionDetailProp
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Button onClick={() => router.push(`/workflows/${workflowId}/executions`)}>Return to Executions</Button>
+          <Button onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions`)}>Return to Executions</Button>
         </CardFooter>
       </Card>
     )
@@ -205,7 +209,7 @@ export function ExecutionDetail({ workflowId, executionId }: ExecutionDetailProp
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0"
-              onClick={() => router.push(`/workflows/${workflowId}/executions`)}
+              onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions`)}
             >
               <ArrowLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>

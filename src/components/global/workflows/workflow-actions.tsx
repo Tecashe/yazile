@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter,usePathname } from "next/navigation"
 import { Play, Pause, Settings, Trash, Edit, History } from "lucide-react"
 import type { WorkflowStatus } from "@prisma/client"
 
@@ -41,6 +41,10 @@ interface WorkflowActionsProps {
 
 export function WorkflowActions({ workflow, onUpdate, variant = "outline", showLabels = true }: WorkflowActionsProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
@@ -160,7 +164,7 @@ export function WorkflowActions({ workflow, onUpdate, variant = "outline", showL
       })
 
       // Redirect to execution details page
-      router.push(`/workflows/${workflow.id}/executions/${execution.id}`)
+      router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}/executions/${execution.id}`)
     } catch (error) {
       console.error("Error executing workflow:", error)
       toast({
@@ -190,7 +194,7 @@ export function WorkflowActions({ workflow, onUpdate, variant = "outline", showL
       })
 
       // Navigate back to workflows list
-      router.push("/workflows")
+      router.push(`/dashboard/${slug}/agents//workflows`)
       router.refresh()
     } catch (error) {
       console.error("Error deleting workflow:", error)
@@ -250,12 +254,12 @@ export function WorkflowActions({ workflow, onUpdate, variant = "outline", showL
             <DropdownMenuLabel>Workflow Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={() => router.push(`/workflows/${workflow.id}/configure`)}>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}/configure`)}>
               <Edit className="h-4 w-4 mr-2" />
               Edit Configuration
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={() => router.push(`/workflows/${workflow.id}/executions`)}>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}/executions`)}>
               <History className="h-4 w-4 mr-2" />
               View Execution History
             </DropdownMenuItem>
