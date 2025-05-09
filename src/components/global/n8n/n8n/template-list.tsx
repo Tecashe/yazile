@@ -708,11 +708,14 @@ export function TemplateList({
           {filteredTemplates.length === 0 ? (
             <div className="text-center py-12 bg-background rounded-lg border border-dashed">
               <p>You haven&apos;t created any workflows from templates yet</p>
-              <Button className="mt-4">
+               <Button className="mt-4" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/new}`)}>
+                Create Your First Workflow
+              </Button>
+              {/* <Button className="mt-4">
               <Link href={`/dashboard/${slug}/agents/workflows/new}`}>
               Create Your First Workflow
             </Link>
-              </Button>
+              </Button> */}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
