@@ -122,7 +122,7 @@ export function WorkflowList({
 
   // Handle creating a new workflow
   const handleCreateWorkflow = () => {
-    router.push("/workflows/new")
+    router.push("/workflows/nnnnnnew")
   }
 
   // Filter workflows based on search query
