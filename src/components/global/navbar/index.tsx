@@ -69,7 +69,7 @@ const Navbar = ({ slug }: Props) => {
     }
 
      // Special case for AI Agents group
-    if (groupLabel.toLowerCase() === "automate") {
+    if (groupLabel.toLowerCase() === "automates") {
       // For direct children of AI Agents
       if (!parentPath) {
         return `${basePath}/agents/${itemPath}`

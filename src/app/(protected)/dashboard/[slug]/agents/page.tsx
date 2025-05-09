@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const session = await onUserInfor()
 
   if (!session?.data?.id) {
-    redirect("/login")
+    redirect("/sign-in")
   }
 
   const userId = session.data.id
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Workflows Dashboard</h1>
         <p className="text-muted-foreground">Overview of your n8n workflows and executions</p>
       </div>
 
