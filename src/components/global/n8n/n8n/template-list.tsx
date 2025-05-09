@@ -725,7 +725,7 @@ export function TemplateList({
       {totalTemplates > filteredTemplates.length && !searchQuery && activeTab === "all" && (
         <div className="flex justify-center mt-4">
           <Button variant="outline" asChild>
-            <Link href={`/dashboard/${slug}/agents/templates}`}>
+            <Link href={`/dashboard/${slug}/agents/templates`}>
             View All Templates
             </Link>
           </Button>
