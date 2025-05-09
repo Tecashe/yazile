@@ -68,6 +68,19 @@ const Navbar = ({ slug }: Props) => {
       return `${basePath}/influencer${parentPath}/${itemPath}`
     }
 
+     // Special case for AI Agents group
+    if (groupLabel.toLowerCase() === "automate") {
+      // For direct children of AI Agents
+      if (!parentPath) {
+        return `${basePath}/agents/${itemPath}`
+      }
+
+      // For subitems in the AI Agents group, we need to handle the case where the parent is "Agents"
+      const formattedParentPath = parentPath.startsWith("/agents") ? parentPath.replace("/agents", "") : parentPath
+
+      return `${basePath}/agents${formattedParentPath}/${itemPath}`
+    }
+
   
     // For all other groups, direct path without group name
     return `${basePath}/${itemPath}`

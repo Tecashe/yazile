@@ -370,7 +370,7 @@ const Sidebar = ({ slug }: Props) => {
     }
 
     // Special case for AI Agents group
-    if (groupLabel.toLowerCase() === "ai agents") {
+    if (groupLabel.toLowerCase() === "automate") {
       // For direct children of AI Agents
       if (!parentPath) {
         return `${basePath}/agents/${itemPath}`

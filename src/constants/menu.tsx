@@ -87,7 +87,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
   },
   {
     id: uuid(),
-    label: "Aiagents",
+    label: "Automate",
     items: [
   
       {
@@ -110,12 +110,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       //     { id: uuid(), label: "Import", icon: colorIcon(Upload, "text-green-400", 18) },
       //   ],
       // },
-       {
-        id: uuid(),
-        label: "Portal",
-        icon: colorIcon(PanelTop, "text-indigo-400"),
-        subItems: [{ id: uuid(), label: "Settings", icon: colorIcon(Settings, "text-gray-400", 18) }],
-      },
+      //  {
+      //   id: uuid(),
+      //   label: "Portal",
+      //   icon: colorIcon(PanelTop, "text-indigo-400"),
+      //   subItems: [{ id: uuid(), label: "Settings", icon: colorIcon(Settings, "text-gray-400", 18) }],
+      // },
     ],
   },
   {
