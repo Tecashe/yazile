@@ -86,7 +86,7 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
 
   // Handle create workflow from template
   const handleCreateWorkflow = () => {
-    router.push(`dashboard/${slug}/agents/workflows/new?templateId=${templateId}`)
+    router.push(`/dashboard/${slug}/agents/workflows/new?templateId=${templateId}`)
   }
 
   // Format complexity for display
@@ -132,7 +132,7 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.push(`dashboard/${slug}/agents/templates`)}>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => router.push(`/dashboard/${slug}/agents/templates`)}>
               <ArrowLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
             </Button>
@@ -355,7 +355,7 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
                     <div
                       key={workflow.id}
                       className="flex justify-between items-center p-4 border rounded-md hover:bg-muted/50 cursor-pointer"
-                      onClick={() => router.push(`dashboard/${slug}/agents/workflows/${workflow.id}`)}
+                      onClick={() => router.push(`/dashboard/${slug}/agents/workflows/${workflow.id}`)}
                     >
                       <div>
                         <p className="font-medium">{workflow.name}</p>

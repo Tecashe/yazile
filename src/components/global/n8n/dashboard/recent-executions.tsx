@@ -119,7 +119,7 @@ export function RecentExecutions({
 
   // Handle view execution detail
   const handleViewExecution = (workflowId: string, executionId: string) => {
-    router.push(`dashboard/${slug}/agents/workflows/${workflowId}/executions/${executionId}`)
+    router.push(`/dashboard/${slug}/agents/workflows/${workflowId}/executions/${executionId}`)
   }
 
   // Render loading state
@@ -152,7 +152,7 @@ export function RecentExecutions({
         <CardContent>
           <div className="text-center py-6 text-muted-foreground">
             <p>No executions found</p>
-            <Button variant="outline" className="mt-2" onClick={() => router.push(`dashboard/${slug}/agents/workflows`)}>
+            <Button variant="outline" className="mt-2" onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>
               View Workflows
             </Button>
           </div>
@@ -212,7 +212,7 @@ export function RecentExecutions({
       </CardContent>
       {showViewAll && totalExecutions > executions.length && (
         <CardFooter>
-          <Button variant="outline" className="w-full" onClick={() => router.push(`dashboard/${slug}/agents/workflows/executions`)}>
+          <Button variant="outline" className="w-full" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/executions`)}>
             View All Executions
           </Button>
         </CardFooter>

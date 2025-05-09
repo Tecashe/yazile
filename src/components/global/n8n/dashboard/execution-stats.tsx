@@ -158,7 +158,7 @@ export function ExecutionStats({ userId, period: initialPeriod = "week" }: Execu
           <p className="text-muted-foreground">Run your workflows to see execution statistics.</p>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => router.push(`dashboard/${slug}/agents/workflows`)}>View Workflows</Button>
+          <Button onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>View Workflows</Button>
         </CardFooter>
       </Card>
     )
@@ -290,7 +290,7 @@ export function ExecutionStats({ userId, period: initialPeriod = "week" }: Execu
           </div>
         </CardContent>
         <CardFooter>
-          <Button variant="outline" onClick={() => router.push(`dashboard/${slug}/agents/workflows`)}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>
             View All Workflows
           </Button>
         </CardFooter>

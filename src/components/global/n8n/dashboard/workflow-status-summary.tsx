@@ -144,7 +144,7 @@ export function WorkflowStatusSummary({
         <CardContent>
           <div className="text-center py-6 text-muted-foreground">
             <p>No workflows found</p>
-            <Button variant="outline" className="mt-2" onClick={() => router.push(`dashboard/${slug}/agents/workflows/new`)}>
+            <Button variant="outline" className="mt-2" onClick={() => router.push(`/dashboard/${slug}/agents/workflows/new`)}>
               Create Your First Workflow
             </Button>
           </div>
@@ -185,7 +185,7 @@ export function WorkflowStatusSummary({
       </CardContent>
       {showActions && (
         <CardFooter>
-          <Button variant="outline" className="w-full" onClick={() => router.push(`dashboard/${slug}/agents/workflows`)}>
+          <Button variant="outline" className="w-full" onClick={() => router.push(`/dashboard/${slug}/agents/workflows`)}>
             View All Workflows
           </Button>
         </CardFooter>
