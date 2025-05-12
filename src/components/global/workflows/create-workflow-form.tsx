@@ -118,7 +118,7 @@ export function CreateWorkflowForm({
           params.append("category", selectedCategory)
         }
 
-        const response = await fetch(`/api/templates?${params.toString()}`)
+        const response = await fetch(`/api/n8n-templates?${params.toString()}`)
         if (!response.ok) {
           throw new Error("Failed to fetch templates")
         }

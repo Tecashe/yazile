@@ -127,7 +127,7 @@ export function WorkflowList({
 
   // Handle creating a new workflow
   const handleCreateWorkflow = () => {
-    router.push(`/dashboard/${slug}/agents//workflows/new`)
+    router.push(`/dashboard/${slug}/agents/workflows/new`)
   }
 
   // Filter workflows based on search query

@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const session = await onUserInfor()
 
   if (!session?.data?.id) {
-    redirect("/login")
+    redirect("/sign-up")
   }
 
   const userId = session.data.id

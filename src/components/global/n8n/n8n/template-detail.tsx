@@ -62,7 +62,7 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
     const fetchTemplate = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch(`/api/templates/${templateId}`)
+        const response = await fetch(`/api/n8n-templates/${templateId}`)
         if (!response.ok) {
           throw new Error("Failed to fetch template")
         }

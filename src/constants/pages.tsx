@@ -21,6 +21,7 @@ export const PAGE_BREAD_CRUMBS: string[] = [
   'settings',
   'audience',
   'information',
+  'stats',
   'workflows',
   'templates',
   'request',
