@@ -99,7 +99,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
           { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
           { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
           { id: uuid(), label: "Custom-requests", icon: colorIcon(Split, "text-purple-400", 18) },
-          // { id: uuid(), label: "Stats", icon: colorIcon(Calculator, "text-cyan-400", 18) },
+          { id: uuid(), label: "Stats", icon: colorIcon(Calculator, "text-cyan-400", 18) },
         ],
       },
       // {
