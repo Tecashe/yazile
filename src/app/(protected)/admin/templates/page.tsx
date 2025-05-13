@@ -851,6 +851,7 @@
 //   )
 // }
 
+
 "use client"
 
 import React from "react"
@@ -1104,6 +1105,70 @@ export default function TemplatesAdminPage() {
 
     return (
       <div className="grid gap-4 py-4">
+        <div className="flex justify-end mb-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setLocalFormData({
+                name: "Email Campaign Automation",
+                description: "Automate your email marketing campaigns with personalized content and scheduling.",
+                category: "MARKETING",
+                icon: "mail",
+                featured: true,
+                popular: true,
+                complexity: "MEDIUM",
+                estimatedSetupTime: 20,
+                requiredIntegrations: ["Email Service", "CRM"],
+                configurationSchema: JSON.stringify(
+                  {
+                    properties: {
+                      emailService: {
+                        type: "string",
+                        enum: ["mailchimp", "sendgrid", "other"],
+                        title: "Email Service Provider",
+                      },
+                      apiKey: {
+                        type: "string",
+                        title: "API Key",
+                      },
+                      templateId: {
+                        type: "string",
+                        title: "Email Template ID",
+                      },
+                      schedule: {
+                        type: "object",
+                        properties: {
+                          frequency: {
+                            type: "string",
+                            enum: ["daily", "weekly", "monthly"],
+                            default: "weekly",
+                          },
+                          time: {
+                            type: "string",
+                            format: "time",
+                            default: "09:00",
+                          },
+                        },
+                      },
+                    },
+                    required: ["emailService", "apiKey"],
+                  },
+                  null,
+                  2,
+                ),
+                n8nTemplateId: "email-campaign-001",
+                visualRepresentation: "https://example.com/email-workflow.png",
+                expectedOutcomes: ["Increased email open rates", "Higher conversion rates", "Consistent communication"],
+                useCases: ["Newsletter distribution", "Product announcements", "Customer re-engagement"],
+                isActive: true,
+              })
+              syncFormData()
+            }}
+          >
+            Fill Example Data
+          </Button>
+        </div>
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="name" className="text-right">
             Name *
@@ -1278,11 +1343,13 @@ export default function TemplatesAdminPage() {
             name="requiredIntegrations"
             value={localFormData.requiredIntegrations.join(", ")}
             onChange={(e) => {
-              const arrayValue = e.target.value
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean)
-              setLocalFormData((prev) => ({ ...prev, requiredIntegrations: arrayValue }))
+              setLocalFormData((prev) => ({
+                ...prev,
+                requiredIntegrations: e.target.value
+                  .split(",")
+                  .map((item) => item.trim())
+                  .filter(Boolean),
+              }))
             }}
             onBlur={syncFormData}
             className="col-span-3"
@@ -1348,11 +1415,13 @@ export default function TemplatesAdminPage() {
             name="expectedOutcomes"
             value={localFormData.expectedOutcomes.join(", ")}
             onChange={(e) => {
-              const arrayValue = e.target.value
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean)
-              setLocalFormData((prev) => ({ ...prev, expectedOutcomes: arrayValue }))
+              setLocalFormData((prev) => ({
+                ...prev,
+                expectedOutcomes: e.target.value
+                  .split(",")
+                  .map((item) => item.trim())
+                  .filter(Boolean),
+              }))
             }}
             onBlur={syncFormData}
             className="col-span-3"
@@ -1370,11 +1439,13 @@ export default function TemplatesAdminPage() {
             name="useCases"
             value={localFormData.useCases.join(", ")}
             onChange={(e) => {
-              const arrayValue = e.target.value
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean)
-              setLocalFormData((prev) => ({ ...prev, useCases: arrayValue }))
+              setLocalFormData((prev) => ({
+                ...prev,
+                useCases: e.target.value
+                  .split(",")
+                  .map((item) => item.trim())
+                  .filter(Boolean),
+              }))
             }}
             onBlur={syncFormData}
             className="col-span-3"
