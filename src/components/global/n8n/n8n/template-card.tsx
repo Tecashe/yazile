@@ -315,6 +315,34 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
   // Use icon URL or fallback
   const iconUrl = template.icon && isIconUrl(template.icon) && !imageError ? template.icon : getRandomImageUrl()
 
+  // Get category-specific card classes
+  const getCategoryCardClasses = (category: WorkflowCategory) => {
+    switch (category) {
+      case "MARKETING":
+        return "card-shape-marketing card-border-marketing"
+      case "SALES":
+        return "card-shape-sales card-border-sales"
+      case "CUSTOMER_SUPPORT":
+        return "card-shape-customer-support card-border-customer-support"
+      case "DATA_PROCESSING":
+        return "card-shape-data-processing card-border-data-processing"
+      case "DOCUMENT_MANAGEMENT":
+        return "card-shape-document card-border-document"
+      case "SOCIAL_MEDIA":
+        return "card-shape-social card-border-social"
+      case "COMMUNICATION":
+        return "card-shape-communication card-border-communication"
+      case "INTEGRATION":
+        return "card-shape-integration card-border-integration"
+      case "UTILITY":
+        return "card-shape-utility card-border-utility"
+      case "CUSTOM":
+        return "card-shape-custom card-border-custom"
+      default:
+        return ""
+    }
+  }
+
   return (
     <div
       className={cn(
@@ -332,9 +360,8 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
           "hover:shadow-xl dark:hover:shadow-primary/20",
           "transform-gpu backface-hidden",
           isHovered && "scale-[1.02] z-10",
-          template.featured
-            ? "border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10"
-            : "hover:border-primary/20 bg-card",
+          getCategoryCardClasses(template.category),
+          "bg-card",
           "before:absolute before:inset-0 before:z-10 before:bg-gradient-to-br before:from-transparent before:to-primary/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity",
           "after:absolute after:inset-0 after:z-10 after:bg-gradient-to-br after:from-white/5 after:via-transparent after:to-transparent after:opacity-0 hover:after:opacity-100 after:transition-opacity",
         )}
@@ -351,11 +378,6 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
         }}
       >
         {/* Animated gradient border effect for featured templates */}
-        {template.featured && (
-          <div className="absolute inset-0 z-0 opacity-30 overflow-hidden rounded-[inherit]">
-            <div className="absolute inset-0 z-0 shimmerBorder rounded-[inherit]"></div>
-          </div>
-        )}
 
         {/* Popular badge with animation */}
         {template.popular && (
@@ -365,10 +387,8 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
                 className={cn(
                   "h-5 w-5 text-amber-500 transition-transform duration-500",
                   isHovered ? "scale-125" : "scale-100",
-                  "animate-pulse",
                 )}
               />
-              <span className="absolute -bottom-1 -right-1 h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>
             </div>
           </div>
         )}
@@ -381,10 +401,8 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
                 className={cn(
                   "h-5 w-5 text-primary transition-transform duration-500",
                   isHovered ? "scale-125" : "scale-100",
-                  "animate-pulse",
                 )}
               />
-              <span className="absolute -bottom-1 -right-1 h-2 w-2 rounded-full bg-primary animate-ping"></span>
             </div>
           </div>
         )}
