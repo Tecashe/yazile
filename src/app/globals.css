@@ -458,3 +458,89 @@
     hsl(var(--background)) 60%
   );
 }
+
+
+/* Template Card specific animations */
+@keyframes card-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.template-card-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--primary), 0.1) 0%,
+    rgba(var(--primary), 0.2) 20%,
+    rgba(var(--primary), 0.1) 40%
+  );
+  background-size: 200% 100%;
+  animation: card-shimmer 3s infinite;
+}
+
+.template-card-glow {
+  box-shadow: 0 0 15px 5px rgba(var(--primary), 0.15);
+}
+
+.template-card-glow:hover {
+  box-shadow: 0 0 25px 5px rgba(var(--primary), 0.25);
+}
+
+/* 3D perspective effect */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, hsl(var(--primary)), transparent, hsl(var(--primary)));
+  background-size: 400% 400%;
+  z-index: -1;
+  animation: gradient-border-animation 3s ease infinite;
+  border-radius: inherit;
+}
+
+@keyframes gradient-border-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Staggered entrance animation for cards */
+.staggered-entrance {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggered-entrance-animation 0.5s forwards;
+}
+
+@keyframes staggered-entrance-animation {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
