@@ -128,11 +128,13 @@
 //   )
 // }
 
+
 "use client"
 
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import Image from "next/image"
 import { Clock, Zap, BarChart3, Star, Award, ArrowRight } from "lucide-react"
 import type { WorkflowCategory, WorkflowComplexity } from "@prisma/client"
 
@@ -173,6 +175,7 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
   const [isHovered, setIsHovered] = useState(false)
   const [rotation, setRotation] = useState({ x: 0, y: 0 })
   const [animateIn, setAnimateIn] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   // Animation on mount
   useEffect(() => {
@@ -231,10 +234,42 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
     }
   }
 
-  // Get category icon
-  const getCategoryIcon = () => {
-    if (template.icon) return template.icon
+  // Get category color
+  const getCategoryColor = (category: WorkflowCategory) => {
+    switch (category) {
+      case "MARKETING":
+        return "from-blue-400/20 to-indigo-400/20 text-blue-600 dark:text-blue-300"
+      case "SALES":
+        return "from-emerald-400/20 to-green-400/20 text-emerald-600 dark:text-emerald-300"
+      case "CUSTOMER_SUPPORT":
+        return "from-purple-400/20 to-violet-400/20 text-purple-600 dark:text-purple-300"
+      case "DATA_PROCESSING":
+        return "from-cyan-400/20 to-sky-400/20 text-cyan-600 dark:text-cyan-300"
+      case "DOCUMENT_MANAGEMENT":
+        return "from-amber-400/20 to-yellow-400/20 text-amber-600 dark:text-amber-300"
+      case "SOCIAL_MEDIA":
+        return "from-pink-400/20 to-rose-400/20 text-pink-600 dark:text-pink-300"
+      case "COMMUNICATION":
+        return "from-teal-400/20 to-green-400/20 text-teal-600 dark:text-teal-300"
+      case "INTEGRATION":
+        return "from-blue-400/20 to-sky-400/20 text-blue-600 dark:text-blue-300"
+      case "UTILITY":
+        return "from-slate-400/20 to-gray-400/20 text-slate-600 dark:text-slate-300"
+      case "CUSTOM":
+        return "from-orange-400/20 to-amber-400/20 text-orange-600 dark:text-orange-300"
+      default:
+        return "from-gray-400/20 to-slate-400/20 text-gray-600 dark:text-gray-300"
+    }
+  }
 
+  // Check if icon is a URL
+  const isIconUrl = (icon: string | null): boolean => {
+    if (!icon) return false
+    return icon.startsWith("http") || icon.startsWith("https") || icon.startsWith("/")
+  }
+
+  // Get fallback icon if URL fails or no icon provided
+  const getFallbackIcon = () => {
     // Default icons based on category
     switch (template.category) {
       case "MARKETING":
@@ -261,6 +296,24 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
         return "📋"
     }
   }
+
+  // Get a random image URL if the icon is not provided or fails to load
+  const getRandomImageUrl = () => {
+    const imageIds = [
+      "Kd7Dj4jvwpw", // workflow
+      "5fNmWej4tAA", // automation
+      "iar-afB0QQw", // tech
+      "m_HRfLhgABo", // data
+      "QBpZGqEMsKg", // analytics
+      "FO7JIlwjOtU", // business
+      "npxXWgQ33ZQ", // marketing
+    ]
+    const randomId = imageIds[Math.floor(Math.random() * imageIds.length)]
+    return `https://images.unsplash.com/photo-${randomId}?auto=format&fit=crop&w=100&h=100&q=80`
+  }
+
+  // Use icon URL or fallback
+  const iconUrl = template.icon && isIconUrl(template.icon) && !imageError ? template.icon : getRandomImageUrl()
 
   return (
     <div
@@ -342,19 +395,49 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
               {showCategory && (
                 <Badge
                   variant="outline"
-                  className={cn("mb-1 transition-all duration-300", isHovered ? "bg-primary/10 border-primary/30" : "")}
+                  className={cn(
+                    "mb-1 transition-all duration-300 bg-gradient-to-r",
+                    getCategoryColor(template.category),
+                    isHovered ? "border-primary/30" : "",
+                  )}
                 >
                   {template.category.replace(/_/g, " ")}
                 </Badge>
               )}
             </div>
+
+            {/* Icon container with fancy styling */}
             <div
               className={cn(
-                "text-2xl transition-all duration-500 bg-muted/50 h-10 w-10 rounded-full flex items-center justify-center",
-                isHovered ? "scale-110 rotate-12 bg-primary/10" : "",
+                "relative h-12 w-12 rounded-lg overflow-hidden transition-all duration-500",
+                "bg-gradient-to-br",
+                getCategoryColor(template.category),
+                "shadow-md",
+                isHovered ? "scale-110 rotate-3" : "",
+                "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity",
               )}
             >
-              {getCategoryIcon()}
+              {isIconUrl(template.icon) && !imageError ? (
+                <Image
+                  src={iconUrl || "/placeholder.svg"}
+                  alt={template.name}
+                  width={48}
+                  height={48}
+                  className="object-cover h-full w-full"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-2xl">{getFallbackIcon()}</div>
+              )}
+
+              {/* Animated overlay */}
+              <div
+                className={cn(
+                  "absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10",
+                  "opacity-0 transition-opacity duration-300",
+                  isHovered ? "opacity-100" : "",
+                )}
+              ></div>
             </div>
           </div>
           <CardTitle className={cn("text-lg mt-2 transition-all duration-300", isHovered ? "text-primary" : "")}>
@@ -397,11 +480,24 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
             >
               <p className="text-xs text-muted-foreground mb-1">Required Integrations:</p>
               <div className="flex flex-wrap gap-1">
-                {template.requiredIntegrations.map((integration) => (
+                {template.requiredIntegrations.map((integration, index) => (
                   <Badge
                     key={integration}
                     variant="outline"
-                    className={cn("text-xs transition-all duration-300", isHovered ? "bg-muted/50" : "")}
+                    className={cn(
+                      "text-xs transition-all duration-300",
+                      isHovered ? "bg-muted/50" : "",
+                      // Add subtle different colors to each integration badge
+                      index % 5 === 0
+                        ? "border-blue-200 dark:border-blue-800"
+                        : index % 5 === 1
+                          ? "border-green-200 dark:border-green-800"
+                          : index % 5 === 2
+                            ? "border-purple-200 dark:border-purple-800"
+                            : index % 5 === 3
+                              ? "border-amber-200 dark:border-amber-800"
+                              : "border-teal-200 dark:border-teal-800",
+                    )}
                   >
                     {integration}
                   </Badge>
@@ -432,8 +528,10 @@ export function TemplateCard({ template, showCategory = true, showFooter = true 
             <Button
               size="sm"
               className={cn(
-                "transition-all duration-300 group/button",
-                isHovered ? "bg-primary hover:bg-primary/90" : "",
+                "transition-all duration-300 group/button bg-gradient-to-r",
+                isHovered
+                  ? "from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+                  : "from-primary/90 to-primary/80 hover:from-primary hover:to-primary/90",
               )}
               onClick={handleCreateWorkflow}
             >
