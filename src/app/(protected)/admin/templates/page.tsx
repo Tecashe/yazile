@@ -851,10 +851,9 @@
 //   )
 // }
 
-
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -1062,19 +1061,368 @@ export default function TemplatesAdminPage() {
     setFormData((prev) => ({ ...prev, [name]: arrayValue }))
   }
 
+  // Template form component
+  const TemplateForm = () => {
+    // Use a ref to track if we're currently updating the form
+    const isUpdatingRef = React.useRef(false)
+
+    // Create refs for form elements to maintain focus
+    const nameInputRef = React.useRef<HTMLInputElement>(null)
+    const descriptionRef = React.useRef<HTMLTextAreaElement>(null)
+    const iconInputRef = React.useRef<HTMLInputElement>(null)
+    const setupTimeRef = React.useRef<HTMLInputElement>(null)
+    const integrationsRef = React.useRef<HTMLInputElement>(null)
+    const configSchemaRef = React.useRef<HTMLTextAreaElement>(null)
+    const templateIdRef = React.useRef<HTMLInputElement>(null)
+    const visualRepRef = React.useRef<HTMLInputElement>(null)
+    const outcomesRef = React.useRef<HTMLInputElement>(null)
+    const useCasesRef = React.useRef<HTMLInputElement>(null)
+
+    // Create a local copy of form data to avoid re-renders
+    const [localFormData, setLocalFormData] = useState({ ...formData })
+
+    // Update parent form data only when form is submitted or dialog is closed
+    useEffect(() => {
+      setLocalFormData({ ...formData })
+    }, [formData])
+
+    // Handle input changes without triggering re-renders
+    const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target
+      setLocalFormData((prev) => ({ ...prev, [name]: value }))
+    }
+
+    // Sync local form data to parent form data when needed
+    const syncFormData = () => {
+      if (isUpdatingRef.current) return
+      isUpdatingRef.current = true
+      setFormData(localFormData)
+      setTimeout(() => {
+        isUpdatingRef.current = false
+      }, 100)
+    }
+
+    return (
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">
+            Name *
+          </Label>
+          <Input
+            ref={nameInputRef}
+            id="name"
+            name="name"
+            value={localFormData.name}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="description" className="text-right">
+            Description *
+          </Label>
+          <Textarea
+            ref={descriptionRef}
+            id="description"
+            name="description"
+            value={localFormData.description}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="category" className="text-right">
+            Category *
+          </Label>
+          <Select
+            name="category"
+            value={localFormData.category || ""}
+            onValueChange={(value) => {
+              setLocalFormData((prev) => ({ ...prev, category: value }))
+              // For select components, sync immediately
+              setTimeout(() => {
+                setFormData((prev) => ({ ...prev, category: value }))
+              }, 0)
+            }}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="icon" className="text-right">
+            Icon
+          </Label>
+          <Input
+            ref={iconInputRef}
+            id="icon"
+            name="icon"
+            value={localFormData.icon}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3"
+            placeholder="Icon name or URL"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label className="text-right">Featured</Label>
+          <div className="col-span-3 flex items-center space-x-2">
+            <Checkbox
+              id="featured"
+              checked={localFormData.featured}
+              onCheckedChange={(checked) => {
+                setLocalFormData((prev) => ({ ...prev, featured: checked as boolean }))
+                // For checkbox components, sync immediately
+                setTimeout(() => {
+                  setFormData((prev) => ({ ...prev, featured: checked as boolean }))
+                }, 0)
+              }}
+            />
+            <label
+              htmlFor="featured"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Mark as featured
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label className="text-right">Popular</Label>
+          <div className="col-span-3 flex items-center space-x-2">
+            <Checkbox
+              id="popular"
+              checked={localFormData.popular}
+              onCheckedChange={(checked) => {
+                setLocalFormData((prev) => ({ ...prev, popular: checked as boolean }))
+                // For checkbox components, sync immediately
+                setTimeout(() => {
+                  setFormData((prev) => ({ ...prev, popular: checked as boolean }))
+                }, 0)
+              }}
+            />
+            <label
+              htmlFor="popular"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Mark as popular
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="complexity" className="text-right">
+            Complexity
+          </Label>
+          <Select
+            name="complexity"
+            value={localFormData.complexity}
+            onValueChange={(value) => {
+              setLocalFormData((prev) => ({ ...prev, complexity: value as "SIMPLE" | "MEDIUM" | "COMPLEX" }))
+              // For select components, sync immediately
+              setTimeout(() => {
+                setFormData((prev) => ({ ...prev, complexity: value as "SIMPLE" | "MEDIUM" | "COMPLEX" }))
+              }, 0)
+            }}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Select complexity" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SIMPLE">Simple</SelectItem>
+              <SelectItem value="MEDIUM">Medium</SelectItem>
+              <SelectItem value="COMPLEX">Complex</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="estimatedSetupTime" className="text-right">
+            Setup Time (min)
+          </Label>
+          <Input
+            ref={setupTimeRef}
+            id="estimatedSetupTime"
+            name="estimatedSetupTime"
+            type="number"
+            value={localFormData.estimatedSetupTime}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="requiredIntegrations" className="text-right">
+            Required Integrations
+          </Label>
+          <Input
+            ref={integrationsRef}
+            id="requiredIntegrations"
+            name="requiredIntegrations"
+            value={localFormData.requiredIntegrations.join(", ")}
+            onChange={(e) => {
+              const arrayValue = e.target.value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+              setLocalFormData((prev) => ({ ...prev, requiredIntegrations: arrayValue }))
+            }}
+            onBlur={syncFormData}
+            className="col-span-3"
+            placeholder="Comma-separated list"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="configurationSchema" className="text-right">
+            Config Schema *
+          </Label>
+          <Textarea
+            ref={configSchemaRef}
+            id="configurationSchema"
+            name="configurationSchema"
+            value={localFormData.configurationSchema}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3 font-mono text-sm"
+            rows={5}
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="n8nTemplateId" className="text-right">
+            n8n Template ID
+          </Label>
+          <Input
+            ref={templateIdRef}
+            id="n8nTemplateId"
+            name="n8nTemplateId"
+            value={localFormData.n8nTemplateId}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="visualRepresentation" className="text-right">
+            Visual Representation
+          </Label>
+          <Input
+            ref={visualRepRef}
+            id="visualRepresentation"
+            name="visualRepresentation"
+            value={localFormData.visualRepresentation}
+            onChange={handleLocalInputChange}
+            onBlur={syncFormData}
+            className="col-span-3"
+            placeholder="URL to image or diagram"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="expectedOutcomes" className="text-right">
+            Expected Outcomes
+          </Label>
+          <Input
+            ref={outcomesRef}
+            id="expectedOutcomes"
+            name="expectedOutcomes"
+            value={localFormData.expectedOutcomes.join(", ")}
+            onChange={(e) => {
+              const arrayValue = e.target.value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+              setLocalFormData((prev) => ({ ...prev, expectedOutcomes: arrayValue }))
+            }}
+            onBlur={syncFormData}
+            className="col-span-3"
+            placeholder="Comma-separated list"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="useCases" className="text-right">
+            Use Cases
+          </Label>
+          <Input
+            ref={useCasesRef}
+            id="useCases"
+            name="useCases"
+            value={localFormData.useCases.join(", ")}
+            onChange={(e) => {
+              const arrayValue = e.target.value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+              setLocalFormData((prev) => ({ ...prev, useCases: arrayValue }))
+            }}
+            onBlur={syncFormData}
+            className="col-span-3"
+            placeholder="Comma-separated list"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label className="text-right">Active</Label>
+          <div className="col-span-3 flex items-center space-x-2">
+            <Checkbox
+              id="isActive"
+              checked={localFormData.isActive}
+              onCheckedChange={(checked) => {
+                setLocalFormData((prev) => ({ ...prev, isActive: checked as boolean }))
+                // For checkbox components, sync immediately
+                setTimeout(() => {
+                  setFormData((prev) => ({ ...prev, isActive: checked as boolean }))
+                }, 0)
+              }}
+            />
+            <label
+              htmlFor="isActive"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Template is active
+            </label>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Create template
   const handleCreateTemplate = async () => {
     try {
       // Parse the configurationSchema to ensure it's valid JSON
-      let configData = formData
+      let configData = { ...formData }
 
       try {
-        // Try to parse the string as JSON
-        const parsedConfig = JSON.parse(formData.configurationSchema)
-        // If successful, update the form data with the parsed object
-        configData = {
-          ...formData,
-          configurationSchema: parsedConfig,
+        // Try to parse the string as JSON if it's a string
+        if (typeof configData.configurationSchema === "string") {
+          const parsedConfig = JSON.parse(configData.configurationSchema)
+          // If successful, update the form data with the parsed object
+          configData = {
+            ...configData,
+            configurationSchema: parsedConfig,
+          }
         }
       } catch (jsonError) {
         // If it's not valid JSON, show an error
@@ -1118,31 +1466,9 @@ export default function TemplatesAdminPage() {
       // Refresh templates
       fetchTemplates()
     } catch (err) {
+      console.error("Error creating template:", err)
       setError(err instanceof Error ? err.message : "An error occurred")
     }
-  }
-
-  // Edit template
-  const openEditDialog = (template: Template) => {
-    setCurrentTemplate(template)
-    setFormData({
-      name: template.name,
-      description: template.description,
-      category: template.category,
-      icon: template.icon || "",
-      featured: template.featured,
-      popular: template.popular,
-      complexity: template.complexity,
-      estimatedSetupTime: template.estimatedSetupTime,
-      requiredIntegrations: template.requiredIntegrations,
-      configurationSchema: JSON.stringify(template.configurationSchema, null, 2),
-      n8nTemplateId: template.n8nTemplateId || "",
-      visualRepresentation: template.visualRepresentation || "",
-      expectedOutcomes: template.expectedOutcomes,
-      useCases: template.useCases,
-      isActive: template.isActive,
-    })
-    setIsEditDialogOpen(true)
   }
 
   const handleUpdateTemplate = async () => {
@@ -1150,15 +1476,17 @@ export default function TemplatesAdminPage() {
 
     try {
       // Parse the configurationSchema to ensure it's valid JSON
-      let configData = formData
+      let configData = { ...formData }
 
       try {
-        // Try to parse the string as JSON
-        const parsedConfig = JSON.parse(formData.configurationSchema)
-        // If successful, update the form data with the parsed object
-        configData = {
-          ...formData,
-          configurationSchema: parsedConfig,
+        // Try to parse the string as JSON if it's a string
+        if (typeof configData.configurationSchema === "string") {
+          const parsedConfig = JSON.parse(configData.configurationSchema)
+          // If successful, update the form data with the parsed object
+          configData = {
+            ...configData,
+            configurationSchema: parsedConfig,
+          }
         }
       } catch (jsonError) {
         // If it's not valid JSON, show an error
@@ -1186,6 +1514,7 @@ export default function TemplatesAdminPage() {
       // Refresh templates
       fetchTemplates()
     } catch (err) {
+      console.error("Error updating template:", err)
       setError(err instanceof Error ? err.message : "An error occurred")
     }
   }
@@ -1209,247 +1538,27 @@ export default function TemplatesAdminPage() {
     }
   }
 
-  // Template form component
-  const TemplateForm = () => (
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">
-          Name *
-        </Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="description" className="text-right">
-          Description *
-        </Label>
-        <Textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          className="col-span-3"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="category" className="text-right">
-          Category *
-        </Label>
-        <Select
-          name="category"
-          value={formData.category || ""}
-          onValueChange={(value) => {
-            setFormData((prev) => ({ ...prev, category: value }))
-          }}
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="icon" className="text-right">
-          Icon
-        </Label>
-        <Input
-          id="icon"
-          name="icon"
-          value={formData.icon}
-          onChange={handleInputChange}
-          className="col-span-3"
-          placeholder="Icon name or URL"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label className="text-right">Featured</Label>
-        <div className="col-span-3 flex items-center space-x-2">
-          <Checkbox
-            id="featured"
-            checked={formData.featured}
-            onCheckedChange={(checked) => handleCheckboxChange("featured", checked as boolean)}
-          />
-          <label
-            htmlFor="featured"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Mark as featured
-          </label>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label className="text-right">Popular</Label>
-        <div className="col-span-3 flex items-center space-x-2">
-          <Checkbox
-            id="popular"
-            checked={formData.popular}
-            onCheckedChange={(checked) => handleCheckboxChange("popular", checked as boolean)}
-          />
-          <label
-            htmlFor="popular"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Mark as popular
-          </label>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="complexity" className="text-right">
-          Complexity
-        </Label>
-        <Select
-          name="complexity"
-          value={formData.complexity}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, complexity: value as "SIMPLE" | "MEDIUM" | "COMPLEX" }))
-          }
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select complexity" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="SIMPLE">Simple</SelectItem>
-            <SelectItem value="MEDIUM">Medium</SelectItem>
-            <SelectItem value="COMPLEX">Complex</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="estimatedSetupTime" className="text-right">
-          Setup Time (min)
-        </Label>
-        <Input
-          id="estimatedSetupTime"
-          name="estimatedSetupTime"
-          type="number"
-          value={formData.estimatedSetupTime}
-          onChange={handleInputChange}
-          className="col-span-3"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="requiredIntegrations" className="text-right">
-          Required Integrations
-        </Label>
-        <Input
-          id="requiredIntegrations"
-          name="requiredIntegrations"
-          value={formData.requiredIntegrations.join(", ")}
-          onChange={(e) => handleArrayInputChange("requiredIntegrations", e.target.value)}
-          className="col-span-3"
-          placeholder="Comma-separated list"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="configurationSchema" className="text-right">
-          Config Schema *
-        </Label>
-        <Textarea
-          id="configurationSchema"
-          name="configurationSchema"
-          value={formData.configurationSchema}
-          onChange={handleInputChange}
-          className="col-span-3 font-mono text-sm"
-          rows={5}
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="n8nTemplateId" className="text-right">
-          n8n Template ID
-        </Label>
-        <Input
-          id="n8nTemplateId"
-          name="n8nTemplateId"
-          value={formData.n8nTemplateId}
-          onChange={handleInputChange}
-          className="col-span-3"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="visualRepresentation" className="text-right">
-          Visual Representation
-        </Label>
-        <Input
-          id="visualRepresentation"
-          name="visualRepresentation"
-          value={formData.visualRepresentation}
-          onChange={handleInputChange}
-          className="col-span-3"
-          placeholder="URL to image or diagram"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="expectedOutcomes" className="text-right">
-          Expected Outcomes
-        </Label>
-        <Input
-          id="expectedOutcomes"
-          name="expectedOutcomes"
-          value={formData.expectedOutcomes.join(", ")}
-          onChange={(e) => handleArrayInputChange("expectedOutcomes", e.target.value)}
-          className="col-span-3"
-          placeholder="Comma-separated list"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="useCases" className="text-right">
-          Use Cases
-        </Label>
-        <Input
-          id="useCases"
-          name="useCases"
-          value={formData.useCases.join(", ")}
-          onChange={(e) => handleArrayInputChange("useCases", e.target.value)}
-          className="col-span-3"
-          placeholder="Comma-separated list"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label className="text-right">Active</Label>
-        <div className="col-span-3 flex items-center space-x-2">
-          <Checkbox
-            id="isActive"
-            checked={formData.isActive}
-            onCheckedChange={(checked) => handleCheckboxChange("isActive", checked as boolean)}
-          />
-          <label
-            htmlFor="isActive"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Template is active
-          </label>
-        </div>
-      </div>
-    </div>
-  )
+  const openEditDialog = (template: Template) => {
+    setCurrentTemplate(template)
+    setFormData({
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      icon: template.icon || "",
+      featured: template.featured,
+      popular: template.popular,
+      complexity: template.complexity,
+      estimatedSetupTime: template.estimatedSetupTime,
+      requiredIntegrations: template.requiredIntegrations,
+      configurationSchema: JSON.stringify(template.configurationSchema, null, 2),
+      n8nTemplateId: template.n8nTemplateId || "",
+      visualRepresentation: template.visualRepresentation || "",
+      expectedOutcomes: template.expectedOutcomes,
+      useCases: template.useCases,
+      isActive: template.isActive,
+    })
+    setIsEditDialogOpen(true)
+  }
 
   return (
     <div className="container mx-auto py-8">
