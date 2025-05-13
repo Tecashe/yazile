@@ -373,7 +373,7 @@ const Sidebar = ({ slug }: Props) => {
     if (groupLabel.toLowerCase() === "agents") {
       // For direct children of AI Agents
       if (!parentPath) {
-        return `${basePath}/agents/${itemPath}`
+        return `${basePath}/agents`
       }
 
       // For subitems in the AI Agents group, we need to handle the case where the parent is "Agents"

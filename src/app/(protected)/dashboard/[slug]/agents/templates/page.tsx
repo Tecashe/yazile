@@ -26,7 +26,6 @@
 //       <TemplateList showFilters={true} showSearch={true} limit={50} />
 //     </div>
 //   )
-
 // }
 
 
