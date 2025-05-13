@@ -31,7 +31,7 @@
 
 
 import type { Metadata } from "next"
-import TemplatesPageClient from "./templates-page-client"
+import TemplatesPageClient from "@/components/global/workflows/templates-page-client"
 
 export const metadata: Metadata = {
   title: "Templates | n8n Integration Platform",
