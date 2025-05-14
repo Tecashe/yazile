@@ -149,10 +149,10 @@ export function InvoiceDetail({ invoice }: { invoice: any }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">From</h3>
-                <p className="font-medium">Yazil</p>
-                <p>123 Business Street</p>
-                <p>City, State 12345</p>
-                <p>contact@yazil.ai</p>
+                <p className="font-medium">Yazzil</p>
+                <p>90543 Cashe Street</p>
+                <p>City, State 6369135</p>
+                <p>contact@yazzil.com</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">To</h3>

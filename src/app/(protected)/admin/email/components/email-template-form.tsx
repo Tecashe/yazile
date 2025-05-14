@@ -1799,7 +1799,7 @@ function getDefaultTemplate() {
       <a href="#" class="button">Get Started</a>
     </div>
     <div class="footer">
-      <p>© 2025 Yazil. All rights reserved.</p>
+      <p>© 2025 Yazzil. All rights reserved.</p>
       <p>00100 Main St, Nairobae, Kenya</p>
     </div>
   </div>
@@ -2069,7 +2069,7 @@ function getAIGeneratedTemplate(category: string) {
       <a href="#" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Get Started</a>
     </div>
     <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-radius: 0 0 5px 5px;">
-      <p>© 2025 Yazil. All rights reserved.</p>
+      <p>© 2025 Yazzil. All rights reserved.</p>
       <p>00100 Main St, Nairobae, Kenya</p>
     </div>
   </div>
@@ -2090,7 +2090,7 @@ function getAIGeneratedTemplate(category: string) {
       <a href="#" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Read More</a>
     </div>
     <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-radius: 0 0 5px 5px;">
-      <p>© 2025 Yazil. All rights reserved.</p>
+      <p>© 2025 Yazzil. All rights reserved.</p>
       <p>00100 Main St, Nairobae, Kenya</p>
     </div>
   </div>
@@ -2111,7 +2111,7 @@ function getAIGeneratedTemplate(category: string) {
       <a href="#" style="display: inline-block; padding: 10px 20px; background-color: #dc3545; color: #ffffff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Upgrade Now</a>
     </div>
     <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-radius: 0 0 5px 5px;">
-      <p>© 2025 Yazil. All rights reserved.</p>
+      <p>© 2025 Yazzil. All rights reserved.</p>
       <p>00100 Main St, Nairobae, Kenya</p>
     </div>
   </div>
@@ -2135,7 +2135,7 @@ function getAIGeneratedTemplate(category: string) {
       <p>If you have any questions, please contact our support team.</p>
     </div>
     <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-radius: 0 0 5px 5px;">
-      <p>© 2025 Yazil. All rights reserved.</p>
+      <p>© 2025 Yazzil. All rights reserved.</p>
       <p>00100 Main St, Nairobae, Kenya</p>
     </div>
   </div>
@@ -2161,7 +2161,7 @@ function getAIGeneratedTemplate(category: string) {
       <a href="#" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; margin-top: 20px;">Get Started</a>
     </div>
     <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-radius: 0 0 5px 5px;">
-      <p>© 2025 Yazil. All rights reserved.</p>
+      <p>© 2025 Yazzil. All rights reserved.</p>
       <p>00100 Main St, Nairobae, Kenya</p>
     </div>
   </div>

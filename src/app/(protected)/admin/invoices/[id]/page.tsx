@@ -4,7 +4,7 @@ import { InvoiceDetail } from "../invoice-detail"
 import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
-  title: "Yazil | Invoice Details",
+  title: "Yazzil | Invoice Details",
   description: "View invoice details and manage payments",
 }
 

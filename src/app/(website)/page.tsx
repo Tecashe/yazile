@@ -15,7 +15,7 @@ import ContentFeatures from "@/components/global/landing/content-features"
 
 
 export const metadata: Metadata = {
-  title: "Yazil - Instagram DM Automation Platform",
+  title: "Yazzil - Instagram DM Automation Platform",
   description:
     "Automate your Instagram DMs, increase engagement, and grow your business with our powerful AI-driven platform.",
 }

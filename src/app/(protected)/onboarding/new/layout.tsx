@@ -903,7 +903,7 @@ export default function Layout({
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center glow">
                 <span className="text-white font-bold text-2xl">Y</span>
               </div>
-              <h1 className="text-3xl font-bold text-white">Yazil</h1>
+              <h1 className="text-3xl font-bold text-white">Yazzil</h1>
             </div>
 
             {/* Dynamic Card Showcase */}
@@ -915,7 +915,7 @@ export default function Layout({
           {/* Footer with enhanced styling */}
           <div className="text-gray-400 text-sm border-t border-white/5 pt-4 mt-4">
             <p className="flex items-center">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>© 2025 Yazil.
+              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>© 2025 Yazzil.
               All rights reserved.
             </p>
           </div>

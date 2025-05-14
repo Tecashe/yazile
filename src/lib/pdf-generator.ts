@@ -17,22 +17,21 @@ export async function generateInvoicePdf(invoice: any) {
   doc.setProperties({
     title: `Invoice #${invoice.invoiceNumber}`,
     subject: "Invoice",
-    author: "Yazil | Engage > Automate > Grow",
+    author: "Yazzil | Engage > Automate > Grow",
     keywords: "invoice, payment",
-    creator: "Yazil Ai",
+    creator: "Yazzil",
   })
 
-  // Add company logo
-  // In a real implementation, you would add your company logo
+  // TODO Add my company logo
   // doc.addImage(logoDataUrl, "PNG", 14, 10, 50, 20);
 
   // Add company information
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
-  doc.text("Yazil AI ", 14, 30)
-  doc.text("123 Business Street", 14, 35)
-  doc.text("City, State 12345", 14, 40)
-  doc.text("contact@yourcompany.com", 14, 45)
+  doc.text("Yazzil AI ", 14, 30)
+  doc.text("173 Cashe Street", 14, 35)
+  doc.text("City, State 10095", 14, 40)
+  doc.text("contact@yazzil.com", 14, 45)
 
   // Add invoice title and number
   doc.setFontSize(18)

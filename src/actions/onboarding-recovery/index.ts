@@ -80,7 +80,7 @@ export const recoverAbandonedSessions = async () => {
                 <p>You are ${completionPercentage}% done with your onboarding, finish that so you can get the best features</p>              
                 <p>If you have any questions, please don't hesitate to contact us.</p>
                 <p>Thank you for your interest in us!</p>
-                <p>Best regards,<br>Yazil</p>
+                <p>Best regards,<br>Yazzil</p>
               </div>
             `,
           })

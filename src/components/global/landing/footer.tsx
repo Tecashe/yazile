@@ -19,7 +19,7 @@ export default function Footer() {
                 <div className="absolute inset-0 rounded-full bg-blue-500 blur-sm -z-10 opacity-50"></div>
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-                Yazil
+                Yazzil
               </span>
             </Link>
 
@@ -121,7 +121,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">Subscribe</h3>
-            <p className="text-slate-400 mb-4">Get the latest news and updates from Yazil.</p>
+            <p className="text-slate-400 mb-4">Get the latest news and updates from Yazzil.</p>
 
             <div className="flex space-x-2 mb-6">
               <Input
@@ -151,7 +151,7 @@ export default function Footer() {
 
         <div className="border-t border-blue-900/30 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-slate-500 text-sm mb-4 md:mb-0">
-            © {new Date().getFullYear()} Yazil. All rights reserved.
+            © {new Date().getFullYear()} Yazzil. All rights reserved.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 text-sm">

@@ -466,7 +466,7 @@ export function EnhancedSidebar() {
             </Avatar>
             <div className="flex flex-col">
               <span className="text-sm font-medium">Admin</span>
-              <span className="text-xs text-muted-foreground">Cashe@yazil.com</span>
+              <span className="text-xs text-muted-foreground">Cashe@yazzil.com</span>
             </div>
             <Button variant="ghost" size="icon" className="ml-auto hover:bg-accent/50 transition-all duration-200">
               <LogOut className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors duration-200" />

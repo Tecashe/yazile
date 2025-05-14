@@ -1338,7 +1338,7 @@ export default function PricingSection() {
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-4">Trusted by leading enterprises</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      {["Acme Inc", "Globex", "Initech", "Umbrella Corp"].map((company, i) => (
+                      {["Cashe Inc", "Globex", "Initech", "Umbrella Corp"].map((company, i) => (
                         <div
                           key={i}
                           className="flex items-center justify-center h-12 bg-gray-800/50 rounded-md border border-gray-800 text-gray-400"

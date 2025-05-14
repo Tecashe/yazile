@@ -32,7 +32,7 @@ export default function Navbar() {
             <div className="absolute inset-0 rounded-full bg-blue-500 blur-sm -z-10 opacity-50"></div>
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-            Yazil
+            Yazzil
           </span>
         </Link>
 

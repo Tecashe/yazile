@@ -41,7 +41,7 @@ const ChatalLogo: React.FC<ChatalLogoProps> = ({
             margin: 0,
           }}
         >
-          Yazil
+          Yazzil
         </p>
         <p
           style={{

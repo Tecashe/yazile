@@ -28,7 +28,7 @@ export default function ContentFeatures() {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Complete Instagram Management</h2>
             <p className="text-slate-300">
-              Yazil offers a comprehensive suite of tools to manage all aspects of your Instagram presence from a
+              Yazzil offers a comprehensive suite of tools to manage all aspects of your Instagram presence from a
               single dashboard.
             </p>
           </motion.div>

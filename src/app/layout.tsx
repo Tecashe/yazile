@@ -17,7 +17,7 @@ import {Toaster} from "sonner"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Yazil | Automate > Engage > Grow",
+  title: "Yazzil | Automate > Engage > Grow",
   description: "Next-Level Business Automations",
 };
 
