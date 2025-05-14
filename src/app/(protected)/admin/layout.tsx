@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic'
+import { Analytics } from '@vercel/analytics/next';
 // import { DashboardHeader } from "./components/dashboard-header"
 import "./components/sidebar-styles.css"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
@@ -46,6 +47,7 @@ export default async function AdminLayout({
           <div className="flex h-full flex-col">
             {/* <DashboardHeader adminName="Cashe" /> */}
             <div className="flex-1 overflow-auto p-4">{children}</div>
+            <Analytics />
           </div>
         </SidebarInset>
         </div>
