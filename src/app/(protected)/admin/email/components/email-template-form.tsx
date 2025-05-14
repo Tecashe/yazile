@@ -34,7 +34,7 @@ import {
 import { Laptop, Smartphone, Tablet, Wand2, AlertTriangle, Palette, Sparkles, Send, Check, Copy, Eye, Loader2, Zap, Layout, ImageIcon, Type, ArrowRight, Minus, Columns, Quote, MessageSquare, Heart, Star, Clock, Calendar, Save, X, ChevronRight, Settings, FileCode, Undo, Redo, Trash2, Info, HelpCircle, Maximize2, Minimize2 } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-// import confetti from "canvas-confetti"
+import confetti from "canvas-confetti"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -314,11 +314,11 @@ export function EmailTemplateForm({
         setShowSuccessAnimation(true)
         
         // Trigger confetti effect
-        // confetti({
-        //   particleCount: 100,
-        //   spread: 70,
-        //   origin: { y: 0.6 }
-        // });
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
         
         setTimeout(() => {
           setShowSuccessAnimation(false)

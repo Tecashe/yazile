@@ -18,7 +18,7 @@ app.get('/health', (req, res) => {
 // Configure Socket.IO
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "https://yazil.vercel.app",
+    origin: process.env.CLIENT_URL || "https://yazzil.com",
     methods: ["GET", "POST"],
     credentials: true
   }
