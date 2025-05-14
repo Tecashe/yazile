@@ -21,7 +21,7 @@ import {
 import type { WhatsAppBusinessAccount, WhatsAppPhoneNumber } from "@/types/whatsapp"
 
 // IMPORTANT: This must be the exact same string used in both places
-const EXACT_REDIRECT_URI = "https://yazil.vercel.app/callback/whatsapp"
+const EXACT_REDIRECT_URI = "https://yazzil.com/callback/whatsapp"
 
 export default function WhatsAppCallback() {
   const router = useRouter()

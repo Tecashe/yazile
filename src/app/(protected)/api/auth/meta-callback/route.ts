@@ -5,7 +5,7 @@ import { currentUser } from "@clerk/nextjs/server"
 import { client } from "@/lib/prisma"
 
 // IMPORTANT: This must match exactly what's in the frontend
-const EXACT_REDIRECT_URI = "https://yazil.vercel.app/callback/whatsapp"
+const EXACT_REDIRECT_URI = "https://yazzil.com/callback/whatsapp"
 
 export async function POST(request: NextRequest) {
   try {

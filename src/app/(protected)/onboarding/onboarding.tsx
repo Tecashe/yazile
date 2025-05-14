@@ -2256,7 +2256,7 @@ export default function OnboardingPage() {
                     <p className="mt-1 text-sm text-muted-foreground">Invite other influencers and earn rewards</p>
 
                     <div className="mt-3 flex items-center gap-2">
-                      <Input value="https://yazil.vercel.app/ref/kj907EfcgerR" readOnly className="flex-1 bg-muted" />
+                      <Input value="https://yazzil.com/ref/kj907EfcgerR" readOnly className="flex-1 bg-muted" />
                       <Button variant="outline" size="sm" className="shrink-0">
                         <CopyIcon className="mr-1 h-3 w-3" />
                         Copy
