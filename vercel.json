@@ -2,5 +2,14 @@
   "crons": [{
     "path": "/api/cron",
     "schedule": "0 10 * * *"
-  }]
+  }],
+  
+  "functions": {
+    "api/socket.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/socket.io", "destination": "/api/socket" }
+  ]
 }

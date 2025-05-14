@@ -56,7 +56,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-//import confetti from "canvas-confetti"
+import confetti from "canvas-confetti"
 
 // Add these imports at the top of the file
 import { useLocalStorage } from "@/hooks/use-local-storage"
@@ -757,14 +757,14 @@ export default function OnboardingPage() {
     }
   }, [step, totalSteps])
 
-  // Trigger confetti effect
-  // const triggerConfetti = () => {
-  //   confetti({
-  //     particleCount: 100,
-  //     spread: 70,
-  //     origin: { y: 0.6 },
-  //   })
-  // }
+  //Trigger confetti effect
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    })
+  }
 
   // Handle unlocking achievements
   const unlockAchievement = (achievement: string) => {
@@ -781,11 +781,11 @@ export default function OnboardingPage() {
       })
 
       // Small confetti burst
-      // confetti({
-      //   particleCount: 30,
-      //   spread: 50,
-      //   origin: { y: 0.7 },
-      // })
+      confetti({
+        particleCount: 30,
+        spread: 50,
+        origin: { y: 0.7 },
+      })
     }
   }
 
@@ -896,7 +896,7 @@ export default function OnboardingPage() {
 
         if (result.status === 200) {
           setIsSubmitting(false)
-          // triggerConfetti()
+          triggerConfetti()
 
           // Redirect based on user type
           setTimeout(() => {

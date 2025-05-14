@@ -13,6 +13,7 @@
     "scheduler": "ts-node scripts/scheduler.ts"
   },
   "dependencies": {
+    
     "@ai-sdk/openai": "^1.0.13",
     "@clerk/nextjs": "^6.5.2",
     "@emoji-mart/data": "^1.2.1",
