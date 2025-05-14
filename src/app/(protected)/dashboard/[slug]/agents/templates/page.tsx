@@ -18,12 +18,7 @@ export default async function TemplatesPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Workflow Templates</h1>
-        <p className="text-muted-foreground">Browse and select from our library of pre-built workflow templates</p>
-      </div>
-
-      <TemplateList showFilters={true} showSearch={true} limit={50} />
+     <TemplateList showFilters={true} showSearch={true} limit={50} />
     </div>
   )
 }

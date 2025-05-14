@@ -18,12 +18,8 @@ export default async function WorkflowsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Workflows</h1>
-        <p className="text-muted-foreground">Create and manage your automated workflows</p>
-      </div>
-
-      <WorkflowList
+    
+          <WorkflowList
         title="My Workflows"
         description="View and manage your configured workflows"
         showFilters={true}

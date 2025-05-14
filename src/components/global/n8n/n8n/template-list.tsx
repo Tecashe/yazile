@@ -427,7 +427,7 @@ interface TemplateListResponse {
 }
 
 export function TemplateList({
-  title = "Workflow Templates",
+  title = "",
   description = "Browse and select from our library of pre-built workflow templates",
   limit = 20,
   showFilters = true,

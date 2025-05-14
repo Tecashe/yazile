@@ -19,7 +19,7 @@ export default async function CustomRequestsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Custom Workflow Requests</h1>
+        {/* <h1 className="text-3xl font-bold tracking-tight">Custom Workflow Requests</h1> */}
         <p className="text-muted-foreground">Request custom workflows tailored to your specific needs</p>
       </div>
 
