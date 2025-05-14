@@ -84,6 +84,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Customize",
         icon: colorIcon(Target, "text-purple-400"),
       },
+      {
+        id: uuid(),
+        label: "Affiliate",
+        icon: colorIcon(Target, "text-purple-400"),
+      },
     ],
   },
   {
