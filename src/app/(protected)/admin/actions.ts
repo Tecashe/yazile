@@ -605,7 +605,7 @@ export async function getSystemHealth() {
 }
 
 // Get user activity
-export async function getUserActivity(limit = 10) {
+export async function getUserActivity(limit = 4) {
   try {
     // Fetch recent activity from the database
     // This would typically come from an audit log or activity tracking table

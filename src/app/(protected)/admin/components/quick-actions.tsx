@@ -170,7 +170,7 @@ export function QuickActions() {
             onClick={() => setActiveAction("makeAdmin")}
           >
             <UserPlus className="h-6 w-6 mb-2" />
-            <span className="text-sm">Make Admin</span>
+        
           </Button>
           <Button
             variant="outline"
@@ -178,7 +178,7 @@ export function QuickActions() {
             onClick={() => setActiveAction("sendNotification")}
           >
             <Bell className="h-6 w-6 mb-2" />
-            <span className="text-sm">Send Notification</span>
+            {/* <span className="text-sm">Send Notification</span> */}
           </Button>
           <Button
             variant="outline"
@@ -191,7 +191,7 @@ export function QuickActions() {
             }}
           >
             <MessageSquare className="h-6 w-6 mb-2" />
-            <span className="text-sm">Bulk Message</span>
+            {/* <span className="text-sm">Bulk Message</span> */}
           </Button>
           <Button
             variant="outline"
@@ -204,7 +204,7 @@ export function QuickActions() {
             }}
           >
             <Zap className="h-6 w-6 mb-2" />
-            <span className="text-sm">Run Maintenance</span>
+            {/* <span className="text-sm">Run Maintenance</span> */}
           </Button>
         </div>
 
