@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start:socket": "node socket-server.js",
-    "start": "next start",
+    "start": "node server.js",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "ngrok": "ngrok http 3000",
