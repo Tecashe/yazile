@@ -19,7 +19,7 @@ import SentimentAnalysis from "./_components/dash/SentimentAnalysis"
 import EngagementPredictor from "./_components/dash/EngagementPredictor"
 import AIPerformance from "./_components/dash/AIPerformance"
 import EngagementInsights from "./_components/dash/EngagementInsights"
-import HashtagCloud from "./_components/dash/HashtagCloud"
+//import HashtagCloud from "./_components/dash/HashtagCloud"
 import type { Automation, Conversation } from "@/types/dashboard"
 
 export default async function DashboardPage() {
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 gap-6">
         {/* <SentimentAnalysis /> */}
-        <HashtagCloud />
+        {/* <HashtagCloud /> */}
       </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
