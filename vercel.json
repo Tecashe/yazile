@@ -5,7 +5,7 @@
   }],
   
   "functions": {
-    "api/socket.js": {
+    "api/socket": {
       "maxDuration": 60
     }
   },
