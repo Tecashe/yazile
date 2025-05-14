@@ -1612,7 +1612,7 @@
 //       </p>
 //     </div>
 //     <div class="footer">
-//       <p>© 2025 Company Name. All rights reserved.</p>
+//       <p>© 2025 Company Name. All rightseserved.</p>
 //       <p>123 Street Name, City, Country</p>
 //       <p style="margin-top: 15px;">
 //         <a href="#" style="color: #6c757d; margin: 0 5px;">Unsubscribe</a> • 
