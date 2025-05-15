@@ -563,7 +563,7 @@
 }
 
 .template-icon-container:hover::before {
-  opacity: 1;
+  opacity: 0;
 }
 
 .template-icon-container::after {
@@ -576,7 +576,7 @@
 }
 
 .template-icon-container:hover::after {
-  opacity: 1;
+  opacity: 0;
 }
 
 /* Colorful badge animations */

@@ -64,18 +64,10 @@ export default async function SchedulePage() {
                 <MessageSquareText className="w-4 h-4 mr-2" />
                 Captions
               </TabsTrigger>
-              <TabsTrigger value="hashtags" className="data-[state=active]:bg-gray-800">
+              {/* <TabsTrigger value="hashtags" className="data-[state=active]:bg-gray-800">
                 <Hash className="w-4 h-4 mr-2" />
                 Hashtags
-              </TabsTrigger>
-              <TabsTrigger value="timing" className="data-[state=active]:bg-gray-800">
-                <Clock className="w-4 h-4 mr-2" />
-                Timing
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="data-[state=active]:bg-gray-800">
-                <Zap className="w-4 h-4 mr-2" />
-                Insights
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="schedule" className="space-y-6 mt-6">

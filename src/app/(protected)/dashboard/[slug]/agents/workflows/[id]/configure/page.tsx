@@ -31,19 +31,19 @@ export default async function WorkflowConfigPage({ params, searchParams }: Workf
   const { tab } = searchParams
 
   // Verify the workflow exists and belongs to the user
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/workflows/${id}`, {
-      headers: {
-        Cookie: `next-auth.session-token=${session.data.id}`,
-      },
-    })
+  // try {
+  //   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/workflows/${id}`, {
+  //     headers: {
+  //       Cookie: `next-auth.session-token=${session.data.id}`,
+  //     },
+  //   })
 
-    if (!response.ok) {
-      notFound()
-    }
-  } catch (error) {
-    notFound()
-  }
+  //   if (!response.ok) {
+  //     notFound()
+  //   }
+  // } catch (error) {
+  //   notFound()
+  // }
 
   return (
     <div>
