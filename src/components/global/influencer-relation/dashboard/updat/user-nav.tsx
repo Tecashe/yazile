@@ -50,7 +50,7 @@ export function UserNav() {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Lady Cashe</p>
-            <p className="text-xs leading-none text-muted-foreground">lady.cashe@yazil.com</p>
+            <p className="text-xs leading-none text-muted-foreground">lady.cashe@yazzil.com</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

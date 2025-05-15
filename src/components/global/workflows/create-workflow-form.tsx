@@ -1327,7 +1327,7 @@ function TemplateGroup({
                     >
                       {template.icon ? (
                         // <span className="text-xl">{template.icon}</span>
-                        <span className="text-xs">Cashe</span>
+                        <span className="text-xs"></span>
 
                       ) : (
                         getCategoryIcon(template.category)
