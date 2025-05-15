@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { onUserInfor } from "@/actions/user"
-import { prisma } from "@/lib/prisma"
+import { client } from "@/lib/prisma"
 
 interface RouteParams {
   params: {
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     // Check if user is an admin
-    const user = await prisma.user.findUnique({
+    const user = await client.user.findUnique({
       where: { id: session.data.id },
       select: { isAdmin: true },
     })
