@@ -30,7 +30,7 @@ export default async function WorkflowConfigPage({ params, searchParams }: Workf
   const { id } = params
   const { tab } = searchParams
 
-  // Verify the workflow exists and belongs to the user
+  // Verify the workflow exists and belongs to the userr
   // try {
   //   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/workflows/${id}`, {
   //     headers: {
