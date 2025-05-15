@@ -1928,6 +1928,8 @@ model WorkflowTemplate {
   expectedOutcomes  String[]            // Array of expected outcomes
   useCases          String[]            // Array of use cases
   createdAt         DateTime            @default(now())
+  isVerified        Boolean?             @default(false)
+  lastVerified      DateTime?           
   updatedAt         DateTime            @updatedAt
   isActive          Boolean             @default(true)
   

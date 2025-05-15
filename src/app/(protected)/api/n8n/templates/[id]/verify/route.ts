@@ -66,15 +66,16 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       where: { n8nTemplateId: id },
     })
 
-    // if (templateInDb) {
-    //   await client.workflowTemplate.update({
-    //     where: { id: templateInDb.id },
-    //     data: {
-    //       isVerified: true,
-    //       lastVerified: new Date(),
-    //     },
-    //   })
-    // }
+    if (templateInDb) {
+      await client.workflowTemplate.update({
+        where: { id: templateInDb.id },
+        data: {
+          isVerified: true,
+          lastVerified: new Date(),
+        },
+      })
+    }
+
 
     return NextResponse.json({
       success: true,
