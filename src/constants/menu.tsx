@@ -113,18 +113,13 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       },
       {
         id: uuid(),
-        label: "Posting",
-        icon: colorIcon(Clock, "text-blue-400"),
-      },
-      {
-        id: uuid(),
         label: "Pricing",
         icon: colorIcon(DollarSign, "text-emerald-400"),
       },
       {
         id: uuid(),
         label: "Integrations",
-        icon: colorIcon(Cpu, "text-pink-400"),
+        icon: colorIcon(Cpu, "text-blue-400"),
       },
       {
         id: uuid(),
