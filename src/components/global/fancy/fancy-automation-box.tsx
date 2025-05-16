@@ -267,6 +267,7 @@
 
 // export default FancyAutomationBox
 
+
 "use client"
 
 import type React from "react"
@@ -332,8 +333,11 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
   automation,
   onDelete,
   pathname,
-  isOptimistic = false,
+  isOptimistic,
 }) => {
+  // Use the _isOptimistic flag from the automation object if isOptimistic prop is not provided
+  const isOptimisticState = isOptimistic || automation._isOptimistic
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showChats, setShowChats] = useState(false)
 
@@ -348,10 +352,10 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
     <Card
       className={cn(
         "bg-background border-2 border-border hover:border-primary/50 transition-colors duration-300 relative overflow-hidden",
-        isOptimistic && "border-primary/30 bg-background/95",
+        isOptimisticState && "border-primary/30 bg-background/95",
       )}
     >
-      {isOptimistic && (
+      {isOptimisticState && (
         <div className="absolute inset-0 bg-primary/5 z-10 pointer-events-none">
           <div className="absolute top-4 right-4 px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full flex items-center animate-pulse">
             <Loader2 size={14} className="mr-2 animate-spin" />
@@ -413,7 +417,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
               size="sm"
               className="border-destructive/30 text-destructive hover:bg-destructive/10"
               onClick={() => setShowDeleteConfirm(true)}
-              disabled={isOptimistic}
+              disabled={isOptimisticState}
             >
               <Trash2 size={16} className="mr-2" />
               Delete
@@ -423,11 +427,11 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
               size="sm"
               className={cn(
                 "border-primary/30 text-primary hover:bg-primary/10",
-                isOptimistic && "opacity-50 cursor-not-allowed",
+                isOptimisticState && "opacity-50 cursor-not-allowed",
               )}
-              disabled={isOptimistic}
+              disabled={isOptimisticState}
             >
-              {isOptimistic ? (
+              {isOptimisticState ? (
                 <div className="flex items-center">
                   <Settings size={16} className="mr-2" />
                   Configure
@@ -446,7 +450,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
               size="sm"
               className="rounded-full border-2 border-secondary/30 text-secondary hover:bg-secondary/10 hover:border-secondary transition-all duration-300 pl-3 pr-8"
               onClick={() => setShowChats(!showChats)}
-              disabled={isOptimistic}
+              disabled={isOptimisticState}
             >
               <MessageSquareText size={18} className="mr-2" />
               <span className="font-medium">Chats</span>
@@ -457,7 +461,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
                 />
               </div>
             </Button>
-            {!isOptimistic && (
+            {!isOptimisticState && (
               <div className="absolute -right-1 -top-1 w-3 h-3 bg-red-500 rounded-full border-2 border-background animate-pulse"></div>
             )}
             <div className="absolute top-full right-0 mt-2 bg-popover text-popover-foreground rounded-md p-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
@@ -484,11 +488,11 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
           <div className="flex items-center space-x-2 text-muted-foreground">
             <Clock size={16} />
             <p className="text-sm font-medium">
-              {isOptimistic ? "Creating..." : `Created ${getRelativeTime(automation.createdAt)}`}
+              {isOptimisticState ? "Creating..." : `Created ${getRelativeTime(automation.createdAt)}`}
             </p>
           </div>
 
-          {!isOptimistic && (
+          {!isOptimisticState && (
             <div>
               <h3 className="text-lg font-semibold mb-2 text-foreground">Current Sentiment</h3>
               <div className="h-24">
@@ -526,13 +530,13 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
           )}
         </div>
 
-        {!isOptimistic && (
+        {!isOptimisticState && (
           <>
             <div className="mt-6 border-t border-[#545454] pt-4">
               <button
                 className="w-full flex items-center justify-between p-2 rounded-lg border border-[#545454]/50 bg-transparent transition-colors duration-300"
                 onClick={() => setShowChats(!showChats)}
-                disabled={isOptimistic}
+                disabled={isOptimisticState}
               >
                 <div className="flex items-center">
                   <div className="mr-3 w-8 h-8 rounded-full border border-[#545454] flex items-center justify-center bg-gradient-to-br from-[#2A2A2A] to-[#1D1D1D]">
@@ -590,7 +594,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
       <div
         className={cn(
           "absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-bl-full opacity-50",
-          isOptimistic && "from-primary/30 to-secondary/30 animate-pulse",
+          isOptimisticState && "from-primary/30 to-secondary/30 animate-pulse",
         )}
       />
     </Card>

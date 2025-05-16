@@ -132,11 +132,14 @@ const CreateAutomation = () => {
     const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
     const slug = slugMatch ? slugMatch[1] : ""
 
+    // Create a unique ID for this automation
+    const newAutomationId = `temp-${Date.now()}`
+
     mutate(
       {
         name: "Untitled",
-        id: mutationId,
-        createdAt: new Date(),
+        id: newAutomationId,
+        createdAt: new Date().toISOString(), // Use ISO string for date
         keywords: [],
       },
       {
@@ -144,10 +147,12 @@ const CreateAutomation = () => {
           setShowSuccess(true)
           setTimeout(() => {
             setShowSuccess(false)
-            // Don't redirect - we're using optimistic UI now
-            // router.push(`/dashboard/${slug}/automations`)
           }, 2000)
         },
+        // onError: (error) => {
+        //   console.error("Error creating automation:", error)
+        //   // The error handling is already in the hook
+        // },
       },
     )
   }

@@ -231,6 +231,7 @@
 //   }
 // }
 
+
 "use client"
 
 import type React from "react"
@@ -270,15 +271,18 @@ export const useCreateAutomation = (id?: string) => {
 
   // Create an enhanced mutate function with optimistic updates
   const mutate = (variables: any, options?: any) => {
+    // Generate a temporary ID if none provided
+    const tempId = id || `temp-${Date.now()}`
+
     // Get the current automations data
     const currentData = queryClient.getQueryData(["user-automations"])
 
     // Create an optimistic version of the new automation
     const optimisticAutomation = {
       ...variables,
-      id: id || `temp-${Date.now()}`,
+      id: tempId,
       active: false,
-      keywords: [],
+      keywords: variables.keywords || [],
       listener: null,
       _isOptimistic: true, // Flag to identify this is an optimistic update
     }
@@ -295,6 +299,17 @@ export const useCreateAutomation = (id?: string) => {
     return originalMutate(variables, {
       ...options,
       onSuccess: (data: any) => {
+        // Remove the optimistic entry
+        queryClient.setQueryData(["user-automations"], (old: any) => {
+          return {
+            ...old,
+            data: old?.data ? old.data.filter((item: any) => item.id !== tempId) : [],
+          }
+        })
+
+        // Invalidate and refetch to get the real data
+        queryClient.invalidateQueries({ queryKey: ["user-automations"] })
+
         // Show success toast
         toast({
           title: "Automation created",
@@ -308,8 +323,13 @@ export const useCreateAutomation = (id?: string) => {
         }
       },
       onError: (error: any) => {
-        // Revert the optimistic update on error
-        queryClient.setQueryData(["user-automations"], currentData)
+        // Remove the optimistic entry on error
+        queryClient.setQueryData(["user-automations"], (old: any) => {
+          return {
+            ...old,
+            data: old?.data ? old.data.filter((item: any) => item.id !== tempId) : [],
+          }
+        })
 
         // Show error toast
         toast({

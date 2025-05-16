@@ -164,6 +164,7 @@
 
 // export default AutomationList;
 
+
 "use client"
 import { useMemo, useEffect, useState } from "react"
 import { usePaths } from "@/hooks/user-nav"
@@ -238,16 +239,19 @@ const AutomationList = ({ id }: Props) => {
   // Get all automations including optimistic ones
   const optimisticUiData = useMemo(() => {
     if (data?.data) {
+      // Make sure we're working with the latest data from the server
       return { data: data.data as Automation[] }
     }
-    return { data: automations }
-  }, [data, automations])
-
-  const activeAutomations = optimisticUiData.data.filter((automation) => automation.active)
-  const inactiveAutomations = optimisticUiData.data.filter((automation) => !automation.active)
+    return { data: [] as Automation[] }
+  }, [data])
 
   // Separate optimistic automations for special styling
   const optimisticAutomations = optimisticUiData.data.filter((automation) => automation._isOptimistic)
+  const regularAutomations = optimisticUiData.data.filter((automation) => !automation._isOptimistic)
+
+  // And update the activeAutomations and inactiveAutomations:
+  const activeAutomations = regularAutomations.filter((automation) => automation.active)
+  const inactiveAutomations = regularAutomations.filter((automation) => !automation.active)
 
   if (!automations.length && !optimisticAutomations.length) {
     return (
