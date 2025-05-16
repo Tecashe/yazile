@@ -1406,13 +1406,12 @@
 //     </div>
 //   )
 // }
-
 "use client"
 
 import React from "react"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
 import {
   Check,
@@ -1992,8 +1991,8 @@ export default function PricingSection() {
       </div>
 
       {/* Pricing Cards */}
-      <div className="relative mt-12 w-full max-w-6xl mx-auto px-4">
-        <div className="flex flex-nowrap overflow-x-auto pb-8 gap-4 snap-x snap-mandatory scrollbar-hide">
+      <div className="pricing-cards-container perspective-1000 max-w-7xl mx-auto px-4">
+        <div className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10">
           {pricingPlans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -2002,15 +2001,15 @@ export default function PricingSection() {
               transition={{ delay: 0.1 * (index + 1), duration: 0.5 }}
               onMouseEnter={() => setHoveredPlan(plan.id)}
               onMouseLeave={() => setHoveredPlan(null)}
-              className={`relative flex-shrink-0 w-[300px] snap-center ${
-                hoveredPlan === plan.id ? "scale-105 z-10" : "scale-100 z-0"
-              } transition-all duration-300 ease-in-out`}
+              className={`pricing-card-wrapper w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1rem)] relative ${
+                hoveredPlan === plan.id ? "z-20" : "z-10"
+              }`}
             >
               {/* Popular Badge - Repositioned */}
               {plan.popular && (
                 <div className="absolute -top-5 inset-x-0 flex justify-center z-10">
                   <Badge
-                    className={`bg-gradient-to-r ${plan.color} border-0 px-4 py-1.5 text-white font-medium shadow-lg`}
+                    className={`bg-gradient-to-r ${plan.color} border-0 px-4 py-1.5 text-white font-medium shadow-lg colorful-badge`}
                   >
                     {plan.badge}
                   </Badge>
@@ -2030,192 +2029,137 @@ export default function PricingSection() {
                 </div>
               )}
 
-              {/* Glow Effect */}
-              <AnimatePresence>
-                {hoveredPlan === plan.id && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className={`absolute inset-0 bg-gradient-to-r ${plan.color} blur-xl opacity-20 rounded-xl`}
-                  />
-                )}
-              </AnimatePresence>
-
-              <Card
-                id={`plan-${plan.id}`}
-                className={`
-              h-full relative overflow-hidden border-gray-800 bg-gray-900/80 backdrop-blur-sm
-              ${plan.popular ? "border-gray-700 mt-4" : "border-gray-800"}
-              ${hoveredPlan === plan.id ? "shadow-xl shadow-primary/20" : ""}
-              ${plan.id === activePlan ? "ring-2 ring-green-500/30" : ""}
-            `}
+              <motion.div
+                className={`h-full backface-hidden ${
+                  hoveredPlan === plan.id ? "scale-[1.05] template-card-glow" : "scale-100"
+                } transition-all duration-300 ease-in-out`}
+                style={{
+                  transformStyle: "preserve-3d",
+                }}
               >
-                {/* Gradient Border Effect */}
-                <div
-                  className={`absolute inset-0 rounded-xl opacity-0 ${hoveredPlan === plan.id ? "opacity-100" : ""} transition-opacity duration-300`}
+                <Card
+                  id={`plan-${plan.id}`}
+                  className={`
+                    h-full relative overflow-hidden border-gray-800 bg-gray-900/80 backdrop-blur-sm
+                    ${plan.popular ? "border-gray-700 mt-4" : "border-gray-800"}
+                    ${plan.id === activePlan ? "ring-2 ring-green-500/30" : ""}
+                    ${hoveredPlan === plan.id ? "gradient-border" : ""}
+                  `}
                 >
-                  <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${plan.color} p-[1px]`}>
-                    <div className="absolute inset-[1px] rounded-[10px] bg-gray-900"></div>
-                  </div>
-                </div>
+                  {/* Gradient overlay effect */}
+                  <div
+                    className={`absolute inset-0 opacity-0 ${
+                      hoveredPlan === plan.id ? "opacity-10" : ""
+                    } transition-opacity duration-300 bg-gradient-to-br ${plan.color}`}
+                  ></div>
 
-                <CardHeader className="relative z-10">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-2 rounded-full bg-gradient-to-r ${plan.color}`}>{plan.icon}</div>
-                    <Badge variant="outline" className="bg-gray-800 border-gray-700 text-gray-300">
-                      {plan.id.charAt(0).toUpperCase() + plan.id.slice(1)}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-2xl font-bold mt-4 text-white">{plan.name}</CardTitle>
-                  <CardDescription className="text-gray-300">{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex items-baseline mb-6">
-                    <span className="text-4xl font-bold text-white">
-                      ${billingCycle === "monthly" ? plan.price.monthly : Math.round(plan.price.annually / 12)}
-                    </span>
-                    <span className="text-gray-300 ml-1">/month</span>
-                  </div>
-
-                  {billingCycle === "annually" && (
-                    <div className="mb-6 text-sm">
-                      <span className="text-gray-300">Billed annually at </span>
-                      <span className="font-semibold text-white">${plan.price.annually}</span>
-                      <span className="text-green-400 ml-2">Save ${plan.price.monthly * 12 - plan.price.annually}</span>
+                  <CardHeader className="relative z-10">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-2 rounded-full bg-gradient-to-r ${plan.color} template-icon-container`}>
+                        {plan.icon}
+                      </div>
+                      <Badge variant="outline" className="bg-gray-800 border-gray-700 text-gray-300">
+                        {plan.id.charAt(0).toUpperCase() + plan.id.slice(1)}
+                      </Badge>
                     </div>
-                  )}
+                    <CardTitle className="text-2xl font-bold mt-4 text-white">{plan.name}</CardTitle>
+                    <CardDescription className="text-gray-300">{plan.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="relative z-10">
+                    <div className="flex items-baseline mb-6">
+                      <span className="text-4xl font-bold text-white">
+                        ${billingCycle === "monthly" ? plan.price.monthly : Math.round(plan.price.annually / 12)}
+                      </span>
+                      <span className="text-gray-300 ml-1">/month</span>
+                    </div>
 
-                  {/* Ideal For Tags */}
-                  {plan.idealFor && (
-                    <div className="mb-4 flex flex-wrap gap-2">
-                      {plan.idealFor.map((ideal, i) => (
-                        <Badge key={i} variant="secondary" className="bg-gray-800 text-gray-300 border-0">
-                          {ideal}
-                        </Badge>
+                    {billingCycle === "annually" && (
+                      <div className="mb-6 text-sm">
+                        <span className="text-gray-300">Billed annually at </span>
+                        <span className="font-semibold text-white">${plan.price.annually}</span>
+                        <span className="text-green-400 ml-2">
+                          Save ${plan.price.monthly * 12 - plan.price.annually}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Ideal For Tags */}
+                    {plan.idealFor && (
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {plan.idealFor.map((ideal, i) => (
+                          <Badge key={i} variant="secondary" className="bg-gray-800 text-gray-300 border-0">
+                            {ideal}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    <ul className="space-y-3">
+                      {plan.features.slice(0, 6).map((feature, i) => (
+                        <li key={i} className="flex items-start">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-start">
+                                  {feature.included ? (
+                                    <div
+                                      className={`p-1 rounded-full bg-gradient-to-r ${plan.color} mr-2 shrink-0 mt-0.5`}
+                                    >
+                                      <Check className="h-3 w-3 text-white" />
+                                    </div>
+                                  ) : (
+                                    <div className="p-1 rounded-full bg-gray-800 mr-2 shrink-0 mt-0.5">
+                                      <X className="h-3 w-3 text-gray-500" />
+                                    </div>
+                                  )}
+                                  <span className={feature.included ? "text-gray-200" : "text-gray-400"}>
+                                    {feature.name}
+                                  </span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200 max-w-xs">
+                                {feature.description}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </li>
                       ))}
-                    </div>
-                  )}
+                    </ul>
 
-                  <ul className="space-y-3">
-                    {plan.features.slice(0, 6).map((feature, i) => (
-                      <li key={i} className="flex items-start">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-start">
-                                {feature.included ? (
-                                  <div
-                                    className={`p-1 rounded-full bg-gradient-to-r ${plan.color} mr-2 shrink-0 mt-0.5`}
-                                  >
-                                    <Check className="h-3 w-3 text-white" />
-                                  </div>
-                                ) : (
-                                  <div className="p-1 rounded-full bg-gray-800 mr-2 shrink-0 mt-0.5">
-                                    <X className="h-3 w-3 text-gray-500" />
-                                  </div>
-                                )}
-                                <span className={feature.included ? "text-gray-200" : "text-gray-400"}>
-                                  {feature.name}
-                                </span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200 max-w-xs">
-                              {feature.description}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Show more features button */}
-                  {plan.features.length > 6 && (
-                    <Button
-                      variant="link"
-                      className="mt-2 text-gray-400 hover:text-white p-0 h-auto"
-                      onClick={() => setShowAllFeatures(true)}
-                    >
-                      Show all features <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  )}
-                </CardContent>
-                <CardFooter className="relative z-10">
-                  {plan.id === activePlan ? (
-                    <Button
-                      variant="outline"
-                      className="w-full border-green-500/30 text-green-500 hover:bg-gray-800 hover:text-green-400"
-                    >
-                      Current Plan
-                      <CheckCircle2 className="h-4 w-4 ml-1" />
-                    </Button>
-                  ) : (
-                    <Button
-                      className={`w-full bg-gradient-to-r ${plan.color} hover:opacity-90 transition-opacity`}
-                      onClick={() => handleSelectPlan(plan)}
-                    >
-                      {plan.id === "enterprise" ? "Contact Sales" : "Get Started"}
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
+                    {/* Show more features button */}
+                    {plan.features.length > 6 && (
+                      <Button
+                        variant="link"
+                        className="mt-2 text-gray-400 hover:text-white p-0 h-auto"
+                        onClick={() => setShowAllFeatures(true)}
+                      >
+                        Show all features <ChevronRight className="h-3 w-3 ml-1" />
+                      </Button>
+                    )}
+                  </CardContent>
+                  <CardFooter className="relative z-10">
+                    {plan.id === activePlan ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-green-500/30 text-green-500 hover:bg-gray-800 hover:text-green-400"
+                      >
+                        Current Plan
+                        <CheckCircle2 className="h-4 w-4 ml-1" />
+                      </Button>
+                    ) : (
+                      <Button
+                        className={`w-full gradient-button bg-gradient-to-r ${plan.color} hover:opacity-90 transition-opacity`}
+                        onClick={() => handleSelectPlan(plan)}
+                      >
+                        {plan.id === "enterprise" ? "Contact Sales" : "Get Started"}
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              </motion.div>
             </motion.div>
           ))}
-        </div>
-
-        {/* Navigation dots */}
-        <div className="flex justify-center mt-6 gap-2">
-          {pricingPlans.map((plan, index) => (
-            <button
-              key={`dot-${plan.id}`}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                hoveredPlan === plan.id ? `bg-gradient-to-r ${plan.color} scale-125` : "bg-gray-700 hover:bg-gray-600"
-              }`}
-              onClick={() => {
-                const container = document.querySelector(".overflow-x-auto")
-                const cards = document.querySelectorAll(".snap-center")
-                if (container && cards[index]) {
-                  container.scrollTo({
-                    left: (cards[index] as HTMLElement).offsetLeft - 16,
-                    behavior: "smooth",
-                  })
-                  setHoveredPlan(plan.id)
-                }
-              }}
-              aria-label={`View ${plan.name} plan`}
-            />
-          ))}
-        </div>
-
-        {/* Scroll indicators */}
-        <div className="hidden md:flex justify-between absolute top-1/2 left-0 right-0 -translate-y-1/2 pointer-events-none px-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full bg-gray-900/80 backdrop-blur-sm border-gray-700 text-white pointer-events-auto opacity-70 hover:opacity-100"
-            onClick={() => {
-              const container = document.querySelector(".overflow-x-auto")
-              if (container) {
-                container.scrollBy({ left: -320, behavior: "smooth" })
-              }
-            }}
-          >
-            <ChevronRight className="h-5 w-5 rotate-180" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full bg-gray-900/80 backdrop-blur-sm border-gray-700 text-white pointer-events-auto opacity-70 hover:opacity-100"
-            onClick={() => {
-              const container = document.querySelector(".overflow-x-auto")
-              if (container) {
-                container.scrollBy({ left: 320, behavior: "smooth" })
-              }
-            }}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
         </div>
       </div>
 
