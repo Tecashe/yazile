@@ -187,14 +187,7 @@ export class CrmService {
 
     // Send the data to the CRM
     try {
-        
-    //   const success = await this.sendToCrm(
-    //     integration.provider,
-    //     integration.apiKey,
-    //     integration.apiSecret,
-    //     integration.baseUrl,
-    //     crmData,
-    //   )
+      
     const apiSecret = integration.apiSecret ?? undefined
     const baseUrl = integration.baseUrl ?? undefined
 
@@ -284,6 +277,8 @@ export class CrmService {
       return false
     }
   }
+
+  //TODOS
 
   // Implement other provider-specific methods
   private async testSalesforceIntegration(apiKey: string, apiSecret?: string): Promise<boolean> {

@@ -29,9 +29,9 @@ const getBadgeVariant = (status: string): "default" | "destructive" | "outline" 
       case "NEW":
         return "secondary"
       case "QUALIFYING":
-        return "outline"  // Changed from "warning"
+        return "outline" 
       case "QUALIFIED":
-        return "default"  // Changed from "success"
+        return "default" 
       case "NURTURING":
         return "default"
       case "CONVERTED":

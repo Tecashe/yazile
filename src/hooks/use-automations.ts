@@ -1,239 +1,3 @@
-
-"use client"
-
-import type React from "react"
-
-import { z } from "zod"
-import {
-  createAutomations,
-  deleteAutomation,
-  deleteKeyword,
-  saveKeyword,
-  saveListener,
-  savePosts,
-  saveScheduledPosts,
-  saveTrigger,
-  updateAutomationName,
-} from "@/actions/automations"
-import { useMutationData } from "./use-mutation-data"
-import { useEffect, useRef, useState } from "react"
-import useZodForm from "./use-zod-form"
-import { type AppDispatch, useAppSelector } from "@/redux/store"
-import { useDispatch } from "react-redux"
-import { TRIGGER } from "@/redux/slices/automation"
-import type { ScheduledPost } from "@/actions/schedule/schedule-post"
-
-export const useCreateAutomation = (id?: string) => {
-  const { isPending, mutate } = useMutationData(["create-automation"], () => createAutomations(id), "user-automations")
-
-  return { isPending, mutate }
-}
-
-export const useEditAutomation = (automationId: string) => {
-  const [edit, setEdit] = useState(false)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const enableEdit = () => setEdit(true)
-  const disableEdit = () => setEdit(false)
-
-  const { isPending, mutate } = useMutationData(
-    ["update-automation"],
-    (data: { name: string }) => updateAutomationName(automationId, { name: data.name }),
-    "automation-info",
-    disableEdit,
-  )
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node | null)) {
-        if (inputRef.current.value !== "") {
-          mutate({ name: inputRef.current.value })
-        } else {
-          disableEdit()
-        }
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [mutate])
-
-  return {
-    edit,
-    enableEdit,
-    disableEdit,
-    inputRef,
-    isPending,
-  }
-}
-
-export const useListener = (id: string) => {
-  const [listener, setListener] = useState<"MESSAGE" | "SMARTAI" | null>(null)
-
-  const promptSchema = z.object({
-    prompt: z.string().min(1),
-    reply: z.string(),
-  })
-
-  const { isPending, mutate } = useMutationData(
-    ["create-listener"],
-    (data: { prompt: string; reply: string }) => saveListener(id, listener || "MESSAGE", data.prompt, data.reply),
-    "automation-info",
-  )
-
-  const { errors, onFormSubmit, register, reset, watch } = useZodForm(promptSchema, mutate)
-
-  const onSetListener = (type: "SMARTAI" | "MESSAGE") => setListener(type)
-  return { onSetListener, register, onFormSubmit, listener, isPending }
-}
-
-export const useTriggers = (id: string) => {
-  const types = useAppSelector((state) => state.AutmationReducer.trigger?.types)
-
-  const dispatch: AppDispatch = useDispatch()
-
-  const onSetTrigger = (type: "COMMENT" | "DM") => dispatch(TRIGGER({ trigger: { type } }))
-
-  const { isPending, mutate } = useMutationData(
-    ["add-trigger"],
-    (data: { types: string[] }) => saveTrigger(id, data.types),
-    "automation-info",
-  )
-
-  const onSaveTrigger = () => mutate({ types })
-  return { types, onSetTrigger, onSaveTrigger, isPending }
-}
-
-export const useKeywords = (id: string) => {
-  const [keyword, setKeyword] = useState("")
-  const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)
-
-  const { mutate } = useMutationData(
-    ["add-keyword"],
-    (data: { keyword: string }) => saveKeyword(id, data.keyword),
-    "automation-info",
-    () => setKeyword(""),
-  )
-
-  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      mutate({ keyword })
-      setKeyword("")
-    }
-  }
-
-  const { mutate: deleteMutation } = useMutationData(
-    ["delete-keyword"],
-    (data: { id: string }) => deleteKeyword(data.id),
-    "automation-info",
-  )
-
-  const addKeyword = (newKeyword: string) => {
-    if (newKeyword.trim()) {
-      mutate({ keyword: newKeyword })
-    }
-  }
-
-  return { keyword, onValueChange, onKeyPress, deleteMutation, addKeyword }
-}
-
-export const useAutomationPosts = (id: string) => {
-  const [posts, setPosts] = useState<
-    {
-      postid: string
-      caption?: string
-      media: string
-      mediaType: "IMAGE" | "VIDEO" | "CAROSEL_ALBUM"
-    }[]
-  >([])
-
-  // Add state for scheduled posts
-  const [scheduledPosts, setScheduledPosts] = useState<string[]>([])
-
-  const onSelectPost = (post: {
-    postid: string
-    caption?: string
-    media: string
-    mediaType: "IMAGE" | "VIDEO" | "CAROSEL_ALBUM"
-  }) => {
-    setPosts((prevItems) => {
-      if (prevItems.find((p) => p.postid === post.postid)) {
-        return prevItems.filter((item) => item.postid !== post.postid)
-      } else {
-        return [...prevItems, post]
-      }
-    })
-  }
-
-  // Add function to handle scheduled post selection
-  const onSelectScheduledPost = (post: ScheduledPost) => {
-    // Ensure post.id exists before proceeding
-    if (!post.id) return
-
-    setScheduledPosts((prevItems) => {
-      if (prevItems.includes(post.id)) {
-        return prevItems.filter((item) => item !== post.id)
-      } else {
-        return [...prevItems, post.id]
-      }
-    })
-  }
-
-  const { mutate, isPending } = useMutationData(
-    ["attach-posts"],
-    async (data?: { posts?: typeof posts; scheduledPostIds?: string[] }) => {
-      // Use provided posts or current state
-      const postsToSave = data?.posts || posts
-
-      // Use provided scheduledPostIds or current state
-      const scheduledPostIdsToSave = data?.scheduledPostIds || scheduledPosts
-
-      // Save published posts
-      const publishedResult = await savePosts(id, postsToSave)
-
-      // Always attempt to save scheduled posts, even if the array is empty
-      // This ensures the backend knows about the current state
-      await saveScheduledPosts(id, scheduledPostIdsToSave)
-
-      return publishedResult
-    },
-    "automation-info",
-    () => {
-      setPosts([])
-      setScheduledPosts([])
-    },
-  )
-
-  const { mutate: deleteMutation, isPending: isDeleting } = useMutationData(
-    ["delete-automation"],
-    async (data: { id: string }) => {
-      try {
-        const response = await deleteAutomation(data.id)
-        if (response.status !== 200) throw new Error("Failed to delete automation")
-        return response
-      } catch (err) {
-        console.error("Error deleting automation:", err)
-        throw err
-      }
-    },
-    "automation-info",
-  )
-
-  return {
-    posts,
-    onSelectPost,
-    scheduledPosts,
-    onSelectScheduledPost,
-    mutate,
-    isPending,
-    deleteMutation,
-    isDeleting,
-  }
-}
-
-
-
 // "use client"
 
 // import type React from "react"
@@ -403,6 +167,9 @@ export const useAutomationPosts = (id: string) => {
 
 //   // Add function to handle scheduled post selection
 //   const onSelectScheduledPost = (post: ScheduledPost) => {
+//     // Ensure post.id exists before proceeding
+//     if (!post.id) return
+
 //     setScheduledPosts((prevItems) => {
 //       if (prevItems.includes(post.id)) {
 //         return prevItems.filter((item) => item !== post.id)
@@ -424,10 +191,9 @@ export const useAutomationPosts = (id: string) => {
 //       // Save published posts
 //       const publishedResult = await savePosts(id, postsToSave)
 
-//       // Save scheduled posts if there are any
-//       if (scheduledPostIdsToSave.length > 0) {
-//         await saveScheduledPosts(id, scheduledPostIdsToSave)
-//       }
+//       // Always attempt to save scheduled posts, even if the array is empty
+//       // This ensures the backend knows about the current state
+//       await saveScheduledPosts(id, scheduledPostIdsToSave)
 
 //       return publishedResult
 //     },
@@ -465,394 +231,354 @@ export const useAutomationPosts = (id: string) => {
 //   }
 // }
 
+"use client"
 
-//LATEST ONE WITHOUT SCHEDULED 
-// import { z } from 'zod';
-// import {
-//   createAutomations,
-//   deleteAutomation,
-//   deleteKeyword,
-//   saveKeyword,
-//   saveListener,
-//   savePosts,
-//   saveTrigger,
-//   updateAutomationName,
-//   saveScheduledPosts,
-// } from '@/actions/automations';
-// import { useMutationData } from './use-mutation-data';
-// import { useRouter } from 'next/navigation';
-// import { useEffect, useRef, useState } from 'react';
-// import useZodForm from './use-zod-form';
-// import { AppDispatch, useAppSelector } from '@/redux/store';
-// import { useDispatch } from 'react-redux';
-// import { TRIGGER } from '@/redux/slices/automation';
+import type React from "react"
 
-// export const useCreateAutomation = (id?: string) => {
-//   const { isPending, mutate } = useMutationData(
-//     ['create-automation'],
-//     () => createAutomations(id),
-//     'user-automations'
-//   );
+import { z } from "zod"
+import {
+  createAutomations,
+  deleteAutomation,
+  deleteKeyword,
+  saveKeyword,
+  saveListener,
+  savePosts,
+  saveScheduledPosts,
+  saveTrigger,
+  updateAutomationName,
+} from "@/actions/automations"
+import { useMutationData } from "./use-mutation-data"
+import { useEffect, useRef, useState } from "react"
+import useZodForm from "./use-zod-form"
+import { type AppDispatch, useAppSelector } from "@/redux/store"
+import { useDispatch } from "react-redux"
+import { TRIGGER } from "@/redux/slices/automation"
+import type { ScheduledPost } from "@/actions/schedule/schedule-post"
+import { useQueryClient } from "@tanstack/react-query"
+import { useToast } from "@/hooks/use-toast"
 
-//   return { isPending, mutate };
-// };
+export const useCreateAutomation = (id?: string) => {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
-// export const useEditAutomation = (automationId: string) => {
-//   const [edit, setEdit] = useState(false);
-//   const inputRef = useRef<HTMLInputElement | null>(null);
-//   const enableEdit = () => setEdit(true);
-//   const disableEdit = () => setEdit(false);
+  // Use the existing useMutationData hook but enhance it with optimistic updates
+  const { isPending, mutate: originalMutate } = useMutationData(
+    ["create-automation"],
+    () => createAutomations(id),
+    "user-automations",
+  )
 
-//   const { isPending, mutate } = useMutationData(
-//     ['update-automation'],
-//     (data: { name: string }) =>
-//       updateAutomationName(automationId, { name: data.name }),
-//     'automation-info',
-//     disableEdit
-//   );
+  // Create an enhanced mutate function with optimistic updates
+  const mutate = (variables: any, options?: any) => {
+    // Get the current automations data
+    const currentData = queryClient.getQueryData(["user-automations"])
 
-//   useEffect(() => {
-//     const handleClickOutside = (event: MouseEvent) => {
-//       if (
-//         inputRef.current &&
-//         !inputRef.current.contains(event.target as Node | null)
-//       ) {
-//         if (inputRef.current.value !== '') {
-//           mutate({ name: inputRef.current.value });
-//         } else {
-//           disableEdit();
-//         }
-//       }
-//     };
+    // Create an optimistic version of the new automation
+    const optimisticAutomation = {
+      ...variables,
+      id: id || `temp-${Date.now()}`,
+      active: false,
+      keywords: [],
+      listener: null,
+      _isOptimistic: true, // Flag to identify this is an optimistic update
+    }
 
-//     document.addEventListener('mousedown', handleClickOutside);
-//     return () => {
-//       document.removeEventListener('mousedown', handleClickOutside);
-//     };
-//   }, [mutate]);
+    // Optimistically update the query data
+    queryClient.setQueryData(["user-automations"], (old: any) => {
+      return {
+        ...old,
+        data: old?.data ? [optimisticAutomation, ...old.data] : [optimisticAutomation],
+      }
+    })
 
-//   return {
-//     edit,
-//     enableEdit,
-//     disableEdit,
-//     inputRef,
-//     isPending,
-//   };
-// };
+    // Call the original mutate function
+    return originalMutate(variables, {
+      ...options,
+      onSuccess: (data: any) => {
+        // Show success toast
+        toast({
+          title: "Automation created",
+          description: "Your automation has been created successfully.",
+          variant: "default",
+        })
 
-// export const useListener = (id: string) => {
-//   const [listener, setListener] = useState<'MESSAGE' | 'SMARTAI' | null>(null);
+        // Call the original onSuccess if provided
+        if (options?.onSuccess) {
+          options.onSuccess(data)
+        }
+      },
+      onError: (error: any) => {
+        // Revert the optimistic update on error
+        queryClient.setQueryData(["user-automations"], currentData)
 
-//   const promptSchema = z.object({
-//     prompt: z.string().min(1),
-//     reply: z.string(),
-//   });
+        // Show error toast
+        toast({
+          title: "Failed to create automation",
+          description: "There was an error creating your automation. Please try again.",
+          variant: "destructive",
+        })
 
-//   const { isPending, mutate } = useMutationData(
-//     ['create-listener'],
-//     (data: { prompt: string; reply: string }) =>
-//       saveListener(id, listener || 'MESSAGE', data.prompt, data.reply),
-//     'automation-info'
-//   );
+        // Call the original onError if provided
+        if (options?.onError) {
+          options.onError(error)
+        }
+      },
+    })
+  }
 
-//   const { errors, onFormSubmit, register, reset, watch } = useZodForm(
-//     promptSchema,
-//     mutate
-//   );
+  return { isPending, mutate }
+}
 
-//   const onSetListener = (type: 'SMARTAI' | 'MESSAGE') => setListener(type);
-//   return { onSetListener, register, onFormSubmit, listener, isPending };
-// };
+export const useEditAutomation = (automationId: string) => {
+  const [edit, setEdit] = useState(false)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const enableEdit = () => setEdit(true)
+  const disableEdit = () => setEdit(false)
 
-// export const useTriggers = (id: string) => {
-//   const types = useAppSelector((state) => state.AutmationReducer.trigger?.types);
+  const { isPending, mutate } = useMutationData(
+    ["update-automation"],
+    (data: { name: string }) => updateAutomationName(automationId, { name: data.name }),
+    "automation-info",
+    disableEdit,
+  )
 
-//   const dispatch: AppDispatch = useDispatch();
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(event.target as Node | null)) {
+        if (inputRef.current.value !== "") {
+          mutate({ name: inputRef.current.value })
+        } else {
+          disableEdit()
+        }
+      }
+    }
 
-//   const onSetTrigger = (type: 'COMMENT' | 'DM') =>
-//     dispatch(TRIGGER({ trigger: { type } }));
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [mutate])
 
-//   const { isPending, mutate } = useMutationData(
-//     ['add-trigger'],
-//     (data: { types: string[] }) => saveTrigger(id, data.types),
-//     'automation-info'
-//   );
+  return {
+    edit,
+    enableEdit,
+    disableEdit,
+    inputRef,
+    isPending,
+  }
+}
 
-//   const onSaveTrigger = () => mutate({ types });
-//   return { types, onSetTrigger, onSaveTrigger, isPending };
-// };
+export const useListener = (id: string) => {
+  const [listener, setListener] = useState<"MESSAGE" | "SMARTAI" | null>(null)
 
-// export const useKeywords = (id: string) => {
-//   const [keyword, setKeyword] = useState('');
-//   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-//     setKeyword(e.target.value);
+  const promptSchema = z.object({
+    prompt: z.string().min(1),
+    reply: z.string(),
+  })
 
-//   const { mutate } = useMutationData(
-//     ['add-keyword'],
-//     (data: { keyword: string }) => saveKeyword(id, data.keyword),
-//     'automation-info',
-//     () => setKeyword('')
-//   );
+  const { isPending, mutate } = useMutationData(
+    ["create-listener"],
+    (data: { prompt: string; reply: string }) => saveListener(id, listener || "MESSAGE", data.prompt, data.reply),
+    "automation-info",
+  )
 
-//   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (e.key === 'Enter') {
-//       mutate({ keyword });
-//       setKeyword('');
-//     }
-//   };
+  const { errors, onFormSubmit, register, reset, watch } = useZodForm(promptSchema, mutate)
 
-//   const { mutate: deleteMutation } = useMutationData(
-//     ['delete-keyword'],
-//     (data: { id: string }) => deleteKeyword(data.id),
-//     'automation-info'
-//   );
+  const onSetListener = (type: "SMARTAI" | "MESSAGE") => setListener(type)
+  return { onSetListener, register, onFormSubmit, listener, isPending }
+}
 
-//   const addKeyword = (newKeyword: string) => {
-//     if (newKeyword.trim()) {
-//       mutate({ keyword: newKeyword })
-//     }
-//   }
+export const useTriggers = (id: string) => {
+  const types = useAppSelector((state) => state.AutmationReducer.trigger?.types)
 
-//   return { keyword, onValueChange, onKeyPress, deleteMutation, addKeyword };
-// };
+  const dispatch: AppDispatch = useDispatch()
 
-// export const useAutomationPosts = (id: string) => {
-//   const [posts, setPosts] = useState<
-//     {
-//       postid: string;
-//       caption?: string;
-//       media: string;
-//       mediaType: 'IMAGE' | 'VIDEO' | 'CAROSEL_ALBUM';
-//     }[]
-//   >([]);
+  const onSetTrigger = (type: "COMMENT" | "DM") => dispatch(TRIGGER({ trigger: { type } }))
 
-//   const onSelectPost = (post: {
-//     postid: string;
-//     caption?: string;
-//     media: string;
-//     mediaType: 'IMAGE' | 'VIDEO' | 'CAROSEL_ALBUM';
-//   }) => {
-//     setPosts((prevItems) => {
-//       if (prevItems.find((p) => p.postid === post.postid)) {
-//         return prevItems.filter((item) => item.postid !== post.postid);
-//       } else {
-//         return [...prevItems, post];
-//       }
-//     });
-//   };
+  const { isPending, mutate } = useMutationData(
+    ["add-trigger"],
+    (data: { types: string[] }) => saveTrigger(id, data.types),
+    "automation-info",
+  )
 
-//   const { mutate, isPending } = useMutationData(
-//     ['attach-posts'],
-//     () => savePosts(id, posts),
-//     'automation-info',
-//     () => setPosts([])
-//   );
+  const onSaveTrigger = () => mutate({ types })
+  return { types, onSetTrigger, onSaveTrigger, isPending }
+}
 
-//   const { mutate: deleteMutation, isPending: isDeleting } = useMutationData(
-//     ['delete-automation'],
-//     async (data: { id: string }) => {
-//       try {
-//         const response = await deleteAutomation(data.id);
-//         if (response.status !== 200) throw new Error('Failed to delete automation');
-//         return response;
-//       } catch (err) {
-//         console.error('Error deleting automation:', err);
-//         throw err;
-//       }
-//     },
-//     'automation-info'
-//   );
+export const useKeywords = (id: string) => {
+  const [keyword, setKeyword] = useState("")
+  const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)
 
-//   return { posts, onSelectPost, mutate, isPending, deleteMutation, isDeleting };
-// };
+  const { mutate } = useMutationData(
+    ["add-keyword"],
+    (data: { keyword: string }) => saveKeyword(id, data.keyword),
+    "automation-info",
+    () => setKeyword(""),
+  )
 
+  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      mutate({ keyword })
+      setKeyword("")
+    }
+  }
 
+  const { mutate: deleteMutation } = useMutationData(
+    ["delete-keyword"],
+    (data: { id: string }) => deleteKeyword(data.id),
+    "automation-info",
+  )
 
-//ORIGINAL CODE 
+  const addKeyword = (newKeyword: string) => {
+    if (newKeyword.trim()) {
+      mutate({ keyword: newKeyword })
+    }
+  }
 
+  return { keyword, onValueChange, onKeyPress, deleteMutation, addKeyword }
+}
 
-// import { z } from 'zod'
-// import {
-//   createAutomations,
-//   deleteAutomation,
-//   deleteKeyword,
-//   saveKeyword,
-//   saveListener,
-//   savePosts,
-//   saveTrigger,
-//   updateAutomationName,
-// } from '@/actions/automations'
-// import { useMutationData } from './use-mutation-data'
-// // import { useMutation } from '@/hooks/use-mutation-data' // Highlighted change
-// import { useRouter } from 'next/navigation'
-// import { useEffect, useRef, useState } from 'react'
-// import useZodForm from './use-zod-form'
-// import { AppDispatch, useAppSelector } from '@/redux/store'
-// import { useDispatch } from 'react-redux'
-// import { TRIGGER } from '@/redux/slices/automation'
+export const useAutomationPosts = (id: string) => {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const [posts, setPosts] = useState<
+    {
+      postid: string
+      caption?: string
+      media: string
+      mediaType: "IMAGE" | "VIDEO" | "CAROSEL_ALBUM"
+    }[]
+  >([])
 
-// export const useCreateAutomation = (id?: string) => {
-//   const { isPending, mutate } = useMutationData(
-//     ['create-automation'],
-//     () => createAutomations(id),
-//     'user-automations'
-//   )
+  // Add state for scheduled posts
+  const [scheduledPosts, setScheduledPosts] = useState<string[]>([])
 
-//   return { isPending, mutate }
-// }
+  const onSelectPost = (post: {
+    postid: string
+    caption?: string
+    media: string
+    mediaType: "IMAGE" | "VIDEO" | "CAROSEL_ALBUM"
+  }) => {
+    setPosts((prevItems) => {
+      if (prevItems.find((p) => p.postid === post.postid)) {
+        return prevItems.filter((item) => item.postid !== post.postid)
+      } else {
+        return [...prevItems, post]
+      }
+    })
+  }
 
-// export const useEditAutomation = (automationId: string) => {
-//   const [edit, setEdit] = useState(false)
-//   const inputRef = useRef<HTMLInputElement | null>(null)
-//   const enableEdit = () => setEdit(true)
-//   const disableEdit = () => setEdit(false)
+  // Add function to handle scheduled post selection
+  const onSelectScheduledPost = (post: ScheduledPost) => {
+    // Ensure post.id exists before proceeding
+    if (!post.id) return
 
-//   const { isPending, mutate } = useMutationData(
-//     ['update-automation'],
-//     (data: { name: string }) =>
-//       updateAutomationName(automationId, { name: data.name }),
-//     'automation-info',
-//     disableEdit
-//   )
+    setScheduledPosts((prevItems) => {
+      if (prevItems.includes(post.id)) {
+        return prevItems.filter((item) => item !== post.id)
+      } else {
+        return [...prevItems, post.id]
+      }
+    })
+  }
 
-//   useEffect(() => {
-//     function handleClickOutside(this: Document, event: MouseEvent) {
-//       if (
-//         inputRef.current &&
-//         !inputRef.current.contains(event.target as Node | null)
-//       ) {
-//         if (inputRef.current.value !== '') {
-//           mutate({ name: inputRef.current.value })
-//         } else {
-//           disableEdit()
-//         }
-//       }
-//     }
-//     document.addEventListener('mousedown', handleClickOutside)
-//     return () => {
-//       document.removeEventListener('mousedown', handleClickOutside)
-//     }
-//   }, [])
+  const { mutate, isPending } = useMutationData(
+    ["attach-posts"],
+    async (data?: { posts?: typeof posts; scheduledPostIds?: string[] }) => {
+      // Use provided posts or current state
+      const postsToSave = data?.posts || posts
 
-//   return {
-//     edit,
-//     enableEdit,
-//     disableEdit,
-//     inputRef,
-//     isPending,
-//   }
-// }
+      // Use provided scheduledPostIds or current state
+      const scheduledPostIdsToSave = data?.scheduledPostIds || scheduledPosts
 
-// export const useListener = (id: string) => {
-//   const [listener, setListener] = useState<'MESSAGE' | 'SMARTAI' | null>(null)
+      // Save published posts
+      const publishedResult = await savePosts(id, postsToSave)
 
-//   const promptSchema = z.object({
-//     prompt: z.string().min(1),
-//     reply: z.string(),
-//   })
+      // Always attempt to save scheduled posts, even if the array is empty
+      // This ensures the backend knows about the current state
+      await saveScheduledPosts(id, scheduledPostIdsToSave)
 
-//   const { isPending, mutate } = useMutationData(
-//     ['create-lister'],
-//     (data: { prompt: string; reply: string }) =>
-//       saveListener(id, listener || 'MESSAGE', data.prompt, data.reply),
-//     'automation-info'
-//   )
+      return publishedResult
+    },
+    "automation-info",
+    () => {
+      setPosts([])
+      setScheduledPosts([])
+    },
+  )
 
-//   const { errors, onFormSubmit, register, reset, watch } = useZodForm(
-//     promptSchema,
-//     mutate
-//   )
+  // Enhanced delete mutation with optimistic updates
+  const { mutate: originalDeleteMutation, isPending: isDeleting } = useMutationData(
+    ["delete-automation"],
+    async (data: { id: string }) => {
+      try {
+        const response = await deleteAutomation(data.id)
+        if (response.status !== 200) throw new Error("Failed to delete automation")
+        return response
+      } catch (err) {
+        console.error("Error deleting automation:", err)
+        throw err
+      }
+    },
+    "automation-info",
+  )
 
-//   const onSetListener = (type: 'SMARTAI' | 'MESSAGE') => setListener(type)
-//   return { onSetListener, register, onFormSubmit, listener, isPending }
-// }
+  // Create an enhanced delete mutation with optimistic updates
+  const deleteMutation = (variables: { id: string }, options?: any) => {
+    // Get the current automations data
+    const currentData = queryClient.getQueryData(["user-automations"])
 
-// export const useTriggers = (id: string) => {
-//   const types = useAppSelector((state) => state.AutmationReducer.trigger?.types)
+    // Optimistically update the query data by removing the automation
+    queryClient.setQueryData(["user-automations"], (old: any) => {
+      return {
+        ...old,
+        data: old?.data ? old.data.filter((automation: any) => automation.id !== variables.id) : [],
+      }
+    })
 
-//   const dispatch: AppDispatch = useDispatch()
+    // Call the original delete mutation
+    return originalDeleteMutation(variables, {
+      ...options,
+      onSuccess: (data: any) => {
+        // Show success toast
+        toast({
+          title: "Automation deleted",
+          description: "Your automation has been deleted successfully.",
+          variant: "default",
+        })
 
-//   const onSetTrigger = (type: 'COMMENT' | 'DM') =>
-//     dispatch(TRIGGER({ trigger: { type } }))
+        // Call the original onSuccess if provided
+        if (options?.onSuccess) {
+          options.onSuccess(data)
+        }
+      },
+      onError: (error: any) => {
+        // Revert the optimistic update on error
+        queryClient.setQueryData(["user-automations"], currentData)
 
-//   const { isPending, mutate } = useMutationData(
-//     ['add-trigger'],
-//     (data: { types: string[] }) => saveTrigger(id, data.types),
-//     'automation-info'
-//   )
+        // Show error toast
+        toast({
+          title: "Failed to delete automation",
+          description: "There was an error deleting your automation. Please try again.",
+          variant: "destructive",
+        })
 
-//   const onSaveTrigger = () => mutate({ types })
-//   return { types, onSetTrigger, onSaveTrigger, isPending }
-// }
+        // Call the original onError if provided
+        if (options?.onError) {
+          options.onError(error)
+        }
+      },
+    })
+  }
 
-// export const useKeywords = (id: string) => {
-//   const [keyword, setKeyword] = useState('')
-//   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-//     setKeyword(e.target.value)
-
-//   const { mutate } = useMutationData(
-//     ['add-keyword'],
-//     (data: { keyword: string }) => saveKeyword(id, data.keyword),
-//     'automation-info',
-//     () => setKeyword('')
-//   )
-
-//   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (e.key === 'Enter') {
-//       mutate({ keyword })
-//       setKeyword('')
-//     }
-//   }
-
-//   const { mutate: deleteMutation } = useMutationData(
-//     ['delete-keyword'],
-//     (data: { id: string }) => deleteKeyword(data.id),
-//     'automation-info'
-//   )
-
-//   return { keyword, onValueChange, onKeyPress, deleteMutation }
-// }
-
-
-
-// export const useAutomationPosts = (id: string) => {
-//   const [posts, setPosts] = useState<
-//     {
-//       postid: string
-//       caption?: string
-//       media: string
-//       mediaType: 'IMAGE' | 'VIDEO' | 'CAROSEL_ALBUM'
-//     }[]
-//   >([])
-
-//   const onSelectPost = (post: {
-//     postid: string
-//     caption?: string
-//     media: string
-//     mediaType: 'IMAGE' | 'VIDEO' | 'CAROSEL_ALBUM'
-//   }) => {
-//     setPosts((prevItems) => {
-//       if (prevItems.find((p) => p.postid === post.postid)) {
-//         return prevItems.filter((item) => item.postid !== post.postid)
-//       } else {
-//         return [...prevItems, post]
-//       }
-//     })
-//   }
-
-//   const { mutate, isPending } = useMutationData(
-//     ['attach-posts'],
-//     () => savePosts(id, posts),
-//     'automation-info',
-//     () => setPosts([])
-//   )
-
-//   const { mutate: deleteMutation, isPending: isDeleting } = useMutationData(
-//     ['delete-automation'],
-//     (data: { id: string }) => deleteAutomation(data.id),
-//     'automation-info'
-//   )
-
-//   return { posts, onSelectPost, mutate, isPending,deleteMutation ,isDeleting}
-// }
-
+  return {
+    posts,
+    onSelectPost,
+    scheduledPosts,
+    onSelectScheduledPost,
+    mutate,
+    isPending,
+    deleteMutation,
+    isDeleting,
+  }
+}
