@@ -36,16 +36,16 @@ export const AUTOMATION_TRIGGERS: AutomationsTriggerProps[] = [
 export const AUTOMATION_LISTENERS: AutomationListenerProps[] = [
   {
     id: v4(),
-    label: 'Send the user a message',
+    label: 'Manually write the message to be automatically sent to the user',
     icon: <PlaneBlue />,
-    description: 'Enter the message that you want to send the user.',
+    description: 'Enter the message that you want to send a user.',
     type: 'MESSAGE',
   },
   {
     id: v4(),
-    label: 'Let Smart AI take over',
+    label: 'Use a custom trained Agent',
     icon: <SmartAi />,
-    description: 'Tell AI about your project.',
+    description: 'Your data is Used to train your custom agent for custom responses',
     type: 'SMARTAI',
   },
 ]
