@@ -51,7 +51,7 @@ export default async function SchedulePage() {
 
           {/* Tools Section */}
           <Tabs defaultValue="schedule" className="space-y-6">
-            <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto p-1 bg-gray-900/50 backdrop-blur-sm">
+            <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 h-auto p-1 bg-gray-900/50 backdrop-blur-sm">
               <TabsTrigger value="schedule" className="data-[state=active]:bg-gray-800">
                 <CalendarDays className="w-4 h-4 mr-2" />
                 Schedule

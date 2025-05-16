@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   Share2,
+  Zap,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -33,11 +34,11 @@ import { useMobile } from "@/hooks/use-mobiles"
 
 // Navigation items
 const navItems = [
-  { name: "Automations", icon: Cpu, href: "/automations", color: "blue" },
+  { name: "Automations", icon: Zap, href: "/automations", color: "blue" },
   { name: "Posting", icon: Instagram, href: "/posting", color: "green" },
   { name: "Customize Dm Responses", icon: MessageSquare, href: "/customize", color: "magenta" },
-  { name: "Integrations", icon: Grid, href: "/integrations", color: "blue" },
-  { name: "Affiliates", icon: Share2, href: "/affiliate", color: "green" },
+  { name: "Integrations", icon: Cpu, href: "/integrations", color: "blue" },
+  { name: "Become an Affiliate", icon: Share2, href: "/affiliate", color: "green" },
 ]
 
 export default function AutomationDashboardHeader() {

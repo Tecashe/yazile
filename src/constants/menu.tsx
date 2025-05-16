@@ -33,6 +33,7 @@ import {
   ChartAreaIcon,
   Calculator,
   Grid,
+  Bot,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -80,16 +81,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Messages",
         icon: colorIcon(MessageCircle, "text-amber-400"),
       },
-      // {
-      //   id: uuid(),
-      //   label: "Customize",
-      //   icon: colorIcon(Target, "text-purple-400"),
-      // },
-      {
-        id: uuid(),
-        label: "Affiliate",
-        icon: colorIcon(Target, "text-purple-400"),
-      },
     ],
   },
   {
@@ -100,7 +91,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Agents",
-        icon: colorIcon(Cpu, "text-pink-400"),
+        icon: colorIcon(Bot, "text-pink-400"),
         subItems: [
           { id: uuid(), label: "Workflows", icon: colorIcon(Webhook, "text-green-400", 18) },
           { id: uuid(), label: "Templates", icon: colorIcon(Layout, "text-blue-400", 18) },
@@ -108,22 +99,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
           { id: uuid(), label: "Stats", icon: colorIcon(Calculator, "text-cyan-400", 18) },
         ],
       },
-      // {
-      //   id: uuid(),
-      //   label: "Influencers",
-      //   icon: colorIcon(Instagram, "text-rose-400"),
-      //   subItems: [
-      //     { id: uuid(), label: "AI-Discovery", icon: colorIcon(Sparkles, "text-yellow-400", 18) },
-      //     { id: uuid(), label: "Discover", icon: colorIcon(Search, "text-blue-400", 18) },
-      //     { id: uuid(), label: "Import", icon: colorIcon(Upload, "text-green-400", 18) },
-      //   ],
-      // },
-      //  {
-      //   id: uuid(),
-      //   label: "Portal",
-      //   icon: colorIcon(PanelTop, "text-indigo-400"),
-      //   subItems: [{ id: uuid(), label: "Settings", icon: colorIcon(Settings, "text-gray-400", 18) }],
-      // },
+      
     ],
   },
   {
@@ -148,7 +124,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Integrations",
-        icon: colorIcon(Grid, "text-pink-400"),
+        icon: colorIcon(Cpu, "text-pink-400"),
       },
       {
         id: uuid(),
@@ -163,18 +139,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         icon: colorIcon(Award, "text-magenta-400"),
       },
 
-
-      // Information group
-      // {
-      //   id: uuid(),
-      //   label: "Information",
-      //   icon: colorIcon(Info, "text-indigo-400"),
-      // },
-      // {
-      //   id: uuid(),
-      //   label: "Help",
-      //   icon: colorIcon(HelpCircle, "text-violet-400"),
-      // },
     ],
   },
 ]
