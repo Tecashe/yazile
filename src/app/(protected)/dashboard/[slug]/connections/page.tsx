@@ -513,7 +513,7 @@ function N8nIntegrationsContent() {
             Refresh
           </Button>
           <Button asChild>
-            <Link href={`/dashboard/${slug}/connections/n8n/new`}>
+            <Link href={`/dashboard/${slug}/connections/new`}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Connection
             </Link>
@@ -535,7 +535,7 @@ function N8nIntegrationsContent() {
           </CardContent>
           <CardFooter>
             <Button asChild>
-              <Link href={`/dashboard/${slug}/connections/n8n/new`}>
+              <Link href={`/dashboard/${slug}/connections/new`}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Connection
               </Link>
@@ -597,13 +597,13 @@ function N8nIntegrationsContent() {
                 </Button>
                 <div className="flex space-x-2">
                   <Button variant="outline" asChild>
-                    <Link href={`/dashboard/${slug}/connections/n8n/${connection.id}`}>
+                    <Link href={`/dashboard/${slug}/connections/${connection.id}`}>
                       <Settings className="mr-2 h-4 w-4" />
                       Manage
                     </Link>
                   </Button>
                   <Button asChild>
-                    <Link href={`/dashboard/${slug}/connections/n8n/${connection.id}/workflow/new`}>
+                    <Link href={`/dashboard/${slug}/connections/${connection.id}/workflow/new`}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Add Workflow
                     </Link>

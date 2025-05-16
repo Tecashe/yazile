@@ -32,6 +32,7 @@ import {
   GitGraph,
   ChartAreaIcon,
   Calculator,
+  Grid,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -79,11 +80,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Messages",
         icon: colorIcon(MessageCircle, "text-amber-400"),
       },
-      {
-        id: uuid(),
-        label: "Customize",
-        icon: colorIcon(Target, "text-purple-400"),
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Customize",
+      //   icon: colorIcon(Target, "text-purple-400"),
+      // },
       {
         id: uuid(),
         label: "Affiliate",
@@ -93,7 +94,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
   },
   {
     id: uuid(),
-    label: "Agents",
+    label: "",
     items: [
   
       {
@@ -147,7 +148,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Integrations",
-        icon: colorIcon(Gift, "text-pink-400"),
+        icon: colorIcon(Grid, "text-pink-400"),
       },
       {
         id: uuid(),
@@ -164,16 +165,16 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
 
 
       // Information group
-      {
-        id: uuid(),
-        label: "Information",
-        icon: colorIcon(Info, "text-indigo-400"),
-      },
-      {
-        id: uuid(),
-        label: "Help",
-        icon: colorIcon(HelpCircle, "text-violet-400"),
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Information",
+      //   icon: colorIcon(Info, "text-indigo-400"),
+      // },
+      // {
+      //   id: uuid(),
+      //   label: "Help",
+      //   icon: colorIcon(HelpCircle, "text-violet-400"),
+      // },
     ],
   },
 ]
