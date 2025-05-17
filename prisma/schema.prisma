@@ -72,9 +72,10 @@ model User {
   instagramCredentials InstagramCredentials?
 
   
-  businessProfile     BusinessProfile?
-  savedSearches       SavedSearch[]        // Add this line
-  chatParticipations  CollabChatParticipant[] // Add this line
+  businessProfile               BusinessProfile?
+  businessProfilesDescription   BusinessProfileDescription[]
+  savedSearches                 SavedSearch[]        // Add this line
+  chatParticipations            CollabChatParticipant[] // Add this line
 
   onboardingProgress  OnboardingProgress?
   
@@ -221,6 +222,7 @@ model Automation {
   active         Boolean            @default(false)
   platform       INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
   trigger        Trigger[]
+  businessProfilesDescription BusinessProfileDescription?
   listener       Listener?
   posts          Post[]
   leads          Lead[]
@@ -2169,4 +2171,54 @@ enum NotificationType {
   WORKFLOW_ERROR
   CUSTOM_REQUEST_UPDATE
   SYSTEM_NOTIFICATION
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// This is just the BusinessProfile model to add to your schema
+// Add this to your existing schema.prisma file
+
+model BusinessProfileDescription {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @db.Uuid
+  automationId String   @db.Uuid @unique
+  content     String    @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  automation  Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([automationId])
 }

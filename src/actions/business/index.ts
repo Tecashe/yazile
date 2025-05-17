@@ -1,7 +1,7 @@
 "use server"
 
 import { client } from "@/lib/prisma"
-import { onCurrentUser } from "../user"
+import { onCurrentUser, onUserInfor } from "../user"
 import { revalidatePath } from "next/cache"
 
 // Business Profile Actions
@@ -697,5 +697,138 @@ export const createOpportunity = async (data: {
   } catch (error) {
     console.error("Error creating opportunity:", error)
     return { status: 500, error: "Failed to create opportunity" }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use server"
+
+// import { db } from "@/lib/db"
+// import { auth } from "@/auth"
+// import { revalidatePath } from "next/cache"
+
+interface SaveBusinessProfileParams {
+  automationId: string
+  content: string
+}
+
+export async function saveBusinessProfile({ automationId, content }: SaveBusinessProfileParams) {
+  try {
+    const session = await onUserInfor()
+
+    if (!session?.data?.id) {
+      return {
+        success: false,
+        error: "Unauthorized. Please sign in.",
+      }
+    }
+
+    // Check if the automation exists and belongs to the user
+    const automation = await client.automation.findUnique({
+      where: {
+        id: automationId,
+        userId: session.data.id,
+      },
+    })
+
+    if (!automation) {
+      return {
+        success: false,
+        error: "Automation not found or you don't have permission to modify it.",
+      }
+    }
+
+    // Check if a business profile already exists for this automation
+    const existingProfile = await client.businessProfileDescription.findUnique({
+      where: {
+        automationId,
+      },
+    })
+
+    if (existingProfile) {
+      // Update existing profile
+      await client.businessProfileDescription.update({
+        where: {
+          id: existingProfile.id,
+        },
+        data: {
+          content,
+          updatedAt: new Date(),
+        },
+      })
+    } else {
+      // Create new profile
+      await client.businessProfileDescription.create({
+        data: {
+          automationId,
+          userId: session.data.id,
+          content,
+        },
+      })
+    }
+
+    // Revalidate paths that might display this data
+    revalidatePath(`/dashboard/[slug]/agents/workflows/${automationId}`)
+    revalidatePath(`/dashboard/[slug]/agents/workflows`)
+
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("Error saving business profile:", error)
+    return {
+      success: false,
+      error: "Failed to save business profile. Please try again.",
+    }
+  }
+}
+
+export async function getBusinessProfileDescription(automationId: string) {
+  try {
+    const session = await onUserInfor()
+
+    if (!session?.data?.id) {
+      return {
+        success: false,
+        error: "Unauthorized. Please sign in.",
+      }
+    }
+
+    const profile = await client.businessProfileDescription.findUnique({
+      where: {
+        automationId,
+        userId: session.data.id,
+      },
+    })
+
+    if (!profile) {
+      return {
+        success: true,
+        profile: null,
+      }
+    }
+
+    return {
+      success: true,
+      profile,
+    }
+  } catch (error) {
+    console.error("Error fetching business profile:", error)
+    return {
+      success: false,
+      error: "Failed to fetch business profile.",
+    }
   }
 }
