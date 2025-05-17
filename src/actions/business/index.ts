@@ -779,9 +779,9 @@ export async function saveBusinessProfile({ automationId, content }: SaveBusines
       })
     }
 
-    // Revalidate paths that might display this data
-    revalidatePath(`/dashboard/[slug]/agents/workflows/${automationId}`)
-    revalidatePath(`/dashboard/[slug]/agents/workflows`)
+    // // Revalidate paths that might display this data
+    // revalidatePath(``)
+    // revalidatePath()
 
     return {
       success: true,
