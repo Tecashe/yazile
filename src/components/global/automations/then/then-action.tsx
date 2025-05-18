@@ -5158,8 +5158,8 @@ Key team members:
               {Listener && (
                 <div className={`bg-background-80 p-4 rounded-xl mb-2`}>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-white font-medium flex items-center">
-                      {Listener === "SMARTAI" ? (
+                    {/* <h3 className="text-white font-medium flex items-center"> */}
+                      {/* {Listener === "SMARTAI" ? (
                         <>
                           <Lightbulb className="h-5 w-5 mr-2 text-keyword-purple" />
                           AI Suggestions
@@ -5169,8 +5169,8 @@ Key team members:
                           <MessageSquare className="h-5 w-5 mr-2 text-light-blue" />
                           Quick Responses
                         </>
-                      )}
-                    </h3>
+                      )} */}
+                    {/* </h3> */}
                     <ResponseLibrary
                       isAI={Listener === "SMARTAI"}
                       onSelectTemplate={handleSelectMessageTemplate}
