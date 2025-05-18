@@ -52,6 +52,73 @@
 //   )
 // }
 
+// import type { Metadata } from "next"
+// import { onUserInfor } from "@/actions/user"
+// import { redirect } from "next/navigation"
+// import { notFound } from "next/navigation"
+// import { client } from "@/lib/prisma"
+// import { WorkflowConfigurationForm } from "@/components/global/workflows/workflow-configuration-form"
+
+// interface WorkflowConfigPageProps {
+//   params: {
+//     id: string
+//   }
+//   searchParams: {
+//     tab?: string
+//   }
+// }
+
+// export const metadata: Metadata = {
+//   title: "Configure Workflow | n8n Integration Platform",
+//   description: "Configure your n8n workflow",
+// }
+
+// export default async function WorkflowConfigPage({ params, searchParams }: WorkflowConfigPageProps) {
+//   const session = await onUserInfor()
+  
+//   if (!session?.data?.id) {
+//     redirect("/login")
+//   }
+
+//   const { id } = params
+//   const { tab } = searchParams
+
+//   // Verify the workflow exists and belongs to the user
+//   try {
+//     const workflow = await client.userWorkflow.findUnique({
+//       where: {
+//         id,
+//         userId: session.data.id, // Ensure the workflow belongs to the authenticated user
+//       },
+//       include: {
+//         template: true,
+//         credentials: {
+//           select: {
+//             id: true,
+//             name: true,
+//             type: true,
+//             expiresAt: true,
+//           },
+//         },
+//       },
+//     })
+
+//     if (!workflow) {
+//       notFound()
+//     }
+
+//     return (
+//       <div>
+//          <WorkflowConfigurationForm workflowId={id} activateAfterSave={false} />
+//       </div>
+//     )
+//   } catch (error) {
+//     console.error("Error fetching workflow:", error)
+//     notFound()
+//   }
+// }
+
+
 import type { Metadata } from "next"
 import { onUserInfor } from "@/actions/user"
 import { redirect } from "next/navigation"
@@ -91,13 +158,32 @@ export default async function WorkflowConfigPage({ params, searchParams }: Workf
         userId: session.data.id, // Ensure the workflow belongs to the authenticated user
       },
       include: {
-        template: true,
+        template: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            configurationSchema: true, // Include the JSON field
+            requiredIntegrations: true,
+          },
+        },
         credentials: {
           select: {
             id: true,
             name: true,
             type: true,
             expiresAt: true,
+          },
+        },
+        executions: {
+          take: 5,
+          orderBy: { startedAt: "desc" },
+          select: {
+            id: true,
+            status: true,
+            startedAt: true,
+            completedAt: true,
+            success: true,
           },
         },
       },
@@ -107,9 +193,31 @@ export default async function WorkflowConfigPage({ params, searchParams }: Workf
       notFound()
     }
 
+    // Add debugging
+    console.log("Workflow data:", workflow)
+    console.log("Credentials:", workflow.credentials)
+    console.log("Executions:", workflow.executions)
+
+    // Ensure arrays exist even if empty and provide safe defaults
+    const safeWorkflow = {
+      ...workflow,
+      credentials: workflow.credentials || [],
+      executions: workflow.executions || [],
+      template: {
+        ...workflow.template,
+        configurationSchema: workflow.template?.configurationSchema || {
+          sections: [],
+        },
+        requiredIntegrations: workflow.template?.requiredIntegrations || [],
+      },
+    }
+
     return (
       <div>
-         <WorkflowConfigurationForm workflowId={id} activateAfterSave={false} />
+        <WorkflowConfigurationForm 
+          workflowId={id} 
+          activateAfterSave={false}
+        />
       </div>
     )
   } catch (error) {
