@@ -98,12 +98,22 @@ export async function storeWorkflowCredential(
     // Store in the database
     const credential = await client.workflowCredential.create({
       data: {
-        workflowId,
         name,
         type,
         value: encryptedValue,
         expiresAt,
-      },
+        workflow: {
+          connect: { id: workflowId },
+        },
+      }
+
+      // data: {
+      //   workflowId,
+      //   name,
+      //   type,
+      //   value: encryptedValue,
+      //   expiresAt,
+      // },
     })
 
     return credential.id
