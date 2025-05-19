@@ -224,7 +224,7 @@ export function WorkflowConfigurationForm({ workflowId, activateAfterSave = fals
       // If the workflow was in DRAFT state, it should now be in READY state
       if (workflow.status === "DRAFT" && updatedWorkflow.status === "READY") {
         if (activateAfterSave) {
-          // Activate the workflow
+          // Activate the workflo
           await activateWorkflow()
         }
       }
