@@ -475,12 +475,12 @@ export default async function WorkflowConfigPage({ params, searchParams }: Workf
   const { id } = params
   const { tab } = searchParams
 
-  // Verify the workflow exists and belongs to the user
+  // Verify that the workflow exists and belongs to the user
   try {
     const workflow = await client.userWorkflow.findUnique({
       where: {
         id,
-        userId: session.data.id, // Ensure the workflow belongs to the authenticated user
+        userId: session.data.id, // Ensure that the workflow belongs to the authenticated user
       },
       include: {
         template: {
@@ -546,14 +546,6 @@ export default async function WorkflowConfigPage({ params, searchParams }: Workf
           workflowId={id} 
           activateAfterSave={false}
         />
-        {/* <WorkflowConfigurationForm 
-          workflowId={id} 
-          activateAfterSave={false}
-          configurationSchema={validConfigSchema}
-          template={workflow.template}
-          credentials={workflow.credentials}
-          executions={workflow.executions}
-        /> */}
       </div>
     )
   } catch (error) {
