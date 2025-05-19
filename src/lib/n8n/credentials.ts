@@ -9,7 +9,7 @@ const AUTH_TAG_LENGTH = 16
 
 if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
   console.warn(
-    "CREDENTIAL_ENCRYPTION_KEY is not set or not 32 bytes. Secure credential storage will not work properly.",
+    "CREDENTIAL_ENCRYPTION_KEY is not set or not 32 bytes. Secure credential storage will not work properly!!.",
   )
 }
 
