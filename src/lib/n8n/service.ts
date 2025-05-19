@@ -1138,6 +1138,7 @@ export class N8nService {
   /**
    * Apply user configuration to a workflow template
    */
+
   private applyUserConfiguration(
     templateData: N8nWorkflowData,
     configuration: Record<string, any> | null,
@@ -1165,6 +1166,8 @@ export class N8nService {
   /**
    * Generate a workflow from a template schema
    */
+
+  
   private generateWorkflowFromTemplate(
     template: WorkflowTemplate,
     configuration: Record<string, any> | null,
