@@ -4,6 +4,12 @@ import { storeWorkflowCredential } from "@/lib/n8n/credentials"
 export async function POST(req: Request, { params }: { params: { workflowId: string } }) {
   const { workflowId } = params
 
+  
+  if (!workflowId) {
+    return NextResponse.json({ error: "Missing workflowId" }, { status: 400 })
+  }
+
+
   try {
     const body = await req.json()
     const { name, type, value, expiresAt } = body
