@@ -335,7 +335,7 @@ const AutomationList = ({ id }: Props) => {
 
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg text-white shadow-lg w-80">
+          <div className="bg-black-900 p-6 rounded-lg text-white shadow-lg w-80">
             <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
             <p className="text-sm mb-6">This action cannot be undone!</p>
             <div className="flex justify-end gap-3">
