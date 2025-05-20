@@ -72,7 +72,7 @@ export function ScheduledPosts({ userId }: ScheduledPostsProps) {
           ),
         )
       } else {
-        toast.error(result.error || "Failed to publish post")
+        toast.error(result.error || "Failed to publish the post")
       }
     } catch (error) {
       toast.error("An error occurred while publishing")
