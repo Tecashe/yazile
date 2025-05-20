@@ -79,9 +79,9 @@
 
 import AutomationList from '@/components/global/automation-list'
 import CreateAutomation from '@/components/global/create-automation'
-import useSyncAutomations from '@/hooks/useSyncAutomation'
+import { useQueryAutomations } from '@/hooks/user-queries'
 import { Check, Zap, Sparkles, Rocket, Loader } from 'lucide-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 const AutomationStatus = ({ count }: { count: number }) => {
   if (count === 0) {
@@ -109,7 +109,13 @@ const AutomationStatus = ({ count }: { count: number }) => {
 }
 
 const Page = () => {
-  const { automations, isLoading, isError, refetch } = useSyncAutomations()
+  const { data, isLoading, isError, refetch } = useQueryAutomations()
+  const automations = data?.data || []
+
+  // Refetch data when component mounts
+  useEffect(() => {
+    refetch()
+  }, [refetch])
 
   // Show loading state while data is being fetched
   if (isLoading) {
@@ -140,16 +146,10 @@ const Page = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-6 gap-5">
       <div className="lg:col-span-4 overflow-y-auto max-h-[calc(100vh-4rem)]">
-        {automations.length > 0 ? (
-          <AutomationList 
-            id={automations[0].id}
-            key={`automation-list-${JSON.stringify(automations)}`} // Force re-render with unique key
-          />
-        ) : (
-          <div className="flex items-center justify-center h-64 border rounded-xl p-6">
-            <p className="text-muted-foreground">No automations available. Create your first one!</p>
-          </div>
-        )}
+        <AutomationList 
+          id={automations.length > 0 ? automations[0].id : ''}
+          key={`automation-list-${automations.length}`} // Force re-render when automations change
+        />
       </div>
       <div className="lg:col-span-2 lg:sticky lg:top-16">
         <div className="flex flex-col rounded-xl bg-gradient-to-br from-background-80 to-background-100 gap-y-6 p-5 border-[1px] overflow-hidden border-in-active shadow-lg transition-all duration-300 hover:shadow-xl">
