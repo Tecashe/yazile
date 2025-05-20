@@ -6,7 +6,7 @@ export interface MediaValidationResult {
   export function validateMediaForInstagram(file: File): MediaValidationResult {
     // Check file type
     if (file.type.startsWith("image/")) {
-      if (file.type !== "image/jpeg") {
+      if (file.type == "image/webp") {
         return {
           isValid: false,
           error: "Only JPEG images are supported by Instagram",
