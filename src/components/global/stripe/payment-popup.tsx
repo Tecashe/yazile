@@ -233,7 +233,7 @@ const CardForm = ({
                   name: cardholderName,
                 },
                 fields: {
-                  phone: "never",
+                  phone: "always",
                 },
                 validation: {
                   phone: {
