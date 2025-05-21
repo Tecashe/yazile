@@ -102,7 +102,7 @@ type PaymentPopupProps = {
   currentPlan?: "free" | "pro" | "team" | "enterprise"
 }
 
-// Available plans
+// Available plan
 const PLANS = [
   {
     id: "free",
