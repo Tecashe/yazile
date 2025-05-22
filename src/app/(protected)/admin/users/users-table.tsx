@@ -263,7 +263,7 @@ interface User {
   id: string
   name: string
   email: string
-  plan: "FREE" | "PRO"
+  plan: "FREE" | "PRO" | "TEAM"
   createdAt: string
   integrations: number
   automations: number
