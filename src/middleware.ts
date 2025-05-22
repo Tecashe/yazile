@@ -5,6 +5,57 @@ import type { NextRequest } from "next/server"
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/api/payment(.*)", "/callback(.*)"])
 
+//for plans
+
+import { hasAccess } from "@/lib/subscription"
+
+// This function can be marked `async` if using `await` inside
+export async function middleware(request: NextRequest) {
+  // Check if the path is a protected route
+  if (request.nextUrl.pathname.startsWith("/pro") || 
+      request.nextUrl.pathname.startsWith("/ai-features")) {
+    
+    // Get the user ID from the request (you'll need to adapt this to your auth system)
+    // For example, with Clerk:
+    const userId = request.headers.get("x-user-id")
+    
+    if (!userId) {
+      // Redirect to login if no user ID
+      return NextResponse.redirect(new URL("/sign-in", request.url))
+    }
+    
+    // Check if the user has access to PRO features
+    const hasProAccess = await hasAccess(userId, "PRO")
+    
+    if (!hasProAccess) {
+      // Redirect to upgrade page if no access
+      return NextResponse.redirect(new URL("/upgrade", request.url))
+    }
+  }
+  
+  // Similarly for team features
+  if (request.nextUrl.pathname.startsWith("/team")) {
+    const userId = request.headers.get("x-user-id")
+    
+    if (!userId) {
+      return NextResponse.redirect(new URL("/sign-in", request.url))
+    }
+    
+    const hasTeamAccess = await hasAccess(userId, "TEAM")
+    
+    if (!hasTeamAccess) {
+      return NextResponse.redirect(new URL("/upgrade?plan=team", request.url))
+    }
+  }
+  
+  return NextResponse.next()
+}
+
+
+
+
+//for plans
+
 // This function will handle both referrals and affiliate tracking
 async function handleReferralsAndAffiliates(request: NextRequest) {
   const { pathname, origin } = request.nextUrl
@@ -89,6 +140,7 @@ export const config = {
     "/(api|trpc)(.*)",
     // Add matcher for affiliate referral links
     "/ref/:referralCode*",
+    "/pro/:path*", "/ai-features/:path*", "/team/:path*"
   ],
 }
 

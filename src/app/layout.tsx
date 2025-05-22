@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next';
 import ReactQueryProvider from '@/providers/react-query-provider'
+import { SubscriptionProvider } from "@/contexts/subscription-context"
+
 import ReduxProvider from '@/providers/redux-provider'
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -41,7 +43,9 @@ export default function RootLayout({
           
           <ReduxProvider>
               <ReactQueryProvider>
+                 <SubscriptionProvider>
                 {children}
+                </SubscriptionProvider>
                  <Analytics />
               </ReactQueryProvider>
             </ReduxProvider>
@@ -53,4 +57,10 @@ export default function RootLayout({
     
   );
 }
+
+
+
+
+
+
 

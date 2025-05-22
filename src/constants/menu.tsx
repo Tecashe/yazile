@@ -34,6 +34,7 @@ import {
   Calculator,
   Grid,
   Bot,
+  CogIcon,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -115,6 +116,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         id: uuid(),
         label: "Pricing",
         icon: colorIcon(DollarSign, "text-emerald-400"),
+      },
+      {
+        id: uuid(),
+        label: "Settings",
+        icon: colorIcon(CogIcon, "text-brown-400"),
       },
       {
         id: uuid(),

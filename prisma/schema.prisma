@@ -162,15 +162,7 @@ model Business {
   onboardingCompleted       Boolean @default(false)
 }
 
-model Subscription {
-  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  User       User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String?           @unique @db.Uuid
-  createdAt  DateTime          @default(now())
-  plan       SUBSCRIPTION_PLAN @default(FREE)
-  updatedAt  DateTime          @default(now())
-  customerId String?           @unique
-}
+
 
 model Integrations {
   id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -313,10 +305,6 @@ model Keyword {
   @@unique([automationId, word]) //this constraints ensure user cant use the same keyword on multiple automations
 }
 
-enum SUBSCRIPTION_PLAN {
-  PRO
-  FREE
-}
 
 enum INTEGRATIONS {
   INSTAGRAM
@@ -2222,3 +2210,89 @@ model BusinessProfileDescription {
   @@index([userId])
   @@index([automationId])
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+enum SUBSCRIPTION_PLAN {
+  FREE
+  PRO
+  TEAM
+}
+
+enum SUBSCRIPTION_STATUS {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+  TRIALING
+}
+
+
+
+
+
+model Subscription {
+  id                      String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User                    User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                  String?             @unique @db.Uuid
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt @default(now())
+  
+  plan                    SUBSCRIPTION_PLAN   @default(FREE)
+  status                  SUBSCRIPTION_STATUS @default(ACTIVE)
+  
+  // Stripe specific fields
+  customerId              String?             @unique
+  stripeSubscriptionId    String?             @unique
+  stripePriceId           String?
+  stripeCurrentPeriodStart DateTime?
+  stripeCurrentPeriodEnd   DateTime?
+  
+  // Payment method info
+  paymentMethodId         String?
+  paymentMethodType       String?
+  paymentMethodLast4      String?
+  
+  // Trial information
+  trialStart              DateTime?
+  trialEnd                DateTime?
+  
+  // Cancellation fields
+  cancelAtPeriodEnd       Boolean             @default(false)
+  canceledAt              DateTime?
+}
+
+
