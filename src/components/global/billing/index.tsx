@@ -447,7 +447,7 @@ export default function PricingSection() {
       company: "Self-employed",
       avatar: "/placeholder.svg?height=80&width=80",
       quote:
-        "As a freelancer, the Starter plan gives me everything I need at an affordable price. I can connect all my essential tools without breaking the bank.",
+        "As a freelancer, the PRO plan gives me everything I need at an affordable price. I can connect all my essential tools without breaking the bank.",
       planId: "starter",
     },
     {
@@ -766,7 +766,7 @@ export default function PricingSection() {
               <thead className="sticky top-0 bg-gray-900 z-10">
                 <tr className="border-b border-gray-800">
                   <th className="text-left py-4 px-2 text-gray-300 font-medium">Feature</th>
-                  <th className="text-left py-4 px-2 font-medium text-white">Starter</th>
+                  {/* <th className="text-left py-4 px-2 font-medium text-white">Starter</th> */}
                   <th className="text-left py-4 px-2 font-medium text-white">Professional</th>
                   <th className="text-left py-4 px-2 font-medium text-white">Enterprise</th>
                 </tr>
@@ -782,7 +782,7 @@ export default function PricingSection() {
                     {category.features.map((feature, featureIndex) => (
                       <tr key={`${categoryIndex}-${featureIndex}`} className="border-b border-gray-800">
                         <td className="py-3 px-2 text-gray-300">{feature.name}</td>
-                        <td className="py-3 px-2">
+                        {/* <td className="py-3 px-2">
                           {typeof feature.starter === "boolean" ? (
                             feature.starter ? (
                               <Check className="h-5 w-5 text-green-500" />
@@ -792,7 +792,7 @@ export default function PricingSection() {
                           ) : (
                             <span className="text-gray-200">{feature.starter}</span>
                           )}
-                        </td>
+                        </td> */}
                         <td className="py-3 px-2">
                           {typeof feature.pro === "boolean" ? (
                             feature.pro ? (

@@ -12,25 +12,25 @@ export default function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
 
   const plans = [
-    {
-      name: "Starter",
-      description: "Perfect for individuals and small creators",
-      monthlyPrice: 29,
-      yearlyPrice: 290,
-      features: [
-        { included: true, text: "1 Instagram account" },
-        { included: true, text: "Basic AI responses" },
-        { included: true, text: "Up to 500 messages/month" },
-        { included: true, text: "Standard analytics" },
-        { included: false, text: "Custom AI training" },
-        { included: false, text: "Multi-account management" },
-        { included: false, text: "Advanced analytics" },
-        { included: false, text: "Priority support" },
-      ],
-      cta: "Start Free Trial",
-      popular: false,
-      color: "from-slate-700 to-slate-800",
-    },
+    // {
+    //   name: "Starter",
+    //   description: "Perfect for individuals and small creators",
+    //   monthlyPrice: 29,
+    //   yearlyPrice: 290,
+    //   features: [
+    //     { included: true, text: "1 Instagram account" },
+    //     { included: true, text: "Basic AI responses" },
+    //     { included: true, text: "Up to 500 messages/month" },
+    //     { included: true, text: "Standard analytics" },
+    //     { included: false, text: "Custom AI training" },
+    //     { included: false, text: "Multi-account management" },
+    //     { included: false, text: "Advanced analytics" },
+    //     { included: false, text: "Priority support" },
+    //   ],
+    //   cta: "Start Free Trial",
+    //   popular: false,
+    //   color: "from-slate-700 to-slate-800",
+    // },
     {
       name: "Professional",
       description: "Ideal for growing businesses and influencers",
@@ -46,7 +46,7 @@ export default function PricingSection() {
         { included: false, text: "API access" },
         { included: false, text: "Dedicated account manager" },
       ],
-      cta: "Start Free Trial",
+      cta: "Upgrade to PRO",
       popular: true,
       color: "from-blue-600 to-blue-800",
     },

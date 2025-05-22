@@ -478,15 +478,15 @@
 
 
 
-
-
-/* Template Card specific animations */
+/* Template Card specific animations - SUBTLE VERSION */
 .template-card-glow {
   box-shadow: 0 0 15px 5px rgba(var(--primary), 0.15);
+  transition: box-shadow 0.3s ease;
 }
 
 .template-card-glow:hover {
-  box-shadow: 0 0 25px 5px rgba(var(--primary), 0.25);
+  /* Subtle border glow increase */
+  box-shadow: 0 0 18px 5px rgba(var(--primary), 0.2);
 }
 
 /* 3D perspective effect */
@@ -545,7 +545,7 @@
   }
 }
 
-/* Enhanced template card styles */
+/* Enhanced template card styles - REMOVED HOVER EFFECTS */
 .template-icon-container {
   position: relative;
   overflow: hidden;
@@ -553,61 +553,17 @@
   transition: all 0.3s ease;
 }
 
-.template-icon-container::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
+/* REMOVED: All ::before and ::after hover overlay effects */
 
-.template-icon-container:hover::before {
-  opacity: 0;
-}
-
-.template-icon-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.template-icon-container:hover::after {
-  opacity: 0;
-}
-
-/* Colorful badge animations */
+/* REMOVED: Colorful badge shine animation */
 .colorful-badge {
   position: relative;
   overflow: hidden;
 }
 
-.colorful-badge::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.colorful-badge:hover::before {
-  left: 100%;
-}
-
-/* Gradient button animations */
+/* REMOVED: Gradient button background position animation */
 .gradient-button {
   background-size: 200% 100%;
-  transition: background-position 0.5s ease;
-}
-
-.gradient-button:hover {
-  background-position: right center;
 }
 
 /* Creative card shapes */
@@ -651,53 +607,113 @@
   clip-path: polygon(5% 0%, 100% 0%, 100% 95%, 95% 100%, 0% 100%, 0% 5%);
 }
 
-/* Category-specific card styles */
+/* Category-specific card styles - SUBTLE HOVER ENHANCEMENT */
 .card-border-marketing {
   border-color: rgba(59, 130, 246, 0.5);
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-marketing:hover {
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.25);
 }
 
 .card-border-sales {
   border-color: rgba(16, 185, 129, 0.5);
   box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-sales:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
 }
 
 .card-border-customer-support {
   border-color: rgba(139, 92, 246, 0.5);
   box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-customer-support:hover {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.25);
 }
 
 .card-border-data-processing {
   border-color: rgba(6, 182, 212, 0.5);
   box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-data-processing:hover {
+  border-color: rgba(6, 182, 212, 0.7);
+  box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
 }
 
 .card-border-document {
   border-color: rgba(245, 158, 11, 0.5);
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-document:hover {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
 }
 
 .card-border-social {
   border-color: rgba(236, 72, 153, 0.5);
   box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-social:hover {
+  border-color: rgba(236, 72, 153, 0.7);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.25);
 }
 
 .card-border-communication {
   border-color: rgba(20, 184, 166, 0.5);
   box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-communication:hover {
+  border-color: rgba(20, 184, 166, 0.7);
+  box-shadow: 0 0 18px rgba(20, 184, 166, 0.25);
 }
 
 .card-border-integration {
   border-color: rgba(59, 130, 246, 0.5);
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-integration:hover {
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.25);
 }
 
 .card-border-utility {
   border-color: rgba(100, 116, 139, 0.5);
   box-shadow: 0 0 15px rgba(100, 116, 139, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-utility:hover {
+  border-color: rgba(100, 116, 139, 0.7);
+  box-shadow: 0 0 18px rgba(100, 116, 139, 0.25);
 }
 
 .card-border-custom {
   border-color: rgba(249, 115, 22, 0.5);
   box-shadow: 0 0 15px rgba(249, 115, 22, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-custom:hover {
+  border-color: rgba(249, 115, 22, 0.7);
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.25);
 }
