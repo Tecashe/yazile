@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { updateSubscription } from "@/actions/user/queries"
 
-// This is your Stripe webhook secret for testing your endpoint locally.
+
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
 export async function POST(req: NextRequest) {
@@ -17,20 +17,20 @@ export async function POST(req: NextRequest) {
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 })
   }
 
-  // Handle the event
+
   switch (event.type) {
     case "checkout.session.completed":
       const session = event.data.object
-      // Extract the customer ID from the session
+    
       const customerId = session.customer
-      const userId = session.metadata?.userId // You'll need to add this when creating the session
+      const userId = session.metadata?.userId 
 
       if (userId && customerId) {
         try {
-          // Update user subscription in your database
+
           await updateSubscription(userId, {
             customerId: customerId as string,
-            plan: "PRO", // Update to match your plan name
+            plan: "PRO", 
           })
         } catch (error) {
           console.error("Error updating subscription:", error)
