@@ -3209,6 +3209,7 @@ type Props = {
   isAI: boolean
   onSelectTemplate: (template: string) => void
   selectedTemplate?: string
+  userSubscription?: "SMARTAI" | "MESSAGE"; 
 }
 
 const ResponseLibrary = ({ isAI, onSelectTemplate, selectedTemplate }: Props) => {
