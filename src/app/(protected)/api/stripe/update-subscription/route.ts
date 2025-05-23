@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
-import { currentUser } from "@clerk/nextjs/server"
+import { onCurrentUser } from "@/actions/user"
 import { updateSubscription } from "@/actions/user/queries"
 
 export async function POST(req: NextRequest) {
   try {
-    // Get the current user
-    const user = await currentUser()
+    
+    const user = await onCurrentUser()
     if (!user) {
       return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
