@@ -1161,12 +1161,12 @@ Key team members:
                         </>
                       )} */}
                     {/* </h3> */}
-                    <ResponseLibrary
+                    {/* <ResponseLibrary
                       isAI={Listener === "SMARTAI"}
                       onSelectTemplate={handleSelectMessageTemplate}
                       selectedTemplate={selectedTemplate}
                       userSubscription={Listener}
-                    />
+                    /> */}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
