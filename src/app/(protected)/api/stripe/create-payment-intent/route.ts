@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
-import { onCurrentUser } from "@/actions/user"
+import { onUserInfor } from "@/actions/user"
 
 export async function POST(req: NextRequest) {
   try {
     // Get the current user
-    const user = await onCurrentUser()
+    const user = await onUserInfor()
+    const userid = user.data?.id
     if (!user) {
       return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
       amount,
       currency: "usd",
       metadata: {
-        userId: user.id,
+        userId: userid ||"123",
         plan,
       },
       automatic_payment_methods: {

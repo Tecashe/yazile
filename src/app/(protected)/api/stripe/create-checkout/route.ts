@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createCheckoutSession, SUBSCRIPTION_PRICES } from "@/lib/stripe"
-import { onCurrentUser } from "@/actions/user"
+import { onUserInfor } from "@/actions/user"
 
 export async function POST(req: NextRequest) {
   try {
     // Get the current user
-    const user = await onCurrentUser()
+    const user = await onUserInfor()
     if (!user) {
       return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,

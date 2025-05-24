@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
-import { onCurrentUser } from "@/actions/user"
+import { onCurrentUser, onUserInfor } from "@/actions/user"
 import { updateSubscription } from "@/actions/user/queries"
 
 export async function POST(req: NextRequest) {
   try {
-    
-    const user = await onCurrentUser()
+    const details = await onCurrentUser()
+    const user = await onUserInfor()
+    const userid = user.data?.id
     if (!user) {
       return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -37,10 +38,10 @@ export async function POST(req: NextRequest) {
     if (!customerId) {
       // Create a customer if one doesn't exist
       const customer = await stripe.customers.create({
-        email: user.emailAddresses[0].emailAddress,
-        name: `${user.firstName} ${user.lastName}`,
+        email: details.emailAddresses[0].emailAddress,
+        name: `${details.firstName} ${details.lastName}`,
         metadata: {
-          userId: user.id,
+          userId: userid ||"321",
         },
       })
       customerId = customer.id
@@ -55,12 +56,12 @@ export async function POST(req: NextRequest) {
         },
       ],
       metadata: {
-        userId: user.id,
+        userId: userid ||"321",
       },
     })
 
     // Update user subscription in database
-    await updateSubscription(user.id, {
+    await updateSubscription(userid ||"321", {
       customerId,
       plan: "PRO", // Update to match your plan name
     })

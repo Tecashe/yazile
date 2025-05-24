@@ -1,13 +1,15 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { stripe, PLAN_PRICE_IDS } from "@/lib/stripe"
-import { onCurrentUser } from "@/actions/user"
+import { onCurrentUser, onUserInfor } from "@/actions/user"
 import { upsertSubscription } from "@/lib/subscription"
 
 export async function POST(req: NextRequest) {
   try {
     // Get the current user
-    const user = await onCurrentUser()
+    const details = await onCurrentUser()
+    const user = await onUserInfor()
+    const userid = user.data?.id
     if (!user) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
     // Check if customer already exists
     let customerId
     const existingCustomers = await stripe.customers.list({
-      email: user.emailAddresses[0].emailAddress,
+      email: details.emailAddresses[0].emailAddress,
       limit: 1,
     })
 
@@ -52,8 +54,8 @@ export async function POST(req: NextRequest) {
     } else {
       // Create a new customer
       const customer = await stripe.customers.create({
-        email: user.emailAddresses[0].emailAddress,
-        name: cardholderName || `${user.firstName} ${user.lastName}`,
+        email: details.emailAddresses[0].emailAddress,
+        name: cardholderName || `${details.firstName} ${details.lastName}`,
         payment_method: paymentMethodId,
         invoice_settings: {
           default_payment_method: paymentMethodId,
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
           country,
         },
         metadata: {
-          userId: user.id,
+          userId: userid || "65478754542",
         },
       })
       customerId = customer.id
@@ -79,7 +81,7 @@ export async function POST(req: NextRequest) {
       },
       expand: ["latest_invoice.payment_intent"],
       metadata: {
-        userId: user.id,
+        userId: userid || "65478754542",
       },
     })
 
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
     const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId)
 
     // Update user subscription in database
-    await upsertSubscription(user.id, {
+    await upsertSubscription(userid || "65478754542", {
       customerId,
       subscriptionId: subscription.id,
       priceId,
