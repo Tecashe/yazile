@@ -167,62 +167,20 @@
 
 
 
-
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/api/payment(.*)", "/callback(.*)"])
-
-//for plans
-
 import { hasAccess } from "@/lib/subscription"
 
-// This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
-  // Check if the path is a protected route
-  if (request.nextUrl.pathname.startsWith("/pro") || 
-      request.nextUrl.pathname.startsWith("/ai-features")) {
-    
-        
-    const userId = request.headers.get("x-user-id")
-    
-    if (!userId) {
-      // Redirect to login if no user ID
-      return NextResponse.redirect(new URL("/sign-in", request.url))
-    }
-    
-    // Check if the user has access to PRO features
-    const hasProAccess = await hasAccess(userId, "PRO")
-    
-    if (!hasProAccess) {
-      // Redirect to upgrade page if no access
-      return NextResponse.redirect(new URL("/upgrade", request.url))
-    }
-  }
-  
-  // Similarly for team features
-  if (request.nextUrl.pathname.startsWith("/team")) {
-    const userId = request.headers.get("x-user-id")
-    
-    if (!userId) {
-      return NextResponse.redirect(new URL("/sign-in", request.url))
-    }
-    
-    const hasTeamAccess = await hasAccess(userId, "TEAM")
-    
-    if (!hasTeamAccess) {
-      return NextResponse.redirect(new URL("/upgrade?plan=team", request.url))
-    }
-  }
-  
-  return NextResponse.next()
-}
-
-
-
-
-//for plans
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)", 
+  "/onboarding(.*)",
+  "/api/payment(.*)", 
+  "/callback(.*)",
+  "/pro(.*)",
+  "/ai-features(.*)",
+  "/team(.*)"
+])
 
 // This function will handle both referrals and affiliate tracking
 async function handleReferralsAndAffiliates(request: NextRequest) {
@@ -285,19 +243,57 @@ async function handleReferralsAndAffiliates(request: NextRequest) {
     }
   }
 
-  // Continue with normal request processing
-  return NextResponse.next()
+  return null // Return null to continue processing
 }
 
-// Combine our referral handling with Clerk middleware
+// Handle subscription-based route protection
+async function handleSubscriptionProtection(request: NextRequest, userId: string) {
+  const { pathname } = request.nextUrl
+
+  // Check PRO routes
+  if (pathname.startsWith("/pro") || pathname.startsWith("/ai-features")) {
+    const hasProAccess = await hasAccess(userId, "PRO")
+    
+    if (!hasProAccess) {
+      return NextResponse.redirect(new URL("/upgrade", request.url))
+    }
+  }
+  
+  // Check TEAM routes
+  if (pathname.startsWith("/team")) {
+    const hasTeamAccess = await hasAccess(userId, "TEAM")
+    
+    if (!hasTeamAccess) {
+      return NextResponse.redirect(new URL("/upgrade?plan=team", request.url))
+    }
+  }
+
+  return null // Return null to continue processing
+}
+
+// Main middleware using clerkMiddleware
 export default clerkMiddleware(async (auth, req) => {
   // First handle any referral or affiliate logic
   const referralResponse = await handleReferralsAndAffiliates(req)
+  if (referralResponse) {
+    return referralResponse
+  }
 
-  // Then protect routes as needed
-  if (isProtectedRoute(req)) await auth.protect()
+  // Protect routes that require authentication
+  if (isProtectedRoute(req)) {
+    const { userId } = await auth.protect()
+    
+    // Handle subscription-based protection for authenticated users
+    if (userId) {
+      const subscriptionResponse = await handleSubscriptionProtection(req, userId)
+      if (subscriptionResponse) {
+        return subscriptionResponse
+      }
+    }
+  }
 
-  return referralResponse
+  // Continue with normal request processing
+  return NextResponse.next()
 })
 
 export const config = {
@@ -306,9 +302,5 @@ export const config = {
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
-    // Add matcher for affiliate referral links
-    "/ref/:referralCode*",
-    "/pro/:path*", "/ai-features/:path*", "/team/:path*"
   ],
 }
-
