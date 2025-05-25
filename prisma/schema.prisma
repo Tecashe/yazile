@@ -2165,33 +2165,6 @@ enum NotificationType {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // This is just the BusinessProfile model to add to your schema
 // Add this to your existing schema.prisma file
 
@@ -2210,33 +2183,6 @@ model BusinessProfileDescription {
   @@index([userId])
   @@index([automationId])
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
