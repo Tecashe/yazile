@@ -208,7 +208,7 @@ export default function AutomationDashboardHeader() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        onClick={() => handleNavigation("pricing")}
+                        onClick={() => handleNavigation("settings")}
                         variant="outline"
                         size="icon"
                         className="h-10 w-10 rounded-full border-green-500/20 hover:border-green-500/40 hover:bg-green-500/10"

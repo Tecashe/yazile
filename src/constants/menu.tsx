@@ -164,6 +164,7 @@ import {
   Split,
   Calculator,
   Cog,
+  Route,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -232,7 +233,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Connections",
-        icon: icon(ZapDouToneBlack, "text-cyan-600"),
+        icon: icon(Route, "text-cyan-600"),
       },
       {
         id: uuid(),
