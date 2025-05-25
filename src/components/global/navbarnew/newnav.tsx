@@ -18,6 +18,7 @@ import {
   Settings,
   Share2,
   Zap,
+  Cog,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -212,7 +213,7 @@ export default function AutomationDashboardHeader() {
                         size="icon"
                         className="h-10 w-10 rounded-full border-green-500/20 hover:border-green-500/40 hover:bg-green-500/10"
                       >
-                        <Settings className="h-5 w-5 text-green-500" />
+                        <Cog className="h-5 w-5 text-gray-600" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

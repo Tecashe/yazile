@@ -163,6 +163,7 @@ import {
   Webhook,
   Split,
   Calculator,
+  Cog,
 } from "lucide-react"
 import type React from "react"
 import { ZapDouToneBlack } from "@/icons"
@@ -235,7 +236,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       },
       {
         id: uuid(),
-        label: "Apps",
+        label: "Integrations",
         icon: icon(Cpu, "text-slate-600"),
       },
     ],
@@ -267,7 +268,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       {
         id: uuid(),
         label: "Settings",
-        icon: icon(Settings, "text-gray-600"),
+        icon: icon(Cog, "text-gray-600"),
       },
     ],
   },
