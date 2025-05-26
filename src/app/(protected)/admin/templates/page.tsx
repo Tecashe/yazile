@@ -1708,7 +1708,7 @@ type PaginationInfo = {
 
 type VerificationStatus = "idle" | "loading" | "success" | "error"
 
-export default function TemplatesAdminPage() {
+ export default function TemplatesAdminPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
