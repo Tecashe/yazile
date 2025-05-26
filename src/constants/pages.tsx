@@ -11,7 +11,7 @@ import {
   Chat,
   ZapDouToneBlack
 } from '@/icons'
-import { MessageCircle,Send, BarChart2, Users, Calendar, Zap, FileText, HelpCircle, Sparkles, Target, Palette, Megaphone, Clock, TargetIcon, PersonStanding, Gift, Group, Award, Cog, Webhook, Layout, ChartArea } from 'lucide-react'
+import { MessageCircle,Send, BarChart2, Users, Calendar, Zap, FileText, HelpCircle, Sparkles, Target, Palette, Megaphone, Clock, TargetIcon, PersonStanding, Gift, Group, Award, Cog, Webhook, Layout, ChartArea, Cpu, Route, Home } from 'lucide-react'
 
 export const PAGE_BREAD_CRUMBS: string[] = [
   'contacts',
@@ -40,12 +40,12 @@ type Props = {
 
 export const PAGE_ICON: Props = {
   AUTOMATION: <AutomationDuoToneBlue />,
-  AUTOMATIONS: <AutomationDuoToneBlue />,
+  AUTOMATIONS: <Zap />,
   CONTACTS: <ContactsDuoToneBlue />,
-  INTEGRATIONS: <RocketDuoToneBlue />,
-  CONNECTIONS: <ZapDouToneBlack />,
+  INTEGRATIONS: <Cpu />,
+  CONNECTIONS: <Route />,
   SETTINGS: <Cog />,
-  HOME: <HomeDuoToneBlue />,
+  HOME: <Home />,
   AUDIENCE: <Users />,
   POSTING: <InstagramDuoToneBlue />,
   SCHEDULE: <Clock />,
