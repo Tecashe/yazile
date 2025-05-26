@@ -3264,7 +3264,6 @@
 // }
 
 
-
 "use client"
 
 import React from "react"
@@ -3390,10 +3389,10 @@ export default function TemplatesAdminPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string>("")
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL")
   const [showFeatured, setShowFeatured] = useState<boolean | undefined>(undefined)
   const [showPopular, setShowPopular] = useState<boolean | undefined>(undefined)
-  const [selectedComplexity, setSelectedComplexity] = useState<string>("")
+  const [selectedComplexity, setSelectedComplexity] = useState<string>("ALL")
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("idle")
   const [selectedN8nTemplate, setSelectedN8nTemplate] = useState<N8nTemplate | null>(null)
   const [templatePreview, setTemplatePreview] = useState<any>(null)
@@ -3483,10 +3482,10 @@ export default function TemplatesAdminPage() {
       // Build query params
       const params = new URLSearchParams()
       if (searchTerm) params.append("search", searchTerm)
-      if (selectedCategory) params.append("category", selectedCategory)
+      if (selectedCategory && selectedCategory !== "ALL") params.append("category", selectedCategory)
       if (showFeatured !== undefined) params.append("featured", String(showFeatured))
       if (showPopular !== undefined) params.append("popular", String(showPopular))
-      if (selectedComplexity) params.append("complexity", selectedComplexity)
+      if (selectedComplexity && selectedComplexity !== "ALL") params.append("complexity", selectedComplexity)
       params.append("limit", String(pagination.limit))
       params.append("offset", String(pagination.offset))
 
@@ -3865,83 +3864,6 @@ export default function TemplatesAdminPage() {
     return useCases.slice(0, 3) // Limit to 3 use cases
   }
 
-  // Initial fetch
-  useEffect(() => {
-    fetchTemplates()
-  }, [fetchTemplates])
-
-  // Apply filters
-  const applyFilters = useCallback(() => {
-    setPagination((prev) => ({ ...prev, offset: 0 })) // Reset to first page
-  }, [])
-
-  // Reset filters
-  const resetFilters = useCallback(() => {
-    setSearchTerm("")
-    setSelectedCategory("")
-    setShowFeatured(undefined)
-    setShowPopular(undefined)
-    setSelectedComplexity("")
-    setPagination((prev) => ({ ...prev, offset: 0 }))
-  }, [])
-
-  // Handle pagination
-  const handlePreviousPage = useCallback(() => {
-    if (pagination.offset - pagination.limit >= 0) {
-      setPagination((prev) => ({ ...prev, offset: prev.offset - prev.limit }))
-    }
-  }, [pagination.offset, pagination.limit])
-
-  const handleNextPage = useCallback(() => {
-    if (pagination.offset + pagination.limit < pagination.total) {
-      setPagination((prev) => ({ ...prev, offset: prev.offset + prev.limit }))
-    }
-  }, [pagination.offset, pagination.limit, pagination.total])
-
-  // Form handlers with proper comma handling
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }, [])
-
-  const handleSelectChange = useCallback((name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }, [])
-
-  const handleCheckboxChange = useCallback((name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }))
-  }, [])
-
-  // Fixed comma-separated input handler
-  const handleCommaSeparatedInput = useCallback((name: string, value: string) => {
-    // Allow typing commas and handle them properly
-    const arrayValue = value
-      .split(",")
-      .map((item) => item.trim())
-      .filter((item, index, arr) => {
-        // Keep empty strings if they're not at the end (user is still typing)
-        if (index === arr.length - 1) return item.length > 0
-        return true
-      })
-
-    setFormData((prev) => ({ ...prev, [name]: arrayValue }))
-  }, [])
-
-  // Handle n8n template selection with auto-generation
-  const handleSelectN8nTemplate = useCallback(
-    async (template: N8nTemplate) => {
-      setSelectedN8nTemplate(template)
-      setIsN8nBrowserOpen(false)
-
-      // Auto-generate all template data
-      await autoGenerateTemplateData(template)
-
-      // Fetch template details for preview
-      await fetchN8nTemplateDetails(template.id)
-    },
-    [autoGenerateTemplateData, fetchN8nTemplateDetails],
-  )
-
   // Template form component with improved state management
   const TemplateForm = React.memo(() => {
     // Handle n8n template verification
@@ -4081,9 +4003,9 @@ export default function TemplatesAdminPage() {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category.replace(/_/g, " ")}
+                    {categories.map((categoryItem) => (
+                      <SelectItem key={categoryItem} value={categoryItem}>
+                        {categoryItem.replace(/_/g, " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -4782,6 +4704,83 @@ export default function TemplatesAdminPage() {
     [fetchN8nTemplateDetails],
   )
 
+  // Initial fetch
+  useEffect(() => {
+    fetchTemplates()
+  }, [fetchTemplates])
+
+  // Apply filters
+  const applyFilters = useCallback(() => {
+    setPagination((prev) => ({ ...prev, offset: 0 })) // Reset to first page
+  }, [])
+
+  // Reset filters
+  const resetFilters = useCallback(() => {
+    setSearchTerm("")
+    setSelectedCategory("ALL")
+    setShowFeatured(undefined)
+    setShowPopular(undefined)
+    setSelectedComplexity("ALL")
+    setPagination((prev) => ({ ...prev, offset: 0 }))
+  }, [])
+
+  // Handle pagination
+  const handlePreviousPage = useCallback(() => {
+    if (pagination.offset - pagination.limit >= 0) {
+      setPagination((prev) => ({ ...prev, offset: prev.offset - prev.limit }))
+    }
+  }, [pagination.offset, pagination.limit])
+
+  const handleNextPage = useCallback(() => {
+    if (pagination.offset + pagination.limit < pagination.total) {
+      setPagination((prev) => ({ ...prev, offset: prev.offset + prev.limit }))
+    }
+  }, [pagination.offset, pagination.limit, pagination.total])
+
+  // Form handlers with proper comma handling
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }, [])
+
+  const handleSelectChange = useCallback((name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }, [])
+
+  const handleCheckboxChange = useCallback((name: string, checked: boolean) => {
+    setFormData((prev) => ({ ...prev, [name]: checked }))
+  }, [])
+
+  // Fixed comma-separated input handler
+  const handleCommaSeparatedInput = useCallback((name: string, value: string) => {
+    // Allow typing commas and handle them properly
+    const arrayValue = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item, index, arr) => {
+        // Keep empty strings if they're not at the end (user is still typing)
+        if (index === arr.length - 1) return item.length > 0
+        return true
+      })
+
+    setFormData((prev) => ({ ...prev, [name]: arrayValue }))
+  }, [])
+
+  // Handle n8n template selection with auto-generation
+  const handleSelectN8nTemplate = useCallback(
+    async (template: N8nTemplate) => {
+      setSelectedN8nTemplate(template)
+      setIsN8nBrowserOpen(false)
+
+      // Auto-generate all template data
+      await autoGenerateTemplateData(template)
+
+      // Fetch template details for preview
+      await fetchN8nTemplateDetails(template.id)
+    },
+    [autoGenerateTemplateData, fetchN8nTemplateDetails],
+  )
+
   return (
     <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
@@ -4888,7 +4887,7 @@ export default function TemplatesAdminPage() {
                   <SelectValue placeholder="Any complexity" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any complexity</SelectItem>
+                  <SelectItem value="ALL">Any complexity</SelectItem>
                   <SelectItem value="SIMPLE">🟢 Simple</SelectItem>
                   <SelectItem value="MEDIUM">🟡 Medium</SelectItem>
                   <SelectItem value="COMPLEX">🔴 Complex</SelectItem>
