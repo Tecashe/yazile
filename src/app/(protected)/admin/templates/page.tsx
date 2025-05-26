@@ -5819,7 +5819,7 @@ export default function TemplatesAdminPage() {
         // Debounced update to parent state
         const timeoutId = setTimeout(() => {
           setFormData((prev) => ({ ...prev, [name]: value }))
-        }, 300) // 300ms debounce
+        }, 1000) // 300ms debounce
 
         return () => clearTimeout(timeoutId)
       },
@@ -5844,7 +5844,7 @@ export default function TemplatesAdminPage() {
             .map((item) => item.trim())
             .filter(Boolean)
           setFormData((prev) => ({ ...prev, [name]: arrayValue }))
-        }, 300)
+        }, 1000)
 
         return () => clearTimeout(timeoutId)
       },
