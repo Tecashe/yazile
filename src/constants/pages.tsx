@@ -44,7 +44,7 @@ export const PAGE_ICON: Props = {
   CONTACTS: <ContactsDuoToneBlue />,
   INTEGRATIONS: <RocketDuoToneBlue />,
   CONNECTIONS: <ZapDouToneBlack />,
-  SETTINGS: <SettingsDuoToneWhite />,
+  SETTINGS: <Cog />,
   HOME: <HomeDuoToneBlue />,
   AUDIENCE: <Users />,
   POSTING: <InstagramDuoToneBlue />,

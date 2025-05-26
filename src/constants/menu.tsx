@@ -156,7 +156,6 @@ import {
   Zap,
   Send,
   Cpu,
-  Settings,
   DollarSign,
   Award,
   Layout,
@@ -167,7 +166,6 @@ import {
   Route,
 } from "lucide-react"
 import type React from "react"
-import { ZapDouToneBlack } from "@/icons"
 
 export type SideBarItemProps = {
   id: string
