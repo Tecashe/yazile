@@ -5203,7 +5203,7 @@
 "use client"
 
 import React from "react"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useRef,useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -5348,6 +5348,8 @@ export default function TemplatesAdminPage() {
 
   // Template form state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isN8nBrowserOpen, setIsN8nBrowserOpen] = useState(false)
   const [currentTemplate, setCurrentTemplate] = useState<Template | null>(null)
@@ -5811,22 +5813,63 @@ export default function TemplatesAdminPage() {
     }, [formData])
 
     // Local input handler that doesn't trigger parent re-renders immediately
+    // const handleLocalInputChange = useCallback(
+    //   (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    //     const { name, value } = e.target
+    //     setLocalFormData((prev) => ({ ...prev, [name]: value }))
+
+    //     // Debounced update to parent state
+    //     const timeoutId = setTimeout(() => {
+    //       setFormData((prev) => ({ ...prev, [name]: value }))
+    //     }, 1000) // 300ms debounce
+
+    //     return () => clearTimeout(timeoutId)
+    //   },
+    //   [setFormData],
+    // )
     const handleLocalInputChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
         setLocalFormData((prev) => ({ ...prev, [name]: value }))
 
-        // Debounced update to parent state
-        const timeoutId = setTimeout(() => {
-          setFormData((prev) => ({ ...prev, [name]: value }))
-        }, 1000) // 300ms debounce
+        if (debounceTimer.current) {
+          clearTimeout(debounceTimer.current)
+        }
 
-        return () => clearTimeout(timeoutId)
+        debounceTimer.current = setTimeout(() => {
+          setFormData((prev) => ({ ...prev, [name]: value }))
+        }, 300)
       },
       [setFormData],
     )
 
+
     // Local comma-separated input handler
+    // const handleLocalCommaSeparatedInput = useCallback(
+    //   (name: string, value: string) => {
+    //     setLocalFormData((prev) => ({
+    //       ...prev,
+    //       [name]: value
+    //         .split(",")
+    //         .map((item) => item.trim())
+    //         .filter(Boolean),
+    //     }))
+
+    //     // Debounced update to parent state
+    //     const timeoutId = setTimeout(() => {
+    //       const arrayValue = value
+    //         .split(",")
+    //         .map((item) => item.trim())
+    //         .filter(Boolean)
+    //       setFormData((prev) => ({ ...prev, [name]: arrayValue }))
+    //     }, 1000)
+
+    //     return () => clearTimeout(timeoutId)
+    //   },
+    //   [setFormData],
+    // )
+    
+
     const handleLocalCommaSeparatedInput = useCallback(
       (name: string, value: string) => {
         setLocalFormData((prev) => ({
@@ -5837,19 +5880,23 @@ export default function TemplatesAdminPage() {
             .filter(Boolean),
         }))
 
-        // Debounced update to parent state
-        const timeoutId = setTimeout(() => {
+        // Clear existing timeout before setting a new one
+        if (debounceRef.current) {
+          clearTimeout(debounceRef.current)
+        }
+
+        debounceRef.current = setTimeout(() => {
           const arrayValue = value
             .split(",")
             .map((item) => item.trim())
             .filter(Boolean)
+
           setFormData((prev) => ({ ...prev, [name]: arrayValue }))
         }, 1000)
-
-        return () => clearTimeout(timeoutId)
       },
-      [setFormData],
+      [setFormData]
     )
+
 
     // Handle n8n template verification
     const handleVerifyTemplate = useCallback(async () => {
