@@ -708,17 +708,6 @@ export const createOpportunity = async (data: {
 
 
 
-
-
-
-
-
-// "use server"
-
-// import { db } from "@/lib/db"
-// import { auth } from "@/auth"
-// import { revalidatePath } from "next/cache"
-
 interface SaveBusinessProfileParams {
   automationId: string
   content: string
@@ -779,9 +768,7 @@ export async function saveBusinessProfile({ automationId, content }: SaveBusines
       })
     }
 
-    // // Revalidate paths that might display this data
-    // revalidatePath(``)
-    // revalidatePath()
+    
 
     return {
       success: true,
@@ -832,3 +819,4 @@ export async function getBusinessProfileDescription(automationId: string) {
     }
   }
 }
+
