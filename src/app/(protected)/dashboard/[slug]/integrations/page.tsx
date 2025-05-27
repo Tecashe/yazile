@@ -2,6 +2,7 @@
 
 import IntegrationsPage from "@/components/global/integrations/integrations-page"
 import { Suspense } from "react"
+import { onUserInfor } from "@/actions/user"
 import { Loader2 } from "lucide-react"
 
 export default function Page() {
