@@ -32,7 +32,7 @@ import InstagramDashboard from "./my-info" // Import the new dashboard
 import IntegrationInsights from "./integration-insights"
 import { useSearchParams } from "next/navigation"
 
-export default async function IntegrationsPage() {
+export default function IntegrationsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [showRequirements, setShowRequirements] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -40,8 +40,7 @@ export default async function IntegrationsPage() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const searchParams = useSearchParams()
-  const userr = await onUserInfor()
-  const thisId = userr.data?.id
+  
   
   // Check for OAuth code in URL (for Instagram callback)
   const code = searchParams.get("code")
@@ -203,7 +202,7 @@ export default async function IntegrationsPage() {
     try {
       // Use the actual user ID from userData
       const userId = userData?.data?.id || "User"
-      const result = await refreshInstagramData(thisId||"237462617")
+      const result = await refreshInstagramData(userId||"237462617")
 
       if (result.status === 200) {
         toast({
@@ -470,7 +469,7 @@ export default async function IntegrationsPage() {
           <PlatformBenefits platform="whatsapp" />
         </TabsContent>
       </Tabs>
-      <InstagramDashboard userId={thisId||"1234556"}/>
+      <InstagramDashboard userId={userData?.data?.clerkId||"1234556"}/>
       
       {showRequirements && (
         <RequirementsModal 
