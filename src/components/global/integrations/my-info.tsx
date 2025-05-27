@@ -494,7 +494,7 @@ export default function InstagramDashboard({ userId }: InstagramDashboardProps) 
           <Card>
             <CardHeader>
               <CardTitle>User Mentions</CardTitle>
-              <CardDescription>Posts where you've been tagged</CardDescription>
+              <CardDescription>Posts where you&apos;ve been tagged</CardDescription>
             </CardHeader>
             <CardContent>
               {mentionsLoading ? (
@@ -535,7 +535,7 @@ export default function InstagramDashboard({ userId }: InstagramDashboardProps) 
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
-                  No mentions found. You haven't been tagged in any posts recently.
+                  No mentions found. You haven&apos;t been tagged in any posts recently.
                 </p>
               )}
             </CardContent>
