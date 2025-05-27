@@ -201,7 +201,7 @@ export default function IntegrationsPage() {
     setIsRefreshing(true)
     try {
       // Use the actual user ID from userData
-      const userId = userData?.data?.id || "User"
+      const userId = userData?.data?.clerkId || "User"
       const result = await refreshInstagramData(userId||"237462617")
 
       if (result.status === 200) {
