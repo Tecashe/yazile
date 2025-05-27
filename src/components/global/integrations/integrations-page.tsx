@@ -3,7 +3,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { onUserInfor } from "@/actions/user"
 import { motion } from "framer-motion"
 import {
   Instagram,
@@ -21,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { onUserInfo } from "@/actions/user"
+import { onUserInfo,onUserInfor } from "@/actions/user"
 import { refreshInstagramData, onOAuthInstagram } from "@/actions/integrations"
 import IntegrationCard from "./integration-card"
 import RequirementsModal from "./requirements-modal"
@@ -33,7 +32,7 @@ import InstagramDashboard from "./my-info" // Import the new dashboard
 import IntegrationInsights from "./integration-insights"
 import { useSearchParams } from "next/navigation"
 
-export default function IntegrationsPage() {
+export default async function IntegrationsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [showRequirements, setShowRequirements] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -41,6 +40,8 @@ export default function IntegrationsPage() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const searchParams = useSearchParams()
+  const userr = await onUserInfor()
+  const thisId = userr.data?.id
   
   // Check for OAuth code in URL (for Instagram callback)
   const code = searchParams.get("code")
@@ -202,7 +203,7 @@ export default function IntegrationsPage() {
     try {
       // Use the actual user ID from userData
       const userId = userData?.data?.id || "User"
-      const result = await refreshInstagramData(userId)
+      const result = await refreshInstagramData(thisId||"237462617")
 
       if (result.status === 200) {
         toast({
@@ -469,7 +470,7 @@ export default function IntegrationsPage() {
           <PlatformBenefits platform="whatsapp" />
         </TabsContent>
       </Tabs>
-      <InstagramDashboard userId={userData?.data?.id||"1234556"}/>
+      <InstagramDashboard userId={thisId||"1234556"}/>
       
       {showRequirements && (
         <RequirementsModal 
