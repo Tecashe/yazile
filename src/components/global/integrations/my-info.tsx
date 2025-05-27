@@ -248,9 +248,9 @@ export default function InstagramDashboard({ userId }: InstagramDashboardProps) 
         {isValid ? (
           <>
             <CheckCircle className="h-4 w-4 text-green-500" />
-            <span className="text-sm text-green-700 dark:text-green-400">
+            {/* <span className="text-sm text-green-700 dark:text-green-400">
               Connected as @{connectionStatus.data?.username}
-            </span>
+            </span> */}
           </>
         ) : (
           <>
