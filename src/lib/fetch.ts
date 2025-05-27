@@ -279,6 +279,7 @@
 //     return long_token.data
 //   }
 // }
+
 //THE TOPMOST IS THE ORIGINAL WORKING WITHOUT BUTTONS ANYAWAY
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -342,7 +343,7 @@ export const sendDM = async (
   try {
     // Using v16.0 which is known to work well with quick replies
     const response = await axios.post(
-      `${process.env.INSTAGRAM_BASE_URL}/v16.0/${userId}/messages`,
+      `${process.env.INSTAGRAM_BASE_URL}/v22.0/${userId}/messages`,
       messagePayload,
       {
         headers: {
@@ -403,7 +404,7 @@ export const sendPrivateMessage = async (
   try {
     // Using explicit API version for consistency
     const response = await axios.post(
-      `${process.env.INSTAGRAM_BASE_URL}/v16.0/${userId}/messages`,
+      `${process.env.INSTAGRAM_BASE_URL}/v22.0/${userId}/messages`,
       messagePayload,
       {
         headers: {
