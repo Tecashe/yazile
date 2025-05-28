@@ -470,7 +470,7 @@ export default function IntegrationsPage() {
           <PlatformBenefits platform="whatsapp" />
         </TabsContent>
       </Tabs>
-      <InstagramDashboard subscriptionTier="pro" userId={userData?.data?.clerkId||"1234556"}/>
+      <InstagramDashboard  userId={userData?.data?.clerkId||"1234556"}/>
       
       {showRequirements && (
         <RequirementsModal 

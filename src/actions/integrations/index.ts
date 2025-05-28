@@ -1147,6 +1147,7 @@ export const validateConnection = async (userId: string) => {
 
 
 
+
 /**
  * Generate AI-powered content strategy based on user's Instagram data
  */
@@ -1176,8 +1177,18 @@ export const generateContentStrategy = async (userId: string) => {
         3. Content type recommendations (photos, videos, reels, stories)
         4. Engagement optimization strategies
         5. Growth opportunities
+        6. Specific recommendations with actionable advice
         
-        Format as JSON with clear sections and actionable recommendations.
+        Format as JSON with the following structure:
+        {
+          "contentThemes": [{"theme": "string", "performance": "string"}],
+          "postingFrequency": {"optimal": "string", "reasoning": "string"},
+          "contentTypes": [{"type": "string", "recommendation": "string"}],
+          "engagementStrategies": [{"strategy": "string", "impact": "string"}],
+          "growthOpportunities": [{"opportunity": "string", "potential": "string"}],
+          "recommendations": [{"title": "string", "description": "string"}],
+          "reports": [{"name": "string", "date": "string"}]
+        }
       `,
     })
 
@@ -1259,7 +1270,27 @@ export const getOptimalPostingTimes = async (userId: string) => {
         3. Content type specific timing (photos vs videos vs reels)
         4. Audience activity patterns
         
-        Return as JSON with specific time recommendations for each day of the week.
+        Return as JSON with the following structure:
+        {
+          "schedule": [
+            {
+              "day": "Monday",
+              "times": ["7-9 PM", "12-2 PM"]
+            },
+            {
+              "day": "Tuesday",
+              "times": ["8-10 PM", "1-3 PM"]
+            },
+            ...for all days of the week
+          ],
+          "contentTypeTimings": {
+            "photos": ["time ranges"],
+            "videos": ["time ranges"],
+            "reels": ["time ranges"],
+            "stories": ["time ranges"]
+          },
+          "audienceActivityPeaks": ["time ranges"]
+        }
       `,
     })
 
@@ -1291,7 +1322,15 @@ export const generateHashtagSuggestions = async (userId: string, contentDescript
         3. 5 trending hashtags (current trends)
         4. 5 branded/community hashtags
         
-        Return as JSON with categories and engagement potential scores.
+        Return as JSON with the following structure:
+        {
+          "high_performance": ["hashtag1", "hashtag2", ...],
+          "niche_specific": ["hashtag1", "hashtag2", ...],
+          "trending": ["hashtag1", "hashtag2", ...],
+          "branded": ["hashtag1", "hashtag2", ...]
+        }
+        
+        Do not include explanations, just the JSON object with arrays of hashtags.
       `,
     })
 
@@ -1311,7 +1350,7 @@ export const analyzeCompetitors = async (userId: string) => {
     const userInsights = await getAccountInsights(userId, "days_28")
 
     // In a real implementation, you'd fetch competitor data from Instagram API
-    // For now, we'll simulate competitor analysis
+    // For now, we'll simulate competitor analysis with AI
 
     const { text } = await generateText({
       model: openai("gpt-4o"),
@@ -1329,7 +1368,35 @@ export const analyzeCompetitors = async (userId: string) => {
         4. Hashtag strategy improvements
         5. Posting frequency recommendations
         
-        Return as JSON with actionable competitive insights.
+        Return as JSON with the following structure:
+        {
+          "competitors": [
+            {
+              "username": "competitor1",
+              "category": "Fashion Brand",
+              "engagementRate": "5.2%",
+              "comparison": "better/worse",
+              "comparisonText": "vs your 4.2%"
+            },
+            {
+              "username": "competitor2",
+              "category": "Lifestyle Brand",
+              "engagementRate": "3.8%",
+              "comparison": "better/worse",
+              "comparisonText": "vs your 4.2%"
+            }
+          ],
+          "contentGaps": [
+            {"gap": "string", "opportunity": "string"}
+          ],
+          "hashtagRecommendations": [
+            {"hashtag": "string", "reason": "string"}
+          ],
+          "frequencyInsights": {
+            "recommendation": "string",
+            "reasoning": "string"
+          }
+        }
       `,
     })
 
@@ -1374,7 +1441,13 @@ export const generateCaptions = async (userId: string, contentDescription: strin
         4. Is optimized for Instagram's algorithm
         5. Includes a call-to-action
         
-        Return as JSON with the caption and suggested hashtags.
+        Return as JSON with the following structure:
+        {
+          "caption": "The full caption text",
+          "suggestedHashtags": ["hashtag1", "hashtag2", ...],
+          "callToAction": "The specific call to action",
+          "toneAnalysis": "Brief analysis of the tone used"
+        }
       `,
     })
 
@@ -1443,7 +1516,42 @@ export const getAudienceInsights = async (userId: string) => {
         4. Best content themes for this audience
         5. Growth opportunities
         
-        Return as JSON with detailed audience analysis.
+        Return as JSON with the following structure:
+        {
+          "performanceScores": [
+            {"name": "Overall Score", "value": 87},
+            {"name": "Content Quality", "value": 92},
+            {"name": "Engagement Rate", "value": 73}
+          ],
+          "audienceDemographics": {
+            "ageRanges": ["string"],
+            "interests": ["string"],
+            "activeHours": ["string"]
+          },
+          "contentPreferences": [
+            {"type": "string", "engagement": "string"}
+          ],
+          "growthProjection": {
+            "monthly": "+247",
+            "quarterly": "string"
+          },
+          "growthFactors": [
+            {"name": "Content consistency", "impact": "+15%"},
+            {"name": "Hashtag optimization", "impact": "+23%"},
+            {"name": "Engagement timing", "impact": "+18%"}
+          ],
+          "engagementFactors": [
+            {"name": "Story interactions", "impact": "+12%"},
+            {"name": "Comment responses", "impact": "+8%"},
+            {"name": "Share rate", "impact": "+5%"}
+          ],
+          "currentEngagementRate": "4.2%",
+          "automationSettings": [
+            {"name": "Auto-like relevant posts", "active": true},
+            {"name": "Auto-follow back", "active": false},
+            {"name": "Smart comment replies", "active": true}
+          ]
+        }
       `,
     })
 
@@ -1511,10 +1619,25 @@ export const createContentCalendar = async (userId: string, days = 30) => {
         1. Daily posting schedule with optimal times
         2. Content type variety (photos, videos, reels, stories)
         3. Content themes and topics
-        4. Hashtag strategies for each post
-        5. Engagement tactics
         
-        Return as JSON with detailed calendar structure.
+        Return as JSON with the following structure:
+        {
+          "days": [
+            {
+              "date": "Mon, 28",
+              "posts": [
+                {"type": "reel", "time": "7 PM", "theme": "string"},
+                {"type": "story", "time": "12 PM", "theme": "string"}
+              ]
+            },
+            ... (for each day)
+          ],
+          "scheduledCount": 12,
+          "scheduleSummary": [
+            {"label": "Next post", "value": "Today 7:00 PM"},
+            {"label": "This week", "value": "5 posts"}
+          ]
+        }
       `,
     })
 
@@ -1548,7 +1671,26 @@ export const analyzeContentTrends = async (userId: string) => {
         5. Hashtag trends
         6. Engagement pattern trends
         
-        Return as JSON with trend analysis and recommendations.
+        Return as JSON with the following structure:
+        {
+          "topThemes": [
+            {"theme": "string", "performance": "string"}
+          ],
+          "emergingOpportunities": [
+            {"opportunity": "string", "potential": "string"}
+          ],
+          "formatPreferences": [
+            {"format": "string", "engagement": "string"}
+          ],
+          "hashtagTrends": [
+            {"hashtag": "string", "trend": "string"}
+          ],
+          "growthMetrics": [
+            {"name": "Follower Growth", "description": "+12% this month", "trend": "up"},
+            {"name": "Engagement Rate", "description": "-3% this week", "trend": "down"},
+            {"name": "Story Views", "description": "+8% this week", "trend": "up"}
+          ]
+        }
       `,
     })
 

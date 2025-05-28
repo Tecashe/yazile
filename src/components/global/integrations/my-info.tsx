@@ -590,14 +590,15 @@ import {
   getAudienceInsights,
   analyzeContentTrends,
   generateReports,
+  generateHashtagSuggestions,
+  createContentCalendar,
 } from "@/actions/integrations"
 
 interface InstagramDashboardProps {
   userId: string
-  subscriptionTier: "free" | "pro" | "enterprise"
 }
 
-export default function EnhancedInstagramDashboard({ userId, subscriptionTier }: InstagramDashboardProps) {
+export default function EnhancedInstagramDashboard({ userId }: InstagramDashboardProps) {
   const [activeTab, setActiveTab] = useState("ai-insights")
   const [selectedPeriod, setSelectedPeriod] = useState<"day" | "week" | "days_28">("week")
   const [hashtagSearch, setHashtagSearch] = useState("")
@@ -605,6 +606,7 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [contentPrompt, setContentPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [selectedTone, setSelectedTone] = useState("professional")
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -625,35 +627,47 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
   const { data: contentStrategy, isLoading: strategyLoading } = useQuery({
     queryKey: ["content-strategy", userId],
     queryFn: () => generateContentStrategy(userId),
-    enabled: subscriptionTier !== "free",
     staleTime: 24 * 60 * 60 * 1000, // 24 hours
   })
 
   const { data: optimalTimes, isLoading: timesLoading } = useQuery({
     queryKey: ["optimal-times", userId],
     queryFn: () => getOptimalPostingTimes(userId),
-    enabled: subscriptionTier !== "free",
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
   })
 
   const { data: audienceInsights, isLoading: audienceLoading } = useQuery({
     queryKey: ["audience-insights", userId],
     queryFn: () => getAudienceInsights(userId),
-    enabled: subscriptionTier === "enterprise",
     staleTime: 24 * 60 * 60 * 1000,
   })
 
   const { data: competitorAnalysis, isLoading: competitorLoading } = useQuery({
     queryKey: ["competitor-analysis", userId],
     queryFn: () => analyzeCompetitors(userId),
-    enabled: subscriptionTier === "enterprise",
     staleTime: 7 * 24 * 60 * 60 * 1000,
   })
 
   const { data: contentTrends, isLoading: trendsLoading } = useQuery({
     queryKey: ["content-trends", userId],
     queryFn: () => analyzeContentTrends(userId),
-    enabled: subscriptionTier !== "free",
+    staleTime: 24 * 60 * 60 * 1000,
+  })
+
+  const {
+    data: hashtagSuggestions,
+    isLoading: hashtagsLoading,
+    refetch: refetchHashtags,
+  } = useQuery({
+    queryKey: ["hashtag-suggestions", userId, contentPrompt],
+    queryFn: () => generateHashtagSuggestions(userId, contentPrompt),
+    enabled: false, // Don't run automatically
+    staleTime: 24 * 60 * 60 * 1000,
+  })
+
+  const { data: contentCalendar, isLoading: calendarLoading } = useQuery({
+    queryKey: ["content-calendar", userId],
+    queryFn: () => createContentCalendar(userId, 7), // 7-day calendar
     staleTime: 24 * 60 * 60 * 1000,
   })
 
@@ -662,14 +676,16 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
 
     setIsGenerating(true)
     try {
-      const result = await generateCaptions(userId, contentPrompt)
+      const result = await generateCaptions(userId, contentPrompt, selectedTone)
       if (result.status === 200) {
         toast({
           title: "Caption Generated",
           description: "AI-powered caption has been created for your content.",
           duration: 3000,
         })
-        // You can display the generated caption in a modal or dedicated section
+
+        // Also generate hashtag suggestions
+        refetchHashtags()
       }
     } catch (error) {
       toast({
@@ -701,22 +717,30 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
     }
   }
 
-  const renderSubscriptionGate = (requiredTier: "pro" | "enterprise") => {
-    if (subscriptionTier === "free" || (requiredTier === "enterprise" && subscriptionTier === "pro")) {
-      return (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
-          <div className="text-center p-6">
-            <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {requiredTier === "enterprise" ? "Enterprise Feature" : "Pro Feature"}
-            </h3>
-            <p className="text-muted-foreground mb-4">Upgrade to access AI-powered insights and advanced analytics</p>
-            <Button>Upgrade to {requiredTier === "enterprise" ? "Enterprise" : "Pro"}</Button>
-          </div>
-        </div>
-      )
+  const handleRefreshData = async () => {
+    setIsRefreshing(true)
+    try {
+      await queryClient.invalidateQueries({ queryKey: ["instagram-media"] })
+      await queryClient.invalidateQueries({ queryKey: ["instagram-insights"] })
+      await queryClient.invalidateQueries({ queryKey: ["content-strategy"] })
+      await queryClient.invalidateQueries({ queryKey: ["optimal-times"] })
+      await queryClient.invalidateQueries({ queryKey: ["audience-insights"] })
+      await queryClient.invalidateQueries({ queryKey: ["content-trends"] })
+
+      toast({
+        title: "Data Refreshed",
+        description: "All dashboard data has been updated.",
+        duration: 3000,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh data.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRefreshing(false)
     }
-    return null
   }
 
   return (
@@ -741,7 +765,7 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
             <Download className="h-4 w-4 mr-2" />
             Generate Report
           </Button>
-          <Button onClick={() => setIsRefreshing(true)} disabled={isRefreshing} variant="outline" size="sm">
+          <Button onClick={handleRefreshData} disabled={isRefreshing} variant="outline" size="sm">
             {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
             Refresh All
           </Button>
@@ -762,7 +786,7 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
         {/* AI Insights Tab */}
         <TabsContent value="ai-insights" className="space-y-6">
           {/* AI Performance Score */}
-          <Card className="relative">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-purple-600" />
@@ -771,30 +795,33 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
               <CardDescription>Your overall Instagram performance analyzed by AI</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">87</div>
-                  <div className="text-sm text-muted-foreground">Overall Score</div>
-                  <Progress value={87} className="mt-2" />
+              {audienceLoading || strategyLoading ? (
+                <div className="animate-pulse space-y-4">
+                  <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">92</div>
-                  <div className="text-sm text-muted-foreground">Content Quality</div>
-                  <Progress value={92} className="mt-2" />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {audienceInsights?.data?.performanceScores?.map((score: any, index: number) => (
+                    <div key={index} className="text-center">
+                      <div
+                        className={`text-3xl font-bold mb-2 ${
+                          score.value > 80 ? "text-green-600" : score.value > 60 ? "text-blue-600" : "text-orange-600"
+                        }`}
+                      >
+                        {score.value}
+                      </div>
+                      <div className="text-sm text-muted-foreground">{score.name}</div>
+                      <Progress value={score.value} className="mt-2" />
+                    </div>
+                  ))}
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">73</div>
-                  <div className="text-sm text-muted-foreground">Engagement Rate</div>
-                  <Progress value={73} className="mt-2" />
-                </div>
-              </div>
+              )}
             </CardContent>
-            {renderSubscriptionGate("pro")}
           </Card>
 
           {/* AI Recommendations */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="relative">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lightbulb className="h-5 w-5 text-yellow-600" />
@@ -802,32 +829,37 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Post at 7 PM today</h4>
-                    <p className="text-sm text-muted-foreground">Your audience is 34% more active at this time</p>
+                {strategyLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="h-16 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    ))}
                   </div>
-                </div>
-                <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-                  <Hash className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Try #sustainablefashion</h4>
-                    <p className="text-sm text-muted-foreground">This hashtag could increase reach by 23%</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                  <Camera className="h-5 w-5 text-purple-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Create more Reels</h4>
-                    <p className="text-sm text-muted-foreground">Reels get 67% more engagement than photos</p>
-                  </div>
-                </div>
+                ) : (
+                  contentStrategy?.data?.recommendations?.map((rec: any, index: number) => {
+                    const icons = [TrendingUp, Hash, Camera]
+                    const colors = ["blue", "green", "purple"]
+                    const Icon = icons[index % icons.length]
+                    const color = colors[index % colors.length]
+
+                    return (
+                      <div
+                        key={index}
+                        className={`flex items-start gap-3 p-3 bg-${color}-50 dark:bg-${color}-950 rounded-lg`}
+                      >
+                        <Icon className={`h-5 w-5 text-${color}-600 mt-0.5`} />
+                        <div>
+                          <h4 className="font-medium">{rec.title}</h4>
+                          <p className="text-sm text-muted-foreground">{rec.description}</p>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
               </CardContent>
-              {renderSubscriptionGate("pro")}
             </Card>
 
-            <Card className="relative">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-red-600" />
@@ -835,34 +867,33 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Follower Growth</h4>
-                    <p className="text-sm text-muted-foreground">+12% this month</p>
+                {trendsLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="h-16 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    ))}
                   </div>
-                  <ArrowUp className="h-5 w-5 text-green-600" />
-                </div>
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Engagement Rate</h4>
-                    <p className="text-sm text-muted-foreground">-3% this week</p>
-                  </div>
-                  <ArrowDown className="h-5 w-5 text-red-600" />
-                </div>
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Story Views</h4>
-                    <p className="text-sm text-muted-foreground">+8% this week</p>
-                  </div>
-                  <ArrowUp className="h-5 w-5 text-green-600" />
-                </div>
+                ) : (
+                  contentTrends?.data?.growthMetrics?.map((metric: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <h4 className="font-medium">{metric.name}</h4>
+                        <p className="text-sm text-muted-foreground">{metric.description}</p>
+                      </div>
+                      {metric.trend === "up" ? (
+                        <ArrowUp className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <ArrowDown className="h-5 w-5 text-red-600" />
+                      )}
+                    </div>
+                  ))
+                )}
               </CardContent>
-              {renderSubscriptionGate("pro")}
             </Card>
           </div>
 
           {/* Optimal Posting Times */}
-          <Card className="relative">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-blue-600" />
@@ -873,34 +904,45 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
             <CardContent>
               {timesLoading ? (
                 <div className="animate-pulse space-y-4">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                 </div>
               ) : (
                 <div className="grid grid-cols-7 gap-2">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => (
-                    <div key={day} className="text-center">
-                      <div className="font-medium text-sm mb-2">{day}</div>
-                      <div className="space-y-1">
-                        <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs p-1 rounded">
-                          7-9 PM
-                        </div>
-                        <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs p-1 rounded">
-                          12-2 PM
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => {
+                    const dayData = optimalTimes?.data?.schedule?.find((d: any) =>
+                      d.day.toLowerCase().startsWith(day.toLowerCase()),
+                    )
+
+                    return (
+                      <div key={day} className="text-center">
+                        <div className="font-medium text-sm mb-2">{day}</div>
+                        <div className="space-y-1">
+                          {dayData?.times?.map((time: any, i: number) => (
+                            <div
+                              key={i}
+                              className={`${
+                                i % 2 === 0
+                                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                                  : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                              } text-xs p-1 rounded`}
+                            >
+                              {time}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </CardContent>
-            {renderSubscriptionGate("pro")}
           </Card>
         </TabsContent>
 
         {/* Content Lab Tab */}
         <TabsContent value="content-lab" className="space-y-6">
-          <Card className="relative">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PenTool className="h-5 w-5 text-purple-600" />
@@ -924,7 +966,7 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                   )}
                   Generate Caption
                 </Button>
-                <Select>
+                <Select value={selectedTone} onValueChange={setSelectedTone}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="Tone" />
                   </SelectTrigger>
@@ -937,11 +979,10 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 </Select>
               </div>
             </CardContent>
-            {renderSubscriptionGate("pro")}
           </Card>
 
           {/* Hashtag Suggestions */}
-          <Card className="relative">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Hash className="h-5 w-5 text-blue-600" />
@@ -950,41 +991,40 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
               <CardDescription>AI-curated hashtags to maximize your reach</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <h4 className="font-medium mb-2 text-green-600">High Performance</h4>
-                  <div className="space-y-1">
-                    <Badge variant="outline">#trending</Badge>
-                    <Badge variant="outline">#viral</Badge>
-                    <Badge variant="outline">#explore</Badge>
-                  </div>
+              {hashtagsLoading ? (
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2 text-blue-600">Niche Specific</h4>
-                  <div className="space-y-1">
-                    <Badge variant="outline">#fashionblogger</Badge>
-                    <Badge variant="outline">#ootd</Badge>
-                    <Badge variant="outline">#style</Badge>
-                  </div>
+              ) : hashtagSuggestions?.data ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Object.entries(hashtagSuggestions.data).map(([category, tags]: [string, any]) => (
+                    <div key={category}>
+                      <h4 className="font-medium mb-2 text-blue-600 capitalize">{category.replace(/_/g, " ")}</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(tags) &&
+                          tags.map((tag: string, i: number) => (
+                            <Badge key={i} variant="outline">
+                              {tag.startsWith("#") ? tag : `#${tag}`}
+                            </Badge>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2 text-purple-600">Emerging</h4>
-                  <div className="space-y-1">
-                    <Badge variant="outline">#sustainablestyle</Badge>
-                    <Badge variant="outline">#ethicalfashion</Badge>
-                    <Badge variant="outline">#slowfashion</Badge>
-                  </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">Generate a caption to see hashtag suggestions</p>
                 </div>
-              </div>
+              )}
             </CardContent>
-            {renderSubscriptionGate("pro")}
           </Card>
         </TabsContent>
 
         {/* Growth Tab */}
         <TabsContent value="growth" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="relative">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <UserPlus className="h-5 w-5 text-green-600" />
@@ -992,29 +1032,34 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">+247</div>
-                  <div className="text-sm text-muted-foreground">Projected monthly growth</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Content consistency</span>
-                    <span className="text-green-600">+15%</span>
+                {audienceLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Hashtag optimization</span>
-                    <span className="text-green-600">+23%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Engagement timing</span>
-                    <span className="text-green-600">+18%</span>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        {audienceInsights?.data?.growthProjection?.monthly || "N/A"}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Projected monthly growth</div>
+                    </div>
+                    <div className="space-y-2">
+                      {audienceInsights?.data?.growthFactors?.map((factor: any, index: number) => (
+                        <div key={index} className="flex justify-between text-sm">
+                          <span>{factor.name}</span>
+                          <span className="text-green-600">{factor.impact}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
-              {renderSubscriptionGate("pro")}
             </Card>
 
-            <Card className="relative">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-600" />
@@ -1022,31 +1067,36 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">4.2%</div>
-                  <div className="text-sm text-muted-foreground">Current engagement rate</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Story interactions</span>
-                    <span className="text-blue-600">+12%</span>
+                {audienceLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Comment responses</span>
-                    <span className="text-blue-600">+8%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Share rate</span>
-                    <span className="text-blue-600">+5%</span>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="text-center p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {audienceInsights?.data?.currentEngagementRate || "N/A"}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Current engagement rate</div>
+                    </div>
+                    <div className="space-y-2">
+                      {audienceInsights?.data?.engagementFactors?.map((factor: any, index: number) => (
+                        <div key={index} className="flex justify-between text-sm">
+                          <span>{factor.name}</span>
+                          <span className="text-blue-600">{factor.impact}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
-              {renderSubscriptionGate("pro")}
             </Card>
           </div>
 
           {/* Content Calendar */}
-          <Card className="relative">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5 text-purple-600" />
@@ -1055,37 +1105,49 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
               <CardDescription>Optimized posting schedule for maximum engagement</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-7 gap-2">
-                {Array.from({ length: 7 }, (_, i) => (
-                  <div key={i} className="border rounded-lg p-2">
-                    <div className="font-medium text-sm mb-2">
-                      {new Date(Date.now() + i * 24 * 60 * 60 * 1000).toLocaleDateString("en", {
-                        weekday: "short",
-                        day: "numeric",
-                      })}
-                    </div>
-                    <div className="space-y-1">
-                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs p-1 rounded">
-                        Reel: 7 PM
-                      </div>
-                      <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs p-1 rounded">
-                        Story: 12 PM
-                      </div>
-                    </div>
+              {calendarLoading ? (
+                <div className="animate-pulse space-y-4">
+                  <div className="grid grid-cols-7 gap-2">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <div key={i} className="h-24 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-7 gap-2">
+                  {contentCalendar?.data?.days?.map((day: any, index: number) => (
+                    <div key={index} className="border rounded-lg p-2">
+                      <div className="font-medium text-sm mb-2">{day.date}</div>
+                      <div className="space-y-1">
+                        {day.posts?.map((post: any, i: number) => (
+                          <div
+                            key={i}
+                            className={`${
+                              post.type === "reel"
+                                ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                                : post.type === "story"
+                                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                                  : "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200"
+                            } text-xs p-1 rounded`}
+                          >
+                            {post.type.charAt(0).toUpperCase() + post.type.slice(1)}: {post.time}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
-            {renderSubscriptionGate("pro")}
           </Card>
         </TabsContent>
 
         {/* Competitors Tab */}
         <TabsContent value="competitors" className="space-y-6">
-          <Card className="relative">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-gold-600" />
+                <Trophy className="h-5 w-5 text-amber-600" />
                 Competitor Analysis
               </CardTitle>
               <CardDescription>See how you stack up against your competition</CardDescription>
@@ -1096,58 +1158,59 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                   <div className="animate-pulse space-y-4">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
                         <div className="flex-1">
-                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-2/3"></div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                          C1
+                    {competitorAnalysis?.data?.competitors?.map((competitor: any, index: number) => {
+                      const colors = [
+                        "from-pink-500 to-purple-500",
+                        "from-blue-500 to-cyan-500",
+                        "from-green-500 to-emerald-500",
+                        "from-orange-500 to-amber-500",
+                      ]
+
+                      return (
+                        <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-10 h-10 bg-gradient-to-r ${colors[index % colors.length]} rounded-full flex items-center justify-center text-white font-bold`}
+                            >
+                              {competitor.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <h4 className="font-medium">@{competitor.username}</h4>
+                              <p className="text-sm text-muted-foreground">{competitor.category}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium">Engagement: {competitor.engagementRate}</div>
+                            <div
+                              className={`text-xs ${competitor.comparison === "better" ? "text-green-600" : "text-muted-foreground"}`}
+                            >
+                              {competitor.comparisonText}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium">@competitor1</h4>
-                          <p className="text-sm text-muted-foreground">Fashion Brand</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium">Engagement: 5.2%</div>
-                        <div className="text-xs text-muted-foreground">vs your 4.2%</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
-                          C2
-                        </div>
-                        <div>
-                          <h4 className="font-medium">@competitor2</h4>
-                          <p className="text-sm text-muted-foreground">Lifestyle Brand</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium">Engagement: 3.8%</div>
-                        <div className="text-xs text-green-600">vs your 4.2%</div>
-                      </div>
-                    </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
             </CardContent>
-            {renderSubscriptionGate("enterprise")}
           </Card>
         </TabsContent>
 
         {/* Automation Tab */}
         <TabsContent value="automation" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="relative">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-600" />
@@ -1156,24 +1219,29 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 <CardDescription>Automatically engage with your audience</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span>Auto-like relevant posts</span>
-                  <Badge variant="secondary">Active</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Auto-follow back</span>
-                  <Badge variant="outline">Inactive</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Smart comment replies</span>
-                  <Badge variant="secondary">Active</Badge>
-                </div>
-                <Button className="w-full">Configure Settings</Button>
+                {audienceLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="h-8 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {audienceInsights?.data?.automationSettings?.map((setting: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span>{setting.name}</span>
+                        <Badge variant={setting.active ? "secondary" : "outline"}>
+                          {setting.active ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    ))}
+                    <Button className="w-full">Configure Settings</Button>
+                  </>
+                )}
               </CardContent>
-              {renderSubscriptionGate("enterprise")}
             </Card>
 
-            <Card className="relative">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Share2 className="h-5 w-5 text-blue-600" />
@@ -1182,23 +1250,32 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
                 <CardDescription>Schedule posts for optimal times</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">12</div>
-                  <div className="text-sm text-muted-foreground">Posts scheduled</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Next post</span>
-                    <span>Today 7:00 PM</span>
+                {calendarLoading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>This week</span>
-                    <span>5 posts</span>
-                  </div>
-                </div>
-                <Button className="w-full">Schedule New Post</Button>
+                ) : (
+                  <>
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {contentCalendar?.data?.scheduledCount || 0}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Posts scheduled</div>
+                    </div>
+                    <div className="space-y-2">
+                      {contentCalendar?.data?.scheduleSummary?.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between text-sm">
+                          <span>{item.label}</span>
+                          <span>{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button className="w-full">Schedule New Post</Button>
+                  </>
+                )}
               </CardContent>
-              {renderSubscriptionGate("pro")}
             </Card>
           </div>
         </TabsContent>
@@ -1215,36 +1292,39 @@ export default function EnhancedInstagramDashboard({ userId, subscriptionTier }:
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col">
+                <Button variant="outline" className="h-20 flex flex-col" onClick={() => handleGenerateReport()}>
                   <Download className="h-6 w-6 mb-2" />
                   Weekly Report
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col">
+                <Button variant="outline" className="h-20 flex flex-col" onClick={() => handleGenerateReport()}>
                   <Download className="h-6 w-6 mb-2" />
                   Monthly Report
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col">
+                <Button variant="outline" className="h-20 flex flex-col" onClick={() => handleGenerateReport()}>
                   <Download className="h-6 w-6 mb-2" />
                   Custom Report
                 </Button>
               </div>
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-2">Recent Reports</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">November 2024 Report</span>
-                    <Button size="sm" variant="ghost">
-                      Download
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">Week 45 Report</span>
-                    <Button size="sm" variant="ghost">
-                      Download
-                    </Button>
+
+              {contentStrategy?.data?.reports ? (
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-2">Recent Reports</h4>
+                  <div className="space-y-2">
+                    {contentStrategy.data.reports.map((report: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-2 border rounded">
+                        <span className="text-sm">{report.name}</span>
+                        <Button size="sm" variant="ghost">
+                          Download
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="border-t pt-4 text-center text-muted-foreground">
+                  <p>No recent reports available</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
