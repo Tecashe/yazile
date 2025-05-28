@@ -195,6 +195,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Home",
         icon: icon(Home, "text-blue-600"),
       },
+      {
+        id: uuid(),
+        label: "Automations",
+        icon: icon(Zap, "text-amber-600"),
+      },
     ],
   },
   {
@@ -211,11 +216,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
           { id: uuid(), label: "Custom Requests", icon: icon(Split, "text-purple-500", 18) },
           { id: uuid(), label: "Analytics", icon: icon(Calculator, "text-orange-500", 18) },
         ],
-      },
-      {
-        id: uuid(),
-        label: "Automations",
-        icon: icon(Zap, "text-amber-600"),
       },
     ],
   },
