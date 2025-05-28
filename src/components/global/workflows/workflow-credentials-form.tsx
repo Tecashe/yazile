@@ -1,509 +1,15 @@
-// "use client"
-
-// import type React from "react"
-
-// import { useState } from "react"
-// import { useRouter,usePathname } from "next/navigation"
-// import { Loader2, PlusCircle, KeyRound, Trash, Check, Lock } from "lucide-react"
-
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogTrigger,
-// } from "@/components/ui/dialog"
-// import { toast } from "@/hooks/use-toast"
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-//   AlertDialogTrigger,
-// } from "@/components/ui/alert-dialog"
-
-// interface WorkflowCredentialsFormProps {
-//   workflowId: string
-//   requiredIntegrations: string[]
-//   existingCredentials: Array<{
-//     id: string
-//     name: string
-//     type: string
-//   }>
-//   onUpdate?: () => void
-// }
-
-// // Credential type options based on integration type
-// const CREDENTIAL_TYPES: Record<string, Array<{ value: string; label: string }>> = {
-//   // Example credential types
-//   API: [
-//     { value: "api_key", label: "API Key" },
-//     { value: "oauth2", label: "OAuth 2.0" },
-//     { value: "basic_auth", label: "Basic Authentication" },
-//   ],
-//   DATABASE: [
-//     { value: "connection_string", label: "Connection String" },
-//     { value: "username_password", label: "Username/Password" },
-//   ],
-//   PAYMENT: [
-//     { value: "api_key", label: "API Key" },
-//     { value: "secret_key", label: "Secret Key" },
-//   ],
-//   EMAIL: [
-//     { value: "smtp", label: "SMTP" },
-//     { value: "api_key", label: "API Key" },
-//   ],
-//   STORAGE: [
-//     { value: "access_key", label: "Access Key" },
-//     { value: "connection_string", label: "Connection String" },
-//   ],
-//   // Add more types as needed
-//   DEFAULT: [
-//     { value: "api_key", label: "API Key" },
-//     { value: "oauth2", label: "OAuth 2.0" },
-//     { value: "secret_key", label: "Secret Key" },
-//     { value: "username_password", label: "Username/Password" },
-//   ],
-// }
-
-// // Map integration name to category
-// const getIntegrationCategory = (integration: string): string => {
-//   const integrationUppercase = integration.toUpperCase()
-//   if (integrationUppercase.includes("DATABASE") || integrationUppercase.includes("SQL")) return "DATABASE"
-//   if (integrationUppercase.includes("PAYMENT") || integrationUppercase.includes("STRIPE")) return "PAYMENT"
-//   if (integrationUppercase.includes("EMAIL") || integrationUppercase.includes("MAIL")) return "EMAIL"
-//   if (integrationUppercase.includes("STORAGE") || integrationUppercase.includes("S3")) return "STORAGE"
-//   if (integrationUppercase.includes("API")) return "API"
-//   return "DEFAULT"
-// }
-
-// export function WorkflowCredentialsForm({
-//   workflowId,
-//   requiredIntegrations,
-//   existingCredentials,
-//   onUpdate,
-// }: WorkflowCredentialsFormProps) {
-//   const router = useRouter()
-//   const pathname = usePathname()
-//   const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
-//   const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
-  
-
-//   // State
-//   const [isAddingCredential, setIsAddingCredential] = useState(false)
-//   const [credentialToDelete, setCredentialToDelete] = useState<string | null>(null)
-//   const [isSubmitting, setIsSubmitting] = useState(false)
-
-//   // New credential state
-//   const [newCredential, setNewCredential] = useState({
-//     name: "",
-//     type: "",
-//     value: "",
-//     expiresAt: "",
-//   })
-
-//   // Handle adding a new credential
-//   const handleAddCredential = async (e: React.FormEvent) => {
-//     e.preventDefault()
-
-//     if (!newCredential.name.trim()) {
-//       toast({
-//         title: "Missing information",
-//         description: "Please enter a name for the credential",
-//         variant: "destructive",
-//       })
-//       return
-//     }
-
-//     if (!newCredential.type) {
-//       toast({
-//         title: "Missing information",
-//         description: "Please select a credential type",
-//         variant: "destructive",
-//       })
-//       return
-//     }
-
-//     if (!newCredential.value.trim()) {
-//       toast({
-//         title: "Missing information",
-//         description: "Please enter the credential value",
-//         variant: "destructive",
-//       })
-//       return
-//     }
-
-//     setIsSubmitting(true)
-//     try {
-//       const response = await fetch(`/api/workflows/${workflowId}/credentials`, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           name: newCredential.name.trim(),
-//           type: newCredential.type,
-//           value: newCredential.value.trim(),
-//           expiresAt: newCredential.expiresAt ? new Date(newCredential.expiresAt) : null,
-//         }),
-//       })
-
-//       if (!response.ok) {
-//         const errorData = await response.json()
-//         throw new Error(errorData.error || "Failed to add credential")
-//       }
-
-//       toast({
-//         title: "Credential added",
-//         description: "Your credential has been added successfully",
-//       })
-
-//       // Reset form and close dialog
-//       setNewCredential({
-//         name: "",
-//         type: "",
-//         value: "",
-//         expiresAt: "",
-//       })
-//       setIsAddingCredential(false)
-
-//       // Trigger parent update callback
-//       if (onUpdate) {
-//         onUpdate()
-//       }
-//     } catch (error) {
-//       console.error("Error adding credential:", error)
-//       toast({
-//         title: "Error",
-//         description: error instanceof Error ? error.message : "An unknown error occurred",
-//         variant: "destructive",
-//       })
-//     } finally {
-//       setIsSubmitting(false)
-//     }
-//   }
-
-//   // Handle deleting a credential
-//   const handleDeleteCredential = async () => {
-//     if (!credentialToDelete) return
-
-//     setIsSubmitting(true)
-//     try {
-//       const response = await fetch(`/api/workflows/${workflowId}/credentials/${credentialToDelete}`, {
-//         method: "DELETE",
-//       })
-
-//       if (!response.ok) {
-//         const errorData = await response.json()
-//         throw new Error(errorData.error || "Failed to delete credential")
-//       }
-
-//       toast({
-//         title: "Credential deleted",
-//         description: "Your credential has been deleted successfully",
-//       })
-
-//       // Close dialog and clear selection
-//       setCredentialToDelete(null)
-
-//       // Trigger parent update callback
-//       if (onUpdate) {
-//         onUpdate()
-//       }
-//     } catch (error) {
-//       console.error("Error deleting credential:", error)
-//       toast({
-//         title: "Error",
-//         description: error instanceof Error ? error.message : "An unknown error occurred",
-//         variant: "destructive",
-//       })
-//     } finally {
-//       setIsSubmitting(false)
-//     }
-//   }
-
-//   // Get credential types for the selected integration
-//   const getCredentialTypes = (integration: string) => {
-//     const category = getIntegrationCategory(integration)
-//     return CREDENTIAL_TYPES[category] || CREDENTIAL_TYPES.DEFAULT
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <div>
-//         <h2 className="text-lg font-medium">Credentials</h2>
-//         <p className="text-sm text-muted-foreground">Manage secure credentials for your workflow</p>
-//       </div>
-
-//       {/* Required Integrations */}
-//       {requiredIntegrations && requiredIntegrations.length > 0 && (
-//         <Card>
-//           <CardHeader>
-//             <CardTitle>Required Integrations</CardTitle>
-//             <CardDescription>This workflow requires credentials for the following integrations</CardDescription>
-//           </CardHeader>
-//           <CardContent>
-//             <ul className="space-y-2">
-//               {requiredIntegrations.map((integration) => {
-//                 const hasCredential = existingCredentials.some(
-//                   (cred) =>
-//                     cred.name.toLowerCase().includes(integration.toLowerCase()) ||
-//                     cred.type.toLowerCase().includes(integration.toLowerCase()),
-//                 )
-
-//                 return (
-//                   <li key={integration} className="flex items-center justify-between">
-//                     <div className="flex items-center gap-2">
-//                       <KeyRound className="h-4 w-4 text-muted-foreground" />
-//                       <span>{integration}</span>
-//                     </div>
-//                     {hasCredential ? (
-//                       <span className="text-green-600 flex items-center text-sm">
-//                         <Check className="h-4 w-4 mr-1" /> Configured
-//                       </span>
-//                     ) : (
-//                       <Button
-//                         variant="outline"
-//                         size="sm"
-//                         onClick={() => {
-//                           setNewCredential({
-//                             ...newCredential,
-//                             name: `${integration} Credential`,
-//                           })
-//                           setIsAddingCredential(true)
-//                         }}
-//                       >
-//                         Configure
-//                       </Button>
-//                     )}
-//                   </li>
-//                 )
-//               })}
-//             </ul>
-//           </CardContent>
-//         </Card>
-//       )}
-
-//       {/* Existing Credentials */}
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Stored Credentials</CardTitle>
-//           <CardDescription>Securely stored credentials for this workflow</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           {existingCredentials && existingCredentials.length > 0 ? (
-//             <ul className="space-y-3">
-//               {existingCredentials.map((credential) => (
-//                 <li key={credential.id} className="flex items-center justify-between">
-//                   <div>
-//                     <div className="font-medium">{credential.name}</div>
-//                     <div className="text-sm text-muted-foreground">{credential.type}</div>
-//                   </div>
-//                   <div className="flex items-center gap-2">
-//                     <AlertDialog>
-//                       <AlertDialogTrigger asChild>
-//                         <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-//                           <Trash className="h-4 w-4 mr-1" />
-//                           Remove
-//                         </Button>
-//                       </AlertDialogTrigger>
-//                       <AlertDialogContent>
-//                         <AlertDialogHeader>
-//                           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-//                           <AlertDialogDescription>
-//                             This will permanently delete the credential &quot;{credential.name}&quot;. This action
-//                             cannot be undone and may cause your workflow to stop working.
-//                           </AlertDialogDescription>
-//                         </AlertDialogHeader>
-//                         <AlertDialogFooter>
-//                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-//                           <AlertDialogAction
-//                             onClick={(e) => {
-//                               e.preventDefault()
-//                               setCredentialToDelete(credential.id)
-//                               handleDeleteCredential()
-//                             }}
-//                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-//                           >
-//                             {isSubmitting && credentialToDelete === credential.id ? (
-//                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                             ) : (
-//                               <Trash className="mr-2 h-4 w-4" />
-//                             )}
-//                             Delete
-//                           </AlertDialogAction>
-//                         </AlertDialogFooter>
-//                       </AlertDialogContent>
-//                     </AlertDialog>
-//                   </div>
-//                 </li>
-//               ))}
-//             </ul>
-//           ) : (
-//             <div className="text-center py-6 text-muted-foreground">No credentials configured yet</div>
-//           )}
-//         </CardContent>
-//         <CardFooter>
-//           <Dialog open={isAddingCredential} onOpenChange={setIsAddingCredential}>
-//             <DialogTrigger asChild>
-//               <Button>
-//                 <PlusCircle className="mr-2 h-4 w-4" />
-//                 Add Credential
-//               </Button>
-//             </DialogTrigger>
-//             <DialogContent>
-//               <DialogHeader>
-//                 <DialogTitle>Add New Credential</DialogTitle>
-//                 <DialogDescription>
-//                   Add a new credential for your workflow. Credentials are stored securely and encrypted.
-//                 </DialogDescription>
-//               </DialogHeader>
-
-//               <form onSubmit={handleAddCredential} className="space-y-4 mt-4">
-//                 <div className="space-y-2">
-//                   <Label htmlFor="credential-name">Credential Name</Label>
-//                   <Input
-//                     id="credential-name"
-//                     placeholder="e.g., API Key for Service X"
-//                     value={newCredential.name}
-//                     onChange={(e) => setNewCredential({ ...newCredential, name: e.target.value })}
-//                   />
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="credential-type">Credential Type</Label>
-//                   <Select
-//                     value={newCredential.type}
-//                     onValueChange={(value) => setNewCredential({ ...newCredential, type: value })}
-//                   >
-//                     <SelectTrigger id="credential-type">
-//                       <SelectValue placeholder="Select type" />
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                       {requiredIntegrations && requiredIntegrations.length > 0 ? (
-//                         <>
-//                           {requiredIntegrations.map((integration) => (
-//                             <SelectItem key={integration} value={integration} disabled>
-//                               {integration}
-//                             </SelectItem>
-//                           ))}
-//                           <div className="px-2 py-1.5 text-xs text-muted-foreground">Credential Types</div>
-//                           {requiredIntegrations.flatMap((integration) =>
-//                             getCredentialTypes(integration).map((type) => (
-//                               <SelectItem key={`${integration}-${type.value}`} value={type.value}>
-//                                 {type.label}
-//                               </SelectItem>
-//                             )),
-//                           )}
-//                         </>
-//                       ) : (
-//                         CREDENTIAL_TYPES.DEFAULT.map((type) => (
-//                           <SelectItem key={type.value} value={type.value}>
-//                             {type.label}
-//                           </SelectItem>
-//                         ))
-//                       )}
-//                     </SelectContent>
-//                   </Select>
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="credential-value">Credential Value</Label>
-//                   <div className="relative">
-//                     <Input
-//                       id="credential-value"
-//                       type="password"
-//                       placeholder="Enter the secret value"
-//                       value={newCredential.value}
-//                       onChange={(e) => setNewCredential({ ...newCredential, value: e.target.value })}
-//                     />
-//                     <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
-//                   </div>
-//                   <p className="text-xs text-muted-foreground">This value will be encrypted and stored securely.</p>
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="credential-expiry">Expiration Date (Optional)</Label>
-//                   <Input
-//                     id="credential-expiry"
-//                     type="date"
-//                     value={newCredential.expiresAt}
-//                     onChange={(e) => setNewCredential({ ...newCredential, expiresAt: e.target.value })}
-//                   />
-//                 </div>
-
-//                 <DialogFooter>
-//                   <Button
-//                     type="button"
-//                     variant="outline"
-//                     onClick={() => setIsAddingCredential(false)}
-//                     disabled={isSubmitting}
-//                   >
-//                     Cancel
-//                   </Button>
-//                   <Button type="submit" disabled={isSubmitting}>
-//                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-//                     Save Credential
-//                   </Button>
-//                 </DialogFooter>
-//               </form>
-//             </DialogContent>
-//           </Dialog>
-//         </CardFooter>
-//       </Card>
-
-//       <div className="flex justify-end">
-//         <Button
-//           onClick={() => {
-//             if (onUpdate) {
-//               onUpdate()
-//             } else {
-//               router.push(`/dashboard/${slug}/agents/workflows/${workflowId}`)
-//             }
-//           }}
-//         >
-//           Done
-//         </Button>
-//       </div>
-//     </div>
-//   )
-// }
-
-
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { 
-  Loader2, 
-  PlusCircle, 
-  KeyRound, 
-  Trash, 
-  Check, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  AlertCircle,
-  ExternalLink 
-} from "lucide-react"
+
+import { useState } from "react"
+import { useRouter,usePathname } from "next/navigation"
+import { Loader2, PlusCircle, KeyRound, Trash, Check, Lock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -512,6 +18,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
 import {
@@ -525,225 +32,60 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-
-// n8n credential field types
-type FieldType = 'string' | 'password' | 'number' | 'boolean' | 'json' | 'url' | 'email' | 'multiline'
-
-interface CredentialField {
-  name: string
-  displayName: string
-  type: FieldType
-  required: boolean
-  description?: string
-  placeholder?: string
-  default?: any
-  options?: Array<{ name: string; value: string }>
-  validation?: {
-    pattern?: string
-    minLength?: number
-    maxLength?: number
-  }
-}
-
-interface IntegrationCredentialSchema {
-  name: string
-  displayName: string
-  description: string
-  documentationUrl?: string
-  authType: 'apiKey' | 'oauth2' | 'basic' | 'custom'
-  fields: CredentialField[]
-  testable: boolean
-}
-
-interface StoredCredential {
-  id: string
-  integrationName?: string
-  displayName?: string
-  isValid?: boolean
-  lastTested?: string
-  expiresAt?: string
-}
 
 interface WorkflowCredentialsFormProps {
   workflowId: string
   requiredIntegrations: string[]
-  existingCredentials: StoredCredential[]
+  existingCredentials: Array<{
+    id: string
+    name: string
+    type: string
+  }>
   onUpdate?: () => void
 }
 
-// n8n integration credential schemas
-const INTEGRATION_SCHEMAS: Record<string, IntegrationCredentialSchema> = {
-  gmail: {
-    name: 'gmail',
-    displayName: 'Gmail',
-    description: 'Connect to Gmail using OAuth2 authentication',
-    documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/google/',
-    authType: 'oauth2',
-    testable: true,
-    fields: [
-      {
-        name: 'clientId',
-        displayName: 'Client ID',
-        type: 'string',
-        required: true,
-        description: 'The Client ID from your Google Cloud Console',
-        placeholder: 'your-client-id.googleusercontent.com'
-      },
-      {
-        name: 'clientSecret',
-        displayName: 'Client Secret',
-        type: 'password',
-        required: true,
-        description: 'The Client Secret from your Google Cloud Console'
-      }
-    ]
-  },
-  slack: {
-    name: 'slack',
-    displayName: 'Slack',
-    description: 'Connect to Slack using OAuth2 or Bot Token',
-    documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/slack/',
-    authType: 'oauth2',
-    testable: true,
-    fields: [
-      {
-        name: 'accessToken',
-        displayName: 'Access Token',
-        type: 'password',
-        required: true,
-        description: 'Bot User OAuth Token (starts with xoxb-)',
-        placeholder: 'xoxb-your-token-here'
-      }
-    ]
-  },
-  notion: {
-    name: 'notion',
-    displayName: 'Notion',
-    description: 'Connect to Notion using Internal Integration Token',
-    documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/notion/',
-    authType: 'apiKey',
-    testable: true,
-    fields: [
-      {
-        name: 'apiKey',
-        displayName: 'Internal Integration Token',
-        type: 'password',
-        required: true,
-        description: 'Create an integration at https://www.notion.so/my-integrations',
-        placeholder: 'secret_...'
-      }
-    ]
-  },
-  stripe: {
-    name: 'stripe',
-    displayName: 'Stripe',
-    description: 'Connect to Stripe using API keys',
-    documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/stripe/',
-    authType: 'apiKey',
-    testable: true,
-    fields: [
-      {
-        name: 'secretKey',
-        displayName: 'Secret Key',
-        type: 'password',
-        required: true,
-        description: 'Your Stripe secret key (live or test)',
-        placeholder: 'sk_live_... or sk_test_...'
-      },
-      {
-        name: 'publishableKey',
-        displayName: 'Publishable Key',
-        type: 'string',
-        required: false,
-        description: 'Your Stripe publishable key (for client-side operations)',
-        placeholder: 'pk_live_... or pk_test_...'
-      }
-    ]
-  },
-  postgresql: {
-    name: 'postgresql',
-    displayName: 'PostgreSQL',
-    description: 'Connect to PostgreSQL database',
-    documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/postgres/',
-    authType: 'basic',
-    testable: true,
-    fields: [
-      {
-        name: 'host',
-        displayName: 'Host',
-        type: 'string',
-        required: true,
-        description: 'Database host address',
-        placeholder: 'localhost',
-        default: 'localhost'
-      },
-      {
-        name: 'port',
-        displayName: 'Port',
-        type: 'number',
-        required: true,
-        description: 'Database port',
-        default: 5432
-      },
-      {
-        name: 'database',
-        displayName: 'Database',
-        type: 'string',
-        required: true,
-        description: 'Database name'
-      },
-      {
-        name: 'username',
-        displayName: 'Username',
-        type: 'string',
-        required: true,
-        description: 'Database username'
-      },
-      {
-        name: 'password',
-        displayName: 'Password',
-        type: 'password',
-        required: true,
-        description: 'Database password'
-      },
-      {
-        name: 'ssl',
-        displayName: 'SSL',
-        type: 'boolean',
-        required: false,
-        description: 'Use SSL connection',
-        default: false
-      }
-    ]
-  },
-  openai: {
-    name: 'openai',
-    displayName: 'OpenAI',
-    description: 'Connect to OpenAI API',
-    documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/openai/',
-    authType: 'apiKey',
-    testable: true,
-    fields: [
-      {
-        name: 'apiKey',
-        displayName: 'API Key',
-        type: 'password',
-        required: true,
-        description: 'Your OpenAI API key',
-        placeholder: 'sk-...'
-      },
-      {
-        name: 'organizationId',
-        displayName: 'Organization ID',
-        type: 'string',
-        required: false,
-        description: 'Optional organization ID',
-        placeholder: 'org-...'
-      }
-    ]
-  }
+// Credential type options based on integration type
+const CREDENTIAL_TYPES: Record<string, Array<{ value: string; label: string }>> = {
+  // Example credential types
+  API: [
+    { value: "api_key", label: "API Key" },
+    { value: "oauth2", label: "OAuth 2.0" },
+    { value: "basic_auth", label: "Basic Authentication" },
+  ],
+  DATABASE: [
+    { value: "connection_string", label: "Connection String" },
+    { value: "username_password", label: "Username/Password" },
+  ],
+  PAYMENT: [
+    { value: "api_key", label: "API Key" },
+    { value: "secret_key", label: "Secret Key" },
+  ],
+  EMAIL: [
+    { value: "smtp", label: "SMTP" },
+    { value: "api_key", label: "API Key" },
+  ],
+  STORAGE: [
+    { value: "access_key", label: "Access Key" },
+    { value: "connection_string", label: "Connection String" },
+  ],
+  // Add more types as needed
+  DEFAULT: [
+    { value: "api_key", label: "API Key" },
+    { value: "oauth2", label: "OAuth 2.0" },
+    { value: "secret_key", label: "Secret Key" },
+    { value: "username_password", label: "Username/Password" },
+  ],
+}
+
+// Map integration name to category
+const getIntegrationCategory = (integration: string): string => {
+  const integrationUppercase = integration.toUpperCase()
+  if (integrationUppercase.includes("DATABASE") || integrationUppercase.includes("SQL")) return "DATABASE"
+  if (integrationUppercase.includes("PAYMENT") || integrationUppercase.includes("STRIPE")) return "PAYMENT"
+  if (integrationUppercase.includes("EMAIL") || integrationUppercase.includes("MAIL")) return "EMAIL"
+  if (integrationUppercase.includes("STORAGE") || integrationUppercase.includes("S3")) return "STORAGE"
+  if (integrationUppercase.includes("API")) return "API"
+  return "DEFAULT"
 }
 
 export function WorkflowCredentialsForm({
@@ -755,123 +97,48 @@ export function WorkflowCredentialsForm({
   const router = useRouter()
   const pathname = usePathname()
   const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
-  const slug = slugMatch ? slugMatch[1] : ""
+  const slug = slugMatch ? slugMatch[1] : "" // Extract just the captured group
+  
 
+  // State
   const [isAddingCredential, setIsAddingCredential] = useState(false)
-  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
   const [credentialToDelete, setCredentialToDelete] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isTesting, setIsTesting] = useState(false)
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
-  
-  const [credentialData, setCredentialData] = useState<Record<string, any>>({})
 
-  // Reset form when integration changes
-  useEffect(() => {
-    if (selectedIntegration) {
-      const schema = INTEGRATION_SCHEMAS[selectedIntegration]
-      if (schema) {
-        const initialData: Record<string, any> = {}
-        schema.fields.forEach(field => {
-          if (field.default !== undefined) {
-            initialData[field.name] = field.default
-          } else {
-            initialData[field.name] = field.type === 'boolean' ? false : ''
-          }
-        })
-        setCredentialData(initialData)
-      }
-    }
-  }, [selectedIntegration])
+  // New credential state
+  const [newCredential, setNewCredential] = useState({
+    name: "",
+    type: "",
+    value: "",
+    expiresAt: "",
+  })
 
-  const handleFieldChange = (fieldName: string, value: any) => {
-    setCredentialData(prev => ({
-      ...prev,
-      [fieldName]: value
-    }))
-  }
+  // Handle adding a new credential
+  const handleAddCredential = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-  const togglePasswordVisibility = (fieldName: string) => {
-    setShowPasswords(prev => ({
-      ...prev,
-      [fieldName]: !prev[fieldName]
-    }))
-  }
-
-  const validateCredentialData = (integration: string, data: Record<string, any>) => {
-    const schema = INTEGRATION_SCHEMAS[integration]
-    if (!schema) return { isValid: false, errors: ['Unknown integration'] }
-
-    const errors: string[] = []
-    
-    schema.fields.forEach(field => {
-      const value = data[field.name]
-      
-      if (field.required && (!value || (typeof value === 'string' && !value.trim()))) {
-        errors.push(`${field.displayName} is required`)
-      }
-      
-      if (field.validation && value) {
-        if (field.validation.pattern && !new RegExp(field.validation.pattern).test(value)) {
-          errors.push(`${field.displayName} format is invalid`)
-        }
-        if (field.validation.minLength && value.length < field.validation.minLength) {
-          errors.push(`${field.displayName} must be at least ${field.validation.minLength} characters`)
-        }
-        if (field.validation.maxLength && value.length > field.validation.maxLength) {
-          errors.push(`${field.displayName} must be no more than ${field.validation.maxLength} characters`)
-        }
-      }
-    })
-
-    return { isValid: errors.length === 0, errors }
-  }
-
-  const testCredential = async (integration: string, data: Record<string, any>) => {
-    setIsTesting(true)
-    try {
-      const response = await fetch(`/api/workflows/${workflowId}/credentials/test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ integration, data })
-      })
-
-      const result = await response.json()
-      
-      if (result.success) {
-        toast({
-          title: "Connection successful",
-          description: "Credentials are valid and working",
-        })
-        return true
-      } else {
-        toast({
-          title: "Connection failed",
-          description: result.error || "Unable to connect with these credentials",
-          variant: "destructive",
-        })
-        return false
-      }
-    } catch (error) {
+    if (!newCredential.name.trim()) {
       toast({
-        title: "Test failed",
-        description: "Unable to test credentials",
+        title: "Missing information",
+        description: "Please enter a name for the credential",
         variant: "destructive",
       })
-      return false
-    } finally {
-      setIsTesting(false)
+      return
     }
-  }
 
-  const handleSaveCredential = async () => {
-    if (!selectedIntegration) return
-
-    const validation = validateCredentialData(selectedIntegration, credentialData)
-    if (!validation.isValid) {
+    if (!newCredential.type) {
       toast({
-        title: "Validation failed",
-        description: validation.errors.join(', '),
+        title: "Missing information",
+        description: "Please select a credential type",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!newCredential.value.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter the credential value",
         variant: "destructive",
       })
       return
@@ -880,30 +147,43 @@ export function WorkflowCredentialsForm({
     setIsSubmitting(true)
     try {
       const response = await fetch(`/api/workflows/${workflowId}/credentials`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          integration: selectedIntegration,
-          data: credentialData,
+          name: newCredential.name.trim(),
+          type: newCredential.type,
+          value: newCredential.value.trim(),
+          expiresAt: newCredential.expiresAt ? new Date(newCredential.expiresAt) : null,
         }),
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to save credential')
+        throw new Error(errorData.error || "Failed to add credential")
       }
 
       toast({
-        title: "Credential saved",
-        description: "Your credential has been saved successfully",
+        title: "Credential added",
+        description: "Your credential has been added successfully",
       })
 
+      // Reset form and close dialog
+      setNewCredential({
+        name: "",
+        type: "",
+        value: "",
+        expiresAt: "",
+      })
       setIsAddingCredential(false)
-      setSelectedIntegration(null)
-      setCredentialData({})
-      
-      if (onUpdate) onUpdate()
+
+      // Trigger parent update callback
+      if (onUpdate) {
+        onUpdate()
+      }
     } catch (error) {
+      console.error("Error adding credential:", error)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -914,16 +194,19 @@ export function WorkflowCredentialsForm({
     }
   }
 
-  const handleDeleteCredential = async (credentialId: string) => {
+  // Handle deleting a credential
+  const handleDeleteCredential = async () => {
+    if (!credentialToDelete) return
+
     setIsSubmitting(true)
     try {
-      const response = await fetch(`/api/workflows/${workflowId}/credentials/${credentialId}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/workflows/${workflowId}/credentials/${credentialToDelete}`, {
+        method: "DELETE",
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to delete credential')
+        throw new Error(errorData.error || "Failed to delete credential")
       }
 
       toast({
@@ -931,8 +214,15 @@ export function WorkflowCredentialsForm({
         description: "Your credential has been deleted successfully",
       })
 
-      if (onUpdate) onUpdate()
+      // Close dialog and clear selection
+      setCredentialToDelete(null)
+
+      // Trigger parent update callback
+      if (onUpdate) {
+        onUpdate()
+      }
     } catch (error) {
+      console.error("Error deleting credential:", error)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -940,333 +230,238 @@ export function WorkflowCredentialsForm({
       })
     } finally {
       setIsSubmitting(false)
-      setCredentialToDelete(null)
     }
   }
 
-  const renderCredentialField = (field: CredentialField, integration: string) => {
-    const fieldKey = `${integration}-${field.name}`
-    const value = credentialData[field.name] || ''
-
-    switch (field.type) {
-      case 'boolean':
-        return (
-          <div key={fieldKey} className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>{field.displayName}</Label>
-              {field.description && (
-                <p className="text-sm text-muted-foreground">{field.description}</p>
-              )}
-            </div>
-            <Switch
-              checked={value}
-              onCheckedChange={(checked) => handleFieldChange(field.name, checked)}
-            />
-          </div>
-        )
-
-      case 'multiline':
-        return (
-          <div key={fieldKey} className="space-y-2">
-            <Label>
-              {field.displayName}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            <Textarea
-              placeholder={field.placeholder}
-              value={value}
-              onChange={(e) => handleFieldChange(field.name, e.target.value)}
-              rows={4}
-            />
-            {field.description && (
-              <p className="text-sm text-muted-foreground">{field.description}</p>
-            )}
-          </div>
-        )
-
-      case 'password':
-        return (
-          <div key={fieldKey} className="space-y-2">
-            <Label>
-              {field.displayName}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            <div className="relative">
-              <Input
-                type={showPasswords[fieldKey] ? 'text' : 'password'}
-                placeholder={field.placeholder}
-                value={value}
-                onChange={(e) => handleFieldChange(field.name, e.target.value)}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => togglePasswordVisibility(fieldKey)}
-              >
-                {showPasswords[fieldKey] ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {field.description && (
-              <p className="text-sm text-muted-foreground">{field.description}</p>
-            )}
-          </div>
-        )
-
-      case 'number':
-        return (
-          <div key={fieldKey} className="space-y-2">
-            <Label>
-              {field.displayName}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            <Input
-              type="number"
-              placeholder={field.placeholder}
-              value={value}
-              onChange={(e) => handleFieldChange(field.name, parseInt(e.target.value) || '')}
-            />
-            {field.description && (
-              <p className="text-sm text-muted-foreground">{field.description}</p>
-            )}
-          </div>
-        )
-
-      default:
-        return (
-          <div key={fieldKey} className="space-y-2">
-            <Label>
-              {field.displayName}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            <Input
-              type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'}
-              placeholder={field.placeholder}
-              value={value}
-              onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            />
-            {field.description && (
-              <p className="text-sm text-muted-foreground">{field.description}</p>
-            )}
-          </div>
-        )
-    }
-  }
-
-  const getCredentialStatus = (integration: string) => {
-    return existingCredentials.find(cred => cred.integrationName === integration)
+  // Get credential types for the selected integration
+  const getCredentialTypes = (integration: string) => {
+    const category = getIntegrationCategory(integration)
+    return CREDENTIAL_TYPES[category] || CREDENTIAL_TYPES.DEFAULT
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-medium">Workflow Credentials</h2>
-        <p className="text-sm text-muted-foreground">
-          Configure secure credentials for your workflow integrations
-        </p>
+        <h2 className="text-lg font-medium">Credentials</h2>
+        <p className="text-sm text-muted-foreground">Manage secure credentials for your workflow</p>
       </div>
 
       {/* Required Integrations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Required Integrations</CardTitle>
-          <CardDescription>
-            This workflow requires credentials for the following integrations
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {requiredIntegrations.map((integration) => {
-              const schema = INTEGRATION_SCHEMAS[integration]
-              const credential = getCredentialStatus(integration)
-              
-              if (!schema) {
-                return (
-                  <div key={integration} className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      <AlertCircle className="h-5 w-5 text-amber-500" />
-                      <div>
-                        <p className="font-medium">{integration}</p>
-                        <p className="text-sm text-muted-foreground">Integration not supported yet</p>
-                      </div>
-                    </div>
-                    <Badge variant="secondary">Unsupported</Badge>
-                  </div>
+      {requiredIntegrations && requiredIntegrations.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Required Integrations</CardTitle>
+            <CardDescription>This workflow requires credentials for the following integrations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {requiredIntegrations.map((integration) => {
+                const hasCredential = existingCredentials.some(
+                  (cred) =>
+                    cred.name.toLowerCase().includes(integration.toLowerCase()) ||
+                    cred.type.toLowerCase().includes(integration.toLowerCase()),
                 )
-              }
 
-              return (
-                <div key={integration} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <KeyRound className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{schema.displayName}</p>
-                        {schema.documentationUrl && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 text-xs"
-                            onClick={() => window.open(schema.documentationUrl, '_blank')}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{schema.description}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {schema.authType}
-                        </Badge>
-                        {schema.testable && (
-                          <Badge variant="outline" className="text-xs">
-                            Testable
-                          </Badge>
-                        )}
-                      </div>
+                return (
+                  <li key={integration} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <KeyRound className="h-4 w-4 text-muted-foreground" />
+                      <span>{integration}</span>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    {credential ? (
-                      <div className="flex items-center gap-2">
-                        <div className="text-right">
-                          <div className="flex items-center gap-1 text-green-600">
-                            <Check className="h-4 w-4" />
-                            <span className="text-sm font-medium">Configured</span>
-                          </div>
-                          {credential.lastTested && (
-                            <p className="text-xs text-muted-foreground">
-                              Last tested: {new Date(credential.lastTested).toLocaleDateString()}
-                            </p>
-                          )}
-                        </div>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Trash className="h-4 w-4 mr-1" />
-                              Remove
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Remove Credential</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will remove the {schema.displayName} credential. Your workflow may stop working until you add new credentials.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeleteCredential(credential.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Remove
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                    {hasCredential ? (
+                      <span className="text-green-600 flex items-center text-sm">
+                        <Check className="h-4 w-4 mr-1" /> Configured
+                      </span>
                     ) : (
                       <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => {
-                          setSelectedIntegration(integration)
+                          setNewCredential({
+                            ...newCredential,
+                            name: `${integration} Credential`,
+                          })
                           setIsAddingCredential(true)
                         }}
                       >
                         Configure
                       </Button>
                     )}
+                  </li>
+                )
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Existing Credentials */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Stored Credentials</CardTitle>
+          <CardDescription>Securely stored credentials for this workflow</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {existingCredentials && existingCredentials.length > 0 ? (
+            <ul className="space-y-3">
+              {existingCredentials.map((credential) => (
+                <li key={credential.id} className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">{credential.name}</div>
+                    <div className="text-sm text-muted-foreground">{credential.type}</div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Add/Edit Credential Dialog */}
-      <Dialog open={isAddingCredential} onOpenChange={setIsAddingCredential}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Configure {selectedIntegration && INTEGRATION_SCHEMAS[selectedIntegration]?.displayName}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedIntegration && INTEGRATION_SCHEMAS[selectedIntegration]?.description}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedIntegration && INTEGRATION_SCHEMAS[selectedIntegration] && (
-            <div className="space-y-6 py-4">
-              {INTEGRATION_SCHEMAS[selectedIntegration].documentationUrl && (
-                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                  <AlertCircle className="h-4 w-4 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="text-sm">Need help setting this up?</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(INTEGRATION_SCHEMAS[selectedIntegration!].documentationUrl, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-1" />
-                    View Guide
-                  </Button>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {INTEGRATION_SCHEMAS[selectedIntegration].fields.map(field => 
-                  renderCredentialField(field, selectedIntegration)
-                )}
-              </div>
-
-              {INTEGRATION_SCHEMAS[selectedIntegration].testable && (
-                <>
-                  <Separator />
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => testCredential(selectedIntegration, credentialData)}
-                      disabled={isTesting}
-                    >
-                      {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Test Connection
-                    </Button>
-                    <p className="text-sm text-muted-foreground">
-                      Test your credentials before saving
-                    </p>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                          <Trash className="h-4 w-4 mr-1" />
+                          Remove
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete the credential &quot;{credential.name}&quot;. This action
+                            cannot be undone and may cause your workflow to stop working.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setCredentialToDelete(credential.id)
+                              handleDeleteCredential()
+                            }}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            {isSubmitting && credentialToDelete === credential.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash className="mr-2 h-4 w-4" />
+                            )}
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
-                </>
-              )}
-            </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center py-6 text-muted-foreground">No credentials configured yet</div>
           )}
+        </CardContent>
+        <CardFooter>
+          <Dialog open={isAddingCredential} onOpenChange={setIsAddingCredential}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Credential
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Credential</DialogTitle>
+                <DialogDescription>
+                  Add a new credential for your workflow. Credentials are stored securely and encrypted.
+                </DialogDescription>
+              </DialogHeader>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddingCredential(false)
-                setSelectedIntegration(null)
-                setCredentialData({})
-              }}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSaveCredential} disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Credential
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <form onSubmit={handleAddCredential} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="credential-name">Credential Name</Label>
+                  <Input
+                    id="credential-name"
+                    placeholder="e.g., API Key for Service X"
+                    value={newCredential.name}
+                    onChange={(e) => setNewCredential({ ...newCredential, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="credential-type">Credential Type</Label>
+                  <Select
+                    value={newCredential.type}
+                    onValueChange={(value) => setNewCredential({ ...newCredential, type: value })}
+                  >
+                    <SelectTrigger id="credential-type">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {requiredIntegrations && requiredIntegrations.length > 0 ? (
+                        <>
+                          {requiredIntegrations.map((integration) => (
+                            <SelectItem key={integration} value={integration} disabled>
+                              {integration}
+                            </SelectItem>
+                          ))}
+                          <div className="px-2 py-1.5 text-xs text-muted-foreground">Credential Types</div>
+                          {requiredIntegrations.flatMap((integration) =>
+                            getCredentialTypes(integration).map((type) => (
+                              <SelectItem key={`${integration}-${type.value}`} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            )),
+                          )}
+                        </>
+                      ) : (
+                        CREDENTIAL_TYPES.DEFAULT.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="credential-value">Credential Value</Label>
+                  <div className="relative">
+                    <Input
+                      id="credential-value"
+                      type="password"
+                      placeholder="Enter the secret value"
+                      value={newCredential.value}
+                      onChange={(e) => setNewCredential({ ...newCredential, value: e.target.value })}
+                    />
+                    <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">This value will be encrypted and stored securely.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="credential-expiry">Expiration Date (Optional)</Label>
+                  <Input
+                    id="credential-expiry"
+                    type="date"
+                    value={newCredential.expiresAt}
+                    onChange={(e) => setNewCredential({ ...newCredential, expiresAt: e.target.value })}
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddingCredential(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Credential
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </CardFooter>
+      </Card>
 
       <div className="flex justify-end">
         <Button
@@ -1284,3 +479,808 @@ export function WorkflowCredentialsForm({
     </div>
   )
 }
+
+
+// "use client"
+
+// import type React from "react"
+// import { useState, useEffect } from "react"
+// import { useRouter, usePathname } from "next/navigation"
+// import { 
+//   Loader2, 
+//   PlusCircle, 
+//   KeyRound, 
+//   Trash, 
+//   Check, 
+//   Lock, 
+//   Eye, 
+//   EyeOff, 
+//   AlertCircle,
+//   ExternalLink 
+// } from "lucide-react"
+
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Switch } from "@/components/ui/switch"
+// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogFooter,
+//   DialogHeader,
+//   DialogTitle,
+// } from "@/components/ui/dialog"
+// import { toast } from "@/hooks/use-toast"
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+//   AlertDialogTrigger,
+// } from "@/components/ui/alert-dialog"
+// import { Badge } from "@/components/ui/badge"
+// import { Separator } from "@/components/ui/separator"
+
+// // n8n credential field types
+// type FieldType = 'string' | 'password' | 'number' | 'boolean' | 'json' | 'url' | 'email' | 'multiline'
+
+// interface CredentialField {
+//   name: string
+//   displayName: string
+//   type: FieldType
+//   required: boolean
+//   description?: string
+//   placeholder?: string
+//   default?: any
+//   options?: Array<{ name: string; value: string }>
+//   validation?: {
+//     pattern?: string
+//     minLength?: number
+//     maxLength?: number
+//   }
+// }
+
+// interface IntegrationCredentialSchema {
+//   name: string
+//   displayName: string
+//   description: string
+//   documentationUrl?: string
+//   authType: 'apiKey' | 'oauth2' | 'basic' | 'custom'
+//   fields: CredentialField[]
+//   testable: boolean
+// }
+
+// interface StoredCredential {
+//   id: string
+//   integrationName?: string
+//   displayName?: string
+//   isValid?: boolean
+//   lastTested?: string
+//   expiresAt?: string
+// }
+
+// interface WorkflowCredentialsFormProps {
+//   workflowId: string
+//   requiredIntegrations: string[]
+//   existingCredentials: StoredCredential[]
+//   onUpdate?: () => void
+// }
+
+// // n8n integration credential schemas
+// const INTEGRATION_SCHEMAS: Record<string, IntegrationCredentialSchema> = {
+//   gmail: {
+//     name: 'gmail',
+//     displayName: 'Gmail',
+//     description: 'Connect to Gmail using OAuth2 authentication',
+//     documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/google/',
+//     authType: 'oauth2',
+//     testable: true,
+//     fields: [
+//       {
+//         name: 'clientId',
+//         displayName: 'Client ID',
+//         type: 'string',
+//         required: true,
+//         description: 'The Client ID from your Google Cloud Console',
+//         placeholder: 'your-client-id.googleusercontent.com'
+//       },
+//       {
+//         name: 'clientSecret',
+//         displayName: 'Client Secret',
+//         type: 'password',
+//         required: true,
+//         description: 'The Client Secret from your Google Cloud Console'
+//       }
+//     ]
+//   },
+//   slack: {
+//     name: 'slack',
+//     displayName: 'Slack',
+//     description: 'Connect to Slack using OAuth2 or Bot Token',
+//     documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/slack/',
+//     authType: 'oauth2',
+//     testable: true,
+//     fields: [
+//       {
+//         name: 'accessToken',
+//         displayName: 'Access Token',
+//         type: 'password',
+//         required: true,
+//         description: 'Bot User OAuth Token (starts with xoxb-)',
+//         placeholder: 'xoxb-your-token-here'
+//       }
+//     ]
+//   },
+//   notion: {
+//     name: 'notion',
+//     displayName: 'Notion',
+//     description: 'Connect to Notion using Internal Integration Token',
+//     documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/notion/',
+//     authType: 'apiKey',
+//     testable: true,
+//     fields: [
+//       {
+//         name: 'apiKey',
+//         displayName: 'Internal Integration Token',
+//         type: 'password',
+//         required: true,
+//         description: 'Create an integration at https://www.notion.so/my-integrations',
+//         placeholder: 'secret_...'
+//       }
+//     ]
+//   },
+//   stripe: {
+//     name: 'stripe',
+//     displayName: 'Stripe',
+//     description: 'Connect to Stripe using API keys',
+//     documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/stripe/',
+//     authType: 'apiKey',
+//     testable: true,
+//     fields: [
+//       {
+//         name: 'secretKey',
+//         displayName: 'Secret Key',
+//         type: 'password',
+//         required: true,
+//         description: 'Your Stripe secret key (live or test)',
+//         placeholder: 'sk_live_... or sk_test_...'
+//       },
+//       {
+//         name: 'publishableKey',
+//         displayName: 'Publishable Key',
+//         type: 'string',
+//         required: false,
+//         description: 'Your Stripe publishable key (for client-side operations)',
+//         placeholder: 'pk_live_... or pk_test_...'
+//       }
+//     ]
+//   },
+//   postgresql: {
+//     name: 'postgresql',
+//     displayName: 'PostgreSQL',
+//     description: 'Connect to PostgreSQL database',
+//     documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/postgres/',
+//     authType: 'basic',
+//     testable: true,
+//     fields: [
+//       {
+//         name: 'host',
+//         displayName: 'Host',
+//         type: 'string',
+//         required: true,
+//         description: 'Database host address',
+//         placeholder: 'localhost',
+//         default: 'localhost'
+//       },
+//       {
+//         name: 'port',
+//         displayName: 'Port',
+//         type: 'number',
+//         required: true,
+//         description: 'Database port',
+//         default: 5432
+//       },
+//       {
+//         name: 'database',
+//         displayName: 'Database',
+//         type: 'string',
+//         required: true,
+//         description: 'Database name'
+//       },
+//       {
+//         name: 'username',
+//         displayName: 'Username',
+//         type: 'string',
+//         required: true,
+//         description: 'Database username'
+//       },
+//       {
+//         name: 'password',
+//         displayName: 'Password',
+//         type: 'password',
+//         required: true,
+//         description: 'Database password'
+//       },
+//       {
+//         name: 'ssl',
+//         displayName: 'SSL',
+//         type: 'boolean',
+//         required: false,
+//         description: 'Use SSL connection',
+//         default: false
+//       }
+//     ]
+//   },
+//   openai: {
+//     name: 'openai',
+//     displayName: 'OpenAI',
+//     description: 'Connect to OpenAI API',
+//     documentationUrl: 'https://docs.n8n.io/integrations/builtin/credentials/openai/',
+//     authType: 'apiKey',
+//     testable: true,
+//     fields: [
+//       {
+//         name: 'apiKey',
+//         displayName: 'API Key',
+//         type: 'password',
+//         required: true,
+//         description: 'Your OpenAI API key',
+//         placeholder: 'sk-...'
+//       },
+//       {
+//         name: 'organizationId',
+//         displayName: 'Organization ID',
+//         type: 'string',
+//         required: false,
+//         description: 'Optional organization ID',
+//         placeholder: 'org-...'
+//       }
+//     ]
+//   }
+// }
+
+// export function WorkflowCredentialsForm({
+//   workflowId,
+//   requiredIntegrations,
+//   existingCredentials,
+//   onUpdate,
+// }: WorkflowCredentialsFormProps) {
+//   const router = useRouter()
+//   const pathname = usePathname()
+//   const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+//   const slug = slugMatch ? slugMatch[1] : ""
+
+//   const [isAddingCredential, setIsAddingCredential] = useState(false)
+//   const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
+//   const [credentialToDelete, setCredentialToDelete] = useState<string | null>(null)
+//   const [isSubmitting, setIsSubmitting] = useState(false)
+//   const [isTesting, setIsTesting] = useState(false)
+//   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
+  
+//   const [credentialData, setCredentialData] = useState<Record<string, any>>({})
+
+//   // Reset form when integration changes
+//   useEffect(() => {
+//     if (selectedIntegration) {
+//       const schema = INTEGRATION_SCHEMAS[selectedIntegration]
+//       if (schema) {
+//         const initialData: Record<string, any> = {}
+//         schema.fields.forEach(field => {
+//           if (field.default !== undefined) {
+//             initialData[field.name] = field.default
+//           } else {
+//             initialData[field.name] = field.type === 'boolean' ? false : ''
+//           }
+//         })
+//         setCredentialData(initialData)
+//       }
+//     }
+//   }, [selectedIntegration])
+
+//   const handleFieldChange = (fieldName: string, value: any) => {
+//     setCredentialData(prev => ({
+//       ...prev,
+//       [fieldName]: value
+//     }))
+//   }
+
+//   const togglePasswordVisibility = (fieldName: string) => {
+//     setShowPasswords(prev => ({
+//       ...prev,
+//       [fieldName]: !prev[fieldName]
+//     }))
+//   }
+
+//   const validateCredentialData = (integration: string, data: Record<string, any>) => {
+//     const schema = INTEGRATION_SCHEMAS[integration]
+//     if (!schema) return { isValid: false, errors: ['Unknown integration'] }
+
+//     const errors: string[] = []
+    
+//     schema.fields.forEach(field => {
+//       const value = data[field.name]
+      
+//       if (field.required && (!value || (typeof value === 'string' && !value.trim()))) {
+//         errors.push(`${field.displayName} is required`)
+//       }
+      
+//       if (field.validation && value) {
+//         if (field.validation.pattern && !new RegExp(field.validation.pattern).test(value)) {
+//           errors.push(`${field.displayName} format is invalid`)
+//         }
+//         if (field.validation.minLength && value.length < field.validation.minLength) {
+//           errors.push(`${field.displayName} must be at least ${field.validation.minLength} characters`)
+//         }
+//         if (field.validation.maxLength && value.length > field.validation.maxLength) {
+//           errors.push(`${field.displayName} must be no more than ${field.validation.maxLength} characters`)
+//         }
+//       }
+//     })
+
+//     return { isValid: errors.length === 0, errors }
+//   }
+
+//   const testCredential = async (integration: string, data: Record<string, any>) => {
+//     setIsTesting(true)
+//     try {
+//       const response = await fetch(`/api/workflows/${workflowId}/credentials/test`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ integration, data })
+//       })
+
+//       const result = await response.json()
+      
+//       if (result.success) {
+//         toast({
+//           title: "Connection successful",
+//           description: "Credentials are valid and working",
+//         })
+//         return true
+//       } else {
+//         toast({
+//           title: "Connection failed",
+//           description: result.error || "Unable to connect with these credentials",
+//           variant: "destructive",
+//         })
+//         return false
+//       }
+//     } catch (error) {
+//       toast({
+//         title: "Test failed",
+//         description: "Unable to test credentials",
+//         variant: "destructive",
+//       })
+//       return false
+//     } finally {
+//       setIsTesting(false)
+//     }
+//   }
+
+//   const handleSaveCredential = async () => {
+//     if (!selectedIntegration) return
+
+//     const validation = validateCredentialData(selectedIntegration, credentialData)
+//     if (!validation.isValid) {
+//       toast({
+//         title: "Validation failed",
+//         description: validation.errors.join(', '),
+//         variant: "destructive",
+//       })
+//       return
+//     }
+
+//     setIsSubmitting(true)
+//     try {
+//       const response = await fetch(`/api/workflows/${workflowId}/credentials`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({
+//           integration: selectedIntegration,
+//           data: credentialData,
+//         }),
+//       })
+
+//       if (!response.ok) {
+//         const errorData = await response.json()
+//         throw new Error(errorData.error || 'Failed to save credential')
+//       }
+
+//       toast({
+//         title: "Credential saved",
+//         description: "Your credential has been saved successfully",
+//       })
+
+//       setIsAddingCredential(false)
+//       setSelectedIntegration(null)
+//       setCredentialData({})
+      
+//       if (onUpdate) onUpdate()
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: error instanceof Error ? error.message : "An unknown error occurred",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsSubmitting(false)
+//     }
+//   }
+
+//   const handleDeleteCredential = async (credentialId: string) => {
+//     setIsSubmitting(true)
+//     try {
+//       const response = await fetch(`/api/workflows/${workflowId}/credentials/${credentialId}`, {
+//         method: 'DELETE',
+//       })
+
+//       if (!response.ok) {
+//         const errorData = await response.json()
+//         throw new Error(errorData.error || 'Failed to delete credential')
+//       }
+
+//       toast({
+//         title: "Credential deleted",
+//         description: "Your credential has been deleted successfully",
+//       })
+
+//       if (onUpdate) onUpdate()
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: error instanceof Error ? error.message : "An unknown error occurred",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsSubmitting(false)
+//       setCredentialToDelete(null)
+//     }
+//   }
+
+//   const renderCredentialField = (field: CredentialField, integration: string) => {
+//     const fieldKey = `${integration}-${field.name}`
+//     const value = credentialData[field.name] || ''
+
+//     switch (field.type) {
+//       case 'boolean':
+//         return (
+//           <div key={fieldKey} className="flex items-center justify-between">
+//             <div className="space-y-0.5">
+//               <Label>{field.displayName}</Label>
+//               {field.description && (
+//                 <p className="text-sm text-muted-foreground">{field.description}</p>
+//               )}
+//             </div>
+//             <Switch
+//               checked={value}
+//               onCheckedChange={(checked) => handleFieldChange(field.name, checked)}
+//             />
+//           </div>
+//         )
+
+//       case 'multiline':
+//         return (
+//           <div key={fieldKey} className="space-y-2">
+//             <Label>
+//               {field.displayName}
+//               {field.required && <span className="text-red-500 ml-1">*</span>}
+//             </Label>
+//             <Textarea
+//               placeholder={field.placeholder}
+//               value={value}
+//               onChange={(e) => handleFieldChange(field.name, e.target.value)}
+//               rows={4}
+//             />
+//             {field.description && (
+//               <p className="text-sm text-muted-foreground">{field.description}</p>
+//             )}
+//           </div>
+//         )
+
+//       case 'password':
+//         return (
+//           <div key={fieldKey} className="space-y-2">
+//             <Label>
+//               {field.displayName}
+//               {field.required && <span className="text-red-500 ml-1">*</span>}
+//             </Label>
+//             <div className="relative">
+//               <Input
+//                 type={showPasswords[fieldKey] ? 'text' : 'password'}
+//                 placeholder={field.placeholder}
+//                 value={value}
+//                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
+//               />
+//               <Button
+//                 type="button"
+//                 variant="ghost"
+//                 size="sm"
+//                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+//                 onClick={() => togglePasswordVisibility(fieldKey)}
+//               >
+//                 {showPasswords[fieldKey] ? (
+//                   <EyeOff className="h-4 w-4" />
+//                 ) : (
+//                   <Eye className="h-4 w-4" />
+//                 )}
+//               </Button>
+//             </div>
+//             {field.description && (
+//               <p className="text-sm text-muted-foreground">{field.description}</p>
+//             )}
+//           </div>
+//         )
+
+//       case 'number':
+//         return (
+//           <div key={fieldKey} className="space-y-2">
+//             <Label>
+//               {field.displayName}
+//               {field.required && <span className="text-red-500 ml-1">*</span>}
+//             </Label>
+//             <Input
+//               type="number"
+//               placeholder={field.placeholder}
+//               value={value}
+//               onChange={(e) => handleFieldChange(field.name, parseInt(e.target.value) || '')}
+//             />
+//             {field.description && (
+//               <p className="text-sm text-muted-foreground">{field.description}</p>
+//             )}
+//           </div>
+//         )
+
+//       default:
+//         return (
+//           <div key={fieldKey} className="space-y-2">
+//             <Label>
+//               {field.displayName}
+//               {field.required && <span className="text-red-500 ml-1">*</span>}
+//             </Label>
+//             <Input
+//               type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'}
+//               placeholder={field.placeholder}
+//               value={value}
+//               onChange={(e) => handleFieldChange(field.name, e.target.value)}
+//             />
+//             {field.description && (
+//               <p className="text-sm text-muted-foreground">{field.description}</p>
+//             )}
+//           </div>
+//         )
+//     }
+//   }
+
+//   const getCredentialStatus = (integration: string) => {
+//     return existingCredentials.find(cred => cred.integrationName === integration)
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       <div>
+//         <h2 className="text-lg font-medium">Workflow Credentials</h2>
+//         <p className="text-sm text-muted-foreground">
+//           Configure secure credentials for your workflow integrations
+//         </p>
+//       </div>
+
+//       {/* Required Integrations */}
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>Required Integrations</CardTitle>
+//           <CardDescription>
+//             This workflow requires credentials for the following integrations
+//           </CardDescription>
+//         </CardHeader>
+//         <CardContent>
+//           <div className="space-y-4">
+//             {requiredIntegrations.map((integration) => {
+//               const schema = INTEGRATION_SCHEMAS[integration]
+//               const credential = getCredentialStatus(integration)
+              
+//               if (!schema) {
+//                 return (
+//                   <div key={integration} className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+//                     <div className="flex items-center gap-3">
+//                       <AlertCircle className="h-5 w-5 text-amber-500" />
+//                       <div>
+//                         <p className="font-medium">{integration}</p>
+//                         <p className="text-sm text-muted-foreground">Integration not supported yet</p>
+//                       </div>
+//                     </div>
+//                     <Badge variant="secondary">Unsupported</Badge>
+//                   </div>
+//                 )
+//               }
+
+//               return (
+//                 <div key={integration} className="flex items-center justify-between p-4 border rounded-lg">
+//                   <div className="flex items-center gap-3">
+//                     <KeyRound className="h-5 w-5 text-muted-foreground" />
+//                     <div>
+//                       <div className="flex items-center gap-2">
+//                         <p className="font-medium">{schema.displayName}</p>
+//                         {schema.documentationUrl && (
+//                           <Button
+//                             variant="ghost"
+//                             size="sm"
+//                             className="h-auto p-0 text-xs"
+//                             onClick={() => window.open(schema.documentationUrl, '_blank')}
+//                           >
+//                             <ExternalLink className="h-3 w-3" />
+//                           </Button>
+//                         )}
+//                       </div>
+//                       <p className="text-sm text-muted-foreground">{schema.description}</p>
+//                       <div className="flex items-center gap-2 mt-1">
+//                         <Badge variant="outline" className="text-xs">
+//                           {schema.authType}
+//                         </Badge>
+//                         {schema.testable && (
+//                           <Badge variant="outline" className="text-xs">
+//                             Testable
+//                           </Badge>
+//                         )}
+//                       </div>
+//                     </div>
+//                   </div>
+                  
+//                   <div className="flex items-center gap-3">
+//                     {credential ? (
+//                       <div className="flex items-center gap-2">
+//                         <div className="text-right">
+//                           <div className="flex items-center gap-1 text-green-600">
+//                             <Check className="h-4 w-4" />
+//                             <span className="text-sm font-medium">Configured</span>
+//                           </div>
+//                           {credential.lastTested && (
+//                             <p className="text-xs text-muted-foreground">
+//                               Last tested: {new Date(credential.lastTested).toLocaleDateString()}
+//                             </p>
+//                           )}
+//                         </div>
+//                         <AlertDialog>
+//                           <AlertDialogTrigger asChild>
+//                             <Button variant="outline" size="sm">
+//                               <Trash className="h-4 w-4 mr-1" />
+//                               Remove
+//                             </Button>
+//                           </AlertDialogTrigger>
+//                           <AlertDialogContent>
+//                             <AlertDialogHeader>
+//                               <AlertDialogTitle>Remove Credential</AlertDialogTitle>
+//                               <AlertDialogDescription>
+//                                 This will remove the {schema.displayName} credential. Your workflow may stop working until you add new credentials.
+//                               </AlertDialogDescription>
+//                             </AlertDialogHeader>
+//                             <AlertDialogFooter>
+//                               <AlertDialogCancel>Cancel</AlertDialogCancel>
+//                               <AlertDialogAction
+//                                 onClick={() => handleDeleteCredential(credential.id)}
+//                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+//                               >
+//                                 Remove
+//                               </AlertDialogAction>
+//                             </AlertDialogFooter>
+//                           </AlertDialogContent>
+//                         </AlertDialog>
+//                       </div>
+//                     ) : (
+//                       <Button
+//                         onClick={() => {
+//                           setSelectedIntegration(integration)
+//                           setIsAddingCredential(true)
+//                         }}
+//                       >
+//                         Configure
+//                       </Button>
+//                     )}
+//                   </div>
+//                 </div>
+//               )
+//             })}
+//           </div>
+//         </CardContent>
+//       </Card>
+
+//       {/* Add/Edit Credential Dialog */}
+//       <Dialog open={isAddingCredential} onOpenChange={setIsAddingCredential}>
+//         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+//           <DialogHeader>
+//             <DialogTitle>
+//               Configure {selectedIntegration && INTEGRATION_SCHEMAS[selectedIntegration]?.displayName}
+//             </DialogTitle>
+//             <DialogDescription>
+//               {selectedIntegration && INTEGRATION_SCHEMAS[selectedIntegration]?.description}
+//             </DialogDescription>
+//           </DialogHeader>
+
+//           {selectedIntegration && INTEGRATION_SCHEMAS[selectedIntegration] && (
+//             <div className="space-y-6 py-4">
+//               {INTEGRATION_SCHEMAS[selectedIntegration].documentationUrl && (
+//                 <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+//                   <AlertCircle className="h-4 w-4 text-blue-600" />
+//                   <div className="flex-1">
+//                     <p className="text-sm">Need help setting this up?</p>
+//                   </div>
+//                   <Button
+//                     variant="outline"
+//                     size="sm"
+//                     onClick={() => window.open(INTEGRATION_SCHEMAS[selectedIntegration!].documentationUrl, '_blank')}
+//                   >
+//                     <ExternalLink className="h-4 w-4 mr-1" />
+//                     View Guide
+//                   </Button>
+//                 </div>
+//               )}
+
+//               <div className="space-y-4">
+//                 {INTEGRATION_SCHEMAS[selectedIntegration].fields.map(field => 
+//                   renderCredentialField(field, selectedIntegration)
+//                 )}
+//               </div>
+
+//               {INTEGRATION_SCHEMAS[selectedIntegration].testable && (
+//                 <>
+//                   <Separator />
+//                   <div className="flex items-center gap-2">
+//                     <Button
+//                       variant="outline"
+//                       onClick={() => testCredential(selectedIntegration, credentialData)}
+//                       disabled={isTesting}
+//                     >
+//                       {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+//                       Test Connection
+//                     </Button>
+//                     <p className="text-sm text-muted-foreground">
+//                       Test your credentials before saving
+//                     </p>
+//                   </div>
+//                 </>
+//               )}
+//             </div>
+//           )}
+
+//           <DialogFooter>
+//             <Button
+//               variant="outline"
+//               onClick={() => {
+//                 setIsAddingCredential(false)
+//                 setSelectedIntegration(null)
+//                 setCredentialData({})
+//               }}
+//               disabled={isSubmitting}
+//             >
+//               Cancel
+//             </Button>
+//             <Button onClick={handleSaveCredential} disabled={isSubmitting}>
+//               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+//               Save Credential
+//             </Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+
+//       <div className="flex justify-end">
+//         <Button
+//           onClick={() => {
+//             if (onUpdate) {
+//               onUpdate()
+//             } else {
+//               router.push(`/dashboard/${slug}/agents/workflows/${workflowId}`)
+//             }
+//           }}
+//         >
+//           Done
+//         </Button>
+//       </div>
+//     </div>
+//   )
+// }
