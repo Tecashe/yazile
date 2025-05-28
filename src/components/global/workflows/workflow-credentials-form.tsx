@@ -559,9 +559,9 @@ interface IntegrationCredentialSchema {
 
 interface StoredCredential {
   id: string
-  integrationName: string
-  displayName: string
-  isValid: boolean
+  integrationName?: string
+  displayName?: string
+  isValid?: boolean
   lastTested?: string
   expiresAt?: string
 }
