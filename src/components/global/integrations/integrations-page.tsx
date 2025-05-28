@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+
 import {
   Instagram,
   PhoneIcon as WhatsApp,
@@ -469,7 +470,7 @@ export default function IntegrationsPage() {
           <PlatformBenefits platform="whatsapp" />
         </TabsContent>
       </Tabs>
-      <InstagramDashboard userId={userData?.data?.clerkId||"1234556"}/>
+      <InstagramDashboard subscriptionTier="pro" userId={userData?.data?.clerkId||"1234556"}/>
       
       {showRequirements && (
         <RequirementsModal 
