@@ -2055,12 +2055,18 @@ export const getAccountInsights = async (userId: string, period: "day" | "week" 
       }
     }
 
-    // Try different metrics based on account type and availability
+    // Updated metrics to try - removed "impressions" which is no longer supported in v22+
+    // Based on https://developers.facebook.com/docs/instagram-api/reference/ig-user/insights
     const metricsToTry = [
-      "impressions,reach,profile_views,website_clicks",
-      "impressions,reach,profile_views",
-      "impressions,reach",
+      "reach,profile_views,website_clicks",
+      "reach,profile_views",
       "profile_views",
+      "online_followers",
+      "follower_count",
+      "email_contacts",
+      "get_directions_clicks",
+      "phone_call_clicks",
+      "text_message_clicks",
     ]
 
     for (const metrics of metricsToTry) {
@@ -2089,15 +2095,70 @@ export const getAccountInsights = async (userId: string, period: "day" | "week" 
 
     // If all metrics fail, return fallback data
     logWarning(functionName, "All metrics failed, returning fallback data")
+
+    // Get basic media data to calculate some insights as fallback
+    const mediaData = await fetchInstagramMedia(userId, 50)
+    if (mediaData.status === 200 && mediaData.data) {
+      const totalLikes = mediaData.data.reduce((sum: number, post: any) => sum + (post.like_count || 0), 0)
+      const totalComments = mediaData.data.reduce((sum: number, post: any) => sum + (post.comments_count || 0), 0)
+      const avgLikes = Math.round(totalLikes / mediaData.data.length) || 0
+      const avgComments = Math.round(totalComments / mediaData.data.length) || 0
+      const recentPosts = mediaData.data.filter((post: any) => {
+        const postDate = new Date(post.timestamp)
+        const now = new Date()
+        const diffDays = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24))
+        return diffDays <= (period === "day" ? 1 : period === "week" ? 7 : 28)
+      }).length
+
+      return {
+        status: 200,
+        data: [
+          {
+            name: "average_likes",
+            period: period,
+            values: [{ value: avgLikes, end_time: new Date().toISOString() }],
+            title: "Average Likes",
+            description: "Average likes per post",
+          },
+          {
+            name: "average_comments",
+            period: period,
+            values: [{ value: avgComments, end_time: new Date().toISOString() }],
+            title: "Average Comments",
+            description: "Average comments per post",
+          },
+          {
+            name: "recent_posts",
+            period: period,
+            values: [{ value: recentPosts, end_time: new Date().toISOString() }],
+            title: "Recent Posts",
+            description: `Posts in the last ${period === "day" ? "day" : period === "week" ? "week" : "28 days"}`,
+          },
+          {
+            name: "engagement_rate",
+            period: period,
+            values: [
+              {
+                value: Math.round(((totalLikes + totalComments) / (mediaData.data.length * 100)) * 100) / 100,
+                end_time: new Date().toISOString(),
+              },
+            ],
+            title: "Engagement Rate",
+            description: "Estimated engagement rate",
+          },
+        ],
+      }
+    }
+
     return {
       status: 200,
       data: [
         {
-          name: "profile_views",
+          name: "insights_unavailable",
           period: period,
           values: [{ value: 0, end_time: new Date().toISOString() }],
-          title: "Profile Views",
-          description: "Profile views not available",
+          title: "Insights Unavailable",
+          description: "Account insights not available for this account type",
         },
       ],
     }
