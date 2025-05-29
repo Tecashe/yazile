@@ -157,51 +157,6 @@ function ConnectionDetailsContent({ connectionId }: { connectionId: string }) {
     fetchConnection()
   }, [connectionId, router])
 
-//   const fetchConnection = async () => {
-//     try {
-//       setLoading(true)
-//       setError(null)
-
-//       // Get user info
-//       const userResponse = await onUserInfor()
-//       const userId = userResponse.data?.id
-
-//       if (!userId) {
-//         router.push("/sign-in")
-//         return
-//       }
-
-//       // Fetch connection details
-//       const response = await fetch(`/api/n8n/connections/${connectionId}`)
-
-//       if (!response.ok) {
-//         if (response.status === 404) {
-//           throw new Error("Connection not found")
-//         }
-//         const errorData = await response.json().catch(() => ({}))
-//         throw new Error(errorData.error || "Failed to fetch connection details")
-//       }
-
-//       const data = await response.json()
-//       setConnection(data.connection)
-      
-//       // Initialize edit form
-//       if (data.connection) {
-//         setEditForm({
-//           name: data.connection.name || "",
-//           n8nUrl: data.connection.n8nUrl || "",
-//           description: data.connection.description || "",
-//           isActive: data.connection.isActive || false
-//         })
-//       }
-      
-//     } catch (err) {
-//       setError(err instanceof Error ? err.message : "An error occurred")
-//       console.error("Error fetching connection:", err)
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
 const fetchConnection = async () => {
   try {
     setLoading(true)
