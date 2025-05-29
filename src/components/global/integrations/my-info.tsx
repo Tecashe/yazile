@@ -2793,7 +2793,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
     <div className="space-y-6">
       {/* Header with AI Badge */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <Instagram className="h-8 w-8 text-blue-600" />
           <div>
             <div className="flex items-center gap-2">
@@ -2805,7 +2805,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
             </div>
             <p className="text-muted-foreground">Intelligent insights and automated growth strategies</p>
           </div>
-        </div>
+        </div> */}
         <div className="flex items-center gap-2">
           <Button onClick={handleRefreshToken} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />

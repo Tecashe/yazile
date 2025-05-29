@@ -2165,8 +2165,7 @@ enum NotificationType {
 
 
 
-// This is just the BusinessProfile model to add to your schema
-// Add this to your existing schema.prisma file
+
 
 model BusinessProfileDescription {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -2183,11 +2182,6 @@ model BusinessProfileDescription {
   @@index([userId])
   @@index([automationId])
 }
-
-
-
-
-
 
 
 

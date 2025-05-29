@@ -13,7 +13,6 @@
     "scheduler": "ts-node scripts/scheduler.ts"
   },
   "dependencies": {
-    
     "@ai-sdk/openai": "^1.0.13",
     "@clerk/nextjs": "^6.5.2",
     "@emoji-mart/data": "^1.2.1",
@@ -74,6 +73,7 @@
     "embla-carousel-react": "^8.5.1",
     "express": "^4.21.2",
     "framer-motion": "^11.15.0",
+    "googleapis": "^149.0.0",
     "input-otp": "^1.4.1",
     "ioredis": "^5.6.0",
     "jspdf": "^3.0.1",
