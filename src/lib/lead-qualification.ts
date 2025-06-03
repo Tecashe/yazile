@@ -828,6 +828,16 @@
 //   }
 // }
 
+
+
+
+
+
+
+
+
+
+
 import { client } from "@/lib/prisma"
 import { openai } from "@/lib/openai"
 import { Prisma } from "@prisma/client"
@@ -836,7 +846,7 @@ import type { LeadStatus,Lead } from "@prisma/client"
 /**
  * Analyzes a message for sentiment and intent
  */
-export async function analyzeMessage(message: string) {
+export async function analyzeMessageE(message: string) {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -1119,5 +1129,54 @@ export async function analyzeLead(params: {
   } catch (error) {
     console.error("Error analyzing lead:", error)
     return null
+  }
+}
+
+
+/**
+ * Analyzes a message for sentiment and intent using n8n workflow
+ */
+export async function analyzeMessage(message: string) {
+  try {
+    // Replace with your n8n webhook URL
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || 'https://yaziln8n.onrender.com/webhook/analyze-message'
+    
+    const response = await fetch(n8nWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any authentication headers if needed
+        'Authorization': `Bearer ${process.env.N8N_API_KEY}`,
+      },
+      body: JSON.stringify({
+        message: message,
+        analysisType: 'lead_qualification'
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`n8n request failed: ${response.status} ${response.statusText}`)
+    }
+
+    const analysis = await response.json()
+    
+    // Ensure the response has the expected structure
+    return {
+      sentiment: analysis.sentiment || 0,
+      purchaseIntent: analysis.purchaseIntent || 0,
+      questionIntent: analysis.questionIntent || false,
+      informationSharing: analysis.informationSharing || false,
+      objections: analysis.objections || false,
+      intent: analysis.intent || null
+    }
+  } catch (error) {
+    console.error("Error analyzing message with n8n:", error)
+    return {
+      sentiment: 0,
+      purchaseIntent: 0,
+      questionIntent: false,
+      informationSharing: false,
+      objections: false,
+    }
   }
 }

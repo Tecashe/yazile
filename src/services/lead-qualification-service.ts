@@ -255,6 +255,8 @@ export class LeadQualificationService {
   /**
    * Analyze a message for sentiment and intent
    */
+
+  
   private async analyzeMessage(message: string): Promise<any> {
     try {
       const { text } = await generateText({
@@ -307,6 +309,8 @@ export class LeadQualificationService {
       }
     }
   }
+
+  
 
   /**
    * Qualify a lead
