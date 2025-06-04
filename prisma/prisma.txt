@@ -1603,6 +1603,7 @@ model Lead {
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
+
   @@index([userId])
   @@index([automationId])
   @@index([status])
