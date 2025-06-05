@@ -738,14 +738,14 @@ function CrmIntegrationsContent() {
     window.location.reload()
   }
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <Loader className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
-        <p className="text-muted-foreground">Loading your integrations...</p>
-      </div>
-    )
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center h-64">
+  //       <Loader className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+  //       <p className="text-muted-foreground">Loading your integrations...</p>
+  //     </div>
+  //   )
+  // }
 
   if (error) {
     return (
