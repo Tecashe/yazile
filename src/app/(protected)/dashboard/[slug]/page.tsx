@@ -38,7 +38,6 @@ export default async function DashboardPage() {
        
       <div className="flex gap-5 lg:flex-row flex-col">
         <EngagementInsights />
-         <RealDashboardCards />
       </div>
       
 
@@ -76,7 +75,8 @@ export default async function DashboardPage() {
           <EngagementPredictor />
         </div>
         <div className="grid grid-cols-1 gap-6">      
-        <HashtagCloud />
+        {/* <HashtagCloud /> */}
+        <RealDashboardCards />
       </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
