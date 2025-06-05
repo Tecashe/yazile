@@ -16,6 +16,7 @@ import EngagementPredictor from "./_components/dash/EngagementPredictor"
 import AIPerformance from "./_components/dash/AIPerformance"
 import EngagementInsights from "./_components/dash/EngagementInsights"
 import HashtagCloud from "./_components/dash/HashtagCloud"
+import { RealDashboardCards } from "@/components/global/dashboard/dashboard-cards"
 
 
 import type { Automation } from "@/types/dashboard"
@@ -31,6 +32,11 @@ export default async function DashboardPage() {
         {DASHBOARD_CARDS.map((card) => (
           <DoubleGradientCard key={card.id} {...card} />
         ))}
+      </div>
+
+      
+       <div className="space-y-6">
+         <RealDashboardCards />
       </div>
        
       <div className="flex gap-5 lg:flex-row flex-col">
