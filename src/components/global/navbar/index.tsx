@@ -559,7 +559,7 @@
 "use client"
 
 import React from "react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/components/ui/sidebars"
 import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
@@ -568,7 +568,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumbs"
 import { usePathname } from "next/navigation"
 import { Bell, Search, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -581,7 +581,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badges"
 import { useClerk } from "@clerk/nextjs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
