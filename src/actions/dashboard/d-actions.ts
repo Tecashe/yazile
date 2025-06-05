@@ -1,7 +1,6 @@
 "use server"
 
 import { client } from "@/lib/prisma"
-import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { onUserInfor } from "../user"
 
@@ -88,7 +87,8 @@ export async function getDashboardStats() {
 }
 
 export async function getRecentActivity() {
-  const { userId } = await auth()
+  const  user  = await onUserInfor()
+  const userId = user.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
@@ -154,7 +154,8 @@ export async function getRecentActivity() {
 }
 
 export async function getLeadAnalytics() {
-  const { userId } = await auth()
+  const  user  = await onUserInfor()
+  const userId = user.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
@@ -235,7 +236,8 @@ export async function getLeadAnalytics() {
 }
 
 export async function getAutomationPerformance() {
-  const { userId } = await auth()
+  const  user  = await onUserInfor()
+  const userId = user.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
@@ -300,7 +302,8 @@ export async function getAutomationPerformance() {
 }
 
 export async function getIntegrationStats() {
-  const { userId } = await auth()
+  const  user  = await onUserInfor()
+  const userId = user.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
