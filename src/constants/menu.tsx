@@ -238,11 +238,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Integrations",
         icon: icon(Cpu, "text-slate-600"),
       },
-       {
-        id: uuid(),
-        label: "Conversations",
-        icon: icon(MessageCircle, "text-indigo-600"),
-      },
     ],
   },
   {

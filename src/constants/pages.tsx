@@ -32,7 +32,6 @@ export const PAGE_BREAD_CRUMBS: string[] = [
   'influencer',
   'whatsapp',
   'connections',
-  'conversations',
 ]
 
 type Props = {
@@ -61,7 +60,6 @@ export const PAGE_ICON: Props = {
   WHATSAPP:<Chat/>,
   INFLUENCER:<Chat/>,
   AFFILIATE:<Award/>,
-  CONVERSATIONS:<MessageCircle/>
 }
 
 export const PLANS = [
