@@ -35,12 +35,10 @@ export default async function DashboardPage() {
       </div>
 
       
-       <div className="space-y-6">
-         <RealDashboardCards />
-      </div>
        
       <div className="flex gap-5 lg:flex-row flex-col">
         <EngagementInsights />
+         <RealDashboardCards />
       </div>
       
 
