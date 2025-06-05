@@ -6,7 +6,7 @@ import { onUserInfor } from "../user"
 
 export async function getDashboardStats() {
   const  user  = await onUserInfor()
-  const userId = user.data?.id
+  const userId = user.data?.clerkId
   if (!userId) redirect("/sign-in")
 
   try {
@@ -88,7 +88,7 @@ export async function getDashboardStats() {
 
 export async function getRecentActivity() {
   const  user  = await onUserInfor()
-  const userId = user.data?.id
+  const userId = user.data?.clerkId
   if (!userId) redirect("/sign-in")
 
   try {
@@ -155,7 +155,7 @@ export async function getRecentActivity() {
 
 export async function getLeadAnalytics() {
   const  user  = await onUserInfor()
-  const userId = user.data?.id
+  const userId = user.data?.clerkId
   if (!userId) redirect("/sign-in")
 
   try {
@@ -237,7 +237,7 @@ export async function getLeadAnalytics() {
 
 export async function getAutomationPerformance() {
   const  user  = await onUserInfor()
-  const userId = user.data?.id
+  const userId = user.data?.clerkId
   if (!userId) redirect("/sign-in")
 
   try {
@@ -303,7 +303,7 @@ export async function getAutomationPerformance() {
 
 export async function getIntegrationStats() {
   const  user  = await onUserInfor()
-  const userId = user.data?.id
+  const userId = user.data?.clerkId
   if (!userId) redirect("/sign-in")
 
   try {
