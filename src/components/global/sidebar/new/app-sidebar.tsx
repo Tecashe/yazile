@@ -35,7 +35,7 @@ import {
   SidebarMenuButton,
   SidebarInput,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebars"
 import { usePathname } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
 import Link from "next/link"

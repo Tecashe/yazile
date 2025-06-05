@@ -58,8 +58,7 @@ import { AppSidebar } from "@/components/global/sidebar/new/app-sidebar"
 import type React from "react"
 import Navbar from "@/components/global/navbar"
 import { PrefetchUserAutnomations, PrefetchUserProfile } from "@/react-query/prefetch"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { cookies } from "next/headers"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebars"
 
 type Props = {
   children: React.ReactNode
@@ -73,13 +72,9 @@ const Layout = async ({ children, params }: Props) => {
   await PrefetchUserProfile(query)
   await PrefetchUserAutnomations(query)
 
-  // Get sidebar state from cookies for persistence
-  const cookieStore = await cookies()
-  const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
-
   return (
     <HydrationBoundary state={dehydrate(query)}>
-      <SidebarProvider defaultOpen={defaultOpen}>
+      <SidebarProvider defaultOpen={true}>
         <AppSidebar slug={params.slug} />
         <SidebarInset>
           <div className="flex flex-col min-h-screen">

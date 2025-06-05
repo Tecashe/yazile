@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/components/ui/sidebars"
 import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
