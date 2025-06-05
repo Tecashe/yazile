@@ -570,7 +570,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumbs"
 import { usePathname } from "next/navigation"
-import { Bell, Search, Settings } from "lucide-react"
+import { Bell, Search, Cog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -741,7 +741,7 @@ const Navbar = ({ slug }: Props) => {
           {/* Settings */}
           <Button variant="ghost" size="icon" asChild>
             <a href={`/dashboard/${slug}/settings`}>
-              <Settings className="h-4 w-4" />
+              <Cog className="h-4 w-4" />
               <span className="sr-only">Settings</span>
             </a>
           </Button>
