@@ -48,18 +48,28 @@
 //   }
 // }
 
-
 import { NextRequest, NextResponse } from "next/server"
 import { onUserInfor } from "@/actions/user"
 import { getUserSubscription } from "@/lib/subscription"
 
 export async function GET(req: NextRequest) {
   try {
-    // Get the current user
-    const user = await onUserInfor()
-    const userid = user.data?.id
+    // Get the current user - wrap in try-catch to handle redirect
+    let user;
+    let userid;
     
-    // Check if user is authenticated - fix the authentication check
+    try {
+      user = await onUserInfor()
+      userid = user.data?.id
+    } catch (error: any) {
+      // If onUserInfor throws a redirect, treat as unauthenticated
+      if (error.digest?.includes('NEXT_REDIRECT')) {
+        return NextResponse.json({ success: false, error: "Authentication required" }, { status: 401 })
+      }
+      throw error; // Re-throw if it's not a redirect
+    }
+    
+    // Check if user is authenticated
     if (!user || !user.data || !userid) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
@@ -105,5 +115,3 @@ export async function GET(req: NextRequest) {
     )
   }
 }
-
-

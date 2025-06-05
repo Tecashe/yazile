@@ -28,13 +28,17 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-y-10">
 
-      <div className="flex gap-5 lg:flex-row flex-col">
+      {/* <div className="flex gap-5 lg:flex-row flex-col">
         {DASHBOARD_CARDS.map((card) => (
           <DoubleGradientCard key={card.id} {...card} />
         ))}
+      </div> */}
+       <div className="grid grid-cols-1 gap-6">      
+        <RealDashboardCards />
+       
       </div>
 
-      
+       
        
       <div className="flex gap-5 lg:flex-row flex-col">
         <EngagementInsights />
@@ -75,8 +79,8 @@ export default async function DashboardPage() {
           <EngagementPredictor />
         </div>
         <div className="grid grid-cols-1 gap-6">      
-        {/* <HashtagCloud /> */}
-        <RealDashboardCards />
+        <HashtagCloud />
+       
       </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
