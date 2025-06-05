@@ -16,7 +16,7 @@ import EngagementPredictor from "./_components/dash/EngagementPredictor"
 import AIPerformance from "./_components/dash/AIPerformance"
 import EngagementInsights from "./_components/dash/EngagementInsights"
 import HashtagCloud from "./_components/dash/HashtagCloud"
-import { RealDashboardCards } from "@/components/global/dashboard/dashboard-cards"
+import { EnhancedDashboardCards } from "@/components/global/dashboard/dashboard-cards"
 
 
 import type { Automation } from "@/types/dashboard"
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
         ))}
       </div> */}
        <div className="grid grid-cols-1 gap-6">      
-        <RealDashboardCards />
+        <EnhancedDashboardCards />
        
       </div>
 
