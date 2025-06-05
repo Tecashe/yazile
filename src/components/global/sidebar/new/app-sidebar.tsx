@@ -242,7 +242,7 @@
 
 "use client"
 import { useState } from "react"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, GitBranch } from "lucide-react"
 import { NavMain } from "./nav-main"
 import { NavUser } from "./nav-user"
 import { TeamSwitcher } from "./team-switcher"
@@ -320,7 +320,7 @@ const teams = [
   {
     name: "Yazzil",
     logo: Instagram,
-    plan: "Enterprise",
+    plan: "PRO",
   },
 ]
 
@@ -384,7 +384,7 @@ export function AppSidebar({ slug }: Props) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="hover:bg-accent/50">
-                  <Link href={`/dashboard/${slug}/create-automation`}>
+                  <Link href={`/dashboard/${slug}/automations`}>
                     <Plus className="h-4 w-4" />
                     <span>New Automation</span>
                   </Link>
@@ -392,9 +392,25 @@ export function AppSidebar({ slug }: Props) {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="hover:bg-accent/50">
-                  <Link href={`/dashboard/${slug}/create-agent`}>
+                  <Link href={`/dashboard/${slug}/agents`}>
                     <Plus className="h-4 w-4" />
                     <span>New Agent</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="hover:bg-accent/50">
+                  <Link href={`/dashboard/${slug}/posting`}>
+                    <Instagram className="h-4 w-4" />
+                    <span>Posting</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="hover:bg-accent/50">
+                  <Link href={`/dashboard/${slug}/affiliate`}>
+                    <GitBranch className="h-4 w-4" />
+                    <span>Affiliates</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

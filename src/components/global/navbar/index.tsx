@@ -584,7 +584,6 @@ import {
 import { Badge } from "@/components/ui/badges"
 import { useClerk } from "@clerk/nextjs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import AutomationDashboardHeader from '@/components/global/navbarnew/newnav'
 
 type Props = {
   slug: string
@@ -685,8 +684,6 @@ const Navbar = ({ slug }: Props) => {
             <Input placeholder="Search..." className="pl-8 w-64 bg-muted/50 border-border/50" />
           </div>
         </div>
-        
-        <AutomationDashboardHeader/>
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-2">
