@@ -79,16 +79,6 @@ model User {
 
   onboardingProgress  OnboardingProgress?
 
-  businessKnowledge           BusinessKnowledge[]
-  userFlowCustomizations      UserFlowCustomization[]
-  userPersonalizations        UserPersonalization[]
-  voiceflowABTests            VoiceflowABTest[]
-  voiceflowIntentTrainings    VoiceflowIntentTraining[]
-  voiceflowConversationEvents VoiceflowConversationEvent[]
-  voiceflowAnalytics          VoiceflowAnalytics[]
-  voiceflowLiveConversations  VoiceflowLiveConversation[]
-  voiceflowUserJourneys       VoiceflowUserJourney[]
-  voiceflowConversationFeedbacks VoiceflowConversationFeedback[]
   
 }
 
@@ -237,16 +227,6 @@ model Automation {
   keywords       Keyword[]
   scheduledPosts ScheduledContent[]
 
-  businessKnowledge           BusinessKnowledge[]
-  userFlowCustomizations      UserFlowCustomization[]
-  userPersonalizations        UserPersonalization[]
-  voiceflowABTests            VoiceflowABTest[]
-  voiceflowIntentTrainings    VoiceflowIntentTraining[]
-  voiceflowConversationEvents VoiceflowConversationEvent[]
-  voiceflowAnalytics          VoiceflowAnalytics[]
-  voiceflowLiveConversations  VoiceflowLiveConversation[]
-  voiceflowUserJourneys       VoiceflowUserJourney[]
-  voiceflowConversationFeedbacks VoiceflowConversationFeedback[]
 }
 
 model Message {
