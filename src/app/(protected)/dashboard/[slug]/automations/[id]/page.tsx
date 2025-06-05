@@ -435,7 +435,7 @@ import TestAutomation from "@/components/global/automations/test/test-automation
 import Trigger from "@/components/global/automations/trigger"
 import { FancyConnector } from "@/components/global/automations/connector"
 import AutomationsBreadCrumb from "@/components/global/bread-crumbs/automations"
-import AutomationBenefits from "@/components/global/benefits/automationBenefits"
+
 
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import { PrefetchUserAutomation } from "@/react-query/prefetch"
@@ -468,8 +468,7 @@ const Page = async ({ params }: Props) => {
           <p className="text-white/60 text-sm">Configure your automation sequence below</p>
         </div>
 
-        {/* New Automation Benefits Component */}
-        <AutomationBenefits />
+      
 
         {/* When section with improved styling and animated SVG */}
         <div className="w-full max-w-4xl p-6 rounded-xl flex flex-col bg-[#1D1D1D] gap-y-4 border border-[#333333] shadow-lg relative overflow-hidden">
