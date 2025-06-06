@@ -123,7 +123,7 @@ import {
 import FeatureCard from "@/components/global/landing/feature-card"
 import TestimonialCard from "@/components/global/landing/testimonial-card"
 import StatsCounter from "@/components/global/landing/stats-counter"
-import IntegrationLogos from "@/components/global/landing/integration-logos"
+import IntegrationLogos from "@/components/global/landing/integration-logo"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function Home() {
