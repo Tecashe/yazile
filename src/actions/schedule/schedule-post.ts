@@ -105,8 +105,14 @@ export async function publishPost(postId: string) {
       return { success: false, error: "Post not found" }
     }
 
+    fetch('/api/debug-instagram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: 'your-user-id' })
+    })
+
     // Call the Instagram API endpoint
-    const response = await fetch(`/api/post-to-instagram`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/post-to-instagram`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

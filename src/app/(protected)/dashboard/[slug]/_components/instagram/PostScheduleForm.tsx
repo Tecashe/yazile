@@ -1722,16 +1722,11 @@ export default function PostScheduleForm({ userId, selectedMedia, onMediaClear }
           body: JSON.stringify(postData),
         })
       } else {
-        response = await fetch('/api/debug-instagram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: 'your-user-id' })
-      })
-        // response = await fetch("/api/post-to-instagram", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify(postData),
-        // })
+        response = await fetch("/api/post-to-instagram", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(postData),
+        })
       }
 
       const data = await response.json()

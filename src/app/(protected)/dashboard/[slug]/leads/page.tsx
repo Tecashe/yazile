@@ -73,7 +73,7 @@ import {
   Plus,
 } from "lucide-react"
 import { getLeadAnalytics } from "@/lib/lead-qualification"
-import { onCurrentUser } from "@/actions/user"
+import { onUserInfor } from "@/actions/user"
 import { client } from "@/lib/prisma"
 import { formatDistanceToNow } from "date-fns"
 
@@ -408,7 +408,7 @@ function RecentInteractionsCard({ interactions }: { interactions: any[] }) {
 }
 
 export default async function LeadsPage() {
-  const user = await onCurrentUser()
+  const user = await onUserInfor()
 
   if (!user) {
     return (
@@ -421,7 +421,7 @@ export default async function LeadsPage() {
     )
   }
 
-  const { analytics, recentLeads, topLeads } = await getLeadsData(user.id)
+  const { analytics, recentLeads, topLeads } = await getLeadsData(user.data?.id||"098765432")
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
