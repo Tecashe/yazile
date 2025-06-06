@@ -77,10 +77,10 @@ export default async function DashboardPage() {
           </Suspense>
         
         </div>
-        {/* <div className="grid grid-cols-1 gap-6">      
+        <div className="grid grid-cols-1 gap-6">      
         <HashtagCloud />
        
-      </div> */}
+      </div>
       </div>
       {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ContentSuggestions />
