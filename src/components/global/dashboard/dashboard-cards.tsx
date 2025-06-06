@@ -426,18 +426,11 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import {
   LineChart,
   Line,
-  AreaChart,
-  Area,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -447,10 +440,7 @@ import {
 import {
   Zap,
   Users,
-  Activity,
   Target,
-  BarChart3,
-  Sparkles,
   Clock,
   ArrowUpRight,
   ArrowDownRight,
@@ -481,7 +471,6 @@ type SourceData = Awaited<ReturnType<typeof getLeadSourceAnalytics>>
 type EngagementData = Awaited<ReturnType<typeof getEngagementMetrics>>
 type BusinessImpactData = Awaited<ReturnType<typeof getBusinessImpactMetrics>>
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#8dd1e1", "#d084d0"]
 
 export function EnhancedDashboardCards() {
   const [stats, setStats] = useState<EnhancedStats | null>(null)
@@ -783,148 +772,7 @@ export function EnhancedDashboardCards() {
           </Card>
         </motion.div>
 
-        {/* Platform Performance */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}>
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-500" />
-                Platform Comparison
-              </CardTitle>
-              <CardDescription>Performance across different platforms</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={platformData||undefined}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="platform" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="totalLeads" fill="#8884d8" />
-                    <Bar dataKey="conversions" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Lead Sources Pie Chart */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}>
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-orange-500" />
-                Lead Sources
-              </CardTitle>
-              <CardDescription>Distribution of leads by source</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={sourceData||undefined}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ source, percentage }) => `${source}: ${percentage}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {sourceData?.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
-
-      {/* Engagement Analytics */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-pink-500" />
-              Engagement Analytics
-            </CardTitle>
-            <CardDescription>Daily engagement trends and interaction types</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Engagement Trend */}
-              <div className="h-64">
-                <h4 className="text-sm font-medium mb-4">Daily Engagement Trend</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={engagementData?.engagementTrend}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="interactions" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Interaction Types */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Interaction Types</h4>
-                {engagementData?.interactionsByType.map((interaction, index) => (
-                  <div key={interaction.type} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="capitalize">{interaction.type}</span>
-                      <span className="font-medium">
-                        {interaction.count} ({interaction.percentage}%)
-                      </span>
-                    </div>
-                    <Progress value={interaction.percentage} className="h-2" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Quick Actions */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }}>
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
-              Business Insights & Actions
-            </CardTitle>
-            <CardDescription>Recommended actions based on your performance data</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              <Button className="h-auto p-4 flex-col gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600">
-                <Target className="h-6 w-6" />
-                <span className="text-sm">Optimize Funnel</span>
-              </Button>
-              <Button variant="outline" className="h-auto p-4 flex-col gap-2 hover:bg-accent/50">
-                <TrendingUp className="h-6 w-6" />
-                <span className="text-sm">View ROI Report</span>
-              </Button>
-              <Button variant="outline" className="h-auto p-4 flex-col gap-2 hover:bg-accent/50">
-                <Users className="h-6 w-6" />
-                <span className="text-sm">Segment Leads</span>
-              </Button>
-              <Button variant="outline" className="h-auto p-4 flex-col gap-2 hover:bg-accent/50">
-                <BarChart3 className="h-6 w-6" />
-                <span className="text-sm">Export Analytics</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   )
 }
