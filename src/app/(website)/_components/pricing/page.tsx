@@ -110,7 +110,7 @@ export default function PricingPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight mb-4">Compare Plans</h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                See what's included in each plan to find the perfect fit for your business.
+                See what&apos;s included in each plan to find the perfect fit for your business.
               </p>
             </div>
 

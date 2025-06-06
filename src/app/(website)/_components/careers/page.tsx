@@ -323,7 +323,7 @@ export default function CareersPage() {
         <section className="py-12 md:py-24">
           <div className="container px-4 md:px-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-4">Don't See the Right Role?</h2>
+              <h2 className="text-2xl font-bold mb-4">Don&apos;t See the Right Role?</h2>
               <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                 We&apos;re always looking for talented people. Send us your resume and we&apos;ll keep you in mind for future
                 opportunities.

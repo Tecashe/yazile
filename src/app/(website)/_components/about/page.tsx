@@ -39,7 +39,7 @@ export default function AboutPage() {
                 Empowering Businesses Through Social Innovation
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                We're on a mission to democratize social media marketing and influencer collaboration, making powerful
+                We&apos;re on a mission to democratize social media marketing and influencer collaboration, making powerful
                 automation tools accessible to businesses of all sizes.
               </p>
             </div>
@@ -97,7 +97,7 @@ export default function AboutPage() {
                   <Heart className="h-12 w-12 text-red-500 mx-auto mb-4" />
                   <h3 className="font-bold mb-2">Customer First</h3>
                   <p className="text-sm text-muted-foreground">
-                    Every decision we make is guided by what's best for our customers and their success.
+                    Every decision we make is guided by what&apos;s best for our customers and their success.
                   </p>
                 </CardContent>
               </Card>
@@ -117,7 +117,7 @@ export default function AboutPage() {
                   <Shield className="h-12 w-12 text-green-500 mx-auto mb-4" />
                   <h3 className="font-bold mb-2">Trust & Security</h3>
                   <p className="text-sm text-muted-foreground">
-                    We protect our customers' data and privacy with the highest security standards.
+                    We protect our customers data and privacy with the highest security standards.
                   </p>
                 </CardContent>
               </Card>
@@ -127,7 +127,7 @@ export default function AboutPage() {
                   <Globe className="h-12 w-12 text-blue-500 mx-auto mb-4" />
                   <h3 className="font-bold mb-2">Global Impact</h3>
                   <p className="text-sm text-muted-foreground">
-                    We're building tools that help businesses worldwide connect and grow together.
+                    We&apos;re building tools that help businesses worldwide connect and grow together.
                   </p>
                 </CardContent>
               </Card>
@@ -141,7 +141,7 @@ export default function AboutPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight mb-4">Our Impact</h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Numbers that showcase the difference we're making for businesses worldwide.
+                Numbers that showcase the difference we&apos;re making for businesses worldwide.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-4">
@@ -171,7 +171,7 @@ export default function AboutPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight mb-4">Meet Our Team</h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                The passionate individuals behind Yazzil's success.
+                The passionate individuals behind Yazzil&apos;s success.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

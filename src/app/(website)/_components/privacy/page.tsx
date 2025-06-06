@@ -96,7 +96,7 @@ export default function PrivacyPage() {
                     <p className="text-muted-foreground">
                       With your explicit permission, we access your connected social media accounts to provide
                       automation services. This includes posts, comments, messages, and engagement metrics. We only
-                      access data necessary for the services you've requested.
+                      access data necessary for the services you&apos;ve requested.
                     </p>
 
                     <h3 className="text-lg font-semibold">Usage Information</h3>
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
                     <h3 className="text-lg font-semibold">Social Media Platforms</h3>
                     <p className="text-muted-foreground">
                       When you connect your social media accounts, we share necessary information with those platforms
-                      to provide automation services. This sharing is governed by the platforms' own privacy policies.
+                      to provide automation services. This sharing is governed by the platforms&apos; own privacy policies.
                     </p>
 
                     <h3 className="text-lg font-semibold">Legal Requirements</h3>

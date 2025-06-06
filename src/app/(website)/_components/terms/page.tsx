@@ -83,7 +83,7 @@ export default function TermsPage() {
                 <section>
                   <h2 className="text-2xl font-bold mb-4">1. Acceptance of Terms</h2>
                   <p className="text-muted-foreground">
-                    By accessing or using Yazzil's services, you agree to be bound by these Terms of Service and all
+                    By accessing or using Yazzil&apos;s services, you agree to be bound by these Terms of Service and all
                     applicable laws and regulations. If you do not agree with any of these terms, you are prohibited
                     from using or accessing this site and our services.
                   </p>
@@ -168,7 +168,7 @@ export default function TermsPage() {
 
                     <h3 className="text-lg font-semibold">Price Changes</h3>
                     <p className="text-muted-foreground">
-                      We reserve the right to change our pricing at any time. We will provide at least 30 days' notice
+                      We reserve the right to change our pricing at any time. We will provide at least 30 days&apos; notice
                       of any price increases. Your continued use of our services after a price change constitutes
                       acceptance of the new pricing.
                     </p>

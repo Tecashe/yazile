@@ -138,7 +138,7 @@ export default function SolutionsPage() {
                 Solutions Built for Your Business Size & Industry
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Whether you're a startup or enterprise, we have the perfect solution to help you automate social media,
+                Whether you&apos;re a startup or enterprise, we have the perfect solution to help you automate social media,
                 manage influencers, and convert leads.
               </p>
             </div>
@@ -200,7 +200,7 @@ export default function SolutionsPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight mb-4">Industry Solutions</h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Specialized features and workflows designed for your industry's unique needs.
+                Specialized features and workflows designed for your industry&apos;s unique needs.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -241,7 +241,7 @@ export default function SolutionsPage() {
                   How TechCorp Increased Leads by 300%
                 </h2>
                 <p className="text-muted-foreground md:text-lg">
-                  See how a growing SaaS company used Yazzil's automation and lead qualification features to triple
+                  See how a growing SaaS company used Yazzil&apos;s automation and lead qualification features to triple
                   their qualified leads in just 3 months.
                 </p>
                 <ul className="space-y-2">
@@ -285,7 +285,7 @@ export default function SolutionsPage() {
                 Ready to Find Your Perfect Solution?
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
-                Let's discuss your specific needs and find the best Yazzil solution for your business.
+                Let&apos;s discuss your specific needs and find the best Yazzil solution for your business.
               </p>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Button size="lg">Start Free Trial</Button>

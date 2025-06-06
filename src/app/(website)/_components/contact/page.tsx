@@ -38,7 +38,7 @@ export default function ContactPage() {
                 Get in Touch
               </Badge>
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                We'd Love to Hear From You
+                We&apos;d Love to Hear From You
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
                 Have questions about Yazzil? Want to schedule a demo? Our team is here to help you succeed with social
@@ -57,7 +57,7 @@ export default function ContactPage() {
                 <CardHeader>
                   <h2 className="text-2xl font-bold">Send us a message</h2>
                   <p className="text-muted-foreground">
-                    Fill out the form below and we'll get back to you within 24 hours.
+                    Fill out the form below and we&apos;ll get back to you within 24 hours.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -99,7 +99,7 @@ export default function ContactPage() {
                 <div>
                   <h2 className="text-2xl font-bold mb-4">Get in touch</h2>
                   <p className="text-muted-foreground mb-8">
-                    Choose the best way to reach us. We're here to help you grow your business with Yazzil.
+                    Choose the best way to reach us. We&apos;re here to help you grow your business with Yazzil.
                   </p>
                 </div>
 
@@ -111,7 +111,7 @@ export default function ContactPage() {
                         <div>
                           <h3 className="font-semibold mb-1">Email Us</h3>
                           <p className="text-sm text-muted-foreground mb-2">
-                            Send us an email and we'll respond within 24 hours.
+                            Send us an email and we&apos;ll respond within 24 hours.
                           </p>
                           <p className="text-sm font-medium">hello@yazzil.com</p>
                         </div>
@@ -128,7 +128,7 @@ export default function ContactPage() {
                           <p className="text-sm text-muted-foreground mb-2">
                             Speak directly with our team during business hours.
                           </p>
-                          <p className="text-sm font-medium">+1 (555) 123-4567</p>
+                          <p className="text-sm font-medium">+1 (555) 111-54993</p>
                         </div>
                       </div>
                     </CardContent>
