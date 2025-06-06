@@ -288,7 +288,7 @@ export default function DocumentationPage() {
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-4">Still Need Help?</h2>
               <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                Can&apos;t find what you're looking for? Our support team is here to help.
+                Can&apos;t find what you&apos;re looking for? Our support team is here to help.
               </p>
               <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
                 <Button>Contact Support</Button>

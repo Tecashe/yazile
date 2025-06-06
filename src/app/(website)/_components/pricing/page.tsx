@@ -204,7 +204,7 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll
+                    Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we&apos;ll
                     prorate any billing differences.
                   </p>
                 </CardContent>

@@ -485,7 +485,7 @@ export default function Home() {
                   Solutions for every business need
                 </h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                  Whether you're a small business or an enterprise, we have the right solution for you.
+                  Whether you&apos;re a small business or an enterprise, we have the right solution for you.
                 </p>
               </div>
             </div>

@@ -17,7 +17,7 @@ export default function TestimonialCard({ quote, author, role, company }: Testim
             <Star key={i} className="h-4 w-4 fill-primary text-primary" />
           ))}
         </div>
-        <blockquote className="mb-4 text-lg italic">"{quote}"</blockquote>
+        <blockquote className="mb-4 text-lg italic">&ldquo;{quote}&rdquo;</blockquote>
         <div className="flex items-center gap-4">
           <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
             <span className="text-sm font-medium">{author.charAt(0)}</span>
