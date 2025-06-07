@@ -57,6 +57,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 import { AppSidebar } from "@/components/global/sidebar/new/app-sidebar"
 import type React from "react"
 import Navbar from "@/components/global/navbar"
+import { SubscriptionProvider } from "@/contexts/subscription-context"
 import { PrefetchUserAutnomations, PrefetchUserProfile } from "@/react-query/prefetch"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebars"
 
@@ -79,7 +80,11 @@ const Layout = async ({ children, params }: Props) => {
         <SidebarInset>
           <div className="flex flex-col min-h-screen">
             <Navbar slug={params.slug} />
-            <main className="flex-1 p-6">{children}</main>
+            <SubscriptionProvider>
+            <main className="flex-1 p-6">
+              {children}
+            </main>
+            </SubscriptionProvider>
             <UserChat userId={user.id} userName={user.fullName} />
           </div>
         </SidebarInset>
