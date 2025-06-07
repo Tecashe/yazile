@@ -457,7 +457,7 @@ export default function DocumentationPage() {
                 Everything You Need to Know About Yazzil
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Comprehensive guides, tutorials, and API documentation to help you get the most out of Yazzil's social
+                Comprehensive guides, tutorials, and API documentation to help you get the most out of Yazzil&apos;s social
                 media automation platform.
               </p>
               <div className="w-full max-w-md">
@@ -559,7 +559,7 @@ export default function DocumentationPage() {
                 <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary w-fit">
                   Developer Resources
                 </Badge>
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Build with Yazzil's API</h2>
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Build with Yazzil&apos;s API</h2>
                 <p className="text-muted-foreground md:text-lg">
                   Comprehensive API documentation with code examples, SDKs, and interactive testing tools to help you
                   integrate Yazzil into your applications.
@@ -614,7 +614,7 @@ export default function DocumentationPage() {
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-4">Still Need Help?</h2>
               <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                Can't find what you're looking for? Our support team is here to help.
+                Can&apos;t find what you&apos;re looking for? Our support team is here to help.
               </p>
               <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
                 <Button>Contact Support</Button>
