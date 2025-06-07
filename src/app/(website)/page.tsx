@@ -1295,6 +1295,17 @@ export default function Home() {
                   <TabsTrigger value="leads">Lead Management</TabsTrigger>
                 </TabsList>
                 <TabsContent value="automation" className="mt-6">
+                  <div className="flex items-center justify-center">
+                    <Image
+                      src="/three.png?height=400&width=600&text=Social+Automation+Dashboard"
+                      alt="Social Automation Dashboard Screenshot"
+                      width={600}
+                      height={400}
+                      className="rounded-md w-full max-w-4xl"
+                    />
+                  </div>
+                </TabsContent>
+                {/* <TabsContent value="automation" className="mt-6">
                   <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
                     <div className="flex flex-col justify-center space-y-4">
                       <h3 className="text-2xl font-bold">Automate your social media presence</h3>
@@ -1331,7 +1342,7 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                </TabsContent>
+                </TabsContent> */}
                 <TabsContent value="influencer" className="mt-6">
                   <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
                     <div className="flex flex-col justify-center space-y-4">
