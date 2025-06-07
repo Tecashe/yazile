@@ -1090,7 +1090,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 lg:left-8 lg:transform-none">
+                {/* <div className="absolute top-8 left-1/2 transform -translate-x-1/2 lg:left-8 lg:transform-none">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-1">
@@ -1103,10 +1103,10 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Floating Icons */}
-                <div
+                {/* <div
                   className="absolute top-1/4 left-1/4 animate-bounce"
                   style={{ animationDelay: "0s", animationDuration: "3s" }}
                 >
@@ -1122,16 +1122,16 @@ export default function Home() {
                   <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center border border-green-500/30 backdrop-blur-sm">
                     <Users className="w-5 h-5 text-green-500" />
                   </div>
-                </div>
+                </div> */}
 
-                <div
+                {/* <div
                   className="absolute top-1/3 right-1/4 animate-bounce"
                   style={{ animationDelay: "2s", animationDuration: "3s" }}
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center border border-purple-500/30 backdrop-blur-sm">
                     <BarChart3 className="w-4 h-4 text-purple-500" />
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
