@@ -1012,7 +1012,7 @@ export default function Home() {
                         className="inline-block h-10 w-10 rounded-full border-3 border-background bg-gradient-to-br from-primary/20 to-blue-500/20 overflow-hidden ring-2 ring-primary/20"
                       >
                         <Image
-                          src={`/placeholder.png?height=40&width=40&text=${i}`}
+                          src={`/ten.png?height=40&width=40&text=${i}`}
                           alt={`Customer avatar ${i}`}
                           width={40}
                           height={40}
@@ -1035,7 +1035,7 @@ export default function Home() {
                   <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70" />
                   <div className="relative bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 p-2">
                     <Image
-                      src="/placeholder.png?height=400&width=600&text=Main+Dashboard"
+                      src="/nine.png?height=400&width=600&text=Main+Dashboard"
                       alt="Yazzil Main Dashboard"
                       width={600}
                       height={400}
@@ -1050,7 +1050,7 @@ export default function Home() {
                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-2">
                       <Image
-                        src="/placeholder.png?height=200&width=300&text=Automation+Rules"
+                        src="/eight.png?height=200&width=300&text=Automation+Rules"
                         alt="Automation Rules Interface"
                         width={300}
                         height={200}
@@ -1065,7 +1065,7 @@ export default function Home() {
                     <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:-rotate-2">
                       <Image
-                        src="/placeholder.png?height=180&width=280&text=Influencer+Discovery"
+                        src="/seven.png?height=180&width=280&text=Influencer+Discovery"
                         alt="Influencer Discovery Tool"
                         width={280}
                         height={180}
@@ -1080,7 +1080,7 @@ export default function Home() {
                     <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5">
                       <Image
-                        src="/placeholder.png?height=150&width=250&text=Analytics+Chart"
+                        src="/six.png?height=150&width=250&text=Analytics+Chart"
                         alt="Analytics Dashboard"
                         width={250}
                         height={150}
@@ -1095,7 +1095,7 @@ export default function Home() {
                     <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-1">
                       <Image
-                        src="/placeholder.png?height=160&width=260&text=Lead+Scoring"
+                        src="/four.png?height=160&width=260&text=Lead+Scoring"
                         alt="Lead Scoring Interface"
                         width={260}
                         height={160}
@@ -1308,7 +1308,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center justify-center rounded-lg border border-border/50 bg-muted/30 p-6">
                       <Image
-                        src="/placeholder.png?height=400&width=600&text=Social+Automation+Dashboard"
+                        src="/three.png?height=400&width=600&text=Social+Automation+Dashboard"
                         alt="Social Automation Dashboard Screenshot"
                         width={600}
                         height={400}
@@ -1346,7 +1346,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center justify-center rounded-lg border border-border/50 bg-muted/30 p-6">
                       <Image
-                        src="/placeholder.png?height=400&width=600&text=Influencer+Management+Dashboard"
+                        src="/one.png?height=400&width=600&text=Influencer+Management+Dashboard"
                         alt="Influencer Management Dashboard Screenshot"
                         width={600}
                         height={400}
@@ -1384,7 +1384,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center justify-center rounded-lg border border-border/50 bg-muted/30 p-6">
                       <Image
-                        src="/placeholder.png?height=400&width=600&text=Lead+Qualification+Dashboard"
+                        src="/two.png?height=400&width=600&text=Lead+Qualification+Dashboard"
                         alt="Lead Qualification Dashboard Screenshot"
                         width={600}
                         height={400}
