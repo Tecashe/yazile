@@ -1090,7 +1090,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="absolute top-24 left-4 lg:left-4 lg:top-32">
+                <div className="absolute top-40 left-2 lg:left-2 lg:top-48">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-1">
