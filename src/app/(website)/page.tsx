@@ -925,7 +925,7 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-4">
             <Link
-              href="/login"
+              href="/dashboard"
               className="hidden md:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Log in

@@ -1582,7 +1582,7 @@ model Lead {
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   automationId      String?        @db.Uuid
   automation        Automation?    @relation(fields: [automationId], references: [id], onDelete: SetNull)
-  instagramUserId   String
+  instagramUserId   String         
   pageId            String
   name              String?
   email             String?
@@ -1610,6 +1610,7 @@ model Lead {
   @@index([status])
   @@index([instagramUserId])
   @@index([sentToN8n])
+  @@unique([instagramUserId, pageId], name: "instagramUserId_pageId")
 }
 
 model LeadInteraction {
