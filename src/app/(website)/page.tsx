@@ -895,7 +895,7 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold">Yazzil</span>
+            <span className="text-xl font-bold">❅ Yazzil</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link
