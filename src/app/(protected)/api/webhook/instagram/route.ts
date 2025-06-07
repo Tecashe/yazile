@@ -782,7 +782,8 @@ async function evaluateKeywordTrigger(
       shouldTrigger: true,
       triggerType: "KEYWORD",
       confidence: 1.0,
-      reason: `Matched keyword: ${matcher.keyword}`,
+      //reason: `Matched keyword: ${matcher.keyWord}`,
+      reason: `Matched keyword: ${matcher.word}`,
     }
   }
 
@@ -940,10 +941,10 @@ async function evaluateEventBasedTrigger(
 ): Promise<Omit<TriggerEvaluation, "automationId">> {
   try {
     // Check for specific events like first-time interaction, return customer, etc.
-    const existingHistory = await client.chatHistory.findFirst({
+    const existingHistory = await client.dms.findFirst({
       where: {
-        receiver: pageId,
-        sender: senderId,
+        reciever: pageId,
+        senderId: senderId,
       },
     })
 
@@ -1070,8 +1071,8 @@ export async function POST(req: NextRequest) {
           message: userMessage,
           messageType,
           timestamp: new Date(),
-          triggerType: triggerEvaluation.triggerType,
-          triggerConfidence: triggerEvaluation.confidence,
+          // triggerType: triggerEvaluation.triggerType,
+          // triggerConfidence: triggerEvaluation.confidence,
         })
       } catch (error) {
         console.error("Error analyzing lead:", error)
