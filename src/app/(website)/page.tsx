@@ -1295,14 +1295,16 @@ export default function Home() {
                   <TabsTrigger value="leads">Lead Management</TabsTrigger>
                 </TabsList>
                 <TabsContent value="automation" className="mt-6">
-                  <div className="flex items-center justify-center">
-                    <Image
-                      src="/three.png?height=400&width=600&text=Social+Automation+Dashboard"
-                      alt="Social Automation Dashboard Screenshot"
-                      width={600}
-                      height={400}
-                      className="rounded-md w-full max-w-4xl"
-                    />
+                  <div className="flex items-center justify-center p-8">
+                    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+                      <Image
+                        src="/three.png?height=400&width=600&text=Social+Automation+Dashboard"
+                        alt="Social Automation Dashboard Screenshot"
+                        width={800}
+                        height={400}
+                        className="rounded-lg w-full max-w-4xl shadow-lg"
+                      />
+                    </div>
                   </div>
                 </TabsContent>
                 {/* <TabsContent value="automation" className="mt-6">
