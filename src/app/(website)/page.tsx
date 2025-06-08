@@ -910,7 +910,7 @@ export default function Home() {
           </svg>
         </div> */}
         <div className="flex items-center gap-2">
-          <img src="/yazzil-logo.png" alt="Yazzil logo" className="h-8 w-8" />
+          <img src="/yazzil-logo.png" alt="Yazzil logo" className="h-16 w-16" />
           <span className="text-xl font-bold">Yazzil</span>
         </div>
 
@@ -1083,7 +1083,7 @@ export default function Home() {
                     <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:-rotate-2">
                       <Image
-                        src="/seven.png?height=180&width=280&text=Influencer+Discovery"
+                        src="/six.png?height=180&width=280&text=Influencer+Discovery"
                         alt="Influencer Discovery Tool"
                         width={280}
                         height={180}
@@ -1093,7 +1093,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="absolute top-1/2 -right-8 lg:-right-20 transform -translate-y-1/2">
+                {/* <div className="absolute top-1/2 -right-8 lg:-right-20 transform -translate-y-1/2">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5">
@@ -1106,9 +1106,9 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
 
-                <div className="absolute top-60 left-1 lg:left-1 lg:top-72">
+                {/* <div className="absolute top-60 left-1 lg:left-1 lg:top-72">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-1">
@@ -1121,7 +1121,7 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* <div className="absolute top-8 left-1/2 transform -translate-x-1/2 lg:left-8 lg:transform-none">
                   <div className="relative group">
