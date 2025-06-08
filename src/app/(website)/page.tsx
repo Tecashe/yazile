@@ -1053,7 +1053,7 @@ export default function Home() {
                   <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70" />
                   <div className="relative bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 p-2">
                     <Image
-                      src="/eleven.png?height=400&width=600&text=Main+Dashboard"
+                      src="/eight.png?height=400&width=600&text=Main+Dashboard"
                       alt="Yazzil Main Dashboard"
                       width={600}
                       height={400}
@@ -1068,7 +1068,7 @@ export default function Home() {
                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-2">
                       <Image
-                        src="/eight.png?height=200&width=300&text=Automation+Rules"
+                        src="/eleven.png?height=200&width=300&text=Automation+Rules"
                         alt="Automation Rules Interface"
                         width={300}
                         height={200}
