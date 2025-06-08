@@ -1,24 +1,30 @@
 import { InstagramBlue, PlaneBlue } from "@/icons"
 import { Zap, Brain, Clock, Calendar, Target } from "lucide-react"
+import { MessageCircle, Send } from "lucide-react"
 
 export const AUTOMATION_TRIGGERS = [
   {
     id: "1",
-    label: "Instagram Comments",
-    description: "Trigger when someone comments on your posts",
-    type: "COMMENT",
-    icon: <InstagramBlue />,
-    category: "social",
+    label: "Comment",
+    description: "Respond to comments on your posts",
+    type: "COMMENT" as const,
+    icon: <MessageCircle className="h-4 w-4" />,
+    category: "engagement",
   },
   {
     id: "2",
-    label: "Direct Messages",
-    description: "Trigger when someone sends you a DM",
-    type: "DM",
-    icon: <PlaneBlue />,
-    category: "social",
+    label: "Direct Message",
+    description: "Respond to direct messages",
+    type: "DM" as const,
+    icon: <Send className="h-4 w-4" />,
+    category: "messaging",
   },
+  // ... add other triggers with proper types
 ]
+
+export type TriggerType = (typeof AUTOMATION_TRIGGERS)[number]["type"]
+
+
 
 export const TRIGGER_MODES = [
   {
