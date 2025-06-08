@@ -897,7 +897,7 @@ export default function Home() {
             <Sparkles className="h-8 w-8 text-primary" />
             <span className="text-xl font-bold">❅ Yazzil</span>
           </div> */}
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
           <svg viewBox="0 0 100 100" className="h-8 w-8" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g strokeWidth="8" strokeLinecap="round">
               <line x1="50" y1="10" x2="50" y2="30" stroke="#00E0FF" />
@@ -908,7 +908,12 @@ export default function Home() {
               <line x1="75" y1="75" x2="62" y2="62" stroke="#FF6600" />
             </g>
           </svg>
+        </div> */}
+        <div className="flex items-center gap-2">
+          <img src="/yazzil-logo.png" alt="Yazzil logo" className="h-8 w-8" />
+          <span className="text-xl font-bold">❅ Yazzil</span>
         </div>
+
 
           <nav className="hidden md:flex items-center gap-6">
             <Link
