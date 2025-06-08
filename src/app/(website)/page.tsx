@@ -911,7 +911,7 @@ export default function Home() {
         </div> */}
         <div className="flex items-center gap-2">
           <img src="/yazzil-logo.png" alt="Yazzil logo" className="h-8 w-8" />
-          <span className="text-xl font-bold">❅ Yazzil</span>
+          <span className="text-xl font-bold">Yazzil</span>
         </div>
 
 
