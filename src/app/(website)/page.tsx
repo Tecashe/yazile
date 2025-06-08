@@ -910,7 +910,7 @@ export default function Home() {
           </svg>
         </div> */}
         <div className="flex items-center gap-2">
-          <img src="/yazzil-logo.png" alt="Yazzil logo" className="h-16 w-16" />
+          <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-16 w-16" />
           <span className="text-xl font-bold">Yazzil</span>
         </div>
 
