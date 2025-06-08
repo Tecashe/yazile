@@ -1048,7 +1048,7 @@ export default function Home() {
                   <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70" />
                   <div className="relative bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 p-2">
                     <Image
-                      src="/nine.png?height=400&width=600&text=Main+Dashboard"
+                      src="/eleven.png?height=400&width=600&text=Main+Dashboard"
                       alt="Yazzil Main Dashboard"
                       width={600}
                       height={400}
