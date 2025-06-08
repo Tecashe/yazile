@@ -198,6 +198,7 @@ const config = {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -216,6 +217,7 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        'spin-slow': 'spin 2.5s linear infinite',
       },
       boxShadow: {
         'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
