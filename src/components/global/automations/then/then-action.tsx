@@ -4207,7 +4207,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                   <li>Highlights team members with their specialties and experience</li>
                   <li>Provides detailed policies for cancellations and satisfaction guarantees</li>
                   <li>Answers common customer questions with thorough responses</li>
-                  <li>Includes testimonials that showcase the business's strengths</li>
+                  <li>Includes testimonials that showcase the business&apos;s strengths</li>
                   <li>Mentions unique selling points that differentiate from competitors</li>
                 </ul>
               </div>
