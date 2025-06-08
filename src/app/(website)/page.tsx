@@ -1574,9 +1574,9 @@ export default function Home() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold">Yazzil</span>
+                <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-16 w-16" />
               </div>
+
               <p className="text-sm text-muted-foreground">
                 The all-in-one platform for social media automation, influencer marketing, and lead qualification.
               </p>
