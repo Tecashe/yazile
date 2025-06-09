@@ -3938,7 +3938,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                 {Listener && (
                   <div className="bg-background-90 p-4 rounded-xl mb-2">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-white font-medium flex items-center">
+                      {/* <h4 className="text-white font-medium flex items-center">
                         {Listener === "SMARTAI" ? (
                           <>
                             <Lightbulb className="h-5 w-5 mr-2 text-keyword-purple" />
@@ -3950,7 +3950,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                             Quick Responses
                           </>
                         )}
-                      </h4>
+                      </h4> */}
                       <ResponseLibrary
                         isAI={Listener === "SMARTAI"}
                         onSelectTemplate={handleSelectMessageTemplate}
