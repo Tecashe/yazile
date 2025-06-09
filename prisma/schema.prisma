@@ -2387,3 +2387,12 @@ enum CustomerType {
   VIP
   SPAM
 }
+
+model ProcessedMessage {
+  id         String   @id @default(cuid())
+  messageKey String   @unique
+  createdAt  DateTime @default(now())
+
+  @@index([messageKey])
+  @@index([createdAt])
+}
