@@ -66,7 +66,7 @@ async function getHandoffData(userId: string) {
 
 export default async function HandoffSettingsPage() {
   const  userr  = await onUserInfor()
-  const userId = userr.data?.id
+  const userId = userr.data?.clerkId
 
   if (!userId) redirect("/sign-in")
 
