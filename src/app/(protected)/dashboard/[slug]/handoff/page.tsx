@@ -17,7 +17,7 @@ async function getHandoffData(userId: string) {
   })
 
   if (!user || !user.businesses[0]) {
-    throw new Error("Business not found")
+    throw new Error("Business not ggggfgfound")
   }
 
   const agents = await client.agent.findMany({
@@ -67,7 +67,7 @@ async function getHandoffData(userId: string) {
 export default async function HandoffSettingsPage() {
   const  userr  = await onUserInfor()
   const userId = userr.data?.id
-  
+
   if (!userId) redirect("/sign-in")
 
   const data = await getHandoffData(userId)
