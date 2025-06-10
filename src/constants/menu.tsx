@@ -164,6 +164,7 @@ import {
   Calculator,
   Cog,
   Route,
+  Merge,
 } from "lucide-react"
 import type React from "react"
 
@@ -237,6 +238,11 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         id: uuid(),
         label: "Integrations",
         icon: icon(Cpu, "text-slate-600"),
+      },
+      {
+        id: uuid(),
+        label: "Handoff",
+        icon: icon(Merge, "text-slate-600"),
       },
     ],
   },
