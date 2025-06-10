@@ -1,6 +1,6 @@
 "use server"
 
-import { auth } from "@clerk/nextjs/server"
+import { onUserInfor } from "../user"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -30,7 +30,8 @@ const agentSchema = z.object({
 })
 
 export async function updateHandoffSettings(formData: FormData) {
-  const { userId } = await auth()
+  const userr = await onUserInfor()
+  const userId = userr.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
@@ -56,7 +57,7 @@ export async function updateHandoffSettings(formData: FormData) {
     })
 
     if (!user || !user.businesses[0]) {
-      throw new Error("Business not found")
+      throw new Error("Business not found!!")
     }
 
     await client.handoffSettings.upsert({
@@ -81,7 +82,8 @@ export async function updateHandoffSettings(formData: FormData) {
 }
 
 export async function createAgent(formData: FormData) {
-  const { userId } = await auth()
+  const userr = await onUserInfor()
+  const userId = userr.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
@@ -133,7 +135,8 @@ export async function createAgent(formData: FormData) {
 }
 
 export async function toggleAgentStatus(agentId: string, isActive: boolean) {
-  const { userId } = await auth()
+  const userr = await onUserInfor()
+  const userId = userr.data?.id
   if (!userId) redirect("/sign-in")
 
   try {
