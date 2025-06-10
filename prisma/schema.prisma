@@ -283,10 +283,12 @@ model Post {
   automationId String?     @db.Uuid
 }
 
+
+
 model ConversationState {
-  id                String   @id @default(cuid())
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId            String   @unique
-  isActive          Boolean
+  isActive          Boolean  @default(false)
   lastTriggerType   String?  // Track what triggered the conversation
   lastTriggerReason String?  // Why it was triggered
   triggerHistory    Json?    // History of triggers for this conversation
@@ -294,9 +296,16 @@ model ConversationState {
   interactionCount  Int      @default(0)
   lastInteractionAt DateTime @default(now())
   sentiment         Float?   // Overall conversation sentiment (-1 to 1)
+  
+  lastMessageLength     Int?
+  averageResponseTime   Float?
+  isInHandoff           Boolean       @default(false)
+  handoffReason         String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  @@index([userId])
+  @@index([isActive])
   @@index([customerType])
   @@index([lastInteractionAt])
 }

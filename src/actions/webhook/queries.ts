@@ -1189,10 +1189,7 @@ export const getCustomerInsights = async (pageId: string, senderId: string) => {
       _count: {
         id: true,
       },
-      _avg: {
-        // Assuming you have a sentiment score field
-        sentimentScore: true,
-      },
+     
     })
 
     const recentMessages = await client.dms.findMany({
