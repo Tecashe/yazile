@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server"
+import { onUserInfor } from "@/actions/user"
 import { redirect } from "next/navigation"
 import { client } from "@/lib/prisma"
 import { HandoffSettingsForm } from "../_components/handoff/handoff-settings-form"
@@ -65,7 +65,9 @@ async function getHandoffData(userId: string) {
 }
 
 export default async function HandoffSettingsPage() {
-  const { userId } = await auth()
+  const  userr  = await onUserInfor()
+  const userId = userr.data?.id
+  
   if (!userId) redirect("/sign-in")
 
   const data = await getHandoffData(userId)
