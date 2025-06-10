@@ -80,6 +80,10 @@ model User {
 
   onboardingProgress  OnboardingProgress?
 
+  handoffSettings   HandoffSettings?
+  handoffs          HumanHandoff[]
+  responseMetrics   ResponseMetrics[]
+
   
 }
 
@@ -162,6 +166,11 @@ model Business {
   savedSearches             SavedSearch[]
   chatParticipations        CollabChatParticipant[]
   onboardingCompleted       Boolean @default(false)
+
+  handoffs              HumanHandoff[]
+  agentAssignments      AgentBusinessAssignment[]
+  handoffSettings       HandoffSettings[]
+  agentPerformance      AgentPerformance[]
 }
 
 
@@ -227,6 +236,9 @@ model Automation {
   userId         String?            @db.Uuid
   keywords       Keyword[]
   scheduledPosts ScheduledContent[]
+  handoffs          HumanHandoff[]
+  responseMetrics   ResponseMetrics[]
+
 
 }
 
@@ -2395,4 +2407,209 @@ model ProcessedMessage {
 
   @@index([messageKey])
   @@index([createdAt])
+}
+
+
+
+
+
+
+
+
+
+// Add these NEW models to your existing schema.prisma file
+
+// Multi-tenant Human Handoff Models
+model HumanHandoff {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String            @db.Uuid
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId        String            @db.Uuid // NEW: Business isolation
+  business          Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  pageId            String            // Instagram page ID
+  senderId          String            // Customer/sender ID
+  automationId      String?           @db.Uuid
+  automation        Automation?       @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  reason            String            // Why handoff was initiated
+  priority          HandoffPriority   @default(MEDIUM)
+  status            HandoffStatus     @default(PENDING)
+  context           String?           @db.Text // Conversation context, customer info, etc.
+  assignedAgentId   String?           @db.Uuid
+  assignedAgent     Agent?            @relation(fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  createdAt         DateTime          @default(now())
+  assignedAt        DateTime?
+  completedAt       DateTime?
+  resolution        String?           @db.Text
+  customerWaitTime  Int?              // Time in seconds customer waited for agent
+  n8nWorkflowId     String?           // ID of n8n workflow that processed this handoff
+  n8nExecutionId    String?           // ID of n8n execution
+  messages          HandoffMessage[]
+  notes             HandoffNote[]
+
+  @@index([userId])
+  @@index([businessId]) // NEW: Index for business isolation
+  @@index([status])
+  @@index([priority])
+  @@index([assignedAgentId])
+  @@index([pageId, senderId])
+  @@index([businessId, status]) // NEW: Composite index for business-specific queries
+}
+
+model HandoffMessage {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  handoffId         String       @db.Uuid
+  handoff           HumanHandoff @relation(fields: [handoffId], references: [id], onDelete: Cascade)
+  content           String       @db.Text
+  isFromCustomer    Boolean      @default(false)
+  isFromAgent       Boolean      @default(false)
+  isSystemMessage   Boolean      @default(false)
+  timestamp         DateTime     @default(now())
+  
+  @@index([handoffId])
+  @@index([timestamp])
+}
+
+model HandoffNote {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  handoffId         String       @db.Uuid
+  handoff           HumanHandoff @relation(fields: [handoffId], references: [id], onDelete: Cascade)
+  content           String       @db.Text
+  createdBy         String       // User ID or system
+  createdAt         DateTime     @default(now())
+  
+  @@index([handoffId])
+}
+
+model Agent {
+  id                    String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String
+  email                 String                      @unique
+  slackUserId           String?                     // Slack user ID for notifications
+  isActive              Boolean                     @default(true)
+  isAvailable           Boolean                     @default(true)
+  maxConcurrent         Int                         @default(3) // Maximum concurrent handoffs
+  skills                String[]                    // e.g., ["sales", "support", "technical"]
+  languages             String[]                    // e.g., ["en", "es", "fr"]
+  timezone              String                      @default("UTC")
+  workingHours          Json?                       // Working hours configuration
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  handoffs              HumanHandoff[]
+  businessAssignments   AgentBusinessAssignment[]   // NEW: Business assignments
+  performance           AgentPerformance[]          // NEW: Performance tracking
+  
+  @@index([isActive, isAvailable])
+  @@index([skills])
+  @@index([languages])
+}
+
+// NEW: Agent-Business assignment model for multi-tenancy
+model AgentBusinessAssignment {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agentId           String      @db.Uuid
+  agent             Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  businessId        String      @db.Uuid
+  business          Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  isActive          Boolean     @default(true)
+  role              String      @default("agent") // agent, supervisor, manager
+  assignedAt        DateTime    @default(now())
+  assignedBy        String?     @db.Uuid // User who assigned this agent
+  
+  @@unique([agentId, businessId])
+  @@index([businessId, isActive])
+  @@index([agentId, isActive])
+}
+
+model HandoffSettings {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String        @unique @db.Uuid
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId        String        @db.Uuid // NEW: Business reference
+  business          Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  isEnabled         Boolean       @default(true)
+  notificationEmail String?
+  slackWebhookUrl   String?
+  slackChannel      String?       // Business-specific channel
+  teamsWebhookUrl   String?
+  n8nWorkflowId     String?       // ID of n8n workflow for handoffs
+  defaultPriority   HandoffPriority @default(MEDIUM)
+  businessHoursOnly Boolean       @default(false)
+  autoAssign        Boolean       @default(true)
+  maxWaitTime       Int           @default(300) // Max wait time in seconds before escalation
+  routingRules      Json?         // Business-specific routing rules
+  escalationRules   Json?         // Escalation rules for this business
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([businessId])
+}
+
+model MessageDeliveryLog {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pageId            String
+  recipientId       String
+  message           String        @db.Text
+  type              String        // DM or COMMENT
+  success           Boolean
+  error             String?
+  timestamp         DateTime      @default(now())
+  
+  @@index([pageId, recipientId])
+  @@index([timestamp])
+  @@index([success])
+}
+
+model ResponseMetrics {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId      String        @db.Uuid
+  automation        Automation    @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  userId            String        @db.Uuid
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageLength     Int
+  responseTime      Int           // in milliseconds
+  typingDelay       Int           // in milliseconds
+  wasSuccessful     Boolean
+  messageType       String        // DM or COMMENT
+  hasButtons        Boolean
+  sentiment         String?       // positive, neutral, negative
+  priority          String?       // LOW, MEDIUM, HIGH, URGENT
+  timestamp         DateTime      @default(now())
+  
+  @@index([automationId])
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// NEW: Business-specific agent performance tracking
+model AgentPerformance {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agentId           String      @db.Uuid
+  agent             Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  businessId        String      @db.Uuid
+  business          Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  date              DateTime    @db.Date
+  handoffsHandled   Int         @default(0)
+  avgResponseTime   Int?        // Average response time in seconds
+  avgResolutionTime Int?        // Average resolution time in seconds
+  customerSatisfaction Float?   // Average satisfaction score
+  
+  @@unique([agentId, businessId, date])
+  @@index([businessId, date])
+  @@index([agentId, date])
+}
+
+enum HandoffStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+  TRANSFERRED
+}
+
+enum HandoffPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
