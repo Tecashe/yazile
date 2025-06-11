@@ -2471,234 +2471,96 @@
 //   return <AlertCircle {...props} />
 // }
 
+
 "use client"
 
 import { useState, useEffect } from "react"
-import type React from "react"
-
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import {
-  Building2,
-  Camera,
-  Check,
-  DollarSign,
-  Instagram,
-  Star,
-  TrendingUp,
-  Users,
-  MessageCircle,
-  Video,
-  ImageIcon,
-  Clock,
-} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Slider } from "@/components/ui/slider"
+import { Progress } from "@/components/ui/progress"
 import { toast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
-import confetti from "canvas-confetti"
+import { Star, ChevronRight, Loader2, Check, Building2 } from "lucide-react"
 
-// Components
-import OnboardingLayout from "@/components/global/onboarding/layout"
-import UserTypeSelection from "@/components/global/onboarding/steps/user-type-selection"
-import ProfileSetup from "@/components/global/onboarding/steps/profile-setup"
-import ContentCategories from "@/components/global/onboarding/steps/content-categories"
-import SocialAccounts from "@/components/global/onboarding/steps/social-accounts"
-import ContactInfo from "@/components/global/onboarding/steps/contact-info"
-import PhoneVerification from "@/components/global/onboarding/steps/phone-verification"
-import ContentStrategy from "@/components/global/onboarding/steps/content-strategy"
-import ContentStyle from "@/components/global/onboarding/steps/content-style"
-import IncomeGoals from "@/components/global/onboarding/steps/income-goals"
-import Achievements from "@/components/global/onboarding/steps/achievements"
-import LearningGoals from "@/components/global/onboarding/steps/learning-goals"
-import PersonalityQuiz from "@/components/global/onboarding/steps/personality-quiz"
-import CompletionScreen from "@/components/global/onboarding/steps/completion-screen"
+import { initializeOnboarding, updateOnboardingStep, completeOnboarding, setThisUserType } from "@/actions/onboarding"
 
-// Server actions
-import {
-  initializeOnboarding,
-  updateOnboardingStep,
-  saveOnboardingData,
-  completeOnboarding,
-  setThisUserType,
-} from "@/actions/onboarding"
-
-// Mock server actions - replace with your actual implementations
-const setUserType = async (type: string) => {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  return { success: true }
-}
-
-const saveOnboardingDataOld = async (step: number, data: any) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { success: true }
-}
-
-const completeOnboardingOld = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-  return { success: true }
-}
-
-// Enhanced user type definitions
-const USER_TYPES = {
-  business: {
-    title: "Business Owner",
-    subtitle: "Scale your business with influencer marketing",
-    icon: Building2,
-    color: "from-blue-500 to-cyan-500",
-    benefits: [
-      "Find perfect influencers for your brand",
-      "Manage campaigns efficiently",
-      "Track ROI and performance",
-      "Automate outreach and negotiations",
-    ],
-    steps: ["Business Profile", "Industry & Goals", "Budget & Preferences", "Team Setup", "Integration Setup"],
-  },
-  influencer: {
-    title: "Content Creator",
-    subtitle: "Monetize your influence and grow your brand",
-    icon: Star,
-    color: "from-purple-500 to-pink-500",
-    benefits: [
-      "Get discovered by top brands",
-      "Negotiate better rates",
-      "Manage collaborations seamlessly",
-      "Track your earnings and growth",
-    ],
-    steps: ["Creator Profile", "Content & Niche", "Social Accounts", "Rates & Availability", "Portfolio Setup"],
-  },
-}
-
-// Business-specific data
-const BUSINESS_INDUSTRIES = [
-  { name: "Fashion & Beauty", icon: "👗", growth: "+23%" },
-  { name: "Food & Beverage", icon: "🍕", growth: "+18%" },
-  { name: "Technology", icon: "📱", growth: "+31%" },
-  { name: "Health & Fitness", icon: "💪", growth: "+27%" },
-  { name: "Travel & Tourism", icon: "✈️", growth: "+15%" },
-  { name: "Home & Lifestyle", icon: "🏠", growth: "+22%" },
-  { name: "Gaming & Entertainment", icon: "🎮", growth: "+35%" },
-  { name: "Finance & Business", icon: "💼", growth: "+19%" },
+// Simplified categories for quick selection
+const quickCategories = [
+  { name: "Fashion", icon: "👗", color: "bg-pink-100" },
+  { name: "Food", icon: "🍕", color: "bg-yellow-100" },
+  { name: "Tech", icon: "📱", color: "bg-blue-100" },
+  { name: "Fitness", icon: "💪", color: "bg-green-100" },
+  { name: "Travel", icon: "✈️", color: "bg-purple-100" },
+  { name: "Business", icon: "💼", color: "bg-gray-100" },
 ]
 
-const BUSINESS_GOALS = [
-  {
-    id: "brand-awareness",
-    title: "Brand Awareness",
-    description: "Increase visibility and reach new audiences",
-    icon: TrendingUp,
-    metrics: ["Reach", "Impressions", "Brand Mentions"],
-  },
-  {
-    id: "sales",
-    title: "Drive Sales",
-    description: "Convert followers into customers",
-    icon: DollarSign,
-    metrics: ["Conversions", "Revenue", "ROAS"],
-  },
-  {
-    id: "engagement",
-    title: "Community Building",
-    description: "Build engaged communities around your brand",
-    icon: Users,
-    metrics: ["Engagement Rate", "Comments", "Shares"],
-  },
-  {
-    id: "content",
-    title: "Content Creation",
-    description: "Generate authentic content for your brand",
-    icon: Camera,
-    metrics: ["Content Volume", "Quality Score", "Usage Rights"],
-  },
+// Business types for quick setup
+const businessTypes = [
+  { name: "E-commerce", icon: "🛍️", description: "Online store or retail" },
+  { name: "Restaurant", icon: "🍽️", description: "Food & beverage business" },
+  { name: "Service", icon: "🔧", description: "Professional services" },
+  { name: "SaaS", icon: "💻", description: "Software as a service" },
+  { name: "Agency", icon: "🎯", description: "Marketing or creative agency" },
+  { name: "Other", icon: "📋", description: "Something else" },
 ]
 
-// Influencer-specific data
-const CONTENT_NICHES = [
-  { name: "Fashion", icon: "👗", earning: "$2.5K avg", demand: "High" },
-  { name: "Beauty", icon: "💄", earning: "$3.2K avg", demand: "Very High" },
-  { name: "Fitness", icon: "💪", earning: "$2.1K avg", demand: "High" },
-  { name: "Food", icon: "🍕", earning: "$1.8K avg", demand: "Medium" },
-  { name: "Travel", icon: "✈️", earning: "$4.1K avg", demand: "High" },
-  { name: "Tech", icon: "📱", earning: "$3.8K avg", demand: "Very High" },
-  { name: "Lifestyle", icon: "🌿", earning: "$2.3K avg", demand: "Medium" },
-  { name: "Gaming", icon: "🎮", earning: "$3.5K avg", demand: "High" },
-]
-
-const CONTENT_TYPES = [
-  { name: "Instagram Posts", icon: ImageIcon, rate: "$500-2K" },
-  { name: "Instagram Stories", icon: Clock, rate: "$200-800" },
-  { name: "Instagram Reels", icon: Video, rate: "$800-3K" },
-  { name: "YouTube Videos", icon: Video, rate: "$1K-5K" },
-  { name: "TikTok Videos", icon: Video, rate: "$300-1.5K" },
-  { name: "Blog Posts", icon: MessageCircle, rate: "$400-2K" },
-]
-
-export default function OnboardingPage() {
+export default function SimplifiedOnboardingPage() {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [userType, setUserType] = useState<"influencer" | "regular" | null>(null)
+  const [step, setStep] = useState(0)
+  const [userType, setUserType] = useState<"regular" | "influencer" | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState<Record<string, any>>({})
   const [progress, setProgress] = useState(0)
-  const [isInitialized, setIsInitialized] = useState(false)
-  const [isCompleting, setIsCompleting] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [totalSteps, setTotalSteps] = useState(0)
-  const [isVerified, setIsVerified] = useState(false)
 
-  // Get total steps based on user type
+  // Form data
+  const [formData, setFormData] = useState({
+    profileImage: "",
+    businessName: "",
+    businessType: "",
+    instagramHandle: "",
+    email: "",
+    phone: "",
+    categories: [] as string[],
+    goals: "",
+    monthlyGoal: 5000,
+  })
+
+  // Calculate total steps based on user type
+  const totalSteps = userType === "influencer" ? 4 : 4 // Simplified to 4 steps for both
+
+  // Update progress
   useEffect(() => {
-    if (userType === "influencer") {
-      setTotalSteps(10)
-    } else if (userType === "regular") {
-      setTotalSteps(9)
-    } else {
-      setTotalSteps(1)
-    }
-  }, [userType])
+    setProgress(((step + 1) / totalSteps) * 100)
+  }, [step, totalSteps])
 
-  // Calculate progress
-  useEffect(() => {
-    if (totalSteps > 0) {
-      setProgress(((currentStep + 1) / totalSteps) * 100)
-    }
-  }, [currentStep, totalSteps])
-
-  // Handle user type selection
-  const handleUserTypeSelect = async (type: "influencer" | "regular") => {
+  // Handle user type selection and initialize onboarding
+  const selectUserType = async (type: "regular" | "influencer") => {
     setIsLoading(true)
     try {
-      // Set user type in database
+      setUserType(type)
       await setThisUserType(type)
+      await initializeOnboarding(type, totalSteps)
 
-      // Initialize onboarding
-      const stepsCount = type === "influencer" ? 10 : 9
-      const result = await initializeOnboarding(type, stepsCount)
+      // Trigger n8n workflow for onboarding start
+      await fetch("/api/n8n/onboarding-start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userType: type,
+          timestamp: new Date().toISOString(),
+          step: "user_type_selected",
+        }),
+      })
 
-      if (result.status === 200) {
-        setUserType(type)
-        setCurrentStep(1)
-        setIsInitialized(true)
-
-        toast({
-          title: `Welcome ${type === "influencer" ? "Creator" : "Business Owner"}!`,
-          description: "Let's set up your profile",
-        })
-      } else {
-        throw new Error(result.data || "Failed to initialize onboarding")
-      }
+      setStep(1)
     } catch (error) {
-      console.error("Error selecting user type:", error)
       toast({
         title: "Error",
-        description: "Failed to set user type. Please try again.",
+        description: "Failed to initialize onboarding",
         variant: "destructive",
       })
     } finally {
@@ -2706,749 +2568,450 @@ export default function OnboardingPage() {
     }
   }
 
-  // Update form data
-  const updateFormData = (key: string, value: any) => {
-    setFormData((prev) => {
-      const newData = { ...prev, [key]: value }
-
-      // Auto-save data after a short delay
-      if (isInitialized && currentStep > 0) {
-        saveOnboardingData(currentStep, { [key]: value }).catch(console.error)
-      }
-
-      return newData
-    })
-  }
-
   // Handle next step
-  const handleNext = async () => {
-    if (currentStep === 5 && !isVerified) {
-      toast({
-        title: "Verification Required",
-        description: "Please verify your phone number before continuing",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsSubmitting(true)
-
+  const nextStep = async () => {
+    setIsLoading(true)
     try {
-      if (currentStep < totalSteps - 1) {
-        // Save current step data
-        await updateOnboardingStep(currentStep, "COMPLETED", formData)
+      // Save current step data
+      await updateOnboardingStep(step, "COMPLETED", formData)
 
-        // Move to next step
-        setCurrentStep(currentStep + 1)
+      // Trigger n8n workflow for step completion
+      await fetch("/api/n8n/onboarding-step", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userType,
+          step,
+          data: formData,
+          timestamp: new Date().toISOString(),
+        }),
+      })
+
+      if (step < totalSteps - 1) {
+        setStep(step + 1)
       } else {
-        // Complete onboarding
-        setIsCompleting(true)
-        const result = await completeOnboarding()
+        await completeOnboarding()
 
-        if (result.status === 200) {
-          // Show completion screen with confetti
-          triggerConfetti()
+        // Final n8n trigger for completion
+        await fetch("/api/n8n/onboarding-complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userType,
+            finalData: formData,
+            timestamp: new Date().toISOString(),
+          }),
+        })
 
-          // Redirect after a delay
-          setTimeout(() => {
-            router.push(userType === "influencer" ? "/creator-dashboard" : "/dashboard")
-          }, 3000)
-        } else {
-          throw new Error(result.data || "Failed to complete onboarding")
-        }
+        toast({
+          title: "Welcome aboard! 🎉",
+          description: "Your account is ready to go!",
+        })
+
+        // Redirect based on user type
+        setTimeout(() => {
+          router.push(userType === "influencer" ? "/influencers" : "/dashboard")
+        }, 1500)
       }
     } catch (error) {
-      console.error("Error proceeding to next step:", error)
       toast({
         title: "Error",
-        description: "Failed to save progress. Please try again.",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       })
     } finally {
-      setIsSubmitting(false)
+      setIsLoading(false)
     }
   }
 
-  // Handle previous step
-  const handlePrevious = async () => {
-    if (currentStep > 1) {
-      try {
-        // Mark current step as in progress
-        await updateOnboardingStep(currentStep, "IN_PROGRESS")
-
-        // Move to previous step
-        setCurrentStep(currentStep - 1)
-      } catch (error) {
-        console.error("Error going back:", error)
-      }
-    } else if (currentStep === 1) {
-      // Go back to user type selection
-      setUserType(null)
-      setCurrentStep(0)
-    }
+  // Handle form data updates
+  const updateFormData = (key: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [key]: value }))
   }
 
-  // Handle phone verification
-  const handleVerification = (verified: boolean) => {
-    setIsVerified(verified)
-    if (verified) {
-      // Auto-advance after verification
-      handleNext()
-    }
-  }
+  // Handle category toggle
+  const toggleCategory = (category: string) => {
+    const newCategories = formData.categories.includes(category)
+      ? formData.categories.filter((c) => c !== category)
+      : [...formData.categories, category].slice(0, 3) // Max 3 categories
 
-  // Trigger confetti effect
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-    })
-  }
-
-  // Render current step
-  const renderStep = () => {
-    switch (currentStep) {
-      case 0:
-        return <UserTypeSelection onSelect={handleUserTypeSelect} isLoading={isLoading} />
-      case 1:
-        return <ProfileSetup formData={formData} updateFormData={updateFormData} userType={userType!} />
-      case 2:
-        return <ContentCategories formData={formData} updateFormData={updateFormData} userType={userType!} />
-      case 3:
-        return <SocialAccounts formData={formData} updateFormData={updateFormData} userType={userType!} />
-      case 4:
-        return <ContactInfo formData={formData} updateFormData={updateFormData} />
-      case 5:
-        return <PhoneVerification formData={formData} updateFormData={updateFormData} onVerified={handleVerification} />
-      case 6:
-        return userType === "influencer" ? (
-          <ContentStrategy formData={formData} updateFormData={updateFormData} />
-        ) : (
-          <LearningGoals formData={formData} updateFormData={updateFormData} />
-        )
-      case 7:
-        return userType === "influencer" ? (
-          <ContentStyle formData={formData} updateFormData={updateFormData} />
-        ) : (
-          <PersonalityQuiz formData={formData} updateFormData={updateFormData} />
-        )
-      case 8:
-        return <IncomeGoals formData={formData} updateFormData={updateFormData} userType={userType!} />
-      case 9:
-        return userType === "influencer" ? (
-          <Achievements formData={formData} updateFormData={updateFormData} />
-        ) : (
-          <CompletionScreen userType={userType!} />
-        )
-      case 10:
-        return <CompletionScreen userType={userType!} />
-      default:
-        return null
-    }
+    updateFormData("categories", newCategories)
   }
 
   return (
-    <OnboardingLayout
-      currentStep={currentStep}
-      totalSteps={totalSteps}
-      progress={progress}
-      userType={userType}
-      onNext={handleNext}
-      onPrevious={handlePrevious}
-      isSubmitting={isSubmitting}
-      isCompleting={isCompleting}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="w-full"
-        >
-          {renderStep()}
-        </motion.div>
-      </AnimatePresence>
-    </OnboardingLayout>
-  )
-}
-
-// Business Onboarding Component
-function BusinessOnboardingSteps({
-  step,
-  formData,
-  updateFormData,
-  onFileUpload,
-  fileInputRef,
-}: {
-  step: number
-  formData: any
-  updateFormData: (key: string, value: any) => void
-  onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
-  fileInputRef: React.RefObject<HTMLInputElement>
-}) {
-  return (
-    <AnimatePresence mode="wait">
-      {/* Step 1: Business Profile */}
-      {step === 0 && (
-        <motion.div
-          key="business-profile"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <div className="h-16 w-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Building2 className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold mb-2">Tell us about your business</h2>
-                <p className="text-muted-foreground">This helps us personalize your experience</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg shadow-xl border-0">
+        <CardContent className="p-0">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">Welcome to Yazzil</h1>
+                <p className="text-blue-100">Let's get you started in 2 minutes</p>
               </div>
-
-              <div className="space-y-6">
-                {/* Company Logo */}
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-                      {formData.profileImage ? (
-                        <AvatarImage src={formData.profileImage || "/placeholder.svg"} />
-                      ) : (
-                        <AvatarFallback className="bg-muted">
-                          <Building2 className="h-8 w-8 text-muted-foreground" />
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="absolute -bottom-2 -right-2 rounded-full shadow-lg"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={onFileUpload} />
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">Upload your company logo</p>
+              <div className="text-right">
+                <div className="text-sm opacity-90">
+                  Step {step + 1} of {totalSteps}
                 </div>
-
-                {/* Company Details */}
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="companyName">Company Name *</Label>
-                    <Input
-                      id="companyName"
-                      placeholder="Enter your company name"
-                      value={formData.companyName || ""}
-                      onChange={(e) => updateFormData("companyName", e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      placeholder="https://yourcompany.com"
-                      value={formData.website || ""}
-                      onChange={(e) => updateFormData("website", e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        placeholder="City, Country"
-                        value={formData.location || ""}
-                        onChange={(e) => updateFormData("location", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="companySize">Company Size</Label>
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={formData.companySize || ""}
-                        onChange={(e) => updateFormData("companySize", e.target.value)}
-                      >
-                        <option value="">Select size</option>
-                        <option value="1-10">1-10 employees</option>
-                        <option value="11-50">11-50 employees</option>
-                        <option value="51-200">51-200 employees</option>
-                        <option value="201-1000">201-1000 employees</option>
-                        <option value="1000+">1000+ employees</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">Company Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Tell us what your company does..."
-                      value={formData.description || ""}
-                      onChange={(e) => updateFormData("description", e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </div>
+                <div className="text-xs opacity-75">{Math.round(progress)}% complete</div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+            </div>
 
-      {/* Step 2: Industry & Goals */}
-      {step === 1 && (
-        <motion.div
-          key="industry-goals"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <div className="max-w-4xl mx-auto space-y-8">
-            {/* Industry Selection */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-2">What industry are you in?</h2>
-                <p className="text-muted-foreground mb-6">This helps us show you relevant influencers and benchmarks</p>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {BUSINESS_INDUSTRIES.map((industry) => (
-                    <motion.div key={industry.name} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Card
-                        className={cn(
-                          "cursor-pointer border-2 transition-all",
-                          formData.industry === industry.name
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50",
-                        )}
-                        onClick={() => updateFormData("industry", industry.name)}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl mb-2">{industry.icon}</div>
-                          <div className="font-medium text-sm mb-1">{industry.name}</div>
-                          <Badge variant="secondary" className="text-xs">
-                            {industry.growth} growth
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Goals Selection */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-2">What are your main goals?</h2>
-                <p className="text-muted-foreground mb-6">
-                  Select all that apply - we&apos;ll customize your dashboard accordingly
-                </p>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  {BUSINESS_GOALS.map((goal) => {
-                    const IconComponent = goal.icon
-                    const isSelected = formData.goals?.includes(goal.id)
-
-                    return (
-                      <motion.div key={goal.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Card
-                          className={cn(
-                            "cursor-pointer border-2 transition-all",
-                            isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-                          )}
-                          onClick={() => {
-                            const currentGoals = formData.goals || []
-                            const newGoals = isSelected
-                              ? currentGoals.filter((g: string) => g !== goal.id)
-                              : [...currentGoals, goal.id]
-                            updateFormData("goals", newGoals)
-                          }}
-                        >
-                          <CardContent className="p-6">
-                            <div className="flex items-start gap-4">
-                              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <IconComponent className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-semibold mb-1">{goal.title}</h3>
-                                <p className="text-sm text-muted-foreground mb-3">{goal.description}</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {goal.metrics.map((metric) => (
-                                    <Badge key={metric} variant="outline" className="text-xs">
-                                      {metric}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                              {isSelected && <Check className="h-5 w-5 text-primary" />}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mt-4">
+              <Progress value={progress} className="h-2 bg-blue-500/30" />
+            </div>
           </div>
-        </motion.div>
-      )}
 
-      {/* Step 3: Budget & Preferences */}
-      {step === 2 && (
-        <motion.div
-          key="budget-preferences"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <div className="h-16 w-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <DollarSign className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold mb-2">Budget & Campaign Preferences</h2>
-                <p className="text-muted-foreground">Help us recommend the right influencers for your budget</p>
-              </div>
-
-              <div className="space-y-8">
-                {/* Monthly Budget */}
-                <div>
-                  <Label className="text-base font-medium">Monthly Influencer Marketing Budget</Label>
-                  <p className="text-sm text-muted-foreground mb-4">This helps us show you suitable influencers</p>
+          {/* Content */}
+          <div className="p-6 min-h-[400px]">
+            <AnimatePresence mode="wait">
+              {/* Step 0: User Type Selection */}
+              {step === 0 && (
+                <motion.div
+                  key="step0"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">What brings you here?</h2>
+                    <p className="text-gray-600">Choose the option that best describes you</p>
+                  </div>
 
                   <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-primary">
-                        ${(formData.monthlyBudget || 5000).toLocaleString()}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => selectUserType("regular")}
+                      disabled={isLoading}
+                      className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+                          <Building2 className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">Business Owner</h3>
+                          <p className="text-sm text-gray-600">
+                            I want to grow my business and automate customer interactions
+                          </p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
                       </div>
-                      <div className="text-sm text-muted-foreground">per month</div>
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => selectUserType("influencer")}
+                      disabled={isLoading}
+                      className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 transition-colors">
+                          <Star className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">Content Creator</h3>
+                          <p className="text-sm text-gray-600">
+                            I'm an influencer looking to monetize and manage collaborations
+                          </p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600" />
+                      </div>
+                    </motion.button>
+                  </div>
+
+                  {isLoading && (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      <span className="ml-2 text-sm text-gray-600">Setting up your account...</span>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Step 1: Basic Info */}
+              {step === 1 && (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">
+                      {userType === "influencer" ? "Your Creator Profile" : "Your Business Info"}
+                    </h2>
+                    <p className="text-gray-600">Tell us a bit about yourself</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {userType === "regular" && (
+                      <>
+                        <div>
+                          <Label htmlFor="businessName">Business Name</Label>
+                          <Input
+                            id="businessName"
+                            placeholder="Enter your business name"
+                            value={formData.businessName}
+                            onChange={(e) => updateFormData("businessName", e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <Label>Business Type</Label>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            {businessTypes.map((type) => (
+                              <button
+                                key={type.name}
+                                onClick={() => updateFormData("businessType", type.name)}
+                                className={`p-3 border rounded-lg text-left transition-all ${
+                                  formData.businessType === type.name
+                                    ? "border-blue-500 bg-blue-50"
+                                    : "border-gray-200 hover:border-gray-300"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{type.icon}</span>
+                                  <div>
+                                    <div className="font-medium text-sm">{type.name}</div>
+                                    <div className="text-xs text-gray-500">{type.description}</div>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div>
+                      <Label htmlFor="instagram">Instagram Handle</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
+                        <Input
+                          id="instagram"
+                          placeholder="yourusername"
+                          className="pl-8"
+                          value={formData.instagramHandle}
+                          onChange={(e) => updateFormData("instagramHandle", e.target.value)}
+                        />
+                      </div>
                     </div>
 
-                    <Slider
-                      value={[formData.monthlyBudget || 5000]}
-                      onValueChange={(value) => updateFormData("monthlyBudget", value[0])}
-                      max={50000}
-                      min={500}
-                      step={500}
-                      className="w-full"
-                    />
-
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>$500</span>
-                      <span>$50,000+</span>
+                    <div>
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={formData.email}
+                        onChange={(e) => updateFormData("email", e.target.value)}
+                      />
                     </div>
                   </div>
-                </div>
 
-                {/* Campaign Frequency */}
-                <div>
-                  <Label className="text-base font-medium">How often do you run campaigns?</Label>
-                  <RadioGroup
-                    value={formData.campaignFrequency || ""}
-                    onValueChange={(value) => updateFormData("campaignFrequency", value)}
-                    className="mt-3"
+                  <Button
+                    onClick={nextStep}
+                    className="w-full"
+                    disabled={isLoading || !formData.email || !formData.instagramHandle}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="weekly" id="weekly" />
-                      <Label htmlFor="weekly">Weekly campaigns</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="monthly" id="monthly" />
-                      <Label htmlFor="monthly">Monthly campaigns</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="quarterly" id="quarterly" />
-                      <Label htmlFor="quarterly">Quarterly campaigns</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="as-needed" id="as-needed" />
-                      <Label htmlFor="as-needed">As needed</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
+                </motion.div>
+              )}
 
-                {/* Preferred Platforms */}
-                <div>
-                  <Label className="text-base font-medium">Preferred Platforms</Label>
-                  <p className="text-sm text-muted-foreground mb-3">Select all platforms you want to focus on</p>
+              {/* Step 2: Categories & Interests */}
+              {step === 2 && (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">
+                      {userType === "influencer" ? "Your Content Niche" : "Your Industry"}
+                    </h2>
+                    <p className="text-gray-600">Select up to 3 categories that best describe you</p>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { name: "Instagram", icon: Instagram },
-                      { name: "TikTok", icon: Video },
-                      { name: "YouTube", icon: Video },
-                      { name: "Twitter", icon: MessageCircle },
-                    ].map((platform) => {
-                      const IconComponent = platform.icon
-                      const isSelected = formData.platforms?.includes(platform.name)
-
-                      return (
+                    {quickCategories.map((category) => (
+                      <motion.button
+                        key={category.name}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => toggleCategory(category.name)}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          formData.categories.includes(category.name)
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
                         <div
-                          key={platform.name}
-                          className={cn(
-                            "flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all",
-                            isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-                          )}
-                          onClick={() => {
-                            const currentPlatforms = formData.platforms || []
-                            const newPlatforms = isSelected
-                              ? currentPlatforms.filter((p: string) => p !== platform.name)
-                              : [...currentPlatforms, platform.name]
-                            updateFormData("platforms", newPlatforms)
-                          }}
+                          className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center mx-auto mb-2`}
                         >
-                          <IconComponent className="h-5 w-5" />
-                          <span className="font-medium">{platform.name}</span>
-                          {isSelected && <Check className="h-4 w-4 text-primary ml-auto" />}
+                          <span className="text-xl">{category.icon}</span>
                         </div>
-                      )
-                    })}
+                        <div className="font-medium text-sm">{category.name}</div>
+                      </motion.button>
+                    ))}
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
 
-      {/* Additional steps would go here... */}
-    </AnimatePresence>
-  )
-}
+                  <div className="text-center">
+                    <Badge variant="outline">{formData.categories.length}/3 selected</Badge>
+                  </div>
 
-// Influencer Onboarding Component
-function InfluencerOnboardingSteps({
-  step,
-  formData,
-  updateFormData,
-  onFileUpload,
-  fileInputRef,
-}: {
-  step: number
-  formData: any
-  updateFormData: (key: string, value: any) => void
-  onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
-  fileInputRef: React.RefObject<HTMLInputElement>
-}) {
-  return (
-    <AnimatePresence mode="wait">
-      {/* Step 1: Creator Profile */}
-      {step === 0 && (
-        <motion.div
-          key="creator-profile"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <div className="h-16 w-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Star className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold mb-2">Create your creator profile</h2>
-                <p className="text-muted-foreground">This is how brands will discover you</p>
-              </div>
+                  <Button
+                    onClick={nextStep}
+                    className="w-full"
+                    disabled={isLoading || formData.categories.length === 0}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
+                </motion.div>
+              )}
 
-              <div className="space-y-6">
-                {/* Profile Photo */}
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-                      {formData.profileImage ? (
-                        <AvatarImage src={formData.profileImage || "/placeholder.svg"} />
+              {/* Step 3: Goals & Expectations */}
+              {step === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">Your Goals</h2>
+                    <p className="text-gray-600">
+                      {userType === "influencer"
+                        ? "What do you want to achieve as a creator?"
+                        : "What do you want to achieve with your business?"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="goals">Tell us about your main goals</Label>
+                      <Textarea
+                        id="goals"
+                        placeholder={
+                          userType === "influencer"
+                            ? "I want to grow my following, work with brands, and monetize my content..."
+                            : "I want to automate customer service, increase sales, and grow my online presence..."
+                        }
+                        value={formData.goals}
+                        onChange={(e) => updateFormData("goals", e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Monthly Revenue Goal</Label>
+                      <div className="mt-2">
+                        <div className="flex items-center gap-4">
+                          <span className="text-2xl font-bold text-green-600">
+                            ${formData.monthlyGoal.toLocaleString()}
+                          </span>
+                          <span className="text-sm text-gray-500">per month</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1000"
+                          max="50000"
+                          step="1000"
+                          value={formData.monthlyGoal}
+                          onChange={(e) => updateFormData("monthlyGoal", Number.parseInt(e.target.value))}
+                          className="w-full mt-2"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>$1K</span>
+                          <span>$50K+</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button onClick={nextStep} className="w-full" disabled={isLoading || !formData.goals.trim()}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Completing Setup...
+                      </>
+                    ) : (
+                      "Complete Setup"
+                    )}
+                  </Button>
+                </motion.div>
+              )}
+
+              {/* Final Step: Success */}
+              {step === totalSteps && (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center space-y-6 py-8"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring" }}
+                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto"
+                  >
+                    <Check className="h-10 w-10 text-green-600" />
+                  </motion.div>
+
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">You're all set! 🎉</h2>
+                    <p className="text-gray-600">
+                      Welcome to Yazzil! Your {userType === "influencer" ? "creator" : "business"} dashboard is ready.
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">What's next?</h3>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {userType === "influencer" ? (
+                        <>
+                          <li>• Set up your creator profile</li>
+                          <li>• Browse collaboration opportunities</li>
+                          <li>• Connect with brands</li>
+                        </>
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                          <Star className="h-8 w-8" />
-                        </AvatarFallback>
+                        <>
+                          <li>• Set up your first automation</li>
+                          <li>• Connect your Instagram account</li>
+                          <li>• Start engaging with customers</li>
+                        </>
                       )}
-                    </Avatar>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="absolute -bottom-2 -right-2 rounded-full shadow-lg"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={onFileUpload} />
+                    </ul>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">Upload your profile photo</p>
-                </div>
-
-                {/* Creator Details */}
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName">First Name *</Label>
-                      <Input
-                        id="firstName"
-                        placeholder="Your first name"
-                        value={formData.firstName || ""}
-                        onChange={(e) => updateFormData("firstName", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name *</Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Your last name"
-                        value={formData.lastName || ""}
-                        onChange={(e) => updateFormData("lastName", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email">Email Address *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email || ""}
-                      onChange={(e) => updateFormData("email", e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      placeholder="City, Country"
-                      value={formData.location || ""}
-                      onChange={(e) => updateFormData("location", e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      placeholder="Tell brands about yourself and what makes you unique..."
-                      value={formData.bio || ""}
-                      onChange={(e) => updateFormData("bio", e.target.value)}
-                      rows={4}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">{(formData.bio || "").length}/500 characters</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Step 2: Content & Niche */}
-      {step === 1 && (
-        <motion.div
-          key="content-niche"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <div className="max-w-4xl mx-auto space-y-8">
-            {/* Niche Selection */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-2">What&apos;s your content niche?</h2>
-                <p className="text-muted-foreground mb-6">
-                  Select your primary content categories to help brands find you
-                </p>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {CONTENT_NICHES.map((niche) => {
-                    const isSelected = formData.niches?.includes(niche.name)
-
-                    return (
-                      <motion.div key={niche.name} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Card
-                          className={cn(
-                            "cursor-pointer border-2 transition-all",
-                            isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-                          )}
-                          onClick={() => {
-                            const currentNiches = formData.niches || []
-                            const newNiches = isSelected
-                              ? currentNiches.filter((n: string) => n !== niche.name)
-                              : [...currentNiches, niche.name]
-                            updateFormData("niches", newNiches)
-                          }}
-                        >
-                          <CardContent className="p-4 text-center">
-                            <div className="text-2xl mb-2">{niche.icon}</div>
-                            <div className="font-medium text-sm mb-1">{niche.name}</div>
-                            <div className="text-xs text-muted-foreground mb-1">{niche.earning}</div>
-                            <Badge variant={niche.demand === "Very High" ? "default" : "secondary"} className="text-xs">
-                              {niche.demand} demand
-                            </Badge>
-                            {isSelected && <Check className="h-4 w-4 text-primary mx-auto mt-2" />}
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Content Types */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-2">What content do you create?</h2>
-                <p className="text-muted-foreground mb-6">Select all content types you&apos;re comfortable creating</p>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  {CONTENT_TYPES.map((contentType) => {
-                    const IconComponent = contentType.icon
-                    const isSelected = formData.contentTypes?.includes(contentType.name)
-
-                    return (
-                      <motion.div key={contentType.name} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Card
-                          className={cn(
-                            "cursor-pointer border-2 transition-all",
-                            isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-                          )}
-                          onClick={() => {
-                            const currentTypes = formData.contentTypes || []
-                            const newTypes = isSelected
-                              ? currentTypes.filter((t: string) => t !== contentType.name)
-                              : [...currentTypes, contentType.name]
-                            updateFormData("contentTypes", newTypes)
-                          }}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <IconComponent className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-semibold">{contentType.name}</h3>
-                                <p className="text-sm text-muted-foreground">{contentType.rate}</p>
-                              </div>
-                              {isSelected && <Check className="h-5 w-5 text-primary" />}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </motion.div>
-      )}
-
-      {/* Additional influencer steps would go here... */}
-    </AnimatePresence>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

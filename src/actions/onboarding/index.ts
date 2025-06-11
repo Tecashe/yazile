@@ -989,12 +989,227 @@
 
 
 
-
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { client } from "@/lib/prisma"
 import { onCurrentUser, onUserInfor } from "@/actions/user"
+
+// Enhanced onboarding functions that work with the simplified flow
+
+export const initializeSimplifiedOnboarding = async (userType: "influencer" | "regular") => {
+  const userid = await onUserInfor()
+  const user = await onCurrentUser()
+  const userId = userid.data?.id
+
+  try {
+    // Check if onboarding already exists
+    const existingProgress = await client.onboardingProgress.findUnique({
+      where: { userId },
+    })
+
+    if (existingProgress) {
+      return {
+        status: 200,
+        data: "Onboarding already initialized",
+        progress: existingProgress,
+      }
+    }
+
+    // Create simplified onboarding progress (4 steps for both types)
+    const totalSteps = 4
+    const progress = await client.onboardingProgress.create({
+      data: {
+        userId: userId || "123456",
+        userType,
+        totalSteps,
+        steps: {
+          create: Array.from({ length: totalSteps }, (_, i) => ({
+            stepNumber: i + 1,
+            stepName: getSimplifiedStepName(userType, i + 1),
+            status: i === 0 ? "IN_PROGRESS" : "NOT_STARTED",
+          })),
+        },
+      },
+      include: {
+        steps: true,
+      },
+    })
+
+    return { status: 200, data: "Onboarding initialized", progress }
+  } catch (error) {
+    console.error("Error initializing onboarding:", error)
+    return { status: 500, data: "Failed to initialize onboarding" }
+  }
+}
+
+export const completeSimplifiedOnboarding = async (finalData: any) => {
+  const userid = await onUserInfor()
+  const user = await onCurrentUser()
+  const userId = userid.data?.id
+
+  try {
+    // Get onboarding progress
+    const progress = await client.onboardingProgress.findUnique({
+      where: { userId },
+      include: { steps: true },
+    })
+
+    if (!progress) {
+      return { status: 404, data: "Onboarding not initialized" }
+    }
+
+    // Mark all steps as completed
+    await Promise.all(
+      progress.steps.map((step) =>
+        client.onboardingStep.update({
+          where: {
+            progressId_stepNumber: {
+              progressId: progress.id,
+              stepNumber: step.stepNumber,
+            },
+          },
+          data: {
+            status: "COMPLETED",
+            completedAt: new Date(),
+          },
+        }),
+      ),
+    )
+
+    // Update progress
+    const updatedProgress = await client.onboardingProgress.update({
+      where: { id: progress.id },
+      data: {
+        completedAt: new Date(),
+      },
+      include: { steps: true },
+    })
+
+    // Create profile based on user type
+    if (progress.userType === "influencer") {
+      await createSimplifiedInfluencerProfile(userId || user.id, finalData)
+    } else {
+      await createSimplifiedBusinessProfile(userId || user.id, finalData)
+    }
+
+    // Revalidate paths
+    revalidatePath("/dashboard")
+    revalidatePath("/influencers")
+
+    return {
+      status: 200,
+      data: "Onboarding completed",
+      progress: updatedProgress,
+    }
+  } catch (error) {
+    console.error("Error completing onboarding:", error)
+    return { status: 500, data: "Failed to complete onboarding" }
+  }
+}
+
+// Helper function for simplified step names
+function getSimplifiedStepName(userType: string, stepNumber: number): string {
+  if (userType === "influencer") {
+    const steps = ["User Type Selection", "Creator Profile", "Content Categories", "Goals & Revenue"]
+    return steps[stepNumber - 1] || `Step ${stepNumber}`
+  } else {
+    const steps = ["User Type Selection", "Business Information", "Industry & Categories", "Goals & Targets"]
+    return steps[stepNumber - 1] || `Step ${stepNumber}`
+  }
+}
+
+// Simplified influencer profile creation
+async function createSimplifiedInfluencerProfile(userId: string, data: any) {
+  const existingInfluencer = await client.influencer.findUnique({
+    where: { userId },
+  })
+
+  const profileData = {
+    name: data.businessName || "New Creator",
+    username: data.instagramHandle || `creator_${userId.substring(0, 8)}`,
+    bio: data.goals || "",
+    profilePicture: data.profileImage || "",
+    niche: data.categories?.join(", ") || "",
+    email: data.email || "",
+    incomeGoal: data.monthlyGoal || 0,
+    onboardingCompleted: true,
+  }
+
+  if (existingInfluencer) {
+    await client.influencer.update({
+      where: { userId },
+      data: profileData,
+    })
+  } else {
+    await client.influencer.create({
+      data: {
+        userId,
+        ...profileData,
+        socialAccounts: {
+          create: data.instagramHandle
+            ? [
+                {
+                  platform: "Instagram",
+                  handle: data.instagramHandle,
+                  username: data.instagramHandle,
+                  url: `https://instagram.com/${data.instagramHandle}`,
+                },
+              ]
+            : [],
+        },
+        rates: {
+          create: [
+            {
+              postRate: data.monthlyGoal ? data.monthlyGoal / 10 : 100,
+              videoRate: data.monthlyGoal ? data.monthlyGoal / 5 : 200,
+              storyRate: data.monthlyGoal ? data.monthlyGoal / 20 : 50,
+            },
+          ],
+        },
+      },
+    })
+  }
+}
+
+// Simplified business profile creation
+async function createSimplifiedBusinessProfile(userId: string, data: any) {
+  const businessData = {
+    businessName: data.businessName || "My Business",
+    businessType: data.businessType || "Other",
+    businessDescription: data.goals || "",
+    industry: data.categories?.[0] || "Other",
+    targetAudience: "General",
+    website: "",
+    instagramHandle: data.instagramHandle || "",
+    welcomeMessage: "Welcome to our business!",
+    responseLanguage: "English",
+    businessHours: "9-5",
+    autoReplyEnabled: true,
+    promotionMessage: "",
+    learningTopics: data.categories || [],
+    growthChallenges: [],
+    goalStatement: data.goals || "",
+    onboardingCompleted: true,
+  }
+
+  return await client.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      businesses: {
+        create: businessData,
+      },
+    },
+  })
+}
+
+
+
+
+
+
 
 export const updateOnboardingStep = async (
   stepNumber: number,
