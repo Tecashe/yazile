@@ -2647,7 +2647,7 @@ export default function SimplifiedOnboardingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold">Welcome to Yazzil</h1>
-                <p className="text-blue-100">Let's get you started in 2 minutes</p>
+                <p className="text-blue-100">Let&apos;s get you started in 2 minutes</p>
               </div>
               <div className="text-right">
                 <div className="text-sm opacity-90">
@@ -2715,7 +2715,7 @@ export default function SimplifiedOnboardingPage() {
                         <div className="flex-1">
                           <h3 className="font-semibold">Content Creator</h3>
                           <p className="text-sm text-gray-600">
-                            I'm an influencer looking to monetize and manage collaborations
+                            I&apos;m an influencer looking to monetize and manage collaborations
                           </p>
                         </div>
                         <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600" />
@@ -2982,14 +2982,14 @@ export default function SimplifiedOnboardingPage() {
                   </motion.div>
 
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">You're all set! 🎉</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">You&apos;re all set! 🎉</h2>
                     <p className="text-gray-600">
                       Welcome to Yazzil! Your {userType === "influencer" ? "creator" : "business"} dashboard is ready.
                     </p>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">What's next?</h3>
+                    <h3 className="font-semibold mb-2">What&apos;s next?</h3>
                     <ul className="text-sm text-gray-600 space-y-1">
                       {userType === "influencer" ? (
                         <>
