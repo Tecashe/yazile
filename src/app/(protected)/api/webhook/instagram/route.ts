@@ -703,13 +703,13 @@ export async function POST(req: NextRequest) {
 
     // Check for duplicate message processing
     const isProcessed = await checkProcessedMessage(messageKey)
-    if (isProcessed) {
-      console.log(`Message already processed: ${messageKey}`)
-      return NextResponse.json({ message: "Already processed" }, { status: 200 })
-    }
+    // if (isProcessed) {
+    //   console.log(`Message already processed: ${messageKey}`)
+    //   return NextResponse.json({ message: "Already processed" }, { status: 200 })
+    // }
 
-    // Mark message as being processed
-    await markMessageAsProcessed(messageKey)
+    // // Mark message as being processed
+    // await markMessageAsProcessed(messageKey)
 
     // Check for keyword match
     const matcher = await matchKeyword(userMessage)
