@@ -218,6 +218,8 @@ model Integrations {
   lastUpdated    DateTime     @default(now())
 }
 
+
+
 model Automation {
   id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String             @default("New Automation")
@@ -226,6 +228,7 @@ model Automation {
   platform       INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
   trigger        Trigger[]
   businessProfilesDescription BusinessProfileDescription?
+  listenMode     String  @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
   listener       Listener?
   posts          Post[]
   leads          Lead[]
@@ -301,8 +304,13 @@ model ConversationState {
   averageResponseTime   Float?
   isInHandoff           Boolean       @default(false)
   handoffReason         String?
+
+  automationId          String? // Track which automation is handling this conversation
+  listenMode            String? // Track the current listen mode
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
 
   @@index([userId])
   @@index([isActive])
