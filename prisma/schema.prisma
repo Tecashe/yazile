@@ -224,6 +224,7 @@ model Automation {
   id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String             @default("New Automation")
   createdAt      DateTime           @default(now())
+  isFallback     Boolean            @default(false)
   active         Boolean            @default(false)
   platform       INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
   trigger        Trigger[]
@@ -241,6 +242,9 @@ model Automation {
   scheduledPosts ScheduledContent[]
   handoffs          HumanHandoff[]
   responseMetrics   ResponseMetrics[]
+
+  fallbackMessage  String?
+  buttons          Json?          // Store as JSON array
 
 
 }
@@ -327,6 +331,7 @@ model Listener {
   prompt       String
   commentReply String?
   lastComment  String?
+  buttons      Json?
   lastDm       String?
   dmCount      Int        @default(0)
   commentCount Int        @default(0)
