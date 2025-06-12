@@ -476,6 +476,281 @@
 
 //WE ARE USING THIS UP HERE, BUT THIS DOWN HERE FOR TESTING HANDOFF
 
+// import axios, { type AxiosError, type AxiosResponse } from "axios"
+// import { client } from "@/lib/prisma"
+
+// type InstagramQuickReply = {
+//   content_type: "text"
+//   title: string
+//   payload: string
+// }
+
+// interface TypingIndicatorOptions {
+//   duration?: number
+//   pageId: string
+//   recipientId: string
+//   token: string
+// }
+
+// // Enhanced typing indicator functionality
+// export async function sendTypingIndicator(options: TypingIndicatorOptions): Promise<void> {
+//   const { duration = 3000, pageId, recipientId, token } = options
+
+//   try {
+//     // Send typing_on
+//     await axios.post(
+//       `${process.env.INSTAGRAM_BASE_URL}/v22.0/${pageId}/messages`,
+//       {
+//         recipient: { id: recipientId },
+//         sender_action: "typing_on",
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           "Content-Type": "application/json",
+//         },
+//       },
+//     )
+
+//     // Wait for the specified duration
+//     await new Promise((resolve) => setTimeout(resolve, duration))
+
+//     // Send typing_off
+//     await axios.post(
+//       `${process.env.INSTAGRAM_BASE_URL}/v22.0/${pageId}/messages`,
+//       {
+//         recipient: { id: recipientId },
+//         sender_action: "typing_off",
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           "Content-Type": "application/json",
+//         },
+//       },
+//     )
+//   } catch (error) {
+//     console.error("Error sending typing indicator:", error)
+//   }
+// }
+
+// // Enhanced message sending with typing simulation
+// export async function sendDMWithTyping(
+//   userId: string,
+//   receiverId: string,
+//   prompt: string,
+//   token: string,
+//   quickReplies?: InstagramQuickReply[],
+//   options?: {
+//     simulateTyping?: boolean
+//     typingDuration?: number
+//     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   },
+// ): Promise<AxiosResponse> {
+//   const { simulateTyping = true, typingDuration, priority = "MEDIUM" } = options || {}
+
+//   try {
+//     // Calculate typing duration if not provided
+//     const calculatedTypingDuration = typingDuration || calculateTypingDelay(prompt.length)
+
+//     // Send typing indicator if enabled
+//     if (simulateTyping) {
+//       await sendTypingIndicator({
+//         duration: calculatedTypingDuration,
+//         pageId: userId,
+//         recipientId: receiverId,
+//         token,
+//       })
+//     }
+
+//     // Prepare message payload
+//     const messagePayload: Record<string, any> = {
+//       recipient: { id: receiverId },
+//       messaging_type: "RESPONSE",
+//       message: { text: prompt },
+//     }
+
+//     if (quickReplies && quickReplies.length > 0) {
+//       messagePayload.message.quick_replies = quickReplies
+//     }
+
+//     // Add priority metadata if needed
+//     if (priority !== "MEDIUM") {
+//       messagePayload.metadata = JSON.stringify({ priority })
+//     }
+
+//     console.log("Sending DM payload to Instagram:", JSON.stringify(messagePayload, null, 2))
+
+//     const response = await axios.post(`${process.env.INSTAGRAM_BASE_URL}/v22.0/${userId}/messages`, messagePayload, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//     })
+
+//     // Log successful delivery
+//     await logMessageDelivery(userId, receiverId, prompt, "DM", true)
+
+//     console.log("Instagram DM API response status:", response.status)
+//     return response
+//   } catch (error) {
+//     const axiosError = error as AxiosError
+//     console.error("Error sending DM to Instagram:", axiosError.response?.data || axiosError.message)
+
+//     // Log failed delivery
+//     await logMessageDelivery(userId, receiverId, prompt, "DM", false, axiosError.message)
+
+//     throw error
+//   }
+// }
+
+// // Calculate human-like typing delay
+// function calculateTypingDelay(messageLength: number): number {
+//   const baseDelay = 1000 + Math.random() * 1000
+//   const typingDelay = (messageLength / 200) * 60 * 1000
+//   const randomFactor = 0.5 + Math.random() * 0.5
+//   return Math.min(Math.max(baseDelay + typingDelay * randomFactor, 1000), 8000)
+// }
+
+// // Enhanced private message sending
+// export async function sendPrivateMessageWithTyping(
+//   userId: string,
+//   commentId: string,
+//   prompt: string,
+//   token: string,
+//   quickReplies?: InstagramQuickReply[],
+//   options?: {
+//     simulateTyping?: boolean
+//     typingDuration?: number
+//     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   },
+// ): Promise<AxiosResponse> {
+//   const { simulateTyping = true, typingDuration, priority = "MEDIUM" } = options || {}
+
+//   try {
+//     // For comment replies, we can't send typing indicators in the same way
+//     // But we can still simulate the delay
+//     if (simulateTyping) {
+//       const delay = typingDuration || calculateTypingDelay(prompt.length)
+//       await new Promise((resolve) => setTimeout(resolve, delay))
+//     }
+
+//     const messagePayload: Record<string, any> = {
+//       recipient: { comment_id: commentId },
+//       messaging_type: "RESPONSE",
+//       message: { text: prompt },
+//     }
+
+//     if (quickReplies && quickReplies.length > 0) {
+//       messagePayload.message.quick_replies = quickReplies
+//     }
+
+//     if (priority !== "MEDIUM") {
+//       messagePayload.metadata = JSON.stringify({ priority })
+//     }
+
+//     console.log("Sending private message payload:", JSON.stringify(messagePayload, null, 2))
+
+//     const response = await axios.post(`${process.env.INSTAGRAM_BASE_URL}/v22.0/${userId}/messages`, messagePayload, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//     })
+
+//     await logMessageDelivery(userId, commentId, prompt, "COMMENT", true)
+
+//     console.log("Instagram private message API response status:", response.status)
+//     return response
+//   } catch (error) {
+//     const axiosError = error as AxiosError
+//     console.error("Error sending private message to Instagram:", axiosError.response?.data || axiosError.message)
+
+//     await logMessageDelivery(userId, commentId, prompt, "COMMENT", false, axiosError.message)
+
+//     throw error
+//   }
+// }
+
+// // Message delivery logging
+// async function logMessageDelivery(
+//   pageId: string,
+//   recipientId: string,
+//   message: string,
+//   type: "DM" | "COMMENT",
+//   success: boolean,
+//   error?: string,
+// ): Promise<void> {
+//   try {
+//     await client.messageDeliveryLog.create({
+//       data: {
+//         pageId,
+//         recipientId,
+//         message: message.substring(0, 1000), // Truncate long messages
+//         type,
+//         success,
+//         error: error?.substring(0, 500),
+//         timestamp: new Date(),
+//       },
+//     })
+//   } catch (logError) {
+//     console.error("Error logging message delivery:", logError)
+//   }
+// }
+
+// // Legacy functions for backward compatibility
+// export const sendDM = sendDMWithTyping
+// export const sendPrivateMessage = sendPrivateMessageWithTyping
+
+// export const refreshToken = async (token: string) => {
+//   try {
+//     const response = await axios.get(
+//       `${process.env.INSTAGRAM_BASE_URL}/refresh_access_token?grant_type=ig_refresh_token&access_token=${token}`,
+//     )
+//     return response.data
+//   } catch (error) {
+//     const axiosError = error as AxiosError
+//     console.error("Error refreshing token:", axiosError.response?.data || axiosError.message)
+//     throw error
+//   }
+// }
+
+// export const generateTokens = async (code: string) => {
+//   try {
+//     const insta_form = new FormData()
+//     insta_form.append("client_id", process.env.INSTAGRAM_CLIENT_ID as string)
+//     insta_form.append("client_secret", process.env.INSTAGRAM_CLIENT_SECRET as string)
+//     insta_form.append("grant_type", "authorization_code")
+//     insta_form.append("redirect_uri", `${process.env.NEXT_PUBLIC_HOST_URL}/callback/instagram`)
+//     insta_form.append("code", code)
+
+//     const shortTokenRes = await fetch(process.env.INSTAGRAM_TOKEN_URL as string, {
+//       method: "POST",
+//       body: insta_form,
+//     })
+
+//     const token = await shortTokenRes.json()
+//     if (token.permissions && token.permissions.length > 0) {
+//       console.log("Got permissions:", token)
+
+//       const longTokenResponse = await axios.get(
+//         `${process.env.INSTAGRAM_BASE_URL}/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&access_token=${token.access_token}`,
+//       )
+
+//       return longTokenResponse.data
+//     } else {
+//       console.error("No permissions returned in token response:", token)
+//       throw new Error("No permissions received from Instagram")
+//     }
+//   } catch (error) {
+//     const axiosError = error as Error
+//     console.error("Error generating tokens:", axiosError.message)
+//     throw error
+//   }
+// }
+
+
+
 import axios, { type AxiosError, type AxiosResponse } from "axios"
 import { client } from "@/lib/prisma"
 
@@ -492,8 +767,8 @@ interface TypingIndicatorOptions {
   token: string
 }
 
-// Enhanced typing indicator functionality
-export async function sendTypingIndicator(options: TypingIndicatorOptions): Promise<void> {
+// Enhanced typing indicator functionality with error handling
+export async function sendTypingIndicator(options: TypingIndicatorOptions): Promise<boolean> {
   const { duration = 3000, pageId, recipientId, token } = options
 
   try {
@@ -529,12 +804,22 @@ export async function sendTypingIndicator(options: TypingIndicatorOptions): Prom
         },
       },
     )
+
+    return true
   } catch (error) {
-    console.error("Error sending typing indicator:", error)
+    const axiosError = error as AxiosError
+    console.error("Error sending typing indicator:", axiosError.response?.data || axiosError.message)
+    
+    // Log specific error details for debugging
+    if (axiosError.response?.status === 400) {
+      console.error("Typing indicator failed - likely missing permissions or invalid context")
+    }
+    
+    return false // Return false instead of throwing to allow message sending to continue
   }
 }
 
-// Enhanced message sending with typing simulation
+// Enhanced message sending with optional typing simulation
 export async function sendDMWithTyping(
   userId: string,
   receiverId: string,
@@ -545,22 +830,34 @@ export async function sendDMWithTyping(
     simulateTyping?: boolean
     typingDuration?: number
     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+    fallbackToDelay?: boolean // New option to use delay if typing fails
   },
 ): Promise<AxiosResponse> {
-  const { simulateTyping = true, typingDuration, priority = "MEDIUM" } = options || {}
+  const { 
+    simulateTyping = true, 
+    typingDuration, 
+    priority = "MEDIUM",
+    fallbackToDelay = true 
+  } = options || {}
 
   try {
     // Calculate typing duration if not provided
     const calculatedTypingDuration = typingDuration || calculateTypingDelay(prompt.length)
 
-    // Send typing indicator if enabled
+    // Attempt to send typing indicator if enabled
     if (simulateTyping) {
-      await sendTypingIndicator({
+      const typingSuccess = await sendTypingIndicator({
         duration: calculatedTypingDuration,
         pageId: userId,
         recipientId: receiverId,
         token,
       })
+
+      // If typing indicator fails and fallback is enabled, use a simple delay
+      if (!typingSuccess && fallbackToDelay) {
+        console.log("Typing indicator failed, using fallback delay")
+        await new Promise((resolve) => setTimeout(resolve, calculatedTypingDuration))
+      }
     }
 
     // Prepare message payload
@@ -672,6 +969,31 @@ export async function sendPrivateMessageWithTyping(
   }
 }
 
+// Simplified versions without typing indicators for reliability
+export async function sendDMSimple(
+  userId: string,
+  receiverId: string,
+  prompt: string,
+  token: string,
+  quickReplies?: InstagramQuickReply[],
+): Promise<AxiosResponse> {
+  return sendDMWithTyping(userId, receiverId, prompt, token, quickReplies, {
+    simulateTyping: false
+  })
+}
+
+export async function sendPrivateMessageSimple(
+  userId: string,
+  commentId: string,
+  prompt: string,
+  token: string,
+  quickReplies?: InstagramQuickReply[],
+): Promise<AxiosResponse> {
+  return sendPrivateMessageWithTyping(userId, commentId, prompt, token, quickReplies, {
+    simulateTyping: false
+  })
+}
+
 // Message delivery logging
 async function logMessageDelivery(
   pageId: string,
@@ -748,7 +1070,6 @@ export const generateTokens = async (code: string) => {
     throw error
   }
 }
-
 
 
 
