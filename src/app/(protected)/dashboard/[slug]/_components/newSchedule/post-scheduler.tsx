@@ -609,7 +609,6 @@
 //     </div>
 //   )
 // }
-
 "use client"
 
 import type React from "react"
@@ -618,7 +617,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ImagePlus, Loader2, X, Camera, Video, Images, Instagram } from "lucide-react"
+import { ImagePlus, Loader2, X, Camera, Video, Images, Instagram, CalendarDays } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -627,13 +626,15 @@ import { cn } from "@/lib/utils"
 import { validateMediaForInstagram, validateCarouselMedia } from "@/lib/validate-media"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AIContentGenerator from "./ai-content-generator"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
 
 interface PostSchedulerProps {
   userId: string
 }
 
 const postTypes = [
-  { value: "IMAGE", label: "Single Image", icon: Camera },
+  { value: "IMAGE", label: "Image", icon: Camera },
   { value: "CAROUSEL", label: "Carousel", icon: Images },
   { value: "VIDEO", label: "Video", icon: Video },
   { value: "REELS", label: "Reels", icon: Instagram },
@@ -647,6 +648,7 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
   const [mediaType, setMediaType] = useState("IMAGE")
   const [date, setDate] = useState<Date>()
   const [caption, setCaption] = useState("")
+  const [calendarOpen, setCalendarOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -719,12 +721,6 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
       formData.append("scheduledDate", date.toISOString())
       formData.append("userId", userId)
       formData.append("media", fileInputRef.current.files[0])
-      // const files = fileInputRef.current.files;
-      // if (files) {
-      //   for (let i = 0; i < files.length; i++) {
-      //     formData.append("media[]", files[i]); // Append all files for carousel
-      //   }
-      // }
 
       const response = await fetch("/api/schedule-post", {
         method: "POST",
@@ -788,13 +784,19 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
 
   return (
     <div className="relative">
-      <div className="relative bg-gray-900/50 rounded-lg border border-gray-800 overflow-hidden">
+      <div className="relative bg-card rounded-lg border border-border overflow-hidden">
         <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 bg-gray-800">
-            <TabsTrigger value="upload" className="data-[state=active]:bg-gray-700 text-gray-200">
-              Manual Upload
+          <TabsList className="w-full grid grid-cols-2 bg-secondary">
+            <TabsTrigger 
+              value="upload" 
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
+              Upload Media
             </TabsTrigger>
-            <TabsTrigger value="generate" className="data-[state=active]:bg-gray-700 text-gray-200">
+            <TabsTrigger 
+              value="generate" 
+              className="data-[state=active]:bg-background data-[state=active]:text-foreground"
+            >
               AI Generate
             </TabsTrigger>
           </TabsList>
@@ -802,13 +804,13 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
           <TabsContent value="upload">
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 p-4">
               <div className="space-y-1">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-200">Create New Post</h2>
-                <p className="text-sm text-gray-400">Design your perfect Instagram post</p>
+                <h2 className="text-xl font-bold text-foreground">Create New Post</h2>
+                <p className="text-sm text-muted-foreground">Design your perfect Instagram post</p>
               </div>
 
               <div className="space-y-4">
-                <div className="grid gap-3 p-3 bg-gray-800/50 rounded-lg">
-                  <label className="text-sm font-medium text-gray-300">Post Type</label>
+                <div className="grid gap-3 p-3 bg-secondary rounded-lg">
+                  <label className="text-sm font-medium text-foreground">Post Type</label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {postTypes.map(({ value, label, icon: Icon }) => (
                       <button
@@ -817,18 +819,18 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
                         onClick={() => setMediaType(value)}
                         className={cn(
                           "flex flex-col items-center gap-2 p-3 rounded-lg transition-all",
-                          "hover:bg-gray-700/50",
+                          "hover:bg-accent",
                           "active:scale-95",
-                          mediaType === value ? "bg-gray-700 ring-2 ring-gray-600" : "bg-gray-800/50",
+                          mediaType === value ? "bg-background ring-1 ring-border" : "bg-card",
                         )}
                       >
                         <Icon
                           className={cn(
-                            "w-5 h-5 sm:w-6 sm:h-6",
-                            mediaType === value ? "text-gray-200" : "text-gray-400",
+                            "w-5 h-5",
+                            mediaType === value ? "text-foreground" : "text-muted-foreground",
                           )}
                         />
-                        <span className="text-xs font-medium text-gray-300">{label}</span>
+                        <span className="text-xs font-medium text-foreground">{label}</span>
                       </button>
                     ))}
                   </div>
@@ -841,7 +843,7 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
+                      className="grid grid-cols-2 sm:grid-cols-3 gap-3"
                     >
                       {previews.map((preview, index) => (
                         <motion.div
@@ -880,18 +882,18 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
                     <label
                       className={cn(
                         "flex flex-col items-center justify-center w-full h-48 rounded-lg cursor-pointer",
-                        "border-2 border-dashed border-gray-700",
+                        "border-2 border-dashed border-border",
                         "transition-all duration-300",
-                        "hover:border-gray-600 hover:bg-gray-800/50",
+                        "hover:border-primary hover:bg-accent/20",
                         isSubmitting && "opacity-50 cursor-not-allowed",
                       )}
                     >
                       <div className="flex flex-col items-center justify-center px-4 text-center">
-                        <ImagePlus className="w-10 h-10 mb-3 text-gray-400" />
-                        <p className="mb-2 text-sm text-gray-400">
+                        <ImagePlus className="w-10 h-10 mb-3 text-muted-foreground" />
+                        <p className="mb-2 text-sm text-muted-foreground">
                           <span className="font-semibold">Tap to upload</span> or drag and drop
                         </p>
-                        <p className="text-xs text-gray-500">Maximum file size: 4.5MB</p>
+                        <p className="text-xs text-muted-foreground">Maximum file size: 4.5MB</p>
                       </div>
                       <Input
                         ref={fileInputRef}
@@ -909,43 +911,51 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">Caption</label>
+                  <label className="text-sm font-medium text-foreground">Caption</label>
                   <Textarea
                     placeholder="Write an engaging caption..."
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    className="min-h-[100px] bg-gray-800/50 border-gray-700 focus:border-gray-600 text-gray-200 placeholder:text-gray-500"
+                    className="min-h-[100px] bg-background border-border text-foreground placeholder:text-muted-foreground"
                     disabled={isSubmitting}
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">Schedule Date</label>
-                  <div className="p-3 bg-gray-800/50 rounded-lg">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      className="rounded-md mx-auto"
-                      disabled={(date) => date < new Date() || isSubmitting}
-                      classNames={{
-                        day_selected: "bg-gray-600 text-gray-200 hover:bg-gray-500",
-                        day_today: "bg-gray-800 text-gray-200",
-                        cell: "h-9 w-9 text-sm text-gray-400",
-                        day: "h-9 w-9 p-0 font-normal hover:bg-gray-700",
-                        nav_button: "h-9 w-9 hover:bg-gray-700",
-                        nav_button_previous: "text-gray-400",
-                        nav_button_next: "text-gray-400",
-                      }}
-                    />
-                  </div>
+                  <label className="text-sm font-medium text-foreground">Schedule Date</label>
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={(selectedDate) => {
+                          setDate(selectedDate)
+                          setCalendarOpen(false)
+                        }}
+                        disabled={(date) => date < new Date() || isSubmitting}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isSubmitting || !date || previews.length === 0 || !caption}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 h-12 text-base font-medium"
+                  className="w-full h-12 text-base font-medium"
                 >
                   {isSubmitting ? (
                     <>
@@ -968,4 +978,3 @@ export function PostScheduler({ userId }: PostSchedulerProps) {
     </div>
   )
 }
-
