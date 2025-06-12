@@ -1066,7 +1066,6 @@ export const updateWebhookPerformance = async (
 
 
 
-// "use server"
 
 // import { type TriggerMode, CustomerType } from "@prisma/client"
 // import crypto from "crypto"
