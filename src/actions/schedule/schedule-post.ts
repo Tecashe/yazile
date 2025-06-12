@@ -120,7 +120,7 @@ export async function publishPost(postId: string) {
     })
 
     if (!response.ok) {
-      throw new Error("Failed to publish to Instagram")
+      throw new Error("Failed to publish to Instagrammmmmmmeeeeeghghh")
     }
 
     // Update post status
@@ -136,7 +136,7 @@ export async function publishPost(postId: string) {
     return { success: true }
   } catch (error) {
     console.error("Error publishing post:", error)
-    return { success: false, error: "Failed to publish post" }
+    return { success: false, error: "Failed to publish postiiiiiiiiiiiiiiiii" }
   }
 }
 
