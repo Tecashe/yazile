@@ -331,7 +331,6 @@ model Listener {
   prompt       String
   commentReply String?
   lastComment  String?
-  buttons      Json?
   lastDm       String?
   dmCount      Int        @default(0)
   commentCount Int        @default(0)
