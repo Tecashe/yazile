@@ -705,7 +705,7 @@ const Trigger = ({ id }: Props) => {
                   Set as default fallback automation
                 </label>
                 <p className="text-sm text-slate-300 mt-1">
-                  This automation will respond to messages that don't match any keywords. 
+                  This automation will respond to messages that don&apos;t match any keywords. 
                   Perfect for starting conversations with new customers.
                 </p>
               </div>
@@ -731,8 +731,8 @@ const Trigger = ({ id }: Props) => {
                     <LifeBuoy className="h-4 w-4 text-blue-500" />
                     <AlertTitle className="text-blue-500 font-medium">Fallback Automation</AlertTitle>
                     <AlertDescription className="text-blue-400">
-                      This automation will be triggered when a message doesn't match any keywords. 
-                      It's a great way to start conversations with new customers.
+                      This automation will be triggered when a message doesn&apos;t match any keywords. 
+                      It&apos;s a great way to start conversations with new customers.
                     </AlertDescription>
                   </Alert>
 
@@ -782,7 +782,7 @@ const Trigger = ({ id }: Props) => {
                                 <TooltipContent className="max-w-[300px]">
                                   <p className="text-sm">
                                     When clicked, this button will send the keyword to start a conversation.
-                                    Use simple keywords like "pricing" or "support".
+                                    Use simple keywords like &ldquo;pricing&rdquo; or &ldquo;support&rdquo;.
                                   </p>
                                 </TooltipContent>
                               </Tooltip>

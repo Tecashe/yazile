@@ -349,7 +349,7 @@ const ActiveTrigger = ({
                       transition={{ delay: 0.5 }}
                     >
                       <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                      <span>Responses adapt to customer's language</span>
+                      <span>Responses adapt to customer&apos;s language</span>
                     </motion.div>
                     <motion.div 
                       className="flex items-center gap-3 text-sm text-text-secondary"
