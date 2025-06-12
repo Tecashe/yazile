@@ -171,8 +171,48 @@
 //   )
 // }
 
-"use client"
+// "use client"
 
+// import { cn } from "@/lib/utils"
+
+// interface YazzilSpinnerProps {
+//   isSpinning?: boolean
+//   className?: string
+//   size?: number // optional pixel size
+// }
+
+// export default function YazzilSpinner({ isSpinning = true, className, size = 48 }: YazzilSpinnerProps) {
+//   return (
+//     <div
+//       className={cn(
+//         "flex items-center justify-center",
+//         isSpinning && "animate-spin-slow",
+//         className
+//       )}
+//       style={{ width: size, height: size }}
+//     >
+//       <svg
+//         viewBox="0 0 100 100"
+//         fill="none"
+//         xmlns="http://www.w3.org/2000/svg"
+//         style={{ width: "100%", height: "100%" }}
+//       >
+//         {/* Colorful snowflake-inspired spinner (6 arms) */}
+//         <g strokeWidth="8" strokeLinecap="round">
+//           <line x1="50" y1="10" x2="50" y2="30" stroke="#00E0FF" />
+//           <line x1="50" y1="90" x2="50" y2="70" stroke="#FF0055" />
+//           <line x1="10" y1="50" x2="30" y2="50" stroke="#FFCC00" />
+//           <line x1="90" y1="50" x2="70" y2="50" stroke="#00FF85" />
+//           <line x1="25" y1="25" x2="38" y2="38" stroke="#9933FF" />
+//           <line x1="75" y1="75" x2="62" y2="62" stroke="#FF6600" />
+//         </g>
+//       </svg>
+//     </div>
+//   )
+// }
+
+
+"use client"
 import { cn } from "@/lib/utils"
 
 interface YazzilSpinnerProps {
@@ -181,7 +221,7 @@ interface YazzilSpinnerProps {
   size?: number // optional pixel size
 }
 
-export default function YazzilSpinner({ isSpinning = true, className, size = 48 }: YazzilSpinnerProps) {
+export default function YazzilSpinner({ isSpinning = true, className, size = 24 }: YazzilSpinnerProps) {
   return (
     <div
       className={cn(
