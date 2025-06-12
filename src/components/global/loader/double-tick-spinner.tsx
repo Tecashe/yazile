@@ -212,39 +212,109 @@
 // }
 
 
+// "use client"
+// import { cn } from "@/lib/utils"
+
+// interface YazzilSpinnerProps {
+//   isSpinning?: boolean
+//   className?: string
+//   size?: number // optional pixel size
+// }
+
+// export default function YazzilSpinner({ isSpinning = true, className, size = 24 }: YazzilSpinnerProps) {
+//   return (
+//     <div
+//       className={cn(
+//         "flex items-center justify-center",
+//         isSpinning && "animate-spin-slow",
+//         className
+//       )}
+//       style={{ width: size, height: size }}
+//     >
+//       <svg
+//         viewBox="0 0 100 100"
+//         fill="none"
+//         xmlns="http://www.w3.org/2000/svg"
+//         style={{ width: "100%", height: "100%" }}
+//       >
+//         {/* Colorful snowflake-inspired spinner (6 arms) */}
+//         <g strokeWidth="8" strokeLinecap="round">
+//           <line x1="50" y1="10" x2="50" y2="30" stroke="#00E0FF" />
+//           <line x1="50" y1="90" x2="50" y2="70" stroke="#FF0055" />
+//           <line x1="10" y1="50" x2="30" y2="50" stroke="#FFCC00" />
+//           <line x1="90" y1="50" x2="70" y2="50" stroke="#00FF85" />
+//           <line x1="25" y1="25" x2="38" y2="38" stroke="#9933FF" />
+//           <line x1="75" y1="75" x2="62" y2="62" stroke="#FF6600" />
+//         </g>
+//       </svg>
+//     </div>
+//   )
+// }
+
+
 "use client"
+
 import { cn } from "@/lib/utils"
 
-interface YazzilSpinnerProps {
+interface YazzilSnowflakeSpinnerProps {
   isSpinning?: boolean
   className?: string
-  size?: number // optional pixel size
+  size?: number // pixel size
 }
 
-export default function YazzilSpinner({ isSpinning = true, className, size = 24 }: YazzilSpinnerProps) {
+export default function YazzilSpinner({
+  isSpinning = true,
+  className,
+  size = 24, // larger size by default for visual clarity
+}: YazzilSnowflakeSpinnerProps) {
   return (
     <div
-      className={cn(
-        "flex items-center justify-center",
-        isSpinning && "animate-spin-slow",
-        className
-      )}
+      className={cn("flex items-center justify-center", className)}
       style={{ width: size, height: size }}
     >
       <svg
         viewBox="0 0 100 100"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        className={cn(isSpinning && "animate-yazzil-spin")}
         style={{ width: "100%", height: "100%" }}
       >
-        {/* Colorful snowflake-inspired spinner (6 arms) */}
-        <g strokeWidth="8" strokeLinecap="round">
-          <line x1="50" y1="10" x2="50" y2="30" stroke="#00E0FF" />
-          <line x1="50" y1="90" x2="50" y2="70" stroke="#FF0055" />
-          <line x1="10" y1="50" x2="30" y2="50" stroke="#FFCC00" />
-          <line x1="90" y1="50" x2="70" y2="50" stroke="#00FF85" />
-          <line x1="25" y1="25" x2="38" y2="38" stroke="#9933FF" />
-          <line x1="75" y1="75" x2="62" y2="62" stroke="#FF6600" />
+        <defs>
+          <linearGradient id="snowflakeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#00E0FF" />
+            <stop offset="50%" stopColor="#FF0055" />
+            <stop offset="100%" stopColor="#00FF85" />
+          </linearGradient>
+        </defs>
+        <g
+          stroke="url(#snowflakeGradient)"
+          strokeWidth="6"
+          strokeLinecap="round"
+        >
+          {/* 6 symmetric arms */}
+          {[...Array(6)].map((_, i) => {
+            const angle = (i * 60 * Math.PI) / 180
+            const x = 50 + 30 * Math.cos(angle)
+            const y = 50 + 30 * Math.sin(angle)
+            const x2 = 50 + 45 * Math.cos(angle)
+            const y2 = 50 + 45 * Math.sin(angle)
+
+            const wingAngle1 = angle + Math.PI / 8
+            const wingAngle2 = angle - Math.PI / 8
+            const wx1 = 50 + 45 * Math.cos(wingAngle1)
+            const wy1 = 50 + 45 * Math.sin(wingAngle1)
+            const wx2 = 50 + 45 * Math.cos(wingAngle2)
+            const wy2 = 50 + 45 * Math.sin(wingAngle2)
+
+            return (
+              <g key={i}>
+                {/* main arm */}
+                <line x1="50" y1="50" x2={x2} y2={y2} />
+                {/* decorative branches */}
+                <line x1={x} y1={y} x2={wx1} y2={wy1} />
+                <line x1={x} y1={y} x2={wx2} y2={wy2} />
+              </g>
+            )
+          })}
         </g>
       </svg>
     </div>
