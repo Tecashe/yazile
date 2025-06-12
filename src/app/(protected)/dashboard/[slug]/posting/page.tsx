@@ -109,7 +109,7 @@
 //     </div>
 //   )
 // }
-
+// Updated page.tsx
 import { onCurrentUser } from "@/actions/user"
 import { redirect } from "next/navigation"
 import { PostScheduler } from "../_components/newSchedule/post-scheduler"
@@ -117,7 +117,8 @@ import { ScheduledPosts } from "../_components/newSchedule/scheduled-post"
 import { ContentSuggestions } from "../_components/newSchedule/content-suggestions"
 import { CaptionGenerator } from "../_components/newSchedule/caption-generator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarDays, Sparkles, MessageSquareText, Hash, Clock, LayoutGrid } from "lucide-react"
+import { CalendarDays, Sparkles, MessageSquareText, Clock, LayoutGrid } from "lucide-react"
+import { useState } from "react" // Added for calendar visibility state
 
 export default async function SchedulePage() {
   const user = await onCurrentUser()
@@ -127,124 +128,94 @@ export default async function SchedulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto py-6 px-4 sm:py-8">
-        {/* Header Section - Streamlined */}
-        <div className="mb-8">
-          <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800 backdrop-blur-sm">
-            <h1 className="text-2xl font-bold text-gray-100 mb-2">Content Scheduler</h1>
-            <p className="text-sm text-gray-400 max-w-2xl">
-              Create, schedule, and optimize your Instagram posts with AI-powered tools.
-            </p>
-          </div>
+        {/* Header Section - Simplified */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground mb-1">Content Scheduler</h1>
+          <p className="text-muted-foreground text-sm">
+            Create, schedule, and optimize your Instagram posts with AI-powered tools.
+          </p>
         </div>
 
         {/* Main Content Area */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Column - Tools */}
-          <div className="flex-1 space-y-6">
-            {/* Tools Navigation - Improved */}
-            <Tabs defaultValue="schedule" className="space-y-6">
-              <TabsList className="grid grid-cols-3 h-auto p-1 bg-gray-900/50 backdrop-blur-sm gap-1">
-                <TabsTrigger value="schedule" className="data-[state=active]:bg-gray-800 py-2">
-                  <CalendarDays className="w-4 h-4 mr-2" />
-                  Schedule
-                </TabsTrigger>
-                <TabsTrigger value="content" className="data-[state=active]:bg-gray-800 py-2">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Ideas
-                </TabsTrigger>
-                <TabsTrigger value="captions" className="data-[state=active]:bg-gray-800 py-2">
-                  <MessageSquareText className="w-4 h-4 mr-2" />
-                  Captions
-                </TabsTrigger>
-              </TabsList>
+        <div className="flex flex-col gap-6">
+          {/* Tools Navigation */}
+          <Tabs defaultValue="schedule" className="w-full">
+            <TabsList className="grid grid-cols-3 h-auto p-1 bg-card border border-border rounded-lg gap-1">
+              <TabsTrigger 
+                value="schedule" 
+                className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground py-2 rounded-md"
+              >
+                <CalendarDays className="w-4 h-4 mr-2" />
+                Schedule
+              </TabsTrigger>
+              <TabsTrigger 
+                value="content" 
+                className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground py-2 rounded-md"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Ideas
+              </TabsTrigger>
+              <TabsTrigger 
+                value="captions" 
+                className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground py-2 rounded-md"
+              >
+                <MessageSquareText className="w-4 h-4 mr-2" />
+                Captions
+              </TabsTrigger>
+            </TabsList>
 
+            {/* Tab Contents */}
+            <div className="mt-4">
               <TabsContent value="schedule" className="mt-0">
-                <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-800 backdrop-blur-sm">
+                <div className="bg-card border border-border rounded-lg p-4">
                   <PostScheduler userId={user.id} />
                 </div>
               </TabsContent>
 
               <TabsContent value="content" className="mt-0">
-                <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-800 backdrop-blur-sm">
+                <div className="bg-card border border-border rounded-lg p-4">
                   <ContentSuggestions />
                 </div>
               </TabsContent>
 
               <TabsContent value="captions" className="mt-0">
-                <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-800 backdrop-blur-sm">
+                <div className="bg-card border border-border rounded-lg p-4">
                   <CaptionGenerator />
                 </div>
               </TabsContent>
-            </Tabs>
-
-            {/* Scheduled Posts Section - Compact */}
-            <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-800 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-200">Upcoming Posts</h2>
-                <button className="text-xs text-gray-400 hover:text-gray-200">
-                  View All
-                </button>
-              </div>
-              <ScheduledPosts userId={user.id} />
             </div>
+          </Tabs>
+
+          {/* Upcoming Posts Section */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Upcoming Posts</h2>
+              <button className="text-xs text-muted-foreground hover:text-foreground">
+                View All
+              </button>
+            </div>
+            <ScheduledPosts userId={user.id} />
           </div>
+        </div>
 
-          {/* Right Column - Calendar & Quick Actions */}
-          <div className="lg:w-80 space-y-6">
-            {/* Compact Calendar */}
-            <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-800 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-gray-200">June 2023</h3>
-                <div className="flex gap-2">
-                  <button className="p-1 rounded hover:bg-gray-800/50">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-800/50">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-400 mb-2">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                  <div key={day}>{day}</div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {Array.from({ length: 30 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`p-1.5 text-xs rounded-full ${i === 15 ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-gray-800/50'}`}
-                  >
-                    {i + 1}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-800 backdrop-blur-sm">
-              <h3 className="text-sm font-medium text-gray-200 mb-3">Quick Actions</h3>
-              <div className="space-y-2">
-                <button className="w-full flex items-center gap-2 p-2 text-sm text-left rounded hover:bg-gray-800/50">
-                  <LayoutGrid className="w-4 h-4 text-gray-400" />
-                  <span>Content Templates</span>
-                </button>
-                <button className="w-full flex items-center gap-2 p-2 text-sm text-left rounded hover:bg-gray-800/50">
-                  <Hash className="w-4 h-4 text-gray-400" />
-                  <span>Hashtag Analytics</span>
-                </button>
-                <button className="w-full flex items-center gap-2 p-2 text-sm text-left rounded hover:bg-gray-800/50">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span>Performance Insights</span>
-                </button>
-              </div>
-            </div>
+        {/* Quick Actions - Moved to bottom for mobile-first design */}
+        <div className="mt-6">
+          <h3 className="text-sm font-medium text-foreground mb-3">Quick Actions</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button className="flex items-center gap-2 p-3 text-left rounded-lg bg-card border border-border hover:bg-secondary transition-colors">
+              <LayoutGrid className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm">Content Templates</span>
+            </button>
+            <button className="flex items-center gap-2 p-3 text-left rounded-lg bg-card border border-border hover:bg-secondary transition-colors">
+              <CalendarDays className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm">Scheduling Insights</span>
+            </button>
+            <button className="flex items-center gap-2 p-3 text-left rounded-lg bg-card border border-border hover:bg-secondary transition-colors">
+              <Clock className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm">Performance Analytics</span>
+            </button>
           </div>
         </div>
       </div>
