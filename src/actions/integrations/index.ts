@@ -490,7 +490,7 @@
 
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { redirect } from 'next/navigation'
 import { onCurrentUser } from '../user'
 import { createIntegration, getIntegration, updateIntegrationData } from './queries'
@@ -1152,6 +1152,626 @@ export const validateConnections = async (userId: string) => {
 /**
  * Generate AI-powered content strategy based on user's Instagram data
  */
+// export const generateContentStrategy = async (userId: string) => {
+//   try {
+//     // Fetch user's Instagram data
+//     const mediaData = await fetchInstagramMedia(userId, 50)
+//     const insightsData = await getAccountInsights(userId, "days_28")
+
+//     if (mediaData.status !== 200 || insightsData.status !== 200) {
+//       return { status: 404, message: "Unable to fetch Instagram data" }
+//     }
+
+//     // Analyze content performance with AI
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are an expert Instagram marketing strategist. Analyze the provided Instagram data and generate actionable content strategy recommendations.`,
+//       prompt: `
+//         Analyze this Instagram account data and provide a comprehensive content strategy:
+        
+//         Recent Posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
+//         Account Insights: ${JSON.stringify(insightsData.data)}
+        
+//         Please provide:
+//         1. Content themes that perform best
+//         2. Optimal posting frequency
+//         3. Content type recommendations (photos, videos, reels, stories)
+//         4. Engagement optimization strategies
+//         5. Growth opportunities
+//         6. Specific recommendations with actionable advice
+        
+//         Format as JSON with the following structure:
+//         {
+//           "contentThemes": [{"theme": "string", "performance": "string"}],
+//           "postingFrequency": {"optimal": "string", "reasoning": "string"},
+//           "contentTypes": [{"type": "string", "recommendation": "string"}],
+//           "engagementStrategies": [{"strategy": "string", "impact": "string"}],
+//           "growthOpportunities": [{"opportunity": "string", "potential": "string"}],
+//           "recommendations": [{"title": "string", "description": "string"}],
+//           "reports": [{"name": "string", "date": "string"}]
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error generating content strategy:", error)
+//     return { status: 500, message: "Error generating content strategy" }
+//   }
+// }
+
+// /**
+//  * Analyze post performance and provide insights
+//  */
+// export const analyzePostPerformance = async (userId: string, mediaId: string) => {
+//   try {
+//     const integration = await getIntegration(userId)
+//     if (!integration || integration.integrations.length === 0) {
+//       return { status: 404, message: "No Instagram integration found" }
+//     }
+
+//     // Get post data and insights
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+//     const specificPost = mediaData.data?.find((post: any) => post.id === mediaId)
+
+//     if (!specificPost) {
+//       return { status: 404, message: "Post not found" }
+//     }
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are an Instagram analytics expert. Analyze post performance and provide detailed insights.`,
+//       prompt: `
+//         Analyze this Instagram post performance:
+        
+//         Post Data: ${JSON.stringify(specificPost)}
+        
+//         Provide insights on:
+//         1. Performance vs account average
+//         2. What made this post successful/unsuccessful
+//         3. Recommendations for similar content
+//         4. Optimal timing suggestions
+//         5. Hashtag effectiveness
+        
+//         Return as JSON with specific metrics and recommendations.
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error analyzing post performance:", error)
+//     return { status: 500, message: "Error analyzing post performance" }
+//   }
+// }
+
+// /**
+//  * Get AI-optimized posting times based on audience behavior
+//  */
+// export const getOptimalPostingTimes = async (userId: string) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+//     const insightsData = await getAccountInsights(userId, "days_28")
+
+//     if (mediaData.status !== 200) {
+//       return { status: 404, message: "Unable to fetch media data" }
+//     }
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a data scientist specializing in social media analytics. Analyze posting patterns and engagement to determine optimal posting times.`,
+//       prompt: `
+//         Analyze this Instagram data to determine optimal posting times:
+        
+//         Posts with timestamps and engagement: ${JSON.stringify(mediaData.data)}
+//         Account insights: ${JSON.stringify(insightsData.data)}
+        
+//         Calculate:
+//         1. Best days of the week to post
+//         2. Optimal hours for maximum engagement
+//         3. Content type specific timing (photos vs videos vs reels)
+//         4. Audience activity patterns
+        
+//         Return as JSON with the following structure:
+//         {
+//           "schedule": [
+//             {
+//               "day": "Monday",
+//               "times": ["7-9 PM", "12-2 PM"]
+//             },
+//             {
+//               "day": "Tuesday",
+//               "times": ["8-10 PM", "1-3 PM"]
+//             },
+//             ...for all days of the week
+//           ],
+//           "contentTypeTimings": {
+//             "photos": ["time ranges"],
+//             "videos": ["time ranges"],
+//             "reels": ["time ranges"],
+//             "stories": ["time ranges"]
+//           },
+//           "audienceActivityPeaks": ["time ranges"]
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error getting optimal posting times:", error)
+//     return { status: 500, message: "Error getting optimal posting times" }
+//   }
+// }
+
+
+
+
+
+// // Initialize Gemini (add your API key to environment variables)
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+// /**
+//  * Generate smart hashtag suggestions based on content and performance
+//  */
+// export const generateHashtagSuggestions = async (userId: string, contentDescription: string) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 50)
+
+//     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+//     const prompt = `
+//       You are a hashtag optimization expert. Generate relevant, high-performing hashtags based on content and account performance.
+      
+//       Generate hashtag suggestions for this content: "${contentDescription}"
+      
+//       Based on this account's previous posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
+      
+//       Provide:
+//       1. 10 high-performance hashtags (popular, competitive)
+//       2. 10 niche-specific hashtags (targeted, less competitive)
+//       3. 5 trending hashtags (current trends)
+//       4. 5 branded/community hashtags
+      
+//       Return as JSON with the following structure:
+//       {
+//         "high_performance": ["hashtag1", "hashtag2", ...],
+//         "niche_specific": ["hashtag1", "hashtag2", ...],
+//         "trending": ["hashtag1", "hashtag2", ...],
+//         "branded": ["hashtag1", "hashtag2", ...]
+//       }
+      
+//       Do not include explanations, just the JSON object with arrays of hashtags.
+//     `;
+
+//     const result = await model.generateContent(prompt);
+//     const text = result.response.text();
+    
+//     // Clean up the response (remove markdown formatting if present)
+//     const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+//     return { status: 200, data: JSON.parse(cleanText) }
+//   } catch (error) {
+//     console.error("Error generating hashtag suggestions:", error)
+//     return { status: 500, message: "Error generating hashtag suggestions" }
+//   }
+// }
+
+// /**
+//  * Analyze competitors and provide competitive insights
+//  */
+// export const analyzeCompetitors = async (userId: string) => {
+//   try {
+//     const userMediaData = await fetchInstagramMedia(userId, 50)
+//     const userInsights = await getAccountInsights(userId, "days_28")
+
+//     // In a real implementation, you'd fetch competitor data from Instagram API
+//     // For now, we'll simulate competitor analysis with AI
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a competitive intelligence analyst for social media marketing. Analyze account performance and provide competitive insights.`,
+//       prompt: `
+//         Analyze this Instagram account's competitive position:
+        
+//         User's Posts: ${JSON.stringify(userMediaData.data?.slice(0, 10))}
+//         User's Insights: ${JSON.stringify(userInsights.data)}
+        
+//         Provide competitive analysis including:
+//         1. Content strategy gaps
+//         2. Engagement rate benchmarks
+//         3. Content type opportunities
+//         4. Hashtag strategy improvements
+//         5. Posting frequency recommendations
+        
+//         Return as JSON with the following structure:
+//         {
+//           "competitors": [
+//             {
+//               "username": "competitor1",
+//               "category": "Fashion Brand",
+//               "engagementRate": "5.2%",
+//               "comparison": "better/worse",
+//               "comparisonText": "vs your 4.2%"
+//             },
+//             {
+//               "username": "competitor2",
+//               "category": "Lifestyle Brand",
+//               "engagementRate": "3.8%",
+//               "comparison": "better/worse",
+//               "comparisonText": "vs your 4.2%"
+//             }
+//           ],
+//           "contentGaps": [
+//             {"gap": "string", "opportunity": "string"}
+//           ],
+//           "hashtagRecommendations": [
+//             {"hashtag": "string", "reason": "string"}
+//           ],
+//           "frequencyInsights": {
+//             "recommendation": "string",
+//             "reasoning": "string"
+//           }
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error analyzing competitors:", error)
+//     return { status: 500, message: "Error analyzing competitors" }
+//   }
+// }
+
+// /**
+//  * Generate AI-powered captions for content
+//  */
+// export const generateCaptions = async (userId: string, contentDescription: string, tone = "professional") => {
+//   try {
+//     const integration = await getIntegration(userId)
+//     if (!integration || integration.integrations.length === 0) {
+//       return { status: 404, message: "No Instagram integration found" }
+//     }
+
+//     // Get user's previous posts to understand their voice
+//     const mediaData = await fetchInstagramMedia(userId, 20)
+//     const previousCaptions = mediaData.data
+//       ?.map((post: any) => post.caption)
+//       .filter(Boolean)
+//       .slice(0, 10)
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a creative copywriter specializing in Instagram content. Generate engaging captions that match the user's brand voice and style.`,
+//       prompt: `
+//         Generate an Instagram caption for: "${contentDescription}"
+        
+//         Tone: ${tone}
+        
+//         Previous captions for voice reference: ${JSON.stringify(previousCaptions)}
+        
+//         Create a caption that:
+//         1. Matches the user's established voice and style
+//         2. Includes relevant hashtags
+//         3. Encourages engagement
+//         4. Is optimized for Instagram's algorithm
+//         5. Includes a call-to-action
+        
+//         Return as JSON with the following structure:
+//         {
+//           "caption": "The full caption text",
+//           "suggestedHashtags": ["hashtag1", "hashtag2", ...],
+//           "callToAction": "The specific call to action",
+//           "toneAnalysis": "Brief analysis of the tone used"
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error generating captions:", error)
+//     return { status: 500, message: "Error generating captions" }
+//   }
+// }
+
+// /**
+//  * Predict engagement for potential posts
+//  */
+// export const predictEngagement = async (userId: string, postData: any) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a machine learning expert specializing in social media engagement prediction. Analyze historical data to predict engagement.`,
+//       prompt: `
+//         Predict engagement for this potential post based on historical data:
+        
+//         Proposed Post: ${JSON.stringify(postData)}
+//         Historical Posts: ${JSON.stringify(mediaData.data)}
+        
+//         Analyze and predict:
+//         1. Expected likes range
+//         2. Expected comments range
+//         3. Expected reach
+//         4. Engagement rate prediction
+//         5. Factors affecting performance
+        
+//         Return as JSON with predictions and confidence scores.
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error predicting engagement:", error)
+//     return { status: 500, message: "Error predicting engagement" }
+//   }
+// }
+
+// /**
+//  * Get AI-powered audience insights
+//  */
+// export const getAudienceInsights = async (userId: string) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+//     const insightsData = await getAccountInsights(userId, "days_28")
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are an audience research specialist. Analyze engagement patterns to provide deep audience insights.`,
+//       prompt: `
+//         Analyze this Instagram data to understand the audience:
+        
+//         Posts and Engagement: ${JSON.stringify(mediaData.data)}
+//         Account Insights: ${JSON.stringify(insightsData.data)}
+        
+//         Provide insights on:
+//         1. Audience demographics (inferred from engagement patterns)
+//         2. Content preferences
+//         3. Engagement behavior patterns
+//         4. Best content themes for this audience
+//         5. Growth opportunities
+        
+//         Return as JSON with the following structure:
+//         {
+//           "performanceScores": [
+//             {"name": "Overall Score", "value": 87},
+//             {"name": "Content Quality", "value": 92},
+//             {"name": "Engagement Rate", "value": 73}
+//           ],
+//           "audienceDemographics": {
+//             "ageRanges": ["string"],
+//             "interests": ["string"],
+//             "activeHours": ["string"]
+//           },
+//           "contentPreferences": [
+//             {"type": "string", "engagement": "string"}
+//           ],
+//           "growthProjection": {
+//             "monthly": "+247",
+//             "quarterly": "string"
+//           },
+//           "growthFactors": [
+//             {"name": "Content consistency", "impact": "+15%"},
+//             {"name": "Hashtag optimization", "impact": "+23%"},
+//             {"name": "Engagement timing", "impact": "+18%"}
+//           ],
+//           "engagementFactors": [
+//             {"name": "Story interactions", "impact": "+12%"},
+//             {"name": "Comment responses", "impact": "+8%"},
+//             {"name": "Share rate", "impact": "+5%"}
+//           ],
+//           "currentEngagementRate": "4.2%",
+//           "automationSettings": [
+//             {"name": "Auto-like relevant posts", "active": true},
+//             {"name": "Auto-follow back", "active": false},
+//             {"name": "Smart comment replies", "active": true}
+//           ]
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error getting audience insights:", error)
+//     return { status: 500, message: "Error getting audience insights" }
+//   }
+// }
+
+// /**
+//  * Generate comprehensive growth strategy
+//  */
+// export const generateGrowthStrategy = async (userId: string) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+//     const insightsData = await getAccountInsights(userId, "days_28")
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a growth marketing expert specializing in Instagram. Create comprehensive growth strategies based on data analysis.`,
+//       prompt: `
+//         Create a growth strategy for this Instagram account:
+        
+//         Current Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
+//         Account Insights: ${JSON.stringify(insightsData.data)}
+        
+//         Develop a strategy including:
+//         1. 30-day growth plan
+//         2. Content strategy recommendations
+//         3. Engagement tactics
+//         4. Hashtag strategy
+//         5. Collaboration opportunities
+//         6. Specific KPIs and targets
+        
+//         Return as JSON with actionable growth plan.
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error generating growth strategy:", error)
+//     return { status: 500, message: "Error generating growth strategy" }
+//   }
+// }
+
+// /**
+//  * Create AI-optimized content calendar
+//  */
+// export const createContentCalendar = async (userId: string, days = 30) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 50)
+//     const optimalTimes = await getOptimalPostingTimes(userId)
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a content planning expert. Create optimized content calendars based on performance data and best practices.`,
+//       prompt: `
+//         Create a ${days}-day content calendar for this Instagram account:
+        
+//         Historical Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
+//         Optimal Posting Times: ${JSON.stringify(optimalTimes.data)}
+        
+//         Include:
+//         1. Daily posting schedule with optimal times
+//         2. Content type variety (photos, videos, reels, stories)
+//         3. Content themes and topics
+        
+//         Return as JSON with the following structure:
+//         {
+//           "days": [
+//             {
+//               "date": "Mon, 28",
+//               "posts": [
+//                 {"type": "reel", "time": "7 PM", "theme": "string"},
+//                 {"type": "story", "time": "12 PM", "theme": "string"}
+//               ]
+//             },
+//             ... (for each day)
+//           ],
+//           "scheduledCount": 12,
+//           "scheduleSummary": [
+//             {"label": "Next post", "value": "Today 7:00 PM"},
+//             {"label": "This week", "value": "5 posts"}
+//           ]
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error creating content calendar:", error)
+//     return { status: 500, message: "Error creating content calendar" }
+//   }
+// }
+
+// /**
+//  * Analyze content trends and opportunities
+//  */
+// export const analyzeContentTrends = async (userId: string) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a trend analyst specializing in social media content. Identify trends and opportunities from content performance data.`,
+//       prompt: `
+//         Analyze content trends from this Instagram data:
+        
+//         Posts with Performance Data: ${JSON.stringify(mediaData.data)}
+        
+//         Identify:
+//         1. Top performing content themes
+//         2. Emerging content opportunities
+//         3. Seasonal trends
+//         4. Content format preferences
+//         5. Hashtag trends
+//         6. Engagement pattern trends
+        
+//         Return as JSON with the following structure:
+//         {
+//           "topThemes": [
+//             {"theme": "string", "performance": "string"}
+//           ],
+//           "emergingOpportunities": [
+//             {"opportunity": "string", "potential": "string"}
+//           ],
+//           "formatPreferences": [
+//             {"format": "string", "engagement": "string"}
+//           ],
+//           "hashtagTrends": [
+//             {"hashtag": "string", "trend": "string"}
+//           ],
+//           "growthMetrics": [
+//             {"name": "Follower Growth", "description": "+12% this month", "trend": "up"},
+//             {"name": "Engagement Rate", "description": "-3% this week", "trend": "down"},
+//             {"name": "Story Views", "description": "+8% this week", "trend": "up"}
+//           ]
+//         }
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error analyzing content trends:", error)
+//     return { status: 500, message: "Error analyzing content trends" }
+//   }
+// }
+
+// /**
+//  * Generate comprehensive reports
+//  */
+// export const generateReports = async (userId: string, period: "day" | "week" | "days_28") => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 100)
+//     const insightsData = await getAccountInsights(userId, period)
+//     const contentStrategy = await generateContentStrategy(userId)
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a data analyst creating comprehensive Instagram performance reports. Generate detailed, actionable reports with insights and recommendations.`,
+//       prompt: `
+//         Generate a comprehensive Instagram performance report:
+        
+//         Period: ${period}
+//         Media Data: ${JSON.stringify(mediaData.data?.slice(0, 50))}
+//         Insights Data: ${JSON.stringify(insightsData.data)}
+//         Content Strategy: ${JSON.stringify(contentStrategy.data)}
+        
+//         Include:
+//         1. Executive summary
+//         2. Key performance metrics
+//         3. Content performance analysis
+//         4. Audience insights
+//         5. Growth opportunities
+//         6. Actionable recommendations
+//         7. Next period strategy
+        
+//         Return as JSON with comprehensive report structure.
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error generating reports:", error)
+//     return { status: 500, message: "Error generating reports" }
+//   }
+// }
+
+
+
+// Initialize Gemini (add your API key to environment variables)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+/**
+ * Helper function to call Gemini API with error handling
+ */
+const callGemini = async (prompt: string): Promise<string> => {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  
+  // Clean up the response (remove markdown formatting if present)
+  return text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+};
+
 export const generateContentStrategy = async (userId: string) => {
   try {
     // Fetch user's Instagram data
@@ -1162,37 +1782,35 @@ export const generateContentStrategy = async (userId: string) => {
       return { status: 404, message: "Unable to fetch Instagram data" }
     }
 
-    // Analyze content performance with AI
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are an expert Instagram marketing strategist. Analyze the provided Instagram data and generate actionable content strategy recommendations.`,
-      prompt: `
-        Analyze this Instagram account data and provide a comprehensive content strategy:
-        
-        Recent Posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
-        Account Insights: ${JSON.stringify(insightsData.data)}
-        
-        Please provide:
-        1. Content themes that perform best
-        2. Optimal posting frequency
-        3. Content type recommendations (photos, videos, reels, stories)
-        4. Engagement optimization strategies
-        5. Growth opportunities
-        6. Specific recommendations with actionable advice
-        
-        Format as JSON with the following structure:
-        {
-          "contentThemes": [{"theme": "string", "performance": "string"}],
-          "postingFrequency": {"optimal": "string", "reasoning": "string"},
-          "contentTypes": [{"type": "string", "recommendation": "string"}],
-          "engagementStrategies": [{"strategy": "string", "impact": "string"}],
-          "growthOpportunities": [{"opportunity": "string", "potential": "string"}],
-          "recommendations": [{"title": "string", "description": "string"}],
-          "reports": [{"name": "string", "date": "string"}]
-        }
-      `,
-    })
+    const prompt = `
+      You are an expert Instagram marketing strategist. Analyze the provided Instagram data and generate actionable content strategy recommendations.
+      
+      Analyze this Instagram account data and provide a comprehensive content strategy:
+      
+      Recent Posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
+      Account Insights: ${JSON.stringify(insightsData.data)}
+      
+      Please provide:
+      1. Content themes that perform best
+      2. Optimal posting frequency
+      3. Content type recommendations (photos, videos, reels, stories)
+      4. Engagement optimization strategies
+      5. Growth opportunities
+      6. Specific recommendations with actionable advice
+      
+      Format as JSON with the following structure:
+      {
+        "contentThemes": [{"theme": "string", "performance": "string"}],
+        "postingFrequency": {"optimal": "string", "reasoning": "string"},
+        "contentTypes": [{"type": "string", "recommendation": "string"}],
+        "engagementStrategies": [{"strategy": "string", "impact": "string"}],
+        "growthOpportunities": [{"opportunity": "string", "potential": "string"}],
+        "recommendations": [{"title": "string", "description": "string"}],
+        "reports": [{"name": "string", "date": "string"}]
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error generating content strategy:", error)
@@ -1218,25 +1836,24 @@ export const analyzePostPerformance = async (userId: string, mediaId: string) =>
       return { status: 404, message: "Post not found" }
     }
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are an Instagram analytics expert. Analyze post performance and provide detailed insights.`,
-      prompt: `
-        Analyze this Instagram post performance:
-        
-        Post Data: ${JSON.stringify(specificPost)}
-        
-        Provide insights on:
-        1. Performance vs account average
-        2. What made this post successful/unsuccessful
-        3. Recommendations for similar content
-        4. Optimal timing suggestions
-        5. Hashtag effectiveness
-        
-        Return as JSON with specific metrics and recommendations.
-      `,
-    })
+    const prompt = `
+      You are an Instagram analytics expert. Analyze post performance and provide detailed insights.
+      
+      Analyze this Instagram post performance:
+      
+      Post Data: ${JSON.stringify(specificPost)}
+      
+      Provide insights on:
+      1. Performance vs account average
+      2. What made this post successful/unsuccessful
+      3. Recommendations for similar content
+      4. Optimal timing suggestions
+      5. Hashtag effectiveness
+      
+      Return as JSON with specific metrics and recommendations.
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error analyzing post performance:", error)
@@ -1256,96 +1873,49 @@ export const getOptimalPostingTimes = async (userId: string) => {
       return { status: 404, message: "Unable to fetch media data" }
     }
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a data scientist specializing in social media analytics. Analyze posting patterns and engagement to determine optimal posting times.`,
-      prompt: `
-        Analyze this Instagram data to determine optimal posting times:
-        
-        Posts with timestamps and engagement: ${JSON.stringify(mediaData.data)}
-        Account insights: ${JSON.stringify(insightsData.data)}
-        
-        Calculate:
-        1. Best days of the week to post
-        2. Optimal hours for maximum engagement
-        3. Content type specific timing (photos vs videos vs reels)
-        4. Audience activity patterns
-        
-        Return as JSON with the following structure:
-        {
-          "schedule": [
-            {
-              "day": "Monday",
-              "times": ["7-9 PM", "12-2 PM"]
-            },
-            {
-              "day": "Tuesday",
-              "times": ["8-10 PM", "1-3 PM"]
-            },
-            ...for all days of the week
-          ],
-          "contentTypeTimings": {
-            "photos": ["time ranges"],
-            "videos": ["time ranges"],
-            "reels": ["time ranges"],
-            "stories": ["time ranges"]
+    const prompt = `
+      You are a data scientist specializing in social media analytics. Analyze posting patterns and engagement to determine optimal posting times.
+      
+      Analyze this Instagram data to determine optimal posting times:
+      
+      Posts with timestamps and engagement: ${JSON.stringify(mediaData.data)}
+      Account insights: ${JSON.stringify(insightsData.data)}
+      
+      Calculate:
+      1. Best days of the week to post
+      2. Optimal hours for maximum engagement
+      3. Content type specific timing (photos vs videos vs reels)
+      4. Audience activity patterns
+      
+      Return as JSON with the following structure:
+      {
+        "schedule": [
+          {
+            "day": "Monday",
+            "times": ["7-9 PM", "12-2 PM"]
           },
-          "audienceActivityPeaks": ["time ranges"]
-        }
-      `,
-    })
+          {
+            "day": "Tuesday",
+            "times": ["8-10 PM", "1-3 PM"]
+          }
+        ],
+        "contentTypeTimings": {
+          "photos": ["time ranges"],
+          "videos": ["time ranges"],
+          "reels": ["time ranges"],
+          "stories": ["time ranges"]
+        },
+        "audienceActivityPeaks": ["time ranges"]
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error getting optimal posting times:", error)
     return { status: 500, message: "Error getting optimal posting times" }
   }
 }
-
-// /**
-//  * Generate smart hashtag suggestions based on content and performance
-//  */
-// export const generateHashtagSuggestions = async (userId: string, contentDescription: string) => {
-//   try {
-//     const mediaData = await fetchInstagramMedia(userId, 50)
-
-//     const { text } = await generateText({
-//       model: openai("gpt-4o"),
-//       system: `You are a hashtag optimization expert. Generate relevant, high-performing hashtags based on content and account performance.`,
-//       prompt: `
-//         Generate hashtag suggestions for this content: "${contentDescription}"
-        
-//         Based on this account's previous posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
-        
-//         Provide:
-//         1. 10 high-performance hashtags (popular, competitive)
-//         2. 10 niche-specific hashtags (targeted, less competitive)
-//         3. 5 trending hashtags (current trends)
-//         4. 5 branded/community hashtags
-        
-//         Return as JSON with the following structure:
-//         {
-//           "high_performance": ["hashtag1", "hashtag2", ...],
-//           "niche_specific": ["hashtag1", "hashtag2", ...],
-//           "trending": ["hashtag1", "hashtag2", ...],
-//           "branded": ["hashtag1", "hashtag2", ...]
-//         }
-        
-//         Do not include explanations, just the JSON object with arrays of hashtags.
-//       `,
-//     })
-
-//     return { status: 200, data: JSON.parse(text) }
-//   } catch (error) {
-//     console.error("Error generating hashtag suggestions:", error)
-//     return { status: 500, message: "Error generating hashtag suggestions" }
-//   }
-// }
-
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Initialize Gemini (add your API key to environment variables)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 /**
  * Generate smart hashtag suggestions based on content and performance
@@ -1354,8 +1924,6 @@ export const generateHashtagSuggestions = async (userId: string, contentDescript
   try {
     const mediaData = await fetchInstagramMedia(userId, 50)
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
     const prompt = `
       You are a hashtag optimization expert. Generate relevant, high-performing hashtags based on content and account performance.
       
@@ -1371,22 +1939,17 @@ export const generateHashtagSuggestions = async (userId: string, contentDescript
       
       Return as JSON with the following structure:
       {
-        "high_performance": ["hashtag1", "hashtag2", ...],
-        "niche_specific": ["hashtag1", "hashtag2", ...],
-        "trending": ["hashtag1", "hashtag2", ...],
-        "branded": ["hashtag1", "hashtag2", ...]
+        "high_performance": ["hashtag1", "hashtag2"],
+        "niche_specific": ["hashtag1", "hashtag2"],
+        "trending": ["hashtag1", "hashtag2"],
+        "branded": ["hashtag1", "hashtag2"]
       }
       
       Do not include explanations, just the JSON object with arrays of hashtags.
     `;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    
-    // Clean up the response (remove markdown formatting if present)
-    const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-
-    return { status: 200, data: JSON.parse(cleanText) }
+    const text = await callGemini(prompt);
+    return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error generating hashtag suggestions:", error)
     return { status: 500, message: "Error generating hashtag suggestions" }
@@ -1401,57 +1964,46 @@ export const analyzeCompetitors = async (userId: string) => {
     const userMediaData = await fetchInstagramMedia(userId, 50)
     const userInsights = await getAccountInsights(userId, "days_28")
 
-    // In a real implementation, you'd fetch competitor data from Instagram API
-    // For now, we'll simulate competitor analysis with AI
-
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a competitive intelligence analyst for social media marketing. Analyze account performance and provide competitive insights.`,
-      prompt: `
-        Analyze this Instagram account's competitive position:
-        
-        User's Posts: ${JSON.stringify(userMediaData.data?.slice(0, 10))}
-        User's Insights: ${JSON.stringify(userInsights.data)}
-        
-        Provide competitive analysis including:
-        1. Content strategy gaps
-        2. Engagement rate benchmarks
-        3. Content type opportunities
-        4. Hashtag strategy improvements
-        5. Posting frequency recommendations
-        
-        Return as JSON with the following structure:
-        {
-          "competitors": [
-            {
-              "username": "competitor1",
-              "category": "Fashion Brand",
-              "engagementRate": "5.2%",
-              "comparison": "better/worse",
-              "comparisonText": "vs your 4.2%"
-            },
-            {
-              "username": "competitor2",
-              "category": "Lifestyle Brand",
-              "engagementRate": "3.8%",
-              "comparison": "better/worse",
-              "comparisonText": "vs your 4.2%"
-            }
-          ],
-          "contentGaps": [
-            {"gap": "string", "opportunity": "string"}
-          ],
-          "hashtagRecommendations": [
-            {"hashtag": "string", "reason": "string"}
-          ],
-          "frequencyInsights": {
-            "recommendation": "string",
-            "reasoning": "string"
+    const prompt = `
+      You are a competitive intelligence analyst for social media marketing. Analyze account performance and provide competitive insights.
+      
+      Analyze this Instagram account's competitive position:
+      
+      User's Posts: ${JSON.stringify(userMediaData.data?.slice(0, 10))}
+      User's Insights: ${JSON.stringify(userInsights.data)}
+      
+      Provide competitive analysis including:
+      1. Content strategy gaps
+      2. Engagement rate benchmarks
+      3. Content type opportunities
+      4. Hashtag strategy improvements
+      5. Posting frequency recommendations
+      
+      Return as JSON with the following structure:
+      {
+        "competitors": [
+          {
+            "username": "competitor1",
+            "category": "Fashion Brand",
+            "engagementRate": "5.2%",
+            "comparison": "better/worse",
+            "comparisonText": "vs your 4.2%"
           }
+        ],
+        "contentGaps": [
+          {"gap": "string", "opportunity": "string"}
+        ],
+        "hashtagRecommendations": [
+          {"hashtag": "string", "reason": "string"}
+        ],
+        "frequencyInsights": {
+          "recommendation": "string",
+          "reasoning": "string"
         }
-      `,
-    })
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error analyzing competitors:", error)
@@ -1476,33 +2028,32 @@ export const generateCaptions = async (userId: string, contentDescription: strin
       .filter(Boolean)
       .slice(0, 10)
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a creative copywriter specializing in Instagram content. Generate engaging captions that match the user's brand voice and style.`,
-      prompt: `
-        Generate an Instagram caption for: "${contentDescription}"
-        
-        Tone: ${tone}
-        
-        Previous captions for voice reference: ${JSON.stringify(previousCaptions)}
-        
-        Create a caption that:
-        1. Matches the user's established voice and style
-        2. Includes relevant hashtags
-        3. Encourages engagement
-        4. Is optimized for Instagram's algorithm
-        5. Includes a call-to-action
-        
-        Return as JSON with the following structure:
-        {
-          "caption": "The full caption text",
-          "suggestedHashtags": ["hashtag1", "hashtag2", ...],
-          "callToAction": "The specific call to action",
-          "toneAnalysis": "Brief analysis of the tone used"
-        }
-      `,
-    })
+    const prompt = `
+      You are a creative copywriter specializing in Instagram content. Generate engaging captions that match the user's brand voice and style.
+      
+      Generate an Instagram caption for: "${contentDescription}"
+      
+      Tone: ${tone}
+      
+      Previous captions for voice reference: ${JSON.stringify(previousCaptions)}
+      
+      Create a caption that:
+      1. Matches the user's established voice and style
+      2. Includes relevant hashtags
+      3. Encourages engagement
+      4. Is optimized for Instagram's algorithm
+      5. Includes a call-to-action
+      
+      Return as JSON with the following structure:
+      {
+        "caption": "The full caption text",
+        "suggestedHashtags": ["hashtag1", "hashtag2"],
+        "callToAction": "The specific call to action",
+        "toneAnalysis": "Brief analysis of the tone used"
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error generating captions:", error)
@@ -1517,26 +2068,25 @@ export const predictEngagement = async (userId: string, postData: any) => {
   try {
     const mediaData = await fetchInstagramMedia(userId, 100)
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a machine learning expert specializing in social media engagement prediction. Analyze historical data to predict engagement.`,
-      prompt: `
-        Predict engagement for this potential post based on historical data:
-        
-        Proposed Post: ${JSON.stringify(postData)}
-        Historical Posts: ${JSON.stringify(mediaData.data)}
-        
-        Analyze and predict:
-        1. Expected likes range
-        2. Expected comments range
-        3. Expected reach
-        4. Engagement rate prediction
-        5. Factors affecting performance
-        
-        Return as JSON with predictions and confidence scores.
-      `,
-    })
+    const prompt = `
+      You are a machine learning expert specializing in social media engagement prediction. Analyze historical data to predict engagement.
+      
+      Predict engagement for this potential post based on historical data:
+      
+      Proposed Post: ${JSON.stringify(postData)}
+      Historical Posts: ${JSON.stringify(mediaData.data)}
+      
+      Analyze and predict:
+      1. Expected likes range
+      2. Expected comments range
+      3. Expected reach
+      4. Engagement rate prediction
+      5. Factors affecting performance
+      
+      Return as JSON with predictions and confidence scores.
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error predicting engagement:", error)
@@ -1552,61 +2102,60 @@ export const getAudienceInsights = async (userId: string) => {
     const mediaData = await fetchInstagramMedia(userId, 100)
     const insightsData = await getAccountInsights(userId, "days_28")
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are an audience research specialist. Analyze engagement patterns to provide deep audience insights.`,
-      prompt: `
-        Analyze this Instagram data to understand the audience:
-        
-        Posts and Engagement: ${JSON.stringify(mediaData.data)}
-        Account Insights: ${JSON.stringify(insightsData.data)}
-        
-        Provide insights on:
-        1. Audience demographics (inferred from engagement patterns)
-        2. Content preferences
-        3. Engagement behavior patterns
-        4. Best content themes for this audience
-        5. Growth opportunities
-        
-        Return as JSON with the following structure:
-        {
-          "performanceScores": [
-            {"name": "Overall Score", "value": 87},
-            {"name": "Content Quality", "value": 92},
-            {"name": "Engagement Rate", "value": 73}
-          ],
-          "audienceDemographics": {
-            "ageRanges": ["string"],
-            "interests": ["string"],
-            "activeHours": ["string"]
-          },
-          "contentPreferences": [
-            {"type": "string", "engagement": "string"}
-          ],
-          "growthProjection": {
-            "monthly": "+247",
-            "quarterly": "string"
-          },
-          "growthFactors": [
-            {"name": "Content consistency", "impact": "+15%"},
-            {"name": "Hashtag optimization", "impact": "+23%"},
-            {"name": "Engagement timing", "impact": "+18%"}
-          ],
-          "engagementFactors": [
-            {"name": "Story interactions", "impact": "+12%"},
-            {"name": "Comment responses", "impact": "+8%"},
-            {"name": "Share rate", "impact": "+5%"}
-          ],
-          "currentEngagementRate": "4.2%",
-          "automationSettings": [
-            {"name": "Auto-like relevant posts", "active": true},
-            {"name": "Auto-follow back", "active": false},
-            {"name": "Smart comment replies", "active": true}
-          ]
-        }
-      `,
-    })
+    const prompt = `
+      You are an audience research specialist. Analyze engagement patterns to provide deep audience insights.
+      
+      Analyze this Instagram data to understand the audience:
+      
+      Posts and Engagement: ${JSON.stringify(mediaData.data)}
+      Account Insights: ${JSON.stringify(insightsData.data)}
+      
+      Provide insights on:
+      1. Audience demographics (inferred from engagement patterns)
+      2. Content preferences
+      3. Engagement behavior patterns
+      4. Best content themes for this audience
+      5. Growth opportunities
+      
+      Return as JSON with the following structure:
+      {
+        "performanceScores": [
+          {"name": "Overall Score", "value": 87},
+          {"name": "Content Quality", "value": 92},
+          {"name": "Engagement Rate", "value": 73}
+        ],
+        "audienceDemographics": {
+          "ageRanges": ["string"],
+          "interests": ["string"],
+          "activeHours": ["string"]
+        },
+        "contentPreferences": [
+          {"type": "string", "engagement": "string"}
+        ],
+        "growthProjection": {
+          "monthly": "+247",
+          "quarterly": "string"
+        },
+        "growthFactors": [
+          {"name": "Content consistency", "impact": "+15%"},
+          {"name": "Hashtag optimization", "impact": "+23%"},
+          {"name": "Engagement timing", "impact": "+18%"}
+        ],
+        "engagementFactors": [
+          {"name": "Story interactions", "impact": "+12%"},
+          {"name": "Comment responses", "impact": "+8%"},
+          {"name": "Share rate", "impact": "+5%"}
+        ],
+        "currentEngagementRate": "4.2%",
+        "automationSettings": [
+          {"name": "Auto-like relevant posts", "active": true},
+          {"name": "Auto-follow back", "active": false},
+          {"name": "Smart comment replies", "active": true}
+        ]
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error getting audience insights:", error)
@@ -1622,27 +2171,26 @@ export const generateGrowthStrategy = async (userId: string) => {
     const mediaData = await fetchInstagramMedia(userId, 100)
     const insightsData = await getAccountInsights(userId, "days_28")
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a growth marketing expert specializing in Instagram. Create comprehensive growth strategies based on data analysis.`,
-      prompt: `
-        Create a growth strategy for this Instagram account:
-        
-        Current Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
-        Account Insights: ${JSON.stringify(insightsData.data)}
-        
-        Develop a strategy including:
-        1. 30-day growth plan
-        2. Content strategy recommendations
-        3. Engagement tactics
-        4. Hashtag strategy
-        5. Collaboration opportunities
-        6. Specific KPIs and targets
-        
-        Return as JSON with actionable growth plan.
-      `,
-    })
+    const prompt = `
+      You are a growth marketing expert specializing in Instagram. Create comprehensive growth strategies based on data analysis.
+      
+      Create a growth strategy for this Instagram account:
+      
+      Current Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
+      Account Insights: ${JSON.stringify(insightsData.data)}
+      
+      Develop a strategy including:
+      1. 30-day growth plan
+      2. Content strategy recommendations
+      3. Engagement tactics
+      4. Hashtag strategy
+      5. Collaboration opportunities
+      6. Specific KPIs and targets
+      
+      Return as JSON with actionable growth plan.
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error generating growth strategy:", error)
@@ -1658,41 +2206,39 @@ export const createContentCalendar = async (userId: string, days = 30) => {
     const mediaData = await fetchInstagramMedia(userId, 50)
     const optimalTimes = await getOptimalPostingTimes(userId)
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a content planning expert. Create optimized content calendars based on performance data and best practices.`,
-      prompt: `
-        Create a ${days}-day content calendar for this Instagram account:
-        
-        Historical Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
-        Optimal Posting Times: ${JSON.stringify(optimalTimes.data)}
-        
-        Include:
-        1. Daily posting schedule with optimal times
-        2. Content type variety (photos, videos, reels, stories)
-        3. Content themes and topics
-        
-        Return as JSON with the following structure:
-        {
-          "days": [
-            {
-              "date": "Mon, 28",
-              "posts": [
-                {"type": "reel", "time": "7 PM", "theme": "string"},
-                {"type": "story", "time": "12 PM", "theme": "string"}
-              ]
-            },
-            ... (for each day)
-          ],
-          "scheduledCount": 12,
-          "scheduleSummary": [
-            {"label": "Next post", "value": "Today 7:00 PM"},
-            {"label": "This week", "value": "5 posts"}
-          ]
-        }
-      `,
-    })
+    const prompt = `
+      You are a content planning expert. Create optimized content calendars based on performance data and best practices.
+      
+      Create a ${days}-day content calendar for this Instagram account:
+      
+      Historical Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
+      Optimal Posting Times: ${JSON.stringify(optimalTimes.data)}
+      
+      Include:
+      1. Daily posting schedule with optimal times
+      2. Content type variety (photos, videos, reels, stories)
+      3. Content themes and topics
+      
+      Return as JSON with the following structure:
+      {
+        "days": [
+          {
+            "date": "Mon, 28",
+            "posts": [
+              {"type": "reel", "time": "7 PM", "theme": "string"},
+              {"type": "story", "time": "12 PM", "theme": "string"}
+            ]
+          }
+        ],
+        "scheduledCount": 12,
+        "scheduleSummary": [
+          {"label": "Next post", "value": "Today 7:00 PM"},
+          {"label": "This week", "value": "5 posts"}
+        ]
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error creating content calendar:", error)
@@ -1707,45 +2253,44 @@ export const analyzeContentTrends = async (userId: string) => {
   try {
     const mediaData = await fetchInstagramMedia(userId, 100)
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a trend analyst specializing in social media content. Identify trends and opportunities from content performance data.`,
-      prompt: `
-        Analyze content trends from this Instagram data:
-        
-        Posts with Performance Data: ${JSON.stringify(mediaData.data)}
-        
-        Identify:
-        1. Top performing content themes
-        2. Emerging content opportunities
-        3. Seasonal trends
-        4. Content format preferences
-        5. Hashtag trends
-        6. Engagement pattern trends
-        
-        Return as JSON with the following structure:
-        {
-          "topThemes": [
-            {"theme": "string", "performance": "string"}
-          ],
-          "emergingOpportunities": [
-            {"opportunity": "string", "potential": "string"}
-          ],
-          "formatPreferences": [
-            {"format": "string", "engagement": "string"}
-          ],
-          "hashtagTrends": [
-            {"hashtag": "string", "trend": "string"}
-          ],
-          "growthMetrics": [
-            {"name": "Follower Growth", "description": "+12% this month", "trend": "up"},
-            {"name": "Engagement Rate", "description": "-3% this week", "trend": "down"},
-            {"name": "Story Views", "description": "+8% this week", "trend": "up"}
-          ]
-        }
-      `,
-    })
+    const prompt = `
+      You are a trend analyst specializing in social media content. Identify trends and opportunities from content performance data.
+      
+      Analyze content trends from this Instagram data:
+      
+      Posts with Performance Data: ${JSON.stringify(mediaData.data)}
+      
+      Identify:
+      1. Top performing content themes
+      2. Emerging content opportunities
+      3. Seasonal trends
+      4. Content format preferences
+      5. Hashtag trends
+      6. Engagement pattern trends
+      
+      Return as JSON with the following structure:
+      {
+        "topThemes": [
+          {"theme": "string", "performance": "string"}
+        ],
+        "emergingOpportunities": [
+          {"opportunity": "string", "potential": "string"}
+        ],
+        "formatPreferences": [
+          {"format": "string", "engagement": "string"}
+        ],
+        "hashtagTrends": [
+          {"hashtag": "string", "trend": "string"}
+        ],
+        "growthMetrics": [
+          {"name": "Follower Growth", "description": "+12% this month", "trend": "up"},
+          {"name": "Engagement Rate", "description": "-3% this week", "trend": "down"},
+          {"name": "Story Views", "description": "+8% this week", "trend": "up"}
+        ]
+      }
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error analyzing content trends:", error)
@@ -1762,38 +2307,35 @@ export const generateReports = async (userId: string, period: "day" | "week" | "
     const insightsData = await getAccountInsights(userId, period)
     const contentStrategy = await generateContentStrategy(userId)
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a data analyst creating comprehensive Instagram performance reports. Generate detailed, actionable reports with insights and recommendations.`,
-      prompt: `
-        Generate a comprehensive Instagram performance report:
-        
-        Period: ${period}
-        Media Data: ${JSON.stringify(mediaData.data?.slice(0, 50))}
-        Insights Data: ${JSON.stringify(insightsData.data)}
-        Content Strategy: ${JSON.stringify(contentStrategy.data)}
-        
-        Include:
-        1. Executive summary
-        2. Key performance metrics
-        3. Content performance analysis
-        4. Audience insights
-        5. Growth opportunities
-        6. Actionable recommendations
-        7. Next period strategy
-        
-        Return as JSON with comprehensive report structure.
-      `,
-    })
+    const prompt = `
+      You are a data analyst creating comprehensive Instagram performance reports. Generate detailed, actionable reports with insights and recommendations.
+      
+      Generate a comprehensive Instagram performance report:
+      
+      Period: ${period}
+      Media Data: ${JSON.stringify(mediaData.data?.slice(0, 50))}
+      Insights Data: ${JSON.stringify(insightsData.data)}
+      Content Strategy: ${JSON.stringify(contentStrategy.data)}
+      
+      Include:
+      1. Executive summary
+      2. Key performance metrics
+      3. Content performance analysis
+      4. Audience insights
+      5. Growth opportunities
+      6. Actionable recommendations
+      7. Next period strategy
+      
+      Return as JSON with comprehensive report structure.
+    `;
 
+    const text = await callGemini(prompt);
     return { status: 200, data: JSON.parse(text) }
   } catch (error) {
     console.error("Error generating reports:", error)
     return { status: 500, message: "Error generating reports" }
   }
 }
-
-
 
 
 
