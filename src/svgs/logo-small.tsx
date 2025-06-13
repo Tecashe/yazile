@@ -74,7 +74,7 @@ export const LogoSmall: React.FC<LogoProps> = ({ maxWidth = 300, maxHeight = 100
           fill="#405DE6"
           filter="url(#glow)"
         >
-          Chatal
+          Yazzil
         </text>
 
         {/* Tagline */}

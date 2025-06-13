@@ -276,7 +276,7 @@ export async function getScheduledPosts(
   }
 }
 
-export async function publishPost(postId: string) {
+export async function publishPostE(postId: string) {
   try {
     logError("publishPost - Start", { postId })
 
@@ -357,6 +357,150 @@ export async function publishPost(postId: string) {
           tokenExpires: instagramIntegration.expiresAt
         }
       })
+      
+      throw new Error(`Instagram API responded with ${response.status}: ${response.statusText}`)
+    }
+
+    // Update post status
+    await client.scheduledContent.update({
+      where: { id: postId },
+      data: {
+        status: "published",
+        publishedDate: new Date(),
+      },
+    })
+
+    logError("publishPost - Success", { postId })
+    revalidatePath("/schedule")
+    
+    return { success: true }
+  } catch (error) {
+    logError("publishPost - Failed", error, { postId })
+    
+    return { 
+      success: false, 
+      error: error instanceof Error 
+        ? error.message 
+        : "Failed to publish post. Please check your Instagram connection."
+    }
+  }
+}
+
+export async function publishPost(postId: string) {
+  try {
+    logError("publishPost - Start", { postId })
+
+    const post = await client.scheduledContent.findUnique({
+      where: { id: postId },
+      include: {
+        User: {
+          include: {
+            integrations: {
+              where: { name: "INSTAGRAM" },
+            },
+          },
+        },
+      },
+    })
+
+    if (!post) {
+      logError("publishPost - Post not found", { postId })
+      return { success: false, error: "Post not found" }
+    }
+
+    if (!post.User) {
+      logError("publishPost - User not found", { 
+        postId, 
+        userId: post.userId 
+      })
+      return { success: false, error: "User account not found" }
+    }
+
+    if (!post.User.integrations || post.User.integrations.length === 0) {
+      logError("publishPost - Instagram integration missing", { 
+        postId, 
+        userId: post.userId 
+      })
+      return { success: false, error: "Instagram integration not set up" }
+    }
+
+    const instagramIntegration = post.User.integrations[0]
+    
+    // Check if token is expired
+    if (instagramIntegration.expiresAt && new Date() > instagramIntegration.expiresAt) {
+      logError("publishPost - Token Expired", { 
+        postId, 
+        tokenExpires: instagramIntegration.expiresAt,
+        currentTime: new Date().toISOString()
+      })
+      return { 
+        success: false, 
+        error: "Instagram access token has expired. Please reconnect your Instagram account." 
+      }
+    }
+
+    // Log integration details for debugging
+    logError("publishPost - Integration Details", {
+      postId,
+      integrationId: instagramIntegration.id,
+      instagramId: instagramIntegration.instagramId,
+      hasToken: !!instagramIntegration.token,
+      tokenLength: instagramIntegration.token?.length || 0,
+      tokenExpires: instagramIntegration.expiresAt,
+      tokenPrefix: instagramIntegration.token?.substring(0, 10) + "...",
+    })
+    
+    // Prepare API request
+    const payload = {
+      userId: post.User.clerkId,
+      caption: post.caption,
+      mediaUrls: post.mediaUrl.split(","),
+      mediaType: post.mediaType,
+      thumbnailUrl: post.thumbnailUrl
+    }
+
+    const apiUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/post-to-instagram`
+    logError("publishPost - Calling API", { 
+      apiUrl, 
+      payload: { ...payload, mediaUrls: payload.mediaUrls.length },
+      userId: post.User.clerkId
+    })
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      let errorResponse = ""
+      try {
+        errorResponse = await response.text()
+      } catch (e) {
+        errorResponse = "Failed to read error response"
+      }
+      
+      logError("publishPost - API Error Response", {
+        status: response.status,
+        statusText: response.statusText,
+        errorResponse,
+        apiUrl,
+        payload: { ...payload, mediaUrls: payload.mediaUrls.length },
+        instagramIntegration: {
+          id: instagramIntegration.id,
+          instagramId: instagramIntegration.instagramId,
+          tokenExpires: instagramIntegration.expiresAt,
+          hasToken: !!instagramIntegration.token
+        }
+      })
+      
+      // More specific error messages based on status
+      if (response.status === 401) {
+        return { 
+          success: false, 
+          error: "Instagram authentication failed. Please reconnect your Instagram account." 
+        }
+      }
       
       throw new Error(`Instagram API responded with ${response.status}: ${response.statusText}`)
     }
