@@ -411,7 +411,7 @@ interface LeadsDashboardProps {
   topLeads: any[]
   hasDuplicates: boolean
   duplicateCount: number
-  userId: string // Replace onMergeDuplicates with userId
+  userId: string 
 }
 
 

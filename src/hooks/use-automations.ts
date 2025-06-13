@@ -636,7 +636,7 @@ import type { ScheduledPost } from "@/actions/schedule/schedule-post"
 import { useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 
-export const useCreateAutomation = (id?: string) => {
+export const useCreateAutomationE = (id?: string) => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -706,6 +706,125 @@ export const useCreateAutomation = (id?: string) => {
           return {
             ...old,
             data: old?.data ? old.data.filter((item: any) => item.id !== tempId) : [],
+          }
+        })
+
+        // Show error toast
+        toast({
+          title: "Failed to create automation",
+          description: "There was an error creating your automation. Please try again.",
+          variant: "destructive",
+        })
+
+        // Call the original onError if provided
+        if (options?.onError) {
+          options.onError(error)
+        }
+      },
+    })
+  }
+
+  return { isPending, mutate }
+}
+
+export const useCreateAutomation = (id?: string) => {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  // Use the existing useMutationData hook but enhance it with optimistic updates
+  const { isPending, mutate: originalMutate } = useMutationData(
+    ["create-automation"],
+    () => createAutomations(id),
+    "user-automations", // This should match your query key
+  )
+
+  // Create an enhanced mutate function with optimistic updates
+  const mutate = (variables: any, options?: any) => {
+    // Generate a temporary ID if none provided
+    const tempId = id || `temp-${Date.now()}`
+
+    // Create an optimistic version of the new automation
+    const optimisticAutomation = {
+      ...variables,
+      id: tempId,
+      active: false,
+      keywords: variables.keywords || [],
+      listener: null,
+      _isOptimistic: true, // Flag to identify this is an optimistic update
+    }
+
+    // Optimistically update the query data - use the correct query key
+    queryClient.setQueryData(["user-automations"], (old: any) => {
+      if (!old) {
+        return {
+          data: [optimisticAutomation],
+          status: 200,
+        }
+      }
+      
+      return {
+        ...old,
+        data: [optimisticAutomation, ...(old.data || [])],
+      }
+    })
+
+    // Call the original mutate function
+    return originalMutate(variables, {
+      ...options,
+      onSuccess: (data: any) => {
+        // Remove the optimistic entry first
+        queryClient.setQueryData(["user-automations"], (old: any) => {
+          if (!old) return old
+          return {
+            ...old,
+            data: old.data ? old.data.filter((item: any) => item.id !== tempId) : [],
+          }
+        })
+
+        // Add the real automation data
+        if (data?.data) {
+          queryClient.setQueryData(["user-automations"], (old: any) => {
+            if (!old) {
+              return {
+                data: [data.data],
+                status: 200,
+              }
+            }
+            
+            // Check if the automation already exists to avoid duplicates
+            const existingIds = old.data?.map((item: any) => item.id) || []
+            const newAutomation = Array.isArray(data.data) ? data.data[0] : data.data
+            
+            if (!existingIds.includes(newAutomation.id)) {
+              return {
+                ...old,
+                data: [newAutomation, ...(old.data || [])],
+              }
+            }
+            
+            return old
+          })
+        }
+
+        // Show success toast
+        toast({
+          title: "Automation created",
+          description: "Your automation has been created successfully.",
+          variant: "default",
+        })
+
+        // Call the original onSuccess if provided
+        if (options?.onSuccess) {
+          options.onSuccess(data)
+        }
+      },
+      onError: (error: any) => {
+        // Remove the optimistic entry on error
+        queryClient.setQueryData(["user-automations"], (old: any) => {
+          if (!old) return old
+          return {
+            ...old,
+            data: old.data ? old.data.filter((item: any) => item.id !== tempId) : [],
           }
         })
 
