@@ -1864,7 +1864,7 @@ export const analyzePostPerformance = async (userId: string, mediaId: string) =>
 /**
  * Get AI-optimized posting times based on audience behavior
  */
-export const getOptimalPostingTimes = async (userId: string) => {
+export const getOptimalPostingTimesE = async (userId: string) => {
   try {
     const mediaData = await fetchInstagramMedia(userId, 100)
     const insightsData = await getAccountInsights(userId, "days_28")
@@ -2291,7 +2291,7 @@ export const generateGrowthStrategy = async (userId: string) => {
 /**
  * Create AI-optimized content calendar
  */
-export const createContentCalendar = async (userId: string, days = 30) => {
+export const createContentCalendarE = async (userId: string, days = 30) => {
   try {
     const mediaData = await fetchInstagramMedia(userId, 50)
     const optimalTimes = await getOptimalPostingTimes(userId)
@@ -2335,6 +2335,208 @@ export const createContentCalendar = async (userId: string, days = 30) => {
     return { status: 500, message: "Error creating content calendar" }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+// Utility function to clean and extract JSON from AI responses
+function extractAndCleanJSON(text: string): string {
+  try {
+    // Remove common markdown formatting
+    let cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
+    
+    // Remove any leading/trailing whitespace
+    cleaned = cleaned.trim();
+    
+    // Find the first opening brace and last closing brace
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+      throw new Error('No valid JSON object found in response');
+    }
+    
+    // Extract just the JSON part
+    const jsonString = cleaned.substring(firstBrace, lastBrace + 1);
+    
+    // Test if it's valid JSON by parsing it
+    JSON.parse(jsonString);
+    
+    return jsonString;
+  } catch (error) {
+    console.error('Failed to extract JSON:', error);
+    console.error('Original text:', text);
+    throw new Error(`Invalid JSON response:`);
+  }
+}
+
+// Enhanced error handling wrapper
+async function safeJSONParse(text: string, functionName: string) {
+  try {
+    const cleanedJSON = extractAndCleanJSON(text);
+    return JSON.parse(cleanedJSON);
+  } catch (error) {
+    console.error(`${functionName} - JSON Parse Error:`, error);
+    console.error(`${functionName} - Raw response:`, text);
+    throw error;
+  }
+}
+
+export const getOptimalPostingTimes = async (userId: string) => {
+  try {
+    const mediaData = await fetchInstagramMedia(userId, 100);
+    const insightsData = await getAccountInsights(userId, "days_28");
+
+    if (mediaData.status !== 200) {
+      return { status: 404, message: "Unable to fetch media data" };
+    }
+
+    const prompt = `
+You are a data scientist specializing in social media analytics. Analyze posting patterns and engagement to determine optimal posting times.
+
+CRITICAL: Respond with ONLY valid JSON. No explanatory text, no markdown, no additional comments.
+
+Analyze this Instagram data to determine optimal posting times:
+
+Posts with timestamps and engagement: ${JSON.stringify(mediaData.data)}
+Account insights: ${JSON.stringify(insightsData.data)}
+
+Calculate:
+1. Best days of the week to post
+2. Optimal hours for maximum engagement
+3. Content type specific timing (photos vs videos vs reels)
+4. Audience activity patterns
+
+Return ONLY this JSON structure:
+{
+  "schedule": [
+    {
+      "day": "Monday",
+      "times": ["7-9 PM", "12-2 PM"]
+    },
+    {
+      "day": "Tuesday", 
+      "times": ["8-10 PM", "1-3 PM"]
+    },
+    {
+      "day": "Wednesday",
+      "times": ["7-9 PM", "11 AM-1 PM"]
+    },
+    {
+      "day": "Thursday",
+      "times": ["6-8 PM", "12-2 PM"]
+    },
+    {
+      "day": "Friday",
+      "times": ["5-7 PM", "10 AM-12 PM"]
+    },
+    {
+      "day": "Saturday",
+      "times": ["10 AM-12 PM", "6-8 PM"]
+    },
+    {
+      "day": "Sunday",
+      "times": ["2-4 PM", "7-9 PM"]
+    }
+  ],
+  "contentTypeTimings": {
+    "photos": ["12-2 PM", "6-8 PM"],
+    "videos": ["7-9 PM", "1-3 PM"],
+    "reels": ["5-7 PM", "11 AM-1 PM"],
+    "stories": ["8-10 AM", "8-10 PM"]
+  },
+  "audienceActivityPeaks": ["7-9 PM", "12-2 PM", "8-10 AM"]
+}`;
+
+    const text = await callGemini(prompt);
+    const parsedData = await safeJSONParse(text, 'getOptimalPostingTimes');
+    
+    return { status: 200, data: parsedData };
+  } catch (error) {
+    console.error("Error getting optimal posting times:", error);
+    return { 
+      status: 500, 
+      message: "Error getting optimal posting times",
+      // error: error.message 
+    };
+  }
+};
+
+export const createContentCalendar = async (userId: string, days = 30) => {
+  try {
+    const mediaData = await fetchInstagramMedia(userId, 50);
+    const optimalTimes = await getOptimalPostingTimes(userId);
+
+    const prompt = `
+You are a content planning expert. Create optimized content calendars based on performance data and best practices.
+
+CRITICAL: Respond with ONLY valid JSON. No explanatory text, no markdown, no additional comments.
+
+Create a ${days}-day content calendar for this Instagram account:
+
+Historical Performance: ${JSON.stringify(mediaData.data?.slice(0, 20))}
+Optimal Posting Times: ${JSON.stringify(optimalTimes.data)}
+
+Include:
+1. Daily posting schedule with optimal times
+2. Content type variety (photos, videos, reels, stories)
+3. Content themes and topics
+
+Return ONLY this JSON structure:
+{
+  "days": [
+    {
+      "date": "Mon, 28",
+      "posts": [
+        {"type": "reel", "time": "7 PM", "theme": "lifestyle"},
+        {"type": "story", "time": "12 PM", "theme": "behind-the-scenes"}
+      ]
+    },
+    {
+      "date": "Tue, 29",
+      "posts": [
+        {"type": "photo", "time": "8 PM", "theme": "product showcase"},
+        {"type": "story", "time": "1 PM", "theme": "tips"}
+      ]
+    }
+  ],
+  "scheduledCount": 12,
+  "scheduleSummary": [
+    {"label": "Next post", "value": "Today 7:00 PM"},
+    {"label": "This week", "value": "5 posts"},
+    {"label": "Total scheduled", "value": "12 posts"}
+  ]
+}`;
+
+    const text = await callGemini(prompt);
+    const parsedData = await safeJSONParse(text, 'createContentCalendar');
+    
+    return { status: 200, data: parsedData };
+  } catch (error) {
+    console.error("Error creating content calendar:", error);
+    return { 
+      status: 500, 
+      message: "Error creating content calendar",
+      // error: error.message || "E"
+    };
+  }
+};
+
+
+
+
+
+
+
+
+
 
 /**
  * Analyze content trends and opportunities
