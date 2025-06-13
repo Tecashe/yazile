@@ -220,6 +220,8 @@ model Integrations {
 
 
 
+
+
 model Automation {
   id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String             @default("New Automation")
@@ -399,6 +401,7 @@ model Notification {
   updatedAt DateTime @updatedAt
 }
 
+
 model AuditLog {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId     String   @db.Uuid
@@ -406,9 +409,12 @@ model AuditLog {
   action     String
   target     String
   details    String?
+  entityId  String   @db.Uuid
+  metadata  Json?    // Store additional data like reason, instagramId
   ipAddress  String?
   userAgent  String?
   timestamp  DateTime @default(now())
+  @@map("audit_logs")
 }
 
 model Incident {
