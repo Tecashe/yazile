@@ -376,6 +376,7 @@
 
 "use client"
 
+import { handleMergeDuplicates } from "@/actions/leads" 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -410,8 +411,9 @@ interface LeadsDashboardProps {
   topLeads: any[]
   hasDuplicates: boolean
   duplicateCount: number
-  onMergeDuplicates: () => Promise<{ success: boolean; mergedGroups?: number; error?: string }>
+  userId: string // Replace onMergeDuplicates with userId
 }
+
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -759,14 +761,19 @@ function RecentInteractionsCard({ interactions }: { interactions: any[] }) {
   )
 }
 
+
+
 export function LeadsDashboard({
   analytics,
   recentLeads,
   topLeads,
   hasDuplicates,
   duplicateCount,
-  onMergeDuplicates,
+  userId, // Use userId instead of onMergeDuplicates
 }: LeadsDashboardProps) {
+  // Create a simple function that returns the server action call
+  const handleMerge = () => handleMergeDuplicates(userId)
+
   return (
     <>
       <div className="flex items-center justify-between space-y-2">
@@ -786,7 +793,7 @@ export function LeadsDashboard({
       <DuplicateAlert
         hasDuplicates={hasDuplicates}
         duplicateCount={duplicateCount}
-        onMergeDuplicates={onMergeDuplicates}
+        onMergeDuplicates={handleMerge} // Pass the simple handler
       />
 
       <LeadAnalyticsCards analytics={analytics} />

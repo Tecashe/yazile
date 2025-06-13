@@ -137,13 +137,14 @@ async function handleMergeDuplicates(userId: string) {
 
 export default async function LeadsPage() {
   const user = await onUserInfor()
-
+  const userId = user.data?.id
+  
   if (!user?.data?.id) {
     redirect("/sign-in")
   }
-
+  
   const { analytics, recentLeads, topLeads, hasDuplicates, duplicateCount } = await getLeadsData(user.data.id)
-
+  
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <Suspense fallback={<div>Loading...</div>}>
@@ -153,9 +154,11 @@ export default async function LeadsPage() {
           topLeads={topLeads}
           hasDuplicates={hasDuplicates}
           duplicateCount={duplicateCount}
-          onMergeDuplicates={() => handleMergeDuplicates(user.data.id)}
+          userId={userId||"23"} // Pass userId instead of function
         />
       </Suspense>
     </div>
   )
 }
+
+
