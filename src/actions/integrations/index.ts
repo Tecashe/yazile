@@ -1302,6 +1302,51 @@ export const getOptimalPostingTimes = async (userId: string) => {
   }
 }
 
+// /**
+//  * Generate smart hashtag suggestions based on content and performance
+//  */
+// export const generateHashtagSuggestions = async (userId: string, contentDescription: string) => {
+//   try {
+//     const mediaData = await fetchInstagramMedia(userId, 50)
+
+//     const { text } = await generateText({
+//       model: openai("gpt-4o"),
+//       system: `You are a hashtag optimization expert. Generate relevant, high-performing hashtags based on content and account performance.`,
+//       prompt: `
+//         Generate hashtag suggestions for this content: "${contentDescription}"
+        
+//         Based on this account's previous posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
+        
+//         Provide:
+//         1. 10 high-performance hashtags (popular, competitive)
+//         2. 10 niche-specific hashtags (targeted, less competitive)
+//         3. 5 trending hashtags (current trends)
+//         4. 5 branded/community hashtags
+        
+//         Return as JSON with the following structure:
+//         {
+//           "high_performance": ["hashtag1", "hashtag2", ...],
+//           "niche_specific": ["hashtag1", "hashtag2", ...],
+//           "trending": ["hashtag1", "hashtag2", ...],
+//           "branded": ["hashtag1", "hashtag2", ...]
+//         }
+        
+//         Do not include explanations, just the JSON object with arrays of hashtags.
+//       `,
+//     })
+
+//     return { status: 200, data: JSON.parse(text) }
+//   } catch (error) {
+//     console.error("Error generating hashtag suggestions:", error)
+//     return { status: 500, message: "Error generating hashtag suggestions" }
+//   }
+// }
+
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Initialize Gemini (add your API key to environment variables)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
 /**
  * Generate smart hashtag suggestions based on content and performance
  */
@@ -1309,33 +1354,39 @@ export const generateHashtagSuggestions = async (userId: string, contentDescript
   try {
     const mediaData = await fetchInstagramMedia(userId, 50)
 
-    const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system: `You are a hashtag optimization expert. Generate relevant, high-performing hashtags based on content and account performance.`,
-      prompt: `
-        Generate hashtag suggestions for this content: "${contentDescription}"
-        
-        Based on this account's previous posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
-        
-        Provide:
-        1. 10 high-performance hashtags (popular, competitive)
-        2. 10 niche-specific hashtags (targeted, less competitive)
-        3. 5 trending hashtags (current trends)
-        4. 5 branded/community hashtags
-        
-        Return as JSON with the following structure:
-        {
-          "high_performance": ["hashtag1", "hashtag2", ...],
-          "niche_specific": ["hashtag1", "hashtag2", ...],
-          "trending": ["hashtag1", "hashtag2", ...],
-          "branded": ["hashtag1", "hashtag2", ...]
-        }
-        
-        Do not include explanations, just the JSON object with arrays of hashtags.
-      `,
-    })
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const prompt = `
+      You are a hashtag optimization expert. Generate relevant, high-performing hashtags based on content and account performance.
+      
+      Generate hashtag suggestions for this content: "${contentDescription}"
+      
+      Based on this account's previous posts: ${JSON.stringify(mediaData.data?.slice(0, 10))}
+      
+      Provide:
+      1. 10 high-performance hashtags (popular, competitive)
+      2. 10 niche-specific hashtags (targeted, less competitive)
+      3. 5 trending hashtags (current trends)
+      4. 5 branded/community hashtags
+      
+      Return as JSON with the following structure:
+      {
+        "high_performance": ["hashtag1", "hashtag2", ...],
+        "niche_specific": ["hashtag1", "hashtag2", ...],
+        "trending": ["hashtag1", "hashtag2", ...],
+        "branded": ["hashtag1", "hashtag2", ...]
+      }
+      
+      Do not include explanations, just the JSON object with arrays of hashtags.
+    `;
 
-    return { status: 200, data: JSON.parse(text) }
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    
+    // Clean up the response (remove markdown formatting if present)
+    const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    return { status: 200, data: JSON.parse(cleanText) }
   } catch (error) {
     console.error("Error generating hashtag suggestions:", error)
     return { status: 500, message: "Error generating hashtag suggestions" }
