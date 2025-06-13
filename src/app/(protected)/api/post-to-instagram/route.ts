@@ -201,7 +201,6 @@
 //   }
 // }
 
-
 import { NextResponse } from "next/server";
 import axios from "axios";
 import { client } from "@/lib/prisma";
@@ -288,88 +287,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Instagram ID not found" }, { status: 400 });
     }
 
-    // Enhanced token validation and refresh
-    let accessToken = instagramIntegration.token;
-    const now = new Date();
-    const tokenExpiry = instagramIntegration.expiresAt;
-    
-    logApiError("POST /api/post-to-instagram - Token Check", null, {
-      hasToken: !!accessToken,
-      tokenLength: accessToken?.length,
-      tokenExpiry,
-      currentTime: now.toISOString(),
-      isExpired: tokenExpiry ? now > tokenExpiry : false
-    });
-
-    // Only refresh if token is close to expiring (within 7 days) or already expired
-    const shouldRefresh = !tokenExpiry || (now.getTime() - tokenExpiry.getTime()) > -7 * 24 * 60 * 60 * 1000;
-    
-    if (shouldRefresh) {
-      try {
-        logApiError("POST /api/post-to-instagram - Attempting Token Refresh", null, {
-          tokenExpiry,
-          shouldRefresh
-        });
-        
-        const refreshResponse = await axios.get(`https://graph.instagram.com/refresh_access_token`, {
-          params: {
-            grant_type: "ig_refresh_token",
-            access_token: instagramIntegration.token,
-          },
-        });
-        
-        accessToken = refreshResponse.data.access_token;
-        const expiresIn = refreshResponse.data.expires_in || 5184000; // Default 60 days
-        const newExpiryDate = new Date(Date.now() + expiresIn * 1000);
-        
-        // Update token in database
-        await client.integrations.update({
-          where: { id: instagramIntegration.id },
-          data: { 
-            token: accessToken,
-            expiresAt: newExpiryDate,
-            lastUpdated: now
-          },
-        });
-        
-        logApiError("POST /api/post-to-instagram - Token Refreshed Successfully", null, {
-          newTokenLength: accessToken.length,
-          newExpiry: newExpiryDate.toISOString()
-        });
-      } catch (refreshError) {
-        logApiError("POST /api/post-to-instagram - Token Refresh Failed", refreshError, {
-          originalTokenLength: instagramIntegration.token?.length,
-          tokenExpiry
-        });
-        
-        // If refresh fails, try with original token but warn user
-        if (!tokenExpiry || now > tokenExpiry) {
-          return NextResponse.json({ 
-            error: "Instagram access token has expired and refresh failed. Please reconnect your Instagram account." 
-          }, { status: 401 });
-        }
-        // Continue with original token if it's not expired yet
-      }
-    }
-
-    // Test token validity before proceeding
-    try {
-      logApiError("POST /api/post-to-instagram - Testing Token Validity", null);
-      
-      await axios.get(`https://graph.instagram.com/v22.0/${instagramIntegration.instagramId}`, {
-        params: {
-          fields: 'id,username',
-          access_token: accessToken
-        }
+    if (!instagramIntegration.token) {
+      logApiError("POST /api/post-to-instagram - Missing Access Token", null, {
+        integrationId: instagramIntegration.id
       });
-      
-      logApiError("POST /api/post-to-instagram - Token Valid", null);
-    } catch (tokenTestError) {
-      logApiError("POST /api/post-to-instagram - Token Test Failed", tokenTestError);
-      return NextResponse.json({ 
-        error: "Instagram access token is invalid. Please reconnect your Instagram account." 
-      }, { status: 401 });
+      return NextResponse.json({ error: "Instagram access token not found" }, { status: 401 });
     }
+
+    logApiError("POST /api/post-to-instagram - Integration Details", null, {
+      integrationId: instagramIntegration.id,
+      instagramId: instagramIntegration.instagramId,
+      hasToken: !!instagramIntegration.token,
+      tokenLength: instagramIntegration.token.length,
+      tokenExpires: instagramIntegration.expiresAt
+    });
 
     // Media validation
     try {
@@ -406,7 +337,7 @@ export async function POST(request: Request) {
           
           const containerId = await createMediaContainer(
             instagramIntegration.instagramId!,
-            accessToken,
+            instagramIntegration.token,
             mediaUrl,
             containerMediaType,
             true
@@ -416,7 +347,7 @@ export async function POST(request: Request) {
         
         postId = await createCarouselContainer(
           instagramIntegration.instagramId!,
-          accessToken,
+          instagramIntegration.token,
           containerIds,
           caption
         );
@@ -431,7 +362,7 @@ export async function POST(request: Request) {
         
         postId = await createMediaContainer(
           instagramIntegration.instagramId!,
-          accessToken,
+          instagramIntegration.token,
           mediaUrls[0],
           containerMediaType,
           false,
@@ -443,28 +374,40 @@ export async function POST(request: Request) {
       
       const publishResult = await publishMedia(
         instagramIntegration.instagramId!,
-        accessToken,
+        instagramIntegration.token,
         postId
       );
       
-      logApiError("POST /api/post-to-instagram - Media Published", null, { publishResult });
+      logApiError("POST /api/post-to-instagram - Media Published Successfully", null, { 
+        publishResult,
+        finalPostId: publishResult
+      });
+      
+      return NextResponse.json({ success: true, postId: publishResult });
     } catch (error) {
       logApiError("POST /api/post-to-instagram - Publishing Failed", error, {
         mediaType,
         mediaUrlCount: mediaUrls.length
       });
-      return NextResponse.json({ error: "Failed to publish to Instagram" }, { status: 500 });
+      
+      // More specific error handling
+      if (error instanceof Error && error.message.includes('401')) {
+        return NextResponse.json({ 
+          error: "Instagram authentication failed. Please reconnect your Instagram account." 
+        }, { status: 401 });
+      }
+      
+      return NextResponse.json({ 
+        error: "Failed to publish to Instagram. Please try again." 
+      }, { status: 500 });
     }
-
-    logApiError("POST /api/post-to-instagram - Success", null, { postId });
-    return NextResponse.json({ success: true, postId });
   } catch (error) {
     logApiError("POST /api/post-to-instagram - Unhandled Error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// Helper functions with enhanced logging
+// Helper functions
 async function createMediaContainer(
   instagramId: string,
   token: string,
@@ -488,8 +431,7 @@ async function createMediaContainer(
       instagramId,
       mediaType,
       isCarouselItem,
-      hasCaption: !!caption,
-      mediaUrl: mediaUrl.slice(0, 50) + "..."
+      hasCaption: !!caption
     });
 
     const response = await axios.post(
@@ -507,10 +449,9 @@ async function createMediaContainer(
     logApiError("createMediaContainer - Failed", error, {
       instagramId,
       mediaType,
-      isCarouselItem,
-      mediaUrl: mediaUrl.slice(0, 50) + "..."
+      isCarouselItem
     });
-    throw new Error("Failed to create media container");
+    throw error;
   }
 }
 
@@ -550,7 +491,7 @@ async function createCarouselContainer(
       instagramId,
       containerCount: containerIds.length
     });
-    throw new Error("Failed to create carousel container");
+    throw error;
   }
 }
 
@@ -589,10 +530,9 @@ async function publishMedia(
       instagramId,
       containerId
     });
-    throw new Error("Failed to publish media");
+    throw error;
   }
 }
-
 
 // import { NextResponse } from "next/server";
 // import axios from "axios";
