@@ -3,6 +3,7 @@
 import { onUserInfor } from "@/actions/user"
 import { client } from "@/lib/prisma"
 import { INTEGRATIONS } from "@prisma/client"
+import { verifyInstagramWebhook } from '@/utils/instagram'
 
 interface DeauthorizationResponse {
   status: number
@@ -382,27 +383,27 @@ async function logDeauthorization(
   }
 }
 
-/**
- * Webhook verification for Instagram webhooks
- */
-export function verifyInstagramWebhook(
-  signature: string, 
-  body: string, 
-  appSecret: string
-): boolean {
-  try {
-    const crypto = require('crypto')
-    const expectedSignature = crypto
-      .createHmac('sha256', appSecret)
-      .update(body)
-      .digest('hex')
+// /**
+//  * Webhook verification for Instagram webhooks
+//  */
+// export function verifyInstagramWebhook(
+//   signature: string, 
+//   body: string, 
+//   appSecret: string
+// ): boolean {
+//   try {
+//     const crypto = require('crypto')
+//     const expectedSignature = crypto
+//       .createHmac('sha256', appSecret)
+//       .update(body)
+//       .digest('hex')
 
-    return signature === `sha256=${expectedSignature}`
-  } catch (error) {
-    console.error('Error verifying webhook signature:', error)
-    return false
-  }
-}
+//     return signature === `sha256=${expectedSignature}`
+//   } catch (error) {
+//     console.error('Error verifying webhook signature:', error)
+//     return false
+//   }
+// }
 
 // /**
 //  * Deauthorize Instagram account using the Instagram Graph API

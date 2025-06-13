@@ -1750,8 +1750,10 @@ import { analyzeLead } from "@/lib/lead-qualification"
 import { 
   handleInstagramDeauthWebhook, 
   handleInstagramDataDeletionWebhook, 
-  verifyInstagramWebhook 
+  
 } from '@/lib/deauth'
+import { verifyInstagramWebhook } from '@/utils/instagram'
+
 import type { VoiceflowVariables } from "@/types/voiceflow"
 
 /**
