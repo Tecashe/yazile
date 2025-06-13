@@ -1,5 +1,5 @@
 
-
+'use server'
 import { onUserInfor } from "@/actions/user"
 import { client } from "@/lib/prisma"
 import { INTEGRATIONS } from "@prisma/client"
