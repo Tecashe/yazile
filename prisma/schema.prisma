@@ -409,7 +409,7 @@ model AuditLog {
   action     String
   target     String
   details    String?
-  entityId  String   @db.Uuid
+  entityId  String?   @db.Uuid
   metadata  Json?    // Store additional data like reason, instagramId
   ipAddress  String?
   userAgent  String?
