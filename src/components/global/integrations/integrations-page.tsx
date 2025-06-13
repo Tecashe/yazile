@@ -514,7 +514,8 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { onUserInfo,onUserInfor } from "@/actions/user"
-import { refreshInstagramData, onOAuthInstagram, deauthorizeInstagram } from "@/actions/integrations"
+import { refreshInstagramData, onOAuthInstagram} from "@/actions/integrations"
+import { deauthorizeInstagram } from "@/lib/deauth"
 import IntegrationCard from "./integration-card"
 import RequirementsModal from "./requirements-modal"
 import AccountsList from "./accounts-list"
@@ -1070,7 +1071,7 @@ export default function IntegrationsPage() {
                 <li>Delete stored account data from our servers</li>
               </ul>
               <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                You'll need to reconnect the account to use it again.
+                You&apos;ll need to reconnect the account to use it again.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>

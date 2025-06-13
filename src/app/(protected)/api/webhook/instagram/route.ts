@@ -1751,7 +1751,7 @@ import {
   handleInstagramDeauthWebhook, 
   handleInstagramDataDeletionWebhook, 
   verifyInstagramWebhook 
-} from '@/actions/integrations'
+} from '@/lib/deauth'
 import type { VoiceflowVariables } from "@/types/voiceflow"
 
 /**
