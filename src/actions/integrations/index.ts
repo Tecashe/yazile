@@ -2097,7 +2097,7 @@ export const predictEngagement = async (userId: string, postData: any) => {
 /**
  * Get AI-powered audience insights
  */
-export const getAudienceInsights = async (userId: string) => {
+export const getAudienceInsightsE = async (userId: string) => {
   try {
     const mediaData = await fetchInstagramMedia(userId, 100)
     const insightsData = await getAccountInsights(userId, "days_28")
@@ -2166,6 +2166,96 @@ export const getAudienceInsights = async (userId: string) => {
 /**
  * Generate comprehensive growth strategy
  */
+export const getAudienceInsights = async (userId: string) => {
+  try {
+    const mediaData = await fetchInstagramMedia(userId, 100)
+    const insightsData = await getAccountInsights(userId, "days_28")
+    
+    const prompt = `
+      You are an audience research specialist. Analyze engagement patterns to provide deep audience insights.
+      
+      IMPORTANT: Return ONLY valid JSON, no explanatory text, no markdown formatting.
+      
+      Analyze this Instagram data to understand the audience:
+      
+      Posts and Engagement: ${JSON.stringify(mediaData.data)}
+      Account Insights: ${JSON.stringify(insightsData.data)}
+      
+      Provide insights on:
+      1. Audience demographics (inferred from engagement patterns)
+      2. Content preferences
+      3. Engagement behavior patterns
+      4. Best content themes for this audience
+      5. Growth opportunities
+      
+      Return ONLY the JSON object with this exact structure:
+      {
+        "performanceScores": [
+          {"name": "Overall Score", "value": 87},
+          {"name": "Content Quality", "value": 92},
+          {"name": "Engagement Rate", "value": 73}
+        ],
+        "audienceDemographics": {
+          "ageRanges": ["string"],
+          "interests": ["string"],
+          "activeHours": ["string"]
+        },
+        "contentPreferences": [
+          {"type": "string", "engagement": "string"}
+        ],
+        "growthProjection": {
+          "monthly": "+247",
+          "quarterly": "string"
+        },
+        "growthFactors": [
+          {"name": "Content consistency", "impact": "+15%"},
+          {"name": "Hashtag optimization", "impact": "+23%"},
+          {"name": "Engagement timing", "impact": "+18%"}
+        ],
+        "engagementFactors": [
+          {"name": "Story interactions", "impact": "+12%"},
+          {"name": "Comment responses", "impact": "+8%"},
+          {"name": "Share rate", "impact": "+5%"}
+        ],
+        "currentEngagementRate": "4.2%",
+        "automationSettings": [
+          {"name": "Auto-like relevant posts", "active": true},
+          {"name": "Auto-follow back", "active": false},
+          {"name": "Smart comment replies", "active": true}
+        ]
+      }
+    `;
+
+    const text = await callGemini(prompt);
+    
+    // Clean the response
+    const cleanedText = cleanJsonResponse(text);
+    
+    return { status: 200, data: JSON.parse(cleanedText) }
+  } catch (error) {
+    console.error("Error getting audience insights:", error)
+    console.error("Raw response:", Text) // Log the raw response for debugging
+    return { status: 500, message: "Error getting audience insights" }
+  }
+}
+
+// Helper function to clean JSON response
+function cleanJsonResponse(text: string): string {
+  // Remove markdown code blocks
+  let cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+  
+  // Find the first { and last }
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+  
+  return cleaned.trim();
+}
+
+
 export const generateGrowthStrategy = async (userId: string) => {
   try {
     const mediaData = await fetchInstagramMedia(userId, 100)
