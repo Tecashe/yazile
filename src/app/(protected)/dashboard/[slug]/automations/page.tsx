@@ -214,15 +214,15 @@ const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: bool
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-purple-200/30"
+        className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-purple-200/20"
       >
         <div className="relative">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
           <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping" />
         </div>
         <div>
-          <p className="font-medium text-gray-800">Loading your automations...</p>
-          <p className="text-sm text-gray-500">Preparing your workflow dashboard</p>
+          <p className="font-medium text-foreground">Loading your automations...</p>
+          <p className="text-sm text-muted-foreground">Preparing your workflow dashboard</p>
         </div>
       </motion.div>
     )
@@ -235,8 +235,8 @@ const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: bool
       title: "Ready to supercharge your workflow?",
       subtitle: "Create your first automation and watch the magic happen!",
       gradient: "from-yellow-400 to-orange-500",
-      bg: "from-yellow-50 to-orange-50",
-      border: "border-yellow-200/50"
+      bg: "from-yellow-500/10 to-orange-500/10",
+      border: "border-yellow-500/20"
     },
     {
       condition: count < 3,
@@ -244,8 +244,8 @@ const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: bool
       title: "Great momentum!",
       subtitle: `${count} automation${count !== 1 ? 's' : ''} active. You're building something amazing!`,
       gradient: "from-green-400 to-emerald-500",
-      bg: "from-green-50 to-emerald-50",
-      border: "border-green-200/50"
+      bg: "from-green-500/10 to-emerald-500/10",
+      border: "border-green-500/20"
     },
     {
       condition: count >= 3,
@@ -253,8 +253,8 @@ const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: bool
       title: "Automation Master!",
       subtitle: `${count} automations running. Your workflow is optimized!`,
       gradient: "from-blue-400 to-purple-500",
-      bg: "from-blue-50 to-purple-50",
-      border: "border-blue-200/50"
+      bg: "from-blue-500/10 to-purple-500/10",
+      border: "border-blue-500/20"
     }
   ]
 
@@ -273,8 +273,8 @@ const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: bool
           <div className="absolute inset-0 bg-white/20 rounded-xl animate-pulse" />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-800">{config.title}</h3>
-          <p className="text-sm text-gray-600">{config.subtitle}</p>
+          <h3 className="font-semibold text-foreground">{config.title}</h3>
+          <p className="text-sm text-muted-foreground">{config.subtitle}</p>
         </div>
       </div>
       
@@ -290,17 +290,17 @@ const AutomationSkeleton = ({ index }: { index: number }) => (
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: index * 0.1 }}
-    className="group relative p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200/50 animate-pulse"
+    className="group relative p-4 bg-card rounded-xl border border-border animate-pulse"
   >
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-gray-300 to-gray-400 rounded-lg" />
+        <div className="w-10 h-10 bg-muted rounded-lg" />
         <div>
-          <div className="h-4 bg-gray-300 rounded-md w-24 mb-2" />
-          <div className="h-3 bg-gray-200 rounded-md w-16" />
+          <div className="h-4 bg-muted rounded-md w-24 mb-2" />
+          <div className="h-3 bg-muted/60 rounded-md w-16" />
         </div>
       </div>
-      <div className="w-5 h-5 bg-gray-300 rounded-full" />
+      <div className="w-5 h-5 bg-muted rounded-full" />
     </div>
   </motion.div>
 )
@@ -322,10 +322,10 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
         scale: 1.02,
         transition: { duration: 0.2 }
       }}
-      className={`group relative p-4 bg-gradient-to-r from-white to-gray-50/50 rounded-xl border transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 ${
+      className={`group relative p-4 bg-card rounded-xl border transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 ${
         automation._isOptimistic 
-          ? 'border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50 animate-pulse' 
-          : 'border-gray-200/50 hover:border-blue-300/50'
+          ? 'border-yellow-500/30 bg-yellow-500/5 animate-pulse' 
+          : 'border-border'
       }`}
     >
       {/* Glow effect on hover */}
@@ -339,7 +339,7 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
               ? 'bg-gradient-to-br from-yellow-400 to-orange-500' 
               : automation.active 
                 ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
-                : 'bg-gradient-to-br from-gray-400 to-gray-500'
+                : 'bg-gradient-to-br from-muted-foreground to-muted-foreground'
           }`}>
             {automation._isOptimistic ? (
               <Loader2 className="w-4 h-4 text-white animate-spin" />
@@ -357,14 +357,14 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
           
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+              <h3 className="font-semibold text-foreground group-hover:text-blue-400 transition-colors">
                 {automation.name}
               </h3>
               {automation._isOptimistic && (
                 <motion.span 
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full"
+                  className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full border border-yellow-500/30"
                 >
                   Creating...
                 </motion.span>
@@ -372,12 +372,12 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
             </div>
             
             <div className="flex items-center gap-3 mt-1">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {automation.createdAt ? new Date(automation.createdAt).toLocaleDateString() : 'No Date'}
               </p>
               
               {automation.keywords?.length > 0 && (
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full border border-blue-500/30">
                   {automation.keywords.length} keyword{automation.keywords.length !== 1 ? 's' : ''}
                 </span>
               )}
@@ -403,7 +403,7 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowActions(!showActions)}
-              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
             >
               <MoreVertical className="w-4 h-4" />
             </motion.button>
@@ -416,7 +416,7 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500"
+          className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground"
         >
           <span className="flex items-center gap-1">
             <TrendingUp className="w-3 h-3" />
@@ -424,8 +424,8 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
           </span>
           <span className={`px-2 py-1 rounded-full ${
             automation.active 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-gray-100 text-gray-600'
+              ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+              : 'bg-muted text-muted-foreground'
           }`}>
             {automation.active ? 'Active' : 'Paused'}
           </span>
@@ -442,12 +442,12 @@ const Page = () => {
   const hasAutomations = isSuccess && automations.length > 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Floating background elements */}
+    <div className="min-h-screen bg-background">
+      {/* Dark theme floating background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-400/10 to-rose-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-cyan-400/5 to-blue-500/5 rounded-full blur-3xl animate-spin" style={{ animationDuration: '20s' }} />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-500/5 to-rose-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-cyan-500/3 to-blue-500/3 rounded-full blur-3xl animate-spin" style={{ animationDuration: '20s' }} />
       </div>
       
       <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
@@ -460,19 +460,19 @@ const Page = () => {
             className="flex items-center justify-between"
           >
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-foreground">
                 Automation Dashboard
               </h1>
-              <p className="text-gray-600 mt-1">Manage and monitor your automated workflows</p>
+              <p className="text-muted-foreground mt-1">Manage and monitor your automated workflows</p>
             </div>
             
             <motion.div
               whileHover={{ scale: 1.05 }}
               className="hidden lg:block"
             >
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200/30">
-                <Activity className="w-4 h-4 text-blue-500" />
-                <span className="text-sm font-medium text-gray-700">
+              <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                <Activity className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-medium text-foreground">
                   {automations.filter(a => a.active).length} Active
                 </span>
               </div>
@@ -484,7 +484,7 @@ const Page = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/60 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl shadow-gray-200/50 overflow-hidden"
+            className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border shadow-xl overflow-hidden"
           >
             {isLoading ? (
               <div className="p-8 flex items-center justify-center">
@@ -496,8 +496,8 @@ const Page = () => {
                   >
                     <Loader2 className="w-6 h-6 text-white" />
                   </motion.div>
-                  <p className="text-gray-600 font-medium">Loading your automation workspace...</p>
-                  <p className="text-gray-400 text-sm mt-1">Setting up your personalized dashboard</p>
+                  <p className="text-foreground font-medium">Loading your automation workspace...</p>
+                  <p className="text-muted-foreground text-sm mt-1">Setting up your personalized dashboard</p>
                 </div>
               </div>
             ) : (
@@ -517,23 +517,23 @@ const Page = () => {
             className="sticky top-6 space-y-6"
           >
             {/* Status Card */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl shadow-gray-200/50 p-6">
+            <div className="bg-card/70 backdrop-blur-sm rounded-2xl border border-border shadow-xl p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">My Automations</h2>
+                <h2 className="text-xl font-bold text-foreground">My Automations</h2>
               </div>
               
               <AutomationStatus count={automations.length} isLoading={isLoading} />
             </div>
 
             {/* Automation List */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl shadow-gray-200/50 overflow-hidden">
-              <div className="p-6 border-b border-gray-100/50">
+            <div className="bg-card/70 backdrop-blur-sm rounded-2xl border border-border shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-border">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-800">Recent Automations</h3>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
+                  <h3 className="font-semibold text-foreground">Recent Automations</h3>
+                  <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-sm font-medium rounded-full border border-blue-500/30">
                     {automations.length}
                   </span>
                 </div>
@@ -552,11 +552,11 @@ const Page = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center p-8"
                       >
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Zap className="w-6 h-6 text-red-500" />
+                        <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3 border border-red-500/30">
+                          <Zap className="w-6 h-6 text-red-400" />
                         </div>
-                        <p className="text-red-600 font-medium">Failed to load automations</p>
-                        <p className="text-red-400 text-sm mt-1">Please try refreshing the page</p>
+                        <p className="text-red-400 font-medium">Failed to load automations</p>
+                        <p className="text-muted-foreground text-sm mt-1">Please try refreshing the page</p>
                       </motion.div>
                     ) : automations.length === 0 ? (
                       <motion.div 
@@ -564,11 +564,11 @@ const Page = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center p-8"
                       >
-                        <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                          <Plus className="w-8 h-8 text-gray-400" />
+                        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <Plus className="w-8 h-8 text-muted-foreground" />
                         </div>
-                        <p className="text-gray-600 font-medium">No automations yet</p>
-                        <p className="text-gray-400 text-sm mt-1">Create your first automation to get started</p>
+                        <p className="text-foreground font-medium">No automations yet</p>
+                        <p className="text-muted-foreground text-sm mt-1">Create your first automation to get started</p>
                       </motion.div>
                     ) : (
                       automations.map((automation, index) => (
@@ -591,12 +591,13 @@ const Page = () => {
               transition={{ delay: 0.5 }}
               className="relative"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-20 animate-pulse" />
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl shadow-gray-200/50 p-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-2xl blur-xl animate-pulse" />
+              <div className="relative bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-xl p-6">
                 <CreateAutomation />
               </div>
             </motion.div>
           </motion.div>
+          
         </div>
       </div>
     </div>
