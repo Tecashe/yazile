@@ -84,6 +84,8 @@ model User {
   handoffs          HumanHandoff[]
   responseMetrics   ResponseMetrics[]
 
+  preferences           UserPreferences?
+
   
 }
 
@@ -2639,4 +2641,33 @@ enum HandoffPriority {
   MEDIUM
   HIGH
   URGENT
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+model UserPreferences {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String   @unique @db.Uuid
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  soundEnabled          Boolean  @default(true)
+  desktopNotifications  Boolean  @default(true)
+  emailNotifications    Boolean  @default(false)
+  autoMarkAsRead        Boolean  @default(false)
+  theme                 String   @default("system")
+  language              String   @default("en")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("user_preferences")
 }

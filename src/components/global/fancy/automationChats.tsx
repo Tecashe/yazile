@@ -2166,6 +2166,708 @@
 
 // export default AutomationChats
 
+// "use client"
+
+// import type React from "react"
+// import { useEffect, useState, useRef, useCallback, useMemo } from "react"
+// import { motion } from "framer-motion"
+// import { useSpring, animated } from "react-spring"
+// import { ArrowLeft, MessageSquare, Loader2, Zap } from "lucide-react"
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import { Button } from "@/components/ui/button"
+// import { ScrollArea } from "@/components/ui/scroll-area"
+// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+// import { Badge } from "@/components/ui/badge"
+// import type { Conversation, Message } from "@/types/dashboard"
+// import { fetchChatsAndBusinessVariables, sendMessage } from "@/actions/messageAction/messageAction"
+// import { cn } from "@/lib/utils"
+// import FancyLoader from "./fancy-loader"
+// import ExampleConversations from "./exampleConvo"
+// import DeleteConfirmationModal from "./confirmDelete"
+
+// import { usePusher } from "@/hooks/use-pusher"
+// import { useChatState } from "@/hooks/use-chat-state"
+// import { useOfflineStorage } from "@/hooks/use-offline-storage"
+// import { ChatHeader } from "./chat-header"
+// import { ConversationList } from "./conversation-list"
+// import { MessageInput } from "./message-input"
+
+// interface AutomationChatsProps {
+//   automationId: string
+// }
+
+// interface BusinessVariables {
+//   [key: string]: string
+//   business_name: string
+//   welcome_message: string
+//   business_industry: string
+// }
+
+// const BOT_NAME = "AiAssist"
+// const BOT_AVATAR = "/fancy-profile-pic.svg"
+// const EXCLUDED_CHAT_ID = "17841444435951291"
+
+// const gradientBorder = "bg-gradient-to-r from-primary via-purple-500 to-secondary p-[2px] rounded-lg"
+// const fancyBackground = "bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1d1d1d]"
+
+// const ShimmeringBorder = ({ children }: { children: React.ReactNode }) => {
+//   const styles = useSpring({
+//     from: { backgroundPosition: "0% 50%" },
+//     to: { backgroundPosition: "100% 50%" },
+//     config: { duration: 5000 },
+//     loop: true,
+//   })
+
+//   return (
+//     <animated.div
+//       style={{
+//         ...styles,
+//         backgroundSize: "200% 200%",
+//       }}
+//       className={`${gradientBorder} p-[2px] rounded-lg`}
+//     >
+//       {children}
+//     </animated.div>
+//   )
+// }
+
+// const FancyErrorMessage: React.FC<{ message: string }> = ({ message }) => {
+//   return (
+//     <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+//       <motion.div
+//         initial={{ scale: 0 }}
+//         animate={{ scale: 1 }}
+//         transition={{ type: "spring", stiffness: 260, damping: 20 }}
+//       >
+//         <Zap className="w-16 h-16 text-yellow-400 mb-4" />
+//       </motion.div>
+//       <h3 className="text-xl font-semibold mb-2">Hang tight!</h3>
+//       <p className="text-muted-foreground mb-4">{message}</p>
+//       <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}>
+//         <Loader2 className="w-6 h-6 text-primary animate-spin" />
+//       </motion.div>
+//     </div>
+//   )
+// }
+
+// const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
+//   const [chatState, chatActions] = useChatState()
+//   const { cachedConversations, isOffline, saveConversations, loadReadStatus, saveReadStatus } = useOfflineStorage()
+//   const { pusher, isConnected: isPusherConnected, subscribe } = usePusher()
+
+//   const [newMessage, setNewMessage] = useState("")
+//   const [isTyping, setIsTyping] = useState(false)
+//   const [isLoading, setIsLoading] = useState(true)
+//   const [error, setError] = useState<string | null>(null)
+//   const [isRecording, setIsRecording] = useState(false)
+//   const [token, setToken] = useState<string | null>(null)
+//   const [pageId, setPageId] = useState<string | null>(null)
+//   const [businessVariables, setBusinessVariables] = useState<BusinessVariables>({
+//     business_name: "",
+//     welcome_message: "",
+//     business_industry: "",
+//   })
+
+//   const [soundEnabled, setSoundEnabled] = useState(true)
+//   const [searchQuery, setSearchQuery] = useState("")
+//   const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "recent">("all")
+//   const [isSearchFocused, setIsSearchFocused] = useState(false)
+//   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(new Set())
+//   const [starredConversations, setStarredConversations] = useState<Set<string>>(new Set())
+//   const [hasNewMessages, setHasNewMessages] = useState(false)
+
+//   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+//   const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null)
+
+//   const scrollRef = useRef<HTMLDivElement>(null)
+//   const audioRef = useRef<HTMLAudioElement | null>(null)
+
+//   useEffect(() => {
+//     if (typeof window !== "undefined") {
+//       const audio = new Audio("/message-notification.mp3")
+//       audio.load()
+//       audioRef.current = audio
+//       return () => {
+//         if (audioRef.current) {
+//           audioRef.current.pause()
+//           audioRef.current = null
+//         }
+//       }
+//     }
+//   }, [])
+
+//   useEffect(() => {
+//     const savedReadStatus = loadReadStatus()
+//     if (savedReadStatus.size > 0) {
+//       savedReadStatus.forEach((conversationId) => {
+//         chatActions.markConversationAsRead(conversationId)
+//       })
+//     }
+//   }, [loadReadStatus, chatActions])
+
+//   useEffect(() => {
+//     saveReadStatus(chatState.readConversations)
+//   }, [chatState.readConversations, saveReadStatus])
+
+//   useEffect(() => {
+//     if (!pusher || !isPusherConnected || !automationId) return
+
+//     const channelName = `automation-${automationId}`
+//     const channel = subscribe(channelName)
+
+//     if (channel) {
+//       const handleNewMessage = (data: { conversationId: string; message: Message }) => {
+//         console.log("New message received via Pusher:", data)
+//         chatActions.addMessage(data.conversationId, data.message)
+
+//         if (soundEnabled && chatState.selectedConversation?.id !== data.conversationId) {
+//           playNotificationSound()
+//         }
+
+//         setHasNewMessages(true)
+//       }
+
+//       const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
+//         console.log("Message read status updated via Pusher:", data)
+//         const conversation = chatState.conversations.find((c) => c.id === data.conversationId)
+//         if (conversation) {
+//           const updatedMessages = conversation.messages.map((msg) =>
+//             data.messageIds.includes(msg.id) ? { ...msg, read: true } : msg,
+//           )
+//           chatActions.updateConversation(data.conversationId, { messages: updatedMessages })
+//         }
+//       }
+
+//       const handleConversationUpdated = (data: { conversation: Conversation }) => {
+//         console.log("Conversation updated via Pusher:", data)
+//         chatActions.updateConversation(data.conversation.id, data.conversation)
+//       }
+
+//       channel.bind("new-message", handleNewMessage)
+//       channel.bind("message-read", handleMessageRead)
+//       channel.bind("conversation-updated", handleConversationUpdated)
+
+//       return () => {
+//         channel.unbind("new-message", handleNewMessage)
+//         channel.unbind("message-read", handleMessageRead)
+//         channel.unbind("conversation-updated", handleConversationUpdated)
+//       }
+//     }
+//   }, [
+//     pusher,
+//     isPusherConnected,
+//     automationId,
+//     chatState.selectedConversation,
+//     soundEnabled,
+//     chatActions,
+//     chatState.conversations,
+//   ])
+
+//   const playNotificationSound = useCallback(() => {
+//     if (!soundEnabled || !audioRef.current) return
+
+//     try {
+//       audioRef.current.currentTime = 0
+//       const playPromise = audioRef.current.play()
+
+//       if (playPromise !== undefined) {
+//         playPromise.catch((error) => {
+//           console.error("Audio play failed:", error)
+//         })
+//       }
+//     } catch (e) {
+//       console.error("Error playing sound:", e)
+//     }
+//   }, [soundEnabled])
+
+//   const fetchChats = useCallback(async () => {
+//     if (isOffline) return
+
+//     if (!automationId) {
+//       setError("Missing automation ID")
+//       setIsLoading(false)
+//       return
+//     }
+
+//     try {
+//       setError(null)
+//       const result = await fetchChatsAndBusinessVariables(automationId)
+
+//       if (!result || typeof result !== "object") {
+//         throw new Error("Invalid response from server")
+//       }
+
+//       const { conversations, token, businessVariables } = result as {
+//         conversations: any[]
+//         token: string
+//         businessVariables: BusinessVariables
+//       }
+
+//       if (!Array.isArray(conversations)) {
+//         throw new Error("Conversations data is not in the expected format")
+//       }
+
+//       const transformedConversations = conversations
+//         .filter((conv) => conv.chatId !== EXCLUDED_CHAT_ID)
+//         .map(
+//           (conv): Conversation => ({
+//             id: conv.chatId,
+//             userId: conv.messages[0]?.senderId || conv.chatId,
+//             pageId: conv.pageId,
+//             messages: conv.messages.map(
+//               (msg: any): Message => ({
+//                 id: msg.id,
+//                 role: msg.role,
+//                 content: msg.content,
+//                 senderId: msg.senderId,
+//                 createdAt: new Date(msg.createdAt),
+//                 read: chatState.readConversations.has(conv.chatId) ? true : Boolean(msg.read),
+//               }),
+//             ),
+//             createdAt: new Date(conv.messages[0]?.createdAt ?? Date.now()),
+//             updatedAt: new Date(conv.messages[conv.messages.length - 1]?.createdAt ?? Date.now()),
+//             unreadCount: chatState.readConversations.has(conv.chatId)
+//               ? 0
+//               : conv.messages.filter((msg: any) => !msg.read).length,
+//             Automation: null,
+//           }),
+//         )
+
+//       transformedConversations.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+
+//       chatActions.setConversations(transformedConversations)
+//       saveConversations(transformedConversations)
+
+//       if (transformedConversations.length > 0 && !pageId) {
+//         setPageId(transformedConversations[0].pageId)
+//       }
+
+//       if (token) setToken(token)
+//       if (businessVariables) setBusinessVariables(businessVariables)
+
+//       setIsLoading(false)
+//     } catch (error) {
+//       console.error("Error fetching chats:", error)
+
+//       if (typeof navigator !== "undefined" && !navigator.onLine) {
+//         if (cachedConversations.length > 0) {
+//           chatActions.setConversations(cachedConversations)
+//           setIsLoading(false)
+//         } else {
+//           setError("You are offline. Please check your internet connection.")
+//         }
+//       } else {
+//         setError(`Error loading conversations: ${error instanceof Error ? error.message : "Unknown error"}`)
+//       }
+//     }
+//   }, [
+//     automationId,
+//     isOffline,
+//     cachedConversations,
+//     chatState.readConversations,
+//     chatActions,
+//     saveConversations,
+//     pageId,
+//   ])
+
+//   useEffect(() => {
+//     if (typeof navigator !== "undefined" && navigator.onLine) {
+//       fetchChats()
+//     } else if (cachedConversations.length > 0) {
+//       chatActions.setConversations(cachedConversations)
+//       setIsLoading(false)
+//     } else {
+//       setIsLoading(false)
+//     }
+//   }, [fetchChats, cachedConversations, chatActions])
+
+//   const filteredConversations = useMemo(() => {
+//     let filtered = [...chatState.conversations]
+
+//     if (searchQuery.trim()) {
+//       const query = searchQuery.toLowerCase()
+//       filtered = filtered.filter((conv) => {
+//         const hasMatchingMessage = conv.messages.some((msg) => msg.content.toLowerCase().includes(query))
+//         const matchesId = conv.id.toLowerCase().includes(query)
+//         return hasMatchingMessage || matchesId
+//       })
+//     }
+
+//     if (activeFilter === "unread") {
+//       filtered = filtered.filter((conv) => conv.unreadCount > 0)
+//     } else if (activeFilter === "recent") {
+//       filtered = filtered.slice(0, 5)
+//     }
+
+//     filtered.sort((a, b) => {
+//       if (pinnedConversations.has(a.id) && !pinnedConversations.has(b.id)) return -1
+//       if (!pinnedConversations.has(a.id) && pinnedConversations.has(b.id)) return 1
+//       return b.updatedAt.getTime() - a.updatedAt.getTime()
+//     })
+
+//     return filtered
+//   }, [chatState.conversations, searchQuery, activeFilter, pinnedConversations])
+
+//   const handleSendMessage = async () => {
+//     if (!newMessage.trim() || !chatState.selectedConversation || isOffline) return
+//     if (!token || !pageId) {
+//       setError("Missing authentication token or page ID")
+//       return
+//     }
+
+//     setIsTyping(true)
+//     setError(null)
+
+//     try {
+//       const userId = `${pageId}_${chatState.selectedConversation.userId}`
+//       const result = await sendMessage(newMessage, userId, pageId, automationId, token, businessVariables)
+
+//       if (result.success && result.userMessage) {
+//         const userMessage: Message = {
+//           id: Date.now().toString(),
+//           role: "user",
+//           content: result.userMessage.content,
+//           senderId: chatState.selectedConversation.userId,
+//           receiverId: pageId,
+//           createdAt: result.userMessage.timestamp,
+//           status: "sent",
+//           read: true,
+//         }
+
+//         chatActions.addMessage(chatState.selectedConversation.id, userMessage)
+//         setNewMessage("")
+
+//         setTimeout(() => {
+//           if (scrollRef.current) {
+//             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+//           }
+//         }, 100)
+//       } else {
+//         setError(`Failed to send message: ${result.message || "Unknown error"}`)
+//       }
+//     } catch (error) {
+//       console.error("Error sending message:", error)
+//       if (typeof navigator !== "undefined" && !navigator.onLine) {
+//         setError("You are offline. Messages can't be sent until you reconnect.")
+//       } else {
+//         setError(`Error sending message: ${error instanceof Error ? error.message : "Unknown error"}`)
+//       }
+//     } finally {
+//       setIsTyping(false)
+//     }
+//   }
+
+//   const handleSelectConversation = (conversation: Conversation) => {
+//     chatActions.markConversationAsRead(conversation.id)
+//     chatActions.setSelectedConversation(conversation)
+//     setHasNewMessages(false)
+//   }
+
+//   const togglePinConversation = (conversationId: string, e: React.MouseEvent) => {
+//     e.stopPropagation()
+//     setPinnedConversations((prev) => {
+//       const newSet = new Set(prev)
+//       if (newSet.has(conversationId)) {
+//         newSet.delete(conversationId)
+//       } else {
+//         newSet.add(conversationId)
+//       }
+//       return newSet
+//     })
+//   }
+
+//   const toggleStarConversation = (conversationId: string, e: React.MouseEvent) => {
+//     e.stopPropagation()
+//     setStarredConversations((prev) => {
+//       const newSet = new Set(prev)
+//       if (newSet.has(conversationId)) {
+//         newSet.delete(conversationId)
+//       } else {
+//         newSet.add(conversationId)
+//       }
+//       return newSet
+//     })
+//   }
+
+//   const handleDeleteConversation = (conversation: Conversation) => {
+//     setConversationToDelete(conversation)
+//     setIsDeleteModalOpen(true)
+//   }
+
+//   const confirmDelete = async () => {
+//     if (!conversationToDelete) return
+
+//     try {
+//       chatActions.deleteConversation(conversationToDelete.id)
+
+//       if (pinnedConversations.has(conversationToDelete.id)) {
+//         setPinnedConversations((prev) => {
+//           const newSet = new Set(prev)
+//           newSet.delete(conversationToDelete.id)
+//           return newSet
+//         })
+//       }
+
+//       if (starredConversations.has(conversationToDelete.id)) {
+//         setStarredConversations((prev) => {
+//           const newSet = new Set(prev)
+//           newSet.delete(conversationToDelete.id)
+//           return newSet
+//         })
+//       }
+//     } catch (error) {
+//       console.error("Error deleting conversation:", error)
+//       setError(`Failed to delete conversation: ${error instanceof Error ? error.message : String(error)}`)
+//     } finally {
+//       setIsDeleteModalOpen(false)
+//       setConversationToDelete(null)
+//     }
+//   }
+
+//   return (
+//     <>
+//       <ShimmeringBorder>
+//         <div
+//           className={`flex flex-col ${fancyBackground} text-foreground rounded-lg overflow-hidden h-full max-h-[90vh] sm:max-h-[80vh]`}
+//         >
+//           {isLoading ? (
+//             <FancyLoader />
+//           ) : error ? (
+//             <FancyErrorMessage message={error} />
+//           ) : (
+//             <>
+//               {chatState.selectedConversation ? (
+//                 <>
+//                   <div className="p-2 sm:p-4 bg-background border-b border-primary/10 flex items-center">
+//                     <Button
+//                       variant="ghost"
+//                       className="mr-4 p-2"
+//                       onClick={() => chatActions.setSelectedConversation(null)}
+//                     >
+//                       <ArrowLeft size={20} />
+//                     </Button>
+//                     <Avatar className="w-10 h-10">
+//                       <AvatarImage
+//                         src={`https://api.dicebear.com/6.x/initials/svg?seed=${chatState.selectedConversation.id}`}
+//                       />
+//                       <AvatarFallback>CL</AvatarFallback>
+//                     </Avatar>
+//                     <div className="ml-3 flex-grow">
+//                       <h4 className="font-medium text-lg">Client</h4>
+//                       <p className="text-sm text-muted-foreground flex items-center">
+//                         {isPusherConnected ? (
+//                           <span className="flex items-center">
+//                             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+//                             Connected
+//                           </span>
+//                         ) : (
+//                           <span className="flex items-center">
+//                             <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+//                             {isOffline ? "Offline" : "Connecting..."}
+//                           </span>
+//                         )}
+//                       </p>
+//                     </div>
+//                   </div>
+
+//                   {isOffline && (
+//                     <Alert variant="destructive" className="m-4 border-red-400">
+//                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
+//                       <AlertDescription className="text-sm">
+//                         Showing cached messages. New messages can&apos;t be sent.
+//                       </AlertDescription>
+//                     </Alert>
+//                   )}
+
+//                   <ScrollArea className="flex-grow h-[calc(100vh-300px)] overflow-hidden">
+//                     <div className="p-4 space-y-4" ref={scrollRef}>
+//                       {chatState.selectedConversation.messages.length === 0 ? (
+//                         <div className="flex flex-col items-center justify-center h-64 text-center">
+//                           <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+//                           <h3 className="text-lg font-medium mb-2">No messages yet</h3>
+//                           <p className="text-muted-foreground max-w-md">
+//                             Start the conversation by sending a message below.
+//                           </p>
+//                         </div>
+//                       ) : (
+//                         chatState.selectedConversation.messages.map((message, index) => (
+//                           <motion.div
+//                             key={`${message.id}-${index}`}
+//                             initial={{ opacity: 0, y: 20 }}
+//                             animate={{ opacity: 1, y: 0 }}
+//                             transition={{ duration: 0.3 }}
+//                             className={`flex items-end mb-4 ${message.role === "assistant" ? "justify-start" : "justify-end"}`}
+//                           >
+//                             {message.role === "assistant" ? (
+//                               <Avatar className="w-8 h-8 mr-2 border-2 border-primary">
+//                                 <AvatarImage src={BOT_AVATAR || "/placeholder.svg"} />
+//                                 <AvatarFallback>{BOT_NAME.slice(0, 2)}</AvatarFallback>
+//                               </Avatar>
+//                             ) : (
+//                               <Avatar className="w-8 h-8 ml-2 order-last border-2 border-primary">
+//                                 <AvatarImage src={`https://i.pravatar.cc/150?u=${message.senderId}`} />
+//                                 <AvatarFallback>CL</AvatarFallback>
+//                               </Avatar>
+//                             )}
+//                             <div
+//                               className={cn(
+//                                 "max-w-[85%] sm:max-w-[75%] p-2 sm:p-3 rounded-3xl text-sm relative",
+//                                 message.role === "assistant"
+//                                   ? "bg-gradient-to-br from-blue-400/30 to-blue-600/30 border-2 border-blue-500/50 text-white"
+//                                   : "bg-gradient-to-br from-purple-400/30 to-purple-600/30 border-2 border-purple-500/50 text-white",
+//                               )}
+//                               style={{
+//                                 backdropFilter: "blur(10px)",
+//                                 WebkitBackdropFilter: "blur(10px)",
+//                               }}
+//                             >
+//                               <p className="break-words relative z-10">{message.content}</p>
+//                               <div className="flex justify-between items-center mt-1 text-xs text-gray-300">
+//                                 <span>
+//                                   {new Date(message.createdAt).toLocaleTimeString([], {
+//                                     hour: "2-digit",
+//                                     minute: "2-digit",
+//                                   })}
+//                                 </span>
+//                               </div>
+//                             </div>
+//                           </motion.div>
+//                         ))
+//                       )}
+//                     </div>
+//                   </ScrollArea>
+
+//                   <MessageInput
+//                     message={newMessage}
+//                     isOffline={isOffline}
+//                     isRecording={isRecording}
+//                     onMessageChange={setNewMessage}
+//                     onSendMessage={handleSendMessage}
+//                     onVoiceMessage={() => setIsRecording(!isRecording)}
+//                     onFileUpload={(event) => {
+//                       const file = event.target.files?.[0]
+//                       if (file) {
+//                         console.log("File selected:", file.name)
+//                       }
+//                     }}
+//                   />
+//                 </>
+//               ) : (
+//                 <>
+//                   <ChatHeader
+//                     totalUnreadMessages={chatState.totalUnreadMessages}
+//                     hasNewMessages={hasNewMessages}
+//                     soundEnabled={soundEnabled}
+//                     searchQuery={searchQuery}
+//                     isSearchFocused={isSearchFocused}
+//                     onToggleSound={() => setSoundEnabled(!soundEnabled)}
+//                     onMarkAllAsRead={chatActions.markAllAsRead}
+//                     onShowHelp={() => {}}
+//                     onSearchChange={setSearchQuery}
+//                     onSearchFocus={() => setIsSearchFocused(true)}
+//                     onSearchBlur={() => setIsSearchFocused(false)}
+//                     onClearSearch={() => setSearchQuery("")}
+//                   />
+
+//                   {isOffline && (
+//                     <Alert variant="destructive" className="mx-4 mb-4 border-red-400">
+//                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
+//                       <AlertDescription className="text-sm">
+//                         Showing cached conversations. Real-time updates are unavailable.
+//                         <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-500">
+//                           Offline Mode
+//                         </Badge>
+//                       </AlertDescription>
+//                     </Alert>
+//                   )}
+
+//                   <div className="px-4">
+//                     <Tabs
+//                       defaultValue="all"
+//                       className="w-full"
+//                       onValueChange={(value) => setActiveFilter(value as any)}
+//                     >
+//                       <TabsList className="grid grid-cols-3 mb-4">
+//                         <TabsTrigger value="all" className="text-xs">
+//                           All Chats
+//                         </TabsTrigger>
+//                         <TabsTrigger value="unread" className="text-xs">
+//                           Unread
+//                           {chatState.totalUnreadMessages > 0 && (
+//                             <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1">
+//                               {chatState.totalUnreadMessages}
+//                             </Badge>
+//                           )}
+//                         </TabsTrigger>
+//                         <TabsTrigger value="recent" className="text-xs">
+//                           Recent
+//                         </TabsTrigger>
+//                       </TabsList>
+//                     </Tabs>
+//                   </div>
+
+//                   <ScrollArea className="flex-grow">
+//                     <div className="flex flex-col p-4 space-y-4">
+//                       {!token ? (
+//                         <div className="w-full p-4 bg-background rounded-lg shadow-md">
+//                           <ExampleConversations onSelectConversation={handleSelectConversation} className="mb-4" />
+//                           <div className="text-center">
+//                             <p className="text-muted-foreground mb-4 text-sm sm:text-base">
+//                               Connect your Instagram account to start receiving real messages.
+//                             </p>
+//                             <Button
+//                               onClick={() => console.log("Navigate to integration page")}
+//                               className="bg-[#3352CC] hover:bg-[#3352CC]/90 text-white font-bold py-2 px-4 rounded-full transition-all duration-200 transform hover:scale-105 w-full"
+//                               disabled={isOffline}
+//                             >
+//                               Connect Instagram
+//                             </Button>
+//                           </div>
+//                         </div>
+//                       ) : filteredConversations.length === 0 ? (
+//                         <div className="flex flex-col items-center justify-center h-64 text-center">
+//                           <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+//                           <h3 className="text-lg font-medium mb-2">No conversations yet</h3>
+//                           <p className="text-muted-foreground max-w-md">
+//                             {isOffline
+//                               ? "You're currently offline. Saved conversations will appear here."
+//                               : "Connect your account to start receiving messages."}
+//                           </p>
+//                           <ExampleConversations onSelectConversation={handleSelectConversation} className="mt-6" />
+//                         </div>
+//                       ) : (
+//                         <ConversationList
+//                           conversations={filteredConversations}
+//                           pinnedConversations={pinnedConversations}
+//                           starredConversations={starredConversations}
+//                           onSelectConversation={handleSelectConversation}
+//                           onTogglePin={togglePinConversation}
+//                           onToggleStar={toggleStarConversation}
+//                           onDeleteConversation={handleDeleteConversation}
+//                         />
+//                       )}
+//                     </div>
+//                   </ScrollArea>
+//                 </>
+//               )}
+//             </>
+//           )}
+
+//           <DeleteConfirmationModal
+//             isOpen={isDeleteModalOpen}
+//             onClose={() => setIsDeleteModalOpen(false)}
+//             onConfirm={confirmDelete}
+//           />
+//         </div>
+//       </ShimmeringBorder>
+//     </>
+//   )
+// }
+
+// export default AutomationChats
+
+
 "use client"
 
 import type React from "react"
@@ -2189,12 +2891,14 @@ import DeleteConfirmationModal from "./confirmDelete"
 import { usePusher } from "@/hooks/use-pusher"
 import { useChatState } from "@/hooks/use-chat-state"
 import { useOfflineStorage } from "@/hooks/use-offline-storage"
+import { useDatabaseSync } from "@/hooks/use-database-sync"
 import { ChatHeader } from "./chat-header"
 import { ConversationList } from "./conversation-list"
 import { MessageInput } from "./message-input"
 
 interface AutomationChatsProps {
   automationId: string
+  userId?: string
 }
 
 interface BusinessVariables {
@@ -2251,10 +2955,11 @@ const FancyErrorMessage: React.FC<{ message: string }> = ({ message }) => {
   )
 }
 
-const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
+const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId = "" }) => {
   const [chatState, chatActions] = useChatState()
   const { cachedConversations, isOffline, saveConversations, loadReadStatus, saveReadStatus } = useOfflineStorage()
   const { pusher, isConnected: isPusherConnected, subscribe } = usePusher()
+  const { loadConversations, saveUserPreferences, loadUserPreferences } = useDatabaseSync(automationId, userId)
 
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
@@ -2283,6 +2988,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  // Initialize audio
   useEffect(() => {
     if (typeof window !== "undefined") {
       const audio = new Audio("/message-notification.mp3")
@@ -2297,101 +3003,65 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
     }
   }, [])
 
+  // Load user preferences on mount
   useEffect(() => {
-    const savedReadStatus = loadReadStatus()
-    if (savedReadStatus.size > 0) {
-      savedReadStatus.forEach((conversationId) => {
-        chatActions.markConversationAsRead(conversationId)
-      })
-    }
-  }, [loadReadStatus, chatActions])
+    const loadPrefs = async () => {
+      if (!userId) return
 
-  useEffect(() => {
-    saveReadStatus(chatState.readConversations)
-  }, [chatState.readConversations, saveReadStatus])
-
-  useEffect(() => {
-    if (!pusher || !isPusherConnected || !automationId) return
-
-    const channelName = `automation-${automationId}`
-    const channel = subscribe(channelName)
-
-    if (channel) {
-      const handleNewMessage = (data: { conversationId: string; message: Message }) => {
-        console.log("New message received via Pusher:", data)
-        chatActions.addMessage(data.conversationId, data.message)
-
-        if (soundEnabled && chatState.selectedConversation?.id !== data.conversationId) {
-          playNotificationSound()
+      try {
+        const prefs = await loadUserPreferences()
+        if (prefs) {
+          setSoundEnabled(prefs.soundEnabled)
         }
-
-        setHasNewMessages(true)
-      }
-
-      const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
-        console.log("Message read status updated via Pusher:", data)
-        const conversation = chatState.conversations.find((c) => c.id === data.conversationId)
-        if (conversation) {
-          const updatedMessages = conversation.messages.map((msg) =>
-            data.messageIds.includes(msg.id) ? { ...msg, read: true } : msg,
-          )
-          chatActions.updateConversation(data.conversationId, { messages: updatedMessages })
-        }
-      }
-
-      const handleConversationUpdated = (data: { conversation: Conversation }) => {
-        console.log("Conversation updated via Pusher:", data)
-        chatActions.updateConversation(data.conversation.id, data.conversation)
-      }
-
-      channel.bind("new-message", handleNewMessage)
-      channel.bind("message-read", handleMessageRead)
-      channel.bind("conversation-updated", handleConversationUpdated)
-
-      return () => {
-        channel.unbind("new-message", handleNewMessage)
-        channel.unbind("message-read", handleMessageRead)
-        channel.unbind("conversation-updated", handleConversationUpdated)
+      } catch (error) {
+        console.error("Error loading preferences:", error)
       }
     }
-  }, [
-    pusher,
-    isPusherConnected,
-    automationId,
-    chatState.selectedConversation,
-    soundEnabled,
-    chatActions,
-    chatState.conversations,
-  ])
 
-  const playNotificationSound = useCallback(() => {
-    if (!soundEnabled || !audioRef.current) return
+    loadPrefs()
+  }, [userId, loadUserPreferences])
 
-    try {
-      audioRef.current.currentTime = 0
-      const playPromise = audioRef.current.play()
+  // Save preferences when they change
+  useEffect(() => {
+    if (!userId) return
 
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.error("Audio play failed:", error)
+    const savePrefs = async () => {
+      try {
+        await saveUserPreferences({
+          soundEnabled,
+          desktopNotifications: true,
+          emailNotifications: false,
+          autoMarkAsRead: false,
+          theme: "system",
+          language: "en",
         })
+      } catch (error) {
+        console.error("Error saving preferences:", error)
       }
-    } catch (e) {
-      console.error("Error playing sound:", e)
     }
-  }, [soundEnabled])
 
+    savePrefs()
+  }, [soundEnabled, userId, saveUserPreferences])
+
+  // Load conversations from database
   const fetchChats = useCallback(async () => {
-    if (isOffline) return
-
-    if (!automationId) {
-      setError("Missing automation ID")
-      setIsLoading(false)
-      return
-    }
+    if (isOffline || !automationId) return
 
     try {
       setError(null)
+      setIsLoading(true)
+
+      // Try to load from database first
+      const dbConversations = await loadConversations()
+
+      if (dbConversations.length > 0) {
+        chatActions.setConversations(dbConversations)
+        saveConversations(dbConversations)
+        setIsLoading(false)
+        return
+      }
+
+      // Fallback to existing API
       const result = await fetchChatsAndBusinessVariables(automationId)
 
       if (!result || typeof result !== "object") {
@@ -2445,42 +3115,97 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
 
       if (token) setToken(token)
       if (businessVariables) setBusinessVariables(businessVariables)
-
-      setIsLoading(false)
     } catch (error) {
       console.error("Error fetching chats:", error)
 
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        if (cachedConversations.length > 0) {
-          chatActions.setConversations(cachedConversations)
-          setIsLoading(false)
-        } else {
-          setError("You are offline. Please check your internet connection.")
-        }
+      if (cachedConversations.length > 0) {
+        chatActions.setConversations(cachedConversations)
       } else {
         setError(`Error loading conversations: ${error instanceof Error ? error.message : "Unknown error"}`)
       }
+    } finally {
+      setIsLoading(false)
     }
   }, [
     automationId,
     isOffline,
-    cachedConversations,
-    chatState.readConversations,
+    loadConversations,
     chatActions,
     saveConversations,
+    cachedConversations,
+    chatState.readConversations,
     pageId,
   ])
 
+  // Initial load
   useEffect(() => {
-    if (typeof navigator !== "undefined" && navigator.onLine) {
-      fetchChats()
-    } else if (cachedConversations.length > 0) {
-      chatActions.setConversations(cachedConversations)
-      setIsLoading(false)
-    } else {
-      setIsLoading(false)
+    fetchChats()
+  }, []) // Remove fetchChats from dependencies to prevent infinite loop
+
+  // Set up Pusher subscriptions
+  useEffect(() => {
+    if (!pusher || !isPusherConnected || !automationId) return
+
+    const channelName = `automation-${automationId}`
+    const channel = subscribe(channelName)
+
+    if (channel) {
+      const handleNewMessage = (data: { conversationId: string; message: Message }) => {
+        console.log("New message received via Pusher:", data)
+        chatActions.addMessage(data.conversationId, data.message)
+
+        if (soundEnabled && chatState.selectedConversation?.id !== data.conversationId) {
+          playNotificationSound()
+        }
+
+        setHasNewMessages(true)
+      }
+
+      const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
+        console.log("Message read status updated via Pusher:", data)
+        const conversation = chatState.conversations.find((c) => c.id === data.conversationId)
+        if (conversation) {
+          const updatedMessages = conversation.messages.map((msg) =>
+            data.messageIds.includes(msg.id) ? { ...msg, read: true } : msg,
+          )
+          chatActions.updateConversation(data.conversationId, { messages: updatedMessages })
+        }
+      }
+
+      channel.bind("new-message", handleNewMessage)
+      channel.bind("message-read", handleMessageRead)
+
+      return () => {
+        channel.unbind("new-message", handleNewMessage)
+        channel.unbind("message-read", handleMessageRead)
+      }
     }
-  }, [fetchChats, cachedConversations, chatActions])
+  }, [
+    pusher,
+    isPusherConnected,
+    automationId,
+    soundEnabled,
+    chatState.selectedConversation?.id,
+    chatActions,
+    chatState.conversations,
+  ])
+
+  const playNotificationSound = useCallback(() => {
+    if (!soundEnabled || !audioRef.current) return
+
+    try {
+      audioRef.current.currentTime = 0
+      const playPromise = audioRef.current.play()
+
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.error("Audio play failed:", error)
+        })
+      }
+    } catch (e) {
+      console.error("Error playing sound:", e)
+    }
+  }, [soundEnabled])
 
   const filteredConversations = useMemo(() => {
     let filtered = [...chatState.conversations]
@@ -2535,7 +3260,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
           read: true,
         }
 
-        chatActions.addMessage(chatState.selectedConversation.id, userMessage)
+        await chatActions.addMessage(chatState.selectedConversation.id, userMessage)
         setNewMessage("")
 
         setTimeout(() => {
@@ -2599,7 +3324,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
     if (!conversationToDelete) return
 
     try {
-      chatActions.deleteConversation(conversationToDelete.id)
+      await chatActions.deleteConversation(conversationToDelete.id)
 
       if (pinnedConversations.has(conversationToDelete.id)) {
         setPinnedConversations((prev) => {
@@ -2675,7 +3400,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
                     <Alert variant="destructive" className="m-4 border-red-400">
                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
                       <AlertDescription className="text-sm">
-                        Showing cached messages. New messages can&apos;t be sent.
+                        Showing cached messages. New messages can't be sent.
                       </AlertDescription>
                     </Alert>
                   )}
