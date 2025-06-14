@@ -451,7 +451,7 @@ export const AutomationCardModern: React.FC<AutomationCardModernProps> = ({ auto
             className="mt-4 p-4 border border-destructive/30 rounded-lg bg-destructive/5"
           >
             <p className="text-sm text-destructive mb-3">
-              Are you sure you want to delete "{automation.name}"? This action cannot be undone.
+              Are you sure you want to delete &ldquo;{automation.name}&rdquo;? This action cannot be undone.
             </p>
             <div className="flex gap-2">
               <Button variant="destructive" size="sm" onClick={() => onDelete?.()}>
