@@ -444,7 +444,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
               )}
             </Button>
           </div>
-          <div className="relative group">
+          {/* <div className="relative group">
             <Button
               variant="outline"
               size="sm"
@@ -467,7 +467,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
             <div className="absolute top-full right-0 mt-2 bg-popover text-popover-foreground rounded-md p-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
               {showChats ? "Close Chats" : "Open Chats"}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {showDeleteConfirm && (

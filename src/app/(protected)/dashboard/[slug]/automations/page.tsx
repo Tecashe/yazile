@@ -678,7 +678,7 @@ const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: bool
     >
       <div className="flex items-center gap-4">
         <div className={`relative p-3 bg-gradient-to-br ${config.gradient} rounded-xl shadow-lg`}>
-          <Icon className="w-6 h-6 text-white" />
+          {/* <Icon className="w-6 h-6 text-white" /> */}
           <div className="absolute inset-0 bg-white/20 rounded-xl animate-pulse" />
         </div>
         <div>
@@ -852,10 +852,6 @@ const Page = () => {
 
       <div className="relative max-w-7xl mx-auto p-6 space-y-8">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Automation Dashboard</h1>
-          <p className="text-muted-foreground text-lg">Streamline your workflow with intelligent automation</p>
-        </motion.div>
 
         {/* Metrics Cards */}
         {!isLoading && hasAutomations && (
@@ -897,18 +893,6 @@ const Page = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Messages Sent</p>
                   <p className="text-2xl font-bold text-foreground">{metrics.totalMessages}</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-500/20">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-orange-500/20 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Conversion Rate</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.conversionRate}%</p>
                 </div>
               </div>
             </Card>
