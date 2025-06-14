@@ -2675,7 +2675,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
                     <Alert variant="destructive" className="m-4 border-red-400">
                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
                       <AlertDescription className="text-sm">
-                        Showing cached messages. New messages can't be sent.
+                        Showing cached messages. New messages can&apos;t be sent.
                       </AlertDescription>
                     </Alert>
                   )}
