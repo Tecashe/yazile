@@ -4,8 +4,8 @@ import { onUserInfor } from "@/actions/user"
 
 export async function GET(request: NextRequest, { params }: { params: { automationId: string } }) {
   try {
-   const userr =  await onUserInfor()
-   const  userId  = userr.data?.id
+    const userr =  await onUserInfor()
+        const  userId  = userr.data?.id
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
