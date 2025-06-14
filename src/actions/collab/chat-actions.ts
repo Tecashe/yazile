@@ -2834,12 +2834,6 @@ export async function respondToMeeting(chatId: string, messageId: string, respon
 
 
 
-//////
-// import { revalidatePath } from "next/cache"
-// import { onUserInfor } from "@/app/lib/user-info"
-// import { client } from "@/app/lib/client"
-// import { pusherServer } from "@/app/lib/pusher"
-
 // Replace it with this improved version
 export async function sendMessage(chatId: string, content: string, contentType = "text", tempId?: string) {
   try {
