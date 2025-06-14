@@ -250,6 +250,10 @@ model Automation {
   fallbackMessage  String?
   buttons          Json?          // Store as JSON array
 
+  messageTrackers   MessageTracker[]
+  sentimentAnalyses SentimentAnalysis[]
+  
+
 
 }
 
@@ -2671,3 +2675,69 @@ model UserPreferences {
 
   @@map("user_preferences")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+model MessageTracker {
+  id              String   @id @default(cuid())
+  automationId    String   @db.Uuid
+  pageId          String
+  senderId        String
+  messageCount    Int      @default(0)
+  messages        String[]
+  lastMessageAt   DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  automation      Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  // Composite unique constraint
+  @@unique([automationId, pageId, senderId])
+  @@index([automationId])
+  @@index([lastMessageAt])
+}
+
+
+model SentimentAnalysis {
+  id             String   @id @default(cuid())
+  automationId   String   @db.Uuid
+  pageId         String
+  senderId       String
+  sentiment      String   // "positive", "negative", "neutral"
+  confidence     Float
+  messages       String[] // The 4 messages that were analyzed
+  sentimentScore Float?   // Additional sentiment score
+  metrics        String?  // JSON string of metrics data
+  emotions       String?  // JSON string of emotions data
+  insights       String?  // JSON string of insights data
+  metadata       String?  // JSON string of metadata
+  analyzedAt     DateTime @default(now())
+
+
+  automation     Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId])
+  @@index([analyzedAt])
+  @@index([sentiment])
+}
+
