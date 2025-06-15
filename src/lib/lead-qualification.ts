@@ -818,7 +818,82 @@ import type { LeadStatus, Lead } from "@prisma/client"
 /**
  * Analyzes a message for sentiment and intent using n8n workflow
  */
+
+
+
+
 export async function analyzeMessage(message: string) {
+  try {
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://yaziln8n.onrender.com/webhook/analyze-message"
+    
+    const response = await fetch(n8nWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(process.env.N8N_API_KEY && {
+          Authorization: `Bearer ${process.env.N8N_API_KEY}`,
+        }),
+      },
+      body: JSON.stringify({
+        message: message,
+        analysisType: "lead_qualification",
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`n8n request failed: ${response.status}`)
+    }
+
+    const result = await response.json()
+    
+    // Check if the analysis was successful
+    if (!result.success) {
+      throw new Error(`Analysis failed: ${result.error?.message || 'Unknown error'}`)
+    }
+
+    const analysis = result.analysis
+
+    return {
+      sentiment: Number(analysis.sentiment) || 0,
+      purchaseIntent: Number(analysis.purchaseIntent) || 0,
+      questionIntent: Boolean(analysis.questionIntent),
+      informationSharing: Boolean(analysis.informationSharing),
+      objections: Boolean(analysis.objections),
+      intent: analysis.intent || null,
+      confidence: Number(analysis.intent?.confidence) || 0, // Fixed path
+      qualificationScore: Number(analysis.qualificationScore) || 0,
+      urgencyLevel: Number(analysis.urgencyLevel) || 1,
+      buyerPersona: analysis.buyerPersona || 'unknown',
+      recommendedAction: analysis.recommendedAction || 'low_priority',
+    }
+  } catch (error) {
+    console.error("Error analyzing message with n8n:", error)
+    return {
+      sentiment: 0,
+      purchaseIntent: 0,
+      questionIntent: false,
+      informationSharing: false,
+      objections: false,
+      intent: null,
+      confidence: 0,
+      qualificationScore: 0,
+      urgencyLevel: 1,
+      buyerPersona: 'unknown',
+      recommendedAction: 'low_priority',
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+export async function analyzeMessageE(message: string) {
   try {
     const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://yaziln8n.onrender.com/webhook/analyze-message"
 
@@ -1164,6 +1239,8 @@ async function sendLeadToN8n(lead: Lead) {
  * Main function to analyze a lead from Instagram interaction
  * This function prevents duplicate leads and handles race conditions
  */
+
+
 export async function analyzeLead(params: {
   userId: string
   automationId: string
