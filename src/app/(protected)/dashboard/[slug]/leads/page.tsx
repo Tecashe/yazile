@@ -189,7 +189,6 @@
 //   )
 // }
 
-
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { onUserInfor } from "@/actions/user"
@@ -369,7 +368,15 @@ async function getPremiumLeadsData(userId: string) {
                 followUpStrategy: generateFollowUpStrategy(lead),
                 buyerPersona: generateBuyerPersona(lead),
               }
-            : null,
+            : {
+                leadTier: "BRONZE",
+                estimatedValue: 0,
+                roi: 0,
+                notificationMessage: "Lead needs analysis",
+                nextActions: ["initial_analysis"],
+                followUpStrategy: "standard",
+                buyerPersona: "unknown",
+              },
         },
       })),
       topLeads: topLeads.map((lead) => ({
@@ -383,7 +390,13 @@ async function getPremiumLeadsData(userId: string) {
                 followUpStrategy: generateFollowUpStrategy(lead),
                 buyerPersona: generateBuyerPersona(lead),
               }
-            : null,
+            : {
+                leadTier: "BRONZE",
+                estimatedValue: 0,
+                roi: 0,
+                followUpStrategy: "standard",
+                buyerPersona: "unknown",
+              },
         },
       })),
       hasDuplicates: duplicateCount.length > 0,
@@ -421,9 +434,9 @@ function generateAINotification(interaction: any): string {
 }
 
 function generateLeadNotification(lead: any): string {
-  const score = lead.score
-  const tier = lead.qualificationData?.leadTier
-  const lastInteraction = lead.interactions[0]
+  const score = lead.score || 0
+  const tier = lead.qualificationData?.leadTier || "BRONZE"
+  const lastInteraction = lead.interactions?.[0]
 
   if (score >= 85 && tier === "PLATINUM") {
     return `🎯 Premium opportunity - schedule immediate call`
@@ -434,26 +447,34 @@ function generateLeadNotification(lead: any): string {
   if (lead.scheduledActions?.length > 0) {
     return `⏰ Scheduled follow-up pending - stay on track`
   }
+  if (!lead.qualificationData) {
+    return `📊 Lead needs AI analysis - run qualification`
+  }
   return `📊 Lead qualified and ready for engagement`
 }
 
 function generateNextActions(lead: any): string[] {
   const actions = []
-  const score = lead.score
-  const tier = lead.qualificationData?.leadTier
+  const score = lead.score || 0
+  const tier = lead.qualificationData?.leadTier || "BRONZE"
+
+  if (!lead.qualificationData) {
+    actions.push("run_ai_analysis")
+  }
 
   if (score >= 80) actions.push("immediate_call")
   if (tier === "PLATINUM" || tier === "GOLD") actions.push("send_proposal")
-  if (lead.interactions.length === 0) actions.push("initial_outreach")
+  if (!lead.interactions || lead.interactions.length === 0) actions.push("initial_outreach")
   if (lead.email) actions.push("email_sequence")
 
   return actions.slice(0, 3) // Limit to top 3 actions
 }
 
 function generateFollowUpStrategy(lead: any): string {
-  const tier = lead.qualificationData?.leadTier
-  const score = lead.score
+  const tier = lead.qualificationData?.leadTier || "BRONZE"
+  const score = lead.score || 0
 
+  if (!lead.qualificationData) return "needs_analysis"
   if (tier === "PLATINUM") return "immediate_personal_outreach"
   if (tier === "GOLD" && score >= 70) return "priority_nurturing"
   if (score >= 50) return "automated_sequence"
@@ -461,10 +482,11 @@ function generateFollowUpStrategy(lead: any): string {
 }
 
 function generateBuyerPersona(lead: any): string {
-  const score = lead.score
+  const score = lead.score || 0
   const engagementScore = lead.qualificationData?.engagementScore || 0
   const intentScore = lead.qualificationData?.intentScore || 0
 
+  if (!lead.qualificationData) return "unanalyzed_prospect"
   if (intentScore >= 80) return "ready_buyer"
   if (engagementScore >= 70) return "engaged_prospect"
   if (score >= 60) return "qualified_lead"
