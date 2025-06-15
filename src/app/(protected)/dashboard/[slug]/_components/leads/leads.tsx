@@ -1960,7 +1960,7 @@ function RecentAIAnalysisCard({ interactions }: { interactions: any[] }) {
               <div className="text-center py-8 text-muted-foreground">
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-sm">No recent AI analysis</p>
-                <p className="text-xs">Interactions will appear here as they're analyzed</p>
+                <p className="text-xs">Interactions will appear here as they&apos;re analyzed</p>
               </div>
             ) : (
               interactions.slice(0, 10).map((interaction) => {
