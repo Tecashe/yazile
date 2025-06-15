@@ -768,13 +768,181 @@ interface TypingIndicatorOptions {
 }
 
 // Enhanced typing indicator functionality with error handling
+// export async function sendTypingIndicator(options: TypingIndicatorOptions): Promise<boolean> {
+//   const { duration = 3000, pageId, recipientId, token } = options
+
+//   try {
+//     // Send typing_on
+//     await axios.post(
+//       `${process.env.INSTAGRAM_BASE_URL}/v22.0/${pageId}/messages`,
+//       {
+//         recipient: { id: recipientId },
+//         sender_action: "typing_on",
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           "Content-Type": "application/json",
+//         },
+//       },
+//     )
+
+//     // Wait for the specified duration
+//     await new Promise((resolve) => setTimeout(resolve, duration))
+
+//     // Send typing_off
+//     await axios.post(
+//       `${process.env.INSTAGRAM_BASE_URL}/v22.0/${pageId}/messages`,
+//       {
+//         recipient: { id: recipientId },
+//         sender_action: "typing_off",
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           "Content-Type": "application/json",
+//         },
+//       },
+//     )
+
+//     return true
+//   } catch (error) {
+//     const axiosError = error as AxiosError
+//     console.error("Error sending typing indicator:", axiosError.response?.data || axiosError.message)
+    
+//     // Log specific error details for debugging
+//     if (axiosError.response?.status === 400) {
+//       console.error("Typing indicator failed - likely missing permissions or invalid context")
+//     }
+    
+//     return false // Return false instead of throwing to allow message sending to continue
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export async function sendTypingIndicator(options: TypingIndicatorOptions): Promise<boolean> {
   const { duration = 3000, pageId, recipientId, token } = options
 
+  // Validate required parameters
+  if (!pageId || !recipientId || !token) {
+    console.error("Missing required parameters for typing indicator")
+    return false
+  }
+
   try {
-    // Send typing_on
+    // First, verify the conversation exists and is valid
+    const conversationCheck = await axios.get(
+      `${process.env.INSTAGRAM_BASE_URL}/v21.0/${pageId}/conversations`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          platform: "instagram",
+          user_id: recipientId
+        }
+      }
+    )
+
+    if (!conversationCheck.data?.data?.length) {
+      console.error("No active conversation found with recipient")
+      return false
+    }
+
+    // Send typing_on with additional validation
+    const typingOnPayload = {
+      recipient: { id: recipientId },
+      sender_action: "typing_on",
+    }
+
+    console.log("Sending typing_on with payload:", JSON.stringify(typingOnPayload, null, 2))
+
+    const typingOnResponse = await axios.post(
+      `${process.env.INSTAGRAM_BASE_URL}/v21.0/${pageId}/messages`,
+      typingOnPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000, // 10 second timeout
+      }
+    )
+
+    console.log("Typing on response:", typingOnResponse.data)
+
+    // Wait for the specified duration
+    await new Promise((resolve) => setTimeout(resolve, Math.min(duration, 20000))) // Max 20 seconds
+
+    // Send typing_off
+    const typingOffPayload = {
+      recipient: { id: recipientId },
+      sender_action: "typing_off",
+    }
+
     await axios.post(
-      `${process.env.INSTAGRAM_BASE_URL}/v22.0/${pageId}/messages`,
+      `${process.env.INSTAGRAM_BASE_URL}/v21.0/${pageId}/messages`,
+      typingOffPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    )
+
+    return true
+  } catch (error) {
+    const axiosError = error as AxiosError
+    
+    // Enhanced error logging
+    console.error("Error sending typing indicator:", {
+      status: axiosError.response?.status,
+      statusText: axiosError.response?.statusText,
+      data: axiosError.response?.data,
+      config: {
+        url: axiosError.config?.url,
+        method: axiosError.config?.method,
+        headers: axiosError.config?.headers,
+      }
+    })
+    
+    // Specific error handling
+    if (axiosError.response?.status === 400) {
+      const errorData = axiosError.response.data as any
+      if (errorData?.error?.code === 100 && errorData?.error?.error_subcode === 2534019) {
+        console.error("Invalid sender action - possible causes:")
+        console.error("1. Invalid recipient ID format")
+        console.error("2. No active conversation with recipient")
+        console.error("3. Missing messaging permissions")
+        console.error("4. Page access token issues")
+      }
+    }
+    
+    return false
+  }
+}
+
+// Alternative: Simplified version that only sends typing_on
+export async function sendSimpleTypingIndicator(options: TypingIndicatorOptions): Promise<boolean> {
+  const { pageId, recipientId, token } = options
+
+  try {
+    await axios.post(
+      `${process.env.INSTAGRAM_BASE_URL}/v21.0/${pageId}/messages`,
       {
         recipient: { id: recipientId },
         sender_action: "typing_on",
@@ -784,40 +952,101 @@ export async function sendTypingIndicator(options: TypingIndicatorOptions): Prom
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      },
+      }
     )
 
-    // Wait for the specified duration
-    await new Promise((resolve) => setTimeout(resolve, duration))
+    return true
+  } catch (error) {
+    console.error("Simple typing indicator failed:", error)
+    return false
+  }
+}
 
-    // Send typing_off
+// Utility function to validate recipient ID format
+export function validateInstagramRecipientId(recipientId: string): boolean {
+  // Instagram user IDs are typically numeric strings
+  return /^\d+$/.test(recipientId) && recipientId.length >= 10
+}
+
+// Enhanced function with better error handling and validation
+export async function sendTypingIndicatorWithValidation(options: TypingIndicatorOptions): Promise<{
+  success: boolean
+  error?: string
+}> {
+  const { duration = 3000, pageId, recipientId, token } = options
+
+  // Validate inputs
+  if (!validateInstagramRecipientId(recipientId)) {
+    return { success: false, error: "Invalid recipient ID format" }
+  }
+
+  try {
+    // Only send typing_on, let Instagram handle the timeout
     await axios.post(
-      `${process.env.INSTAGRAM_BASE_URL}/v22.0/${pageId}/messages`,
+      `${process.env.INSTAGRAM_BASE_URL}/v21.0/${pageId}/messages`,
       {
         recipient: { id: recipientId },
-        sender_action: "typing_off",
+        sender_action: "typing_on",
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      },
+      }
     )
 
-    return true
+    return { success: true }
   } catch (error) {
     const axiosError = error as AxiosError
-    console.error("Error sending typing indicator:", axiosError.response?.data || axiosError.message)
+    const errorData = axiosError.response?.data as any
     
-    // Log specific error details for debugging
-    if (axiosError.response?.status === 400) {
-      console.error("Typing indicator failed - likely missing permissions or invalid context")
+    let errorMessage = "Unknown error"
+    
+    if (errorData?.error?.code === 100) {
+      switch (errorData.error.error_subcode) {
+        case 2534019:
+          errorMessage = "Invalid sender action data - check recipient ID and permissions"
+          break
+        case 2534005:
+          errorMessage = "Message not sent - recipient may have blocked the page"
+          break
+        default:
+          errorMessage = `API Error: ${errorData.error.message}`
+      }
     }
     
-    return false // Return false instead of throwing to allow message sending to continue
+    return { success: false, error: errorMessage }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Enhanced message sending with optional typing simulation
 export async function sendDMWithTyping(
