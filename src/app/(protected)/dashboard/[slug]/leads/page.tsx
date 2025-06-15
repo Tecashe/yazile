@@ -188,7 +188,6 @@
 //     </div>
 //   )
 // }
-
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { onUserInfor } from "@/actions/user"
@@ -199,120 +198,157 @@ import { PremiumLeadsDashboard } from "../_components/leads/leads"
 // Enhanced server action to get comprehensive premium leads data
 async function getPremiumLeadsData(userId: string) {
   try {
+    console.log(`Fetching premium leads data for user: ${userId}`)
+
     const [analytics, recentLeads, topLeads, duplicateCount, tierStats, recentInteractions, crmIntegrations] =
       await Promise.all([
-        getPremiumLeadAnalytics(userId),
+        getPremiumLeadAnalytics(userId).catch((error) => {
+          console.error("Error getting analytics:", error)
+          return null
+        }),
 
         // Enhanced recent leads with more comprehensive data
-        client.lead.findMany({
-          where: { userId },
-          include: {
-            qualificationData: true,
-            interactions: {
-              take: 3,
-              orderBy: { timestamp: "desc" },
+        client.lead
+          .findMany({
+            where: { userId },
+            include: {
+              qualificationData: true,
+              interactions: {
+                take: 3,
+                orderBy: { timestamp: "desc" },
+              },
+              revenueOpportunities: {
+                take: 1,
+                orderBy: { createdAt: "desc" },
+              },
+              scheduledActions: {
+                where: { status: "PENDING" },
+                take: 2,
+                orderBy: { scheduledFor: "asc" },
+              },
             },
-            revenueOpportunities: {
-              take: 1,
-              orderBy: { createdAt: "desc" },
-            },
-            scheduledActions: {
-              where: { status: "PENDING" },
-              take: 2,
-              orderBy: { scheduledFor: "asc" },
-            },
-          },
-          orderBy: { lastContactDate: "desc" },
-          take: 50,
-        }),
+            orderBy: { lastContactDate: "desc" },
+            take: 50,
+          })
+          .catch((error) => {
+            console.error("Error getting recent leads:", error)
+            return []
+          }),
 
         // Top performing leads with enhanced scoring
-        client.lead.findMany({
-          where: {
-            userId,
-            score: { gte: 70 }, // Only high-scoring leads
-          },
-          include: {
-            qualificationData: true,
-            interactions: {
-              take: 2,
-              orderBy: { timestamp: "desc" },
+        client.lead
+          .findMany({
+            where: {
+              userId,
+              score: { gte: 50 }, // Lower threshold to get more leads
             },
-            revenueOpportunities: true,
-          },
-          orderBy: [{ score: "desc" }, { lastContactDate: "desc" }],
-          take: 15,
-        }),
+            include: {
+              qualificationData: true,
+              interactions: {
+                take: 2,
+                orderBy: { timestamp: "desc" },
+              },
+              revenueOpportunities: true,
+            },
+            orderBy: [{ score: "desc" }, { lastContactDate: "desc" }],
+            take: 15,
+          })
+          .catch((error) => {
+            console.error("Error getting top leads:", error)
+            return []
+          }),
 
         // Check for potential duplicates with more sophisticated logic
-        client.lead.groupBy({
-          by: ["instagramUserId", "pageId"],
-          where: { userId },
-          having: {
-            id: { _count: { gt: 1 } },
-          },
-          _count: { id: true },
-        }),
+        client.lead
+          .groupBy({
+            by: ["instagramUserId", "pageId"],
+            where: { userId },
+            having: {
+              id: { _count: { gt: 1 } },
+            },
+            _count: { id: true },
+          })
+          .catch((error) => {
+            console.error("Error getting duplicates:", error)
+            return []
+          }),
 
         // Get comprehensive tier statistics
-        client.leadQualificationData.groupBy({
-          by: ["leadTier"],
-          where: {
-            lead: { userId },
-            leadTier: { not: null },
-          },
-          _count: { leadTier: true },
-          _avg: {
-            estimatedValue: true,
-            roi: true,
-            engagementScore: true,
-            intentScore: true,
-          },
-          _sum: { estimatedValue: true },
-        }),
+        client.leadQualificationData
+          .groupBy({
+            by: ["leadTier"],
+            where: {
+              lead: { userId },
+              leadTier: { not: null },
+            },
+            _count: { leadTier: true },
+            _avg: {
+              estimatedValue: true,
+              roi: true,
+              engagementScore: true,
+              intentScore: true,
+            },
+            _sum: { estimatedValue: true },
+          })
+          .catch((error) => {
+            console.error("Error getting tier stats:", error)
+            return []
+          }),
 
         // Recent AI-analyzed interactions
-        client.leadInteraction.findMany({
-          where: {
-            lead: { userId },
-          },
-          include: {
-            lead: {
-              select: {
-                id: true,
-                name: true,
-                instagramUserId: true,
-                status: true,
-                score: true,
-                qualificationData: {
-                  select: {
-                    leadTier: true,
-                    estimatedValue: true,
-                    roi: true,
+        client.leadInteraction
+          .findMany({
+            where: {
+              lead: { userId },
+            },
+            include: {
+              lead: {
+                select: {
+                  id: true,
+                  name: true,
+                  instagramUserId: true,
+                  status: true,
+                  score: true,
+                  qualificationData: {
+                    select: {
+                      leadTier: true,
+                      estimatedValue: true,
+                      roi: true,
+                    },
                   },
                 },
               },
             },
-          },
-          orderBy: { timestamp: "desc" },
-          take: 20,
-        }),
+            orderBy: { timestamp: "desc" },
+            take: 20,
+          })
+          .catch((error) => {
+            console.error("Error getting recent interactions:", error)
+            return []
+          }),
 
         // Check CRM integration status
-        client.crmIntegration.findMany({
-          where: { userId, isActive: true },
-          select: {
-            id: true,
-            provider: true,
-            name: true,
-            isActive: true,
-            lastSynced: true,
-          },
-        }),
+        client.crmIntegration
+          .findMany({
+            where: { userId, isActive: true },
+            select: {
+              id: true,
+              provider: true,
+              name: true,
+              isActive: true,
+              lastSynced: true,
+            },
+          })
+          .catch((error) => {
+            console.error("Error getting CRM integrations:", error)
+            return []
+          }),
       ])
 
-    // Calculate additional metrics
-    const totalEstimatedRevenue = tierStats.reduce((sum, tier) => sum + Number(tier._sum.estimatedValue || 0), 0)
+    console.log(`Found ${recentLeads.length} recent leads, ${topLeads.length} top leads`)
+
+    // Calculate additional metrics safely
+    const totalEstimatedRevenue = tierStats.reduce((sum, tier) => sum + Number(tier._sum?.estimatedValue || 0), 0)
     const avgLeadValue = recentLeads.length > 0 ? totalEstimatedRevenue / recentLeads.length : 0
 
     // Enhanced analytics with calculated fields
@@ -321,14 +357,14 @@ async function getPremiumLeadsData(userId: string) {
       totalEstimatedRevenue,
       avgLeadValue,
       tierDistribution: {
-        platinum: tierStats.find((t) => t.leadTier === "PLATINUM")?._count.leadTier || 0,
-        gold: tierStats.find((t) => t.leadTier === "GOLD")?._count.leadTier || 0,
-        silver: tierStats.find((t) => t.leadTier === "SILVER")?._count.leadTier || 0,
-        bronze: tierStats.find((t) => t.leadTier === "BRONZE")?._count.leadTier || 0,
+        platinum: tierStats.find((t) => t.leadTier === "PLATINUM")?._count?.leadTier || 0,
+        gold: tierStats.find((t) => t.leadTier === "GOLD")?._count?.leadTier || 0,
+        silver: tierStats.find((t) => t.leadTier === "SILVER")?._count?.leadTier || 0,
+        bronze: tierStats.find((t) => t.leadTier === "BRONZE")?._count?.leadTier || 0,
       },
       premiumInsights: {
         highValueLeads: topLeads.filter(
-          (lead) => lead.qualificationData?.leadTier === "PLATINUM" || lead.qualificationData?.leadTier === "GOLD",
+          (lead) => lead?.qualificationData?.leadTier === "PLATINUM" || lead?.qualificationData?.leadTier === "GOLD",
         ).length,
         averageLeadValue: avgLeadValue,
         conversionProbability: analytics?.conversionRate || 0,
@@ -337,9 +373,9 @@ async function getPremiumLeadsData(userId: string) {
       recentInteractions: recentInteractions.map((interaction) => ({
         ...interaction,
         metadata: {
-          leadTier: interaction.lead.qualificationData?.leadTier,
-          estimatedValue: interaction.lead.qualificationData?.estimatedValue,
-          roi: interaction.lead.qualificationData?.roi,
+          leadTier: interaction?.lead?.qualificationData?.leadTier || null,
+          estimatedValue: interaction?.lead?.qualificationData?.estimatedValue || null,
+          roi: interaction?.lead?.qualificationData?.roi || null,
           notificationMessage: generateAINotification(interaction),
         },
       })),
@@ -353,52 +389,97 @@ async function getPremiumLeadsData(userId: string) {
       },
     }
 
+    // Process leads with safe access
+    const processedRecentLeads = recentLeads.map((lead) => {
+      try {
+        const qualData = lead?.qualificationData
+        return {
+          ...lead,
+          metadata: {
+            lastAnalysis: qualData
+              ? {
+                  leadTier: qualData.leadTier || "BRONZE",
+                  estimatedValue: Number(qualData.estimatedValue || 0),
+                  roi: Number(qualData.roi || 0),
+                  notificationMessage: generateLeadNotification(lead),
+                  nextActions: generateNextActions(lead),
+                  followUpStrategy: generateFollowUpStrategy(lead),
+                  buyerPersona: generateBuyerPersona(lead),
+                }
+              : {
+                  leadTier: "BRONZE",
+                  estimatedValue: 0,
+                  roi: 0,
+                  notificationMessage: "Lead needs analysis",
+                  nextActions: ["initial_analysis"],
+                  followUpStrategy: "standard",
+                  buyerPersona: "unknown",
+                },
+          },
+        }
+      } catch (error) {
+        console.error(`Error processing lead ${lead?.id}:`, error)
+        return {
+          ...lead,
+          metadata: {
+            lastAnalysis: {
+              leadTier: "BRONZE",
+              estimatedValue: 0,
+              roi: 0,
+              notificationMessage: "Error processing lead",
+              nextActions: ["manual_review"],
+              followUpStrategy: "manual",
+              buyerPersona: "unknown",
+            },
+          },
+        }
+      }
+    })
+
+    const processedTopLeads = topLeads.map((lead) => {
+      try {
+        const qualData = lead?.qualificationData
+        return {
+          ...lead,
+          metadata: {
+            lastAnalysis: qualData
+              ? {
+                  leadTier: qualData.leadTier || "BRONZE",
+                  estimatedValue: Number(qualData.estimatedValue || 0),
+                  roi: Number(qualData.roi || 0),
+                  followUpStrategy: generateFollowUpStrategy(lead),
+                  buyerPersona: generateBuyerPersona(lead),
+                }
+              : {
+                  leadTier: "BRONZE",
+                  estimatedValue: 0,
+                  roi: 0,
+                  followUpStrategy: "standard",
+                  buyerPersona: "unknown",
+                },
+          },
+        }
+      } catch (error) {
+        console.error(`Error processing top lead ${lead?.id}:`, error)
+        return {
+          ...lead,
+          metadata: {
+            lastAnalysis: {
+              leadTier: "BRONZE",
+              estimatedValue: 0,
+              roi: 0,
+              followUpStrategy: "manual",
+              buyerPersona: "unknown",
+            },
+          },
+        }
+      }
+    })
+
     return {
       analytics: enhancedAnalytics,
-      recentLeads: recentLeads.map((lead) => ({
-        ...lead,
-        metadata: {
-          lastAnalysis: lead.qualificationData
-            ? {
-                leadTier: lead.qualificationData.leadTier,
-                estimatedValue: Number(lead.qualificationData.estimatedValue || 0),
-                roi: Number(lead.qualificationData.roi || 0),
-                notificationMessage: generateLeadNotification(lead),
-                nextActions: generateNextActions(lead),
-                followUpStrategy: generateFollowUpStrategy(lead),
-                buyerPersona: generateBuyerPersona(lead),
-              }
-            : {
-                leadTier: "BRONZE",
-                estimatedValue: 0,
-                roi: 0,
-                notificationMessage: "Lead needs analysis",
-                nextActions: ["initial_analysis"],
-                followUpStrategy: "standard",
-                buyerPersona: "unknown",
-              },
-        },
-      })),
-      topLeads: topLeads.map((lead) => ({
-        ...lead,
-        metadata: {
-          lastAnalysis: lead.qualificationData
-            ? {
-                leadTier: lead.qualificationData.leadTier,
-                estimatedValue: Number(lead.qualificationData.estimatedValue || 0),
-                roi: Number(lead.qualificationData.roi || 0),
-                followUpStrategy: generateFollowUpStrategy(lead),
-                buyerPersona: generateBuyerPersona(lead),
-              }
-            : {
-                leadTier: "BRONZE",
-                estimatedValue: 0,
-                roi: 0,
-                followUpStrategy: "standard",
-                buyerPersona: "unknown",
-              },
-        },
-      })),
+      recentLeads: processedRecentLeads,
+      topLeads: processedTopLeads,
       hasDuplicates: duplicateCount.length > 0,
       duplicateCount: duplicateCount.length,
       tierStats: tierStats.filter((stat) => stat.leadTier !== null),
@@ -406,7 +487,37 @@ async function getPremiumLeadsData(userId: string) {
   } catch (error) {
     console.error("Error fetching premium leads data:", error)
     return {
-      analytics: null,
+      analytics: {
+        totalLeads: 0,
+        qualifiedLeads: 0,
+        convertedLeads: 0,
+        conversionRate: 0,
+        qualificationRate: 0,
+        recentInteractions: [],
+        revenueMetrics: {
+          totalEstimatedRevenue: 0,
+          totalExpectedRevenue: 0,
+          averageROI: 0,
+          revenueGrowth: 0,
+        },
+        tierDistribution: {
+          platinum: 0,
+          gold: 0,
+          silver: 0,
+          bronze: 0,
+        },
+        premiumInsights: {
+          highValueLeads: 0,
+          averageLeadValue: 0,
+          conversionProbability: 0,
+          totalPipelineValue: 0,
+        },
+        crmStatus: {
+          connected: false,
+          integrations: [],
+          lastSync: null,
+        },
+      },
       recentLeads: [],
       topLeads: [],
       hasDuplicates: false,
@@ -416,81 +527,107 @@ async function getPremiumLeadsData(userId: string) {
   }
 }
 
-// Helper functions for AI-generated insights
+// Helper functions for AI-generated insights with safe access
 function generateAINotification(interaction: any): string {
-  const { intent, sentiment, lead } = interaction.lead
-  const tier = lead.qualificationData?.leadTier
+  try {
+    const intent = interaction?.intent
+    const sentiment = interaction?.sentiment
+    const tier = interaction?.lead?.qualificationData?.leadTier
 
-  if (intent && typeof intent === "object" && "purchase_intent" in intent && intent.purchase_intent > 0.7) {
-    return `🔥 High purchase intent detected - immediate follow-up recommended`
+    if (intent && typeof intent === "object" && "purchase_intent" in intent && intent.purchase_intent > 0.7) {
+      return `🔥 High purchase intent detected - immediate follow-up recommended`
+    }
+    if (sentiment && sentiment > 0.5 && tier === "PLATINUM") {
+      return `⭐ Platinum lead showing positive sentiment - perfect timing for proposal`
+    }
+    if (intent && typeof intent === "object" && "information_request" in intent && intent.information_request > 0.6) {
+      return `📋 Information request detected - send detailed product info`
+    }
+    return `🤖 AI analysis complete - lead scored and categorized`
+  } catch (error) {
+    console.error("Error generating AI notification:", error)
+    return `🤖 AI analysis complete`
   }
-  if (sentiment && sentiment > 0.5 && tier === "PLATINUM") {
-    return `⭐ Platinum lead showing positive sentiment - perfect timing for proposal`
-  }
-  if (intent && typeof intent === "object" && "information_request" in intent && intent.information_request > 0.6) {
-    return `📋 Information request detected - send detailed product info`
-  }
-  return `🤖 AI analysis complete - lead scored and categorized`
 }
 
 function generateLeadNotification(lead: any): string {
-  const score = lead.score || 0
-  const tier = lead.qualificationData?.leadTier || "BRONZE"
-  const lastInteraction = lead.interactions?.[0]
+  try {
+    const score = lead?.score || 0
+    const tier = lead?.qualificationData?.leadTier || "BRONZE"
+    const lastInteraction = lead?.interactions?.[0]
 
-  if (score >= 85 && tier === "PLATINUM") {
-    return `🎯 Premium opportunity - schedule immediate call`
+    if (score >= 85 && tier === "PLATINUM") {
+      return `🎯 Premium opportunity - schedule immediate call`
+    }
+    if (score >= 70 && lastInteraction?.sentiment > 0.5) {
+      return `📞 Positive sentiment detected - great time to connect`
+    }
+    if (lead?.scheduledActions?.length > 0) {
+      return `⏰ Scheduled follow-up pending - stay on track`
+    }
+    if (!lead?.qualificationData) {
+      return `📊 Lead needs AI analysis - run qualification`
+    }
+    return `📊 Lead qualified and ready for engagement`
+  } catch (error) {
+    console.error("Error generating lead notification:", error)
+    return `📊 Lead ready for review`
   }
-  if (score >= 70 && lastInteraction?.sentiment > 0.5) {
-    return `📞 Positive sentiment detected - great time to connect`
-  }
-  if (lead.scheduledActions?.length > 0) {
-    return `⏰ Scheduled follow-up pending - stay on track`
-  }
-  if (!lead.qualificationData) {
-    return `📊 Lead needs AI analysis - run qualification`
-  }
-  return `📊 Lead qualified and ready for engagement`
 }
 
 function generateNextActions(lead: any): string[] {
-  const actions = []
-  const score = lead.score || 0
-  const tier = lead.qualificationData?.leadTier || "BRONZE"
+  try {
+    const actions = []
+    const score = lead?.score || 0
+    const tier = lead?.qualificationData?.leadTier || "BRONZE"
 
-  if (!lead.qualificationData) {
-    actions.push("run_ai_analysis")
+    if (!lead?.qualificationData) {
+      actions.push("run_ai_analysis")
+    }
+
+    if (score >= 80) actions.push("immediate_call")
+    if (tier === "PLATINUM" || tier === "GOLD") actions.push("send_proposal")
+    if (!lead?.interactions || lead.interactions.length === 0) actions.push("initial_outreach")
+    if (lead?.email) actions.push("email_sequence")
+
+    return actions.slice(0, 3) // Limit to top 3 actions
+  } catch (error) {
+    console.error("Error generating next actions:", error)
+    return ["manual_review"]
   }
-
-  if (score >= 80) actions.push("immediate_call")
-  if (tier === "PLATINUM" || tier === "GOLD") actions.push("send_proposal")
-  if (!lead.interactions || lead.interactions.length === 0) actions.push("initial_outreach")
-  if (lead.email) actions.push("email_sequence")
-
-  return actions.slice(0, 3) // Limit to top 3 actions
 }
 
 function generateFollowUpStrategy(lead: any): string {
-  const tier = lead.qualificationData?.leadTier || "BRONZE"
-  const score = lead.score || 0
+  try {
+    const tier = lead?.qualificationData?.leadTier || "BRONZE"
+    const score = lead?.score || 0
 
-  if (!lead.qualificationData) return "needs_analysis"
-  if (tier === "PLATINUM") return "immediate_personal_outreach"
-  if (tier === "GOLD" && score >= 70) return "priority_nurturing"
-  if (score >= 50) return "automated_sequence"
-  return "long_term_nurturing"
+    if (!lead?.qualificationData) return "needs_analysis"
+    if (tier === "PLATINUM") return "immediate_personal_outreach"
+    if (tier === "GOLD" && score >= 70) return "priority_nurturing"
+    if (score >= 50) return "automated_sequence"
+    return "long_term_nurturing"
+  } catch (error) {
+    console.error("Error generating follow-up strategy:", error)
+    return "manual"
+  }
 }
 
 function generateBuyerPersona(lead: any): string {
-  const score = lead.score || 0
-  const engagementScore = lead.qualificationData?.engagementScore || 0
-  const intentScore = lead.qualificationData?.intentScore || 0
+  try {
+    const score = lead?.score || 0
+    const engagementScore = lead?.qualificationData?.engagementScore || 0
+    const intentScore = lead?.qualificationData?.intentScore || 0
 
-  if (!lead.qualificationData) return "unanalyzed_prospect"
-  if (intentScore >= 80) return "ready_buyer"
-  if (engagementScore >= 70) return "engaged_prospect"
-  if (score >= 60) return "qualified_lead"
-  return "early_stage_prospect"
+    if (!lead?.qualificationData) return "unanalyzed_prospect"
+    if (intentScore >= 80) return "ready_buyer"
+    if (engagementScore >= 70) return "engaged_prospect"
+    if (score >= 60) return "qualified_lead"
+    return "early_stage_prospect"
+  } catch (error) {
+    console.error("Error generating buyer persona:", error)
+    return "unknown"
+  }
 }
 
 // Enhanced server action to merge duplicates with better error handling
@@ -500,18 +637,20 @@ async function handleMergeDuplicates(userId: string) {
     const result = await mergeDuplicateLeads(userId)
 
     // Log the merge operation for audit purposes
-    await client.auditLog.create({
-      data: {
-        userId,
-        action: "MERGE_DUPLICATE_LEADS",
-        target: "LEADS",
-        details: `Merged ${result.mergedGroups} duplicate lead groups`,
-        metadata: {
-          mergedGroups: result.mergedGroups,
-          timestamp: new Date().toISOString(),
+    await client.auditLog
+      .create({
+        data: {
+          userId,
+          action: "MERGE_DUPLICATE_LEADS",
+          target: "LEADS",
+          details: `Merged ${result.mergedGroups} duplicate lead groups`,
+          metadata: {
+            mergedGroups: result.mergedGroups,
+            timestamp: new Date().toISOString(),
+          },
         },
-      },
-    })
+      })
+      .catch(() => {}) // Ignore audit log errors
 
     return { success: true, mergedGroups: result.mergedGroups }
   } catch (error) {
