@@ -3611,7 +3611,7 @@ export function PremiumLeadsDashboard({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between space-y-2">
-        <div>
+        {/* <div>
           <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
               <Crown className="h-8 w-8 text-white" />
@@ -3635,7 +3635,7 @@ export function PremiumLeadsDashboard({
           <p className="text-muted-foreground mt-2">
             Advanced AI-powered lead qualification with revenue prediction and ROI optimization
           </p>
-        </div>
+        </div> */}
         <div className="flex items-center space-x-2">
           <Button variant="outline" className="hover:bg-primary/5">
             <LineChart className="mr-2 h-4 w-4" />
