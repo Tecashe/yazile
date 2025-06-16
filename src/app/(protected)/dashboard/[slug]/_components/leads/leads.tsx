@@ -2888,6 +2888,29 @@ function CRMIntegrationSection({ userId }: { userId: string }) {
                 {providers.map((provider) => (
                   <Card key={provider.id} className="card-hover cursor-pointer group">
                     <CardHeader>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 flex items-center justify-center">
+                            <img 
+                              src={provider.logo} 
+                              alt={`${provider.name} logo`}
+                              className="w-12 h-12 object-contain"
+                            />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              {provider.name}
+                              {provider.supportsOAuth && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Shield className="h-3 w-3 mr-1" />
+                                  OAuth
+                                </Badge>
+                              )}
+                            </CardTitle>
+                            <CardDescription className="text-sm">{provider.description}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    {/* <CardHeader>
                       <div className="flex items-center space-x-3">
                         <div className="text-3xl">{provider.logo}</div>
                         <div>
@@ -2903,7 +2926,7 @@ function CRMIntegrationSection({ userId }: { userId: string }) {
                           <CardDescription className="text-sm">{provider.description}</CardDescription>
                         </div>
                       </div>
-                    </CardHeader>
+                    </CardHeader> */}
                     <CardContent>
                       <div className="space-y-3">
                         <div>
