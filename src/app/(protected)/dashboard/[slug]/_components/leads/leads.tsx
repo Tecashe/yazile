@@ -2819,7 +2819,16 @@ function CRMIntegrationSection({ userId }: { userId: string }) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="text-2xl">{providers.find((p) => p.id === currentConfig.provider)?.logo}</div>
+                {/* <div className="text-2xl">{providers.find((p) => p.id === currentConfig.provider)?.logo}</div> */}
+                <div className="text-2xl">
+                  {providers.find((p) => p.id === currentConfig.provider)?.logo && (
+                    <img 
+                      src={providers.find((p) => p.id === currentConfig.provider)?.logo} 
+                      alt="Provider Logo" 
+                      className="max-h-8" // Optional: Add sizing via Tailwind
+                    />
+                  )}
+                </div>
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     {providers.find((p) => p.id === currentConfig.provider)?.name}
@@ -2910,23 +2919,6 @@ function CRMIntegrationSection({ userId }: { userId: string }) {
                           </div>
                         </div>
                       </CardHeader>
-                    {/* <CardHeader>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-3xl">{provider.logo}</div>
-                        <div>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            {provider.name}
-                            {provider.supportsOAuth && (
-                              <Badge variant="outline" className="text-xs">
-                                <Shield className="h-3 w-3 mr-1" />
-                                OAuth
-                              </Badge>
-                            )}
-                          </CardTitle>
-                          <CardDescription className="text-sm">{provider.description}</CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader> */}
                     <CardContent>
                       <div className="space-y-3">
                         <div>
