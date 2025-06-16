@@ -1837,6 +1837,7 @@ model CrmIntegration {
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   mappings          CrmFieldMapping[]
+  metadata          Json?
 
   @@index([userId])
   @@index([provider])
