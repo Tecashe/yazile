@@ -1843,6 +1843,7 @@ model CrmIntegration {
   @@index([provider])
 }
 
+
 model CrmFieldMapping {
   id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   integrationId     String         @db.Uuid
