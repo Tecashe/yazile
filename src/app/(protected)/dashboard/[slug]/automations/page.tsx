@@ -1034,45 +1034,12 @@
 import AutomationList from "@/components/global/automation-list"
 import CreateAutomation from "@/components/global/create-automation"
 import { useQueryAutomations } from "@/hooks/user-queries"
-import {
-  Check,
-  Zap,
-  Sparkles,
-  Rocket,
-  Loader2,
-  TrendingUp,
-  Activity,
-  MessageCircle,
-  BarChart3,
-  RefreshCw,
-  AlertCircle,
-} from "lucide-react"
+import { Check, Zap, Sparkles, Rocket, Loader2, TrendingUp, Activity, MessageCircle, BarChart3 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
 
-const AutomationStatus = ({ count, isLoading, error }: { count: number; isLoading: boolean; error: any }) => {
-  if (error) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex items-center gap-3 p-6 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-xl border border-red-200/20"
-      >
-        <div className="relative">
-          <AlertCircle className="w-8 h-8 text-red-400" />
-        </div>
-        <div>
-          <p className="font-semibold text-foreground">Failed to load automations</p>
-          <p className="text-sm text-muted-foreground">Please check your connection and try again</p>
-        </div>
-      </motion.div>
-    )
-  }
-
+const AutomationStatus = ({ count, isLoading }: { count: number; isLoading: boolean }) => {
   if (isLoading) {
     return (
       <motion.div
@@ -1281,89 +1248,15 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
   )
 }
 
-const ErrorState = ({ error, onRetry }: { error: any; onRetry: () => void }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="flex flex-col items-center justify-center py-20 text-center"
-  >
-    <div className="w-16 h-16 bg-destructive/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-destructive/30">
-      <AlertCircle className="w-8 h-8 text-destructive" />
-    </div>
-    <h3 className="text-lg font-semibold text-foreground mb-2">Failed to load automations</h3>
-    <p className="text-muted-foreground mb-6 max-w-md">
-      We couldnt fetch your automations. This might be due to a network issue or server problem.
-    </p>
-    <Button onClick={onRetry} variant="outline" className="gap-2">
-      <RefreshCw className="w-4 h-4" />
-      Try Again
-    </Button>
-  </motion.div>
-)
-
-const EmptyState = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="flex flex-col items-center justify-center py-20 text-center"
-  >
-    <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-      <Zap className="w-10 h-10 text-primary" />
-    </div>
-    <h3 className="text-xl font-semibold text-foreground mb-2">Ready to automate your workflow?</h3>
-    <p className="text-muted-foreground mb-8 max-w-md">
-      Create your first automation to start engaging with your audience automatically and boost your productivity.
-    </p>
-    <div className="flex gap-4">
-      <CreateAutomation />
-    </div>
-  </motion.div>
-)
-
-const LoadingState = () => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="flex flex-col items-center justify-center py-20"
-  >
-    <motion.div
-      animate={{ rotate: 360 }}
-      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-      className="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6"
-    >
-      <Loader2 className="w-8 h-8 text-white" />
-    </motion.div>
-    <h3 className="text-lg font-semibold text-foreground mb-2">Loading your automations...</h3>
-    <p className="text-muted-foreground text-center max-w-md">
-      Setting up your personalized automation dashboard. This should only take a moment.
-    </p>
-  </motion.div>
-)
-
 const Page = () => {
-  const { data, isLoading, error, isSuccess, refetch, isFetching } = useQueryAutomations()
-  const [hasShownError, setHasShownError] = useState(false)
+  const { data, isLoading, isFetching } = useQueryAutomations()
 
+  // Let AutomationList handle its own data states
   const automations = data?.data || []
-  const hasAutomations = isSuccess && automations.length > 0
+  const hasAutomations = data?.data && data.data.length > 0
 
-  // Show error toast once
-  useEffect(() => {
-    if (error && !hasShownError) {
-      toast.error("Failed to load automations. Please try refreshing the page.")
-      setHasShownError(true)
-    }
-  }, [error, hasShownError])
-
-  // Reset error state when data loads successfully
-  useEffect(() => {
-    if (isSuccess && hasShownError) {
-      setHasShownError(false)
-    }
-  }, [isSuccess, hasShownError])
-
-  // Mock metrics - only calculate if we have data
-  const metrics = isSuccess
+  // Only calculate metrics if we have successful data
+  const metrics = hasAutomations
     ? {
         totalInteractions: automations.reduce((acc, auto) => acc + Math.floor(Math.random() * 100), 0),
         activeAutomations: automations.filter((auto) => auto.active).length,
@@ -1371,11 +1264,6 @@ const Page = () => {
         conversionRate: Math.floor(Math.random() * 30) + 10,
       }
     : null
-
-  const handleRetry = () => {
-    setHasShownError(false)
-    refetch()
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -1399,14 +1287,10 @@ const Page = () => {
               {isFetching && <span className="ml-2 text-primary">• Refreshing...</span>}
             </p>
           </div>
-          <Button onClick={handleRetry} variant="outline" size="sm" disabled={isLoading || isFetching}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading || isFetching ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
         </motion.div>
 
-        {/* Metrics Cards - Only show when we have successful data */}
-        {isSuccess && hasAutomations && metrics && (
+        {/* Metrics Cards - Only show when we have data and it's not the initial load */}
+        {!isLoading && hasAutomations && metrics && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1464,19 +1348,11 @@ const Page = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Content */}
+          {/* Main Content - Let AutomationList handle its own states */}
           <div className="lg:col-span-3 space-y-6">
-            {error ? (
-              <ErrorState error={error} onRetry={handleRetry} />
-            ) : isLoading ? (
-              <LoadingState />
-            ) : !hasAutomations ? (
-              <EmptyState />
-            ) : (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <AutomationList id={automations[0]?.id || ""} />
-              </motion.div>
-            )}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <AutomationList id={hasAutomations ? automations[0]?.id || "" : ""} />
+            </motion.div>
           </div>
 
           {/* Sidebar */}
@@ -1496,7 +1372,7 @@ const Page = () => {
                   <h2 className="text-xl font-bold text-foreground">Overview</h2>
                 </div>
 
-                <AutomationStatus count={automations.length} isLoading={isLoading} error={error} />
+                <AutomationStatus count={automations.length} isLoading={isLoading} />
               </Card>
 
               {/* Recent Automations */}
@@ -1515,21 +1391,6 @@ const Page = () => {
                     <AnimatePresence mode="popLayout">
                       {isLoading ? (
                         Array.from({ length: 3 }).map((_, index) => <AutomationSkeleton key={index} index={index} />)
-                      ) : error ? (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="text-center p-8"
-                        >
-                          <div className="w-12 h-12 bg-destructive/20 rounded-full flex items-center justify-center mx-auto mb-3 border border-destructive/30">
-                            <AlertCircle className="w-6 h-6 text-destructive" />
-                          </div>
-                          <p className="text-destructive font-medium">Failed to load</p>
-                          <Button onClick={handleRetry} variant="outline" size="sm" className="mt-2">
-                            <RefreshCw className="w-3 h-3 mr-1" />
-                            Retry
-                          </Button>
-                        </motion.div>
                       ) : automations.length === 0 ? (
                         <motion.div
                           initial={{ opacity: 0, scale: 0.9 }}
