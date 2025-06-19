@@ -896,6 +896,18 @@ const Page = () => {
                 </div>
               </div>
             </Card>
+
+            <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-purple-500/20 rounded-lg">
+                  <MessageCircle className="w-6 h-6 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Messages Sent</p>
+                  <p className="text-2xl font-bold text-foreground">{metrics.totalMessages}</p>
+                </div>
+              </div>
+            </Card>
           </motion.div>
         )}
 

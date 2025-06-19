@@ -1,217 +1,3 @@
-// 'use server'
-
-// import { onCurrentUser } from '../user'
-// import { findUser } from '../user/queries'
-// import {
-//   addKeyWord,
-//   addListener,
-//   addPost,
-//   addTrigger,
-//   createAutomation,
-//   deleteKeywordQuery,
-//   findAutomation,
-//   getAutomations,
-//   updateAutomation,
-//   deleteAutomationQuery,
-//   addScheduledPosts,
-// } from './queries'
-
-// export const createAutomations = async (id?: string) => {
-//   const user = await onCurrentUser()
-//   try {
-//     const create = await createAutomation(user.id, id)
-//     if (create) return { status: 200, data: 'Automation created', res: create }
-
-//     return { status: 404, data: 'Oops! something went wrong' }
-//   } catch (error) {
-//     return { status: 500, data: 'Try refreshing the page first' }
-//   }
-// }
-
-// export const getAllAutomations = async () => {
-//   const user = await onCurrentUser()
-//   try {
-//     const automations = await getAutomations(user.id)
-//     if (automations) return { status: 200, data: automations.automations }
-//     return { status: 404, data: [] }
-//   } catch (error) {
-//     return { status: 500, data: [] }
-//   }
-// }
-
-// export const getAutomationInfo = async (id: string) => {
-//   await onCurrentUser()
-//   try {
-//     const automation = await findAutomation(id)
-//     if (automation) return { status: 200, data: automation }
-
-//     return { status: 404 }
-//   } catch (error) {
-//     return { status: 500 }
-//   }
-// }
-
-// export const updateAutomationName = async (
-//   automationId: string,
-//   data: {
-//     name?: string
-//     active?: boolean
-//     automation?: string
-//   }
-// ) => {
-//   await onCurrentUser()
-//   try {
-//     const update = await updateAutomation(automationId, data)
-//     if (update) {
-//       return { status: 200, data: 'Automation successfully updated' }
-//     }
-//     return { status: 404, data: 'Oops! could not find automation' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// export const deleteAutomation = async (automationId: string) => {
-//   await onCurrentUser()
-//   try {
-//     const deleted = await deleteAutomationQuery(automationId) // Call the query to delete
-//     if (deleted) {
-//       return { status: 200, data: 'Automation deleted successfully' }
-//     }
-//     return { status: 404, data: 'Automation not found' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-// //on
-// export const saveListener = async (
-//   autmationId: string,
-//   listener: 'SMARTAI' | 'MESSAGE',
-//   prompt: string,
-//   reply?: string
-// ) => {
-//   await onCurrentUser()
-//   try {
-//     const create = await addListener(autmationId, listener, prompt, reply)
-//     if (create) return { status: 200, data: 'Listener created' }
-//     return { status: 404, data: 'Cant save listener' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// export const saveTrigger = async (automationId: string, trigger: string[]) => {
-//   await onCurrentUser()
-//   try {
-//     const create = await addTrigger(automationId, trigger)
-//     if (create) return { status: 200, data: 'Trigger saved' }
-//     return { status: 404, data: 'Cannot save trigger' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// export const saveKeyword = async (automationId: string, keyword: string) => {
-//   await onCurrentUser()
-//   try {
-//     const create = await addKeyWord(automationId, keyword)
-
-//     if (create) return { status: 200, data: 'Keyword added successfully' }
-
-//     return { status: 404, data: 'Cannot add this keyword' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// export const deleteKeyword = async (id: string) => {
-//   await onCurrentUser()
-//   try {
-//     const deleted = await deleteKeywordQuery(id)
-//     if (deleted)
-//       return {
-//         status: 200,
-//         data: 'Keyword deleted',
-//       }
-//     return { status: 404, data: 'Keyword not found' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// export const getProfilePosts = async () => {
-//   const user = await onCurrentUser()
-//   try {
-//     const profile = await findUser(user.id)
-//     const posts = await fetch(
-//       `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0].token}`
-//     )
-//     const parsed = await posts.json()
-//     if (parsed) return { status: 200, data: parsed }
-//     console.log('🔴 Error in getting posts')
-//     return { status: 404 }
-//   } catch (error) {
-//     console.log('🔴 server side Error in getting posts ', error)
-//     return { status: 500 }
-//   }
-// }
-
-
-
-
-// export const savePosts = async (
-//   autmationId: string,
-//   posts: {
-//     postid: string
-//     caption?: string
-//     media: string
-//     mediaType: 'IMAGE' | 'VIDEO' | 'CAROSEL_ALBUM'
-//   }[]
-// ) => {
-//   await onCurrentUser()
-//   try {
-//     const create = await addPost(autmationId, posts)
-
-//     if (create) return { status: 200, data: 'Posts attached' }
-
-//     return { status: 404, data: 'Automation not found' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// export const activateAutomation = async (id: string, state: boolean) => {
-//   await onCurrentUser()
-//   try {
-//     const update = await updateAutomation(id, { active: state })
-//     if (update)
-//       return {
-//         status: 200,
-//         data: `Automation ${state ? 'activated' : 'disabled'}`,
-//       }
-//     return { status: 404, data: 'Automation not found' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
-// // Added
-// export const saveScheduledPosts = async (
-//   automationId: string,
-//   scheduledPostIds: string[]
-// ) => {
-//   await onCurrentUser()
-//   try {
-//     const create = await addScheduledPosts(automationId, scheduledPostIds)
-
-//     if (create) return { status: 200, data: 'Scheduled posts attached' }
-
-//     return { status: 404, data: 'Automation not found' }
-//   } catch (error) {
-//     return { status: 500, data: 'Oops! something went wrong' }
-//   }
-// }
-
 'use server'
 
 import { onCurrentUser } from '../user'
@@ -225,7 +11,7 @@ import {
   deleteKeywordQuery,
   findAutomation,
   getAutomations,
-  updateAutomationQuery, // Renamed import
+  updateAutomation,
   deleteAutomationQuery,
   addScheduledPosts,
 } from './queries'
@@ -265,20 +51,17 @@ export const getAutomationInfo = async (id: string) => {
   }
 }
 
-export const updateAutomation = async (
+export const updateAutomationName = async (
   automationId: string,
   data: {
     name?: string
     active?: boolean
     automation?: string
-    isFallback?: boolean
-    fallbackMessage?: string
-    buttons?: { name: string; payload: string }[]
   }
 ) => {
   await onCurrentUser()
   try {
-    const update = await updateAutomationQuery(automationId, data)
+    const update = await updateAutomation(automationId, data)
     if (update) {
       return { status: 200, data: 'Automation successfully updated' }
     }
@@ -291,7 +74,7 @@ export const updateAutomation = async (
 export const deleteAutomation = async (automationId: string) => {
   await onCurrentUser()
   try {
-    const deleted = await deleteAutomationQuery(automationId)
+    const deleted = await deleteAutomationQuery(automationId) // Call the query to delete
     if (deleted) {
       return { status: 200, data: 'Automation deleted successfully' }
     }
@@ -300,7 +83,7 @@ export const deleteAutomation = async (automationId: string) => {
     return { status: 500, data: 'Oops! something went wrong' }
   }
 }
-
+//on
 export const saveListener = async (
   autmationId: string,
   listener: 'SMARTAI' | 'MESSAGE',
@@ -317,36 +100,16 @@ export const saveListener = async (
   }
 }
 
-export const saveTrigger = async (
-  automationId: string, 
-  data: {
-    types: string[]; 
-    isFallback?: boolean; 
-    fallbackMessage?: string; 
-    buttons?: { name: string; payload: string }[]
-  }
-) => {
+export const saveTrigger = async (automationId: string, trigger: string[]) => {
   await onCurrentUser()
   try {
-    // First update automation with fallback settings
-    if (data.isFallback !== undefined || data.fallbackMessage || data.buttons) {
-      await updateAutomationQuery(automationId, {
-        isFallback: data.isFallback,
-        fallbackMessage: data.fallbackMessage,
-        buttons: data.buttons ? JSON.stringify(data.buttons) : undefined
-      })
-    }
-    
-    // Then save trigger types
-    const create = await addTrigger(automationId, data.types)
+    const create = await addTrigger(automationId, trigger)
     if (create) return { status: 200, data: 'Trigger saved' }
     return { status: 404, data: 'Cannot save trigger' }
   } catch (error) {
     return { status: 500, data: 'Oops! something went wrong' }
   }
 }
-
-// ... rest of the file remains the same ...
 
 export const saveKeyword = async (automationId: string, keyword: string) => {
   await onCurrentUser()
@@ -393,6 +156,9 @@ export const getProfilePosts = async () => {
   }
 }
 
+
+
+
 export const savePosts = async (
   autmationId: string,
   posts: {
@@ -429,6 +195,7 @@ export const activateAutomation = async (id: string, state: boolean) => {
   }
 }
 
+// Added
 export const saveScheduledPosts = async (
   automationId: string,
   scheduledPostIds: string[]
@@ -444,3 +211,236 @@ export const saveScheduledPosts = async (
     return { status: 500, data: 'Oops! something went wrong' }
   }
 }
+
+// 'use server'
+
+// import { onCurrentUser } from '../user'
+// import { findUser } from '../user/queries'
+// import {
+//   addKeyWord,
+//   addListener,
+//   addPost,
+//   addTrigger,
+//   createAutomation,
+//   deleteKeywordQuery,
+//   findAutomation,
+//   getAutomations,
+//   updateAutomationQuery, // Renamed import
+//   deleteAutomationQuery,
+//   addScheduledPosts,
+// } from './queries'
+
+// export const createAutomations = async (id?: string) => {
+//   const user = await onCurrentUser()
+//   try {
+//     const create = await createAutomation(user.id, id)
+//     if (create) return { status: 200, data: 'Automation created', res: create }
+
+//     return { status: 404, data: 'Oops! something went wrong' }
+//   } catch (error) {
+//     return { status: 500, data: 'Try refreshing the page first' }
+//   }
+// }
+
+// export const getAllAutomations = async () => {
+//   const user = await onCurrentUser()
+//   try {
+//     const automations = await getAutomations(user.id)
+//     if (automations) return { status: 200, data: automations.automations }
+//     return { status: 404, data: [] }
+//   } catch (error) {
+//     return { status: 500, data: [] }
+//   }
+// }
+
+// export const getAutomationInfo = async (id: string) => {
+//   await onCurrentUser()
+//   try {
+//     const automation = await findAutomation(id)
+//     if (automation) return { status: 200, data: automation }
+
+//     return { status: 404 }
+//   } catch (error) {
+//     return { status: 500 }
+//   }
+// }
+
+// export const updateAutomation = async (
+//   automationId: string,
+//   data: {
+//     name?: string
+//     active?: boolean
+//     automation?: string
+//     isFallback?: boolean
+//     fallbackMessage?: string
+//     buttons?: { name: string; payload: string }[]
+//   }
+// ) => {
+//   await onCurrentUser()
+//   try {
+//     const update = await updateAutomationQuery(automationId, data)
+//     if (update) {
+//       return { status: 200, data: 'Automation successfully updated' }
+//     }
+//     return { status: 404, data: 'Oops! could not find automation' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const deleteAutomation = async (automationId: string) => {
+//   await onCurrentUser()
+//   try {
+//     const deleted = await deleteAutomationQuery(automationId)
+//     if (deleted) {
+//       return { status: 200, data: 'Automation deleted successfully' }
+//     }
+//     return { status: 404, data: 'Automation not found' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const saveListener = async (
+//   autmationId: string,
+//   listener: 'SMARTAI' | 'MESSAGE',
+//   prompt: string,
+//   reply?: string
+// ) => {
+//   await onCurrentUser()
+//   try {
+//     const create = await addListener(autmationId, listener, prompt, reply)
+//     if (create) return { status: 200, data: 'Listener created' }
+//     return { status: 404, data: 'Cant save listener' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const saveTrigger = async (
+//   automationId: string, 
+//   data: {
+//     types: string[]; 
+//     isFallback?: boolean; 
+//     fallbackMessage?: string; 
+//     buttons?: { name: string; payload: string }[]
+//   }
+// ) => {
+//   await onCurrentUser()
+//   try {
+//     // First update automation with fallback settings
+//     if (data.isFallback !== undefined || data.fallbackMessage || data.buttons) {
+//       await updateAutomationQuery(automationId, {
+//         isFallback: data.isFallback,
+//         fallbackMessage: data.fallbackMessage,
+//         buttons: data.buttons ? JSON.stringify(data.buttons) : undefined
+//       })
+//     }
+    
+//     // Then save trigger types
+//     const create = await addTrigger(automationId, data.types)
+//     if (create) return { status: 200, data: 'Trigger saved' }
+//     return { status: 404, data: 'Cannot save trigger' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// // ... rest of the file remains the same ...
+
+// export const saveKeyword = async (automationId: string, keyword: string) => {
+//   await onCurrentUser()
+//   try {
+//     const create = await addKeyWord(automationId, keyword)
+
+//     if (create) return { status: 200, data: 'Keyword added successfully' }
+
+//     return { status: 404, data: 'Cannot add this keyword' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const deleteKeyword = async (id: string) => {
+//   await onCurrentUser()
+//   try {
+//     const deleted = await deleteKeywordQuery(id)
+//     if (deleted)
+//       return {
+//         status: 200,
+//         data: 'Keyword deleted',
+//       }
+//     return { status: 404, data: 'Keyword not found' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const getProfilePosts = async () => {
+//   const user = await onCurrentUser()
+//   try {
+//     const profile = await findUser(user.id)
+//     const posts = await fetch(
+//       `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0].token}`
+//     )
+//     const parsed = await posts.json()
+//     if (parsed) return { status: 200, data: parsed }
+//     console.log('🔴 Error in getting posts')
+//     return { status: 404 }
+//   } catch (error) {
+//     console.log('🔴 server side Error in getting posts ', error)
+//     return { status: 500 }
+//   }
+// }
+
+// export const savePosts = async (
+//   autmationId: string,
+//   posts: {
+//     postid: string
+//     caption?: string
+//     media: string
+//     mediaType: 'IMAGE' | 'VIDEO' | 'CAROSEL_ALBUM'
+//   }[]
+// ) => {
+//   await onCurrentUser()
+//   try {
+//     const create = await addPost(autmationId, posts)
+
+//     if (create) return { status: 200, data: 'Posts attached' }
+
+//     return { status: 404, data: 'Automation not found' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const activateAutomation = async (id: string, state: boolean) => {
+//   await onCurrentUser()
+//   try {
+//     const update = await updateAutomation(id, { active: state })
+//     if (update)
+//       return {
+//         status: 200,
+//         data: `Automation ${state ? 'activated' : 'disabled'}`,
+//       }
+//     return { status: 404, data: 'Automation not found' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
+
+// export const saveScheduledPosts = async (
+//   automationId: string,
+//   scheduledPostIds: string[]
+// ) => {
+//   await onCurrentUser()
+//   try {
+//     const create = await addScheduledPosts(automationId, scheduledPostIds)
+
+//     if (create) return { status: 200, data: 'Scheduled posts attached' }
+
+//     return { status: 404, data: 'Automation not found' }
+//   } catch (error) {
+//     return { status: 500, data: 'Oops! something went wrong' }
+//   }
+// }
