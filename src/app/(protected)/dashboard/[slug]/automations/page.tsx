@@ -1160,7 +1160,7 @@ const AutomationCard = ({ automation, index }: { automation: any; index: number 
 
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {/* Status indicator */}
+          {/* Statuss indicator */}
           <div
             className={`relative p-2.5 rounded-lg shadow-sm ${
               automation._isOptimistic
