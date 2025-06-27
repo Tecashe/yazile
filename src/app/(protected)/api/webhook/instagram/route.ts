@@ -1,554 +1,554 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { findAutomation } from "@/actions/automations/queries"
-import {
-  createChatHistory,
-  getChatHistory,
-  getKeywordAutomation,
-  getKeywordPost,
-  matchKeyword,
-  trackResponses,
-} from "@/actions/webhook/queries"
-import { sendDM, sendPrivateMessage } from "@/lib/fetch"
-import { openai } from "@/lib/openai"
-import { client } from "@/lib/prisma"
-import { getVoiceflowResponse, processVoiceflowResponse, createVoiceflowUser } from "@/lib/voiceflow"
-import { storeConversationMessage } from "@/actions/chats/queries"
-import { createMarketingInfoAction } from "@/actions/details"
-import { analyzeLead } from "@/lib/lead-qualification"
-import type { VoiceflowVariables } from "@/types/voiceflow"
+// import { type NextRequest, NextResponse } from "next/server"
+// import { findAutomation } from "@/actions/automations/queries"
+// import {
+//   createChatHistory,
+//   getChatHistory,
+//   getKeywordAutomation,
+//   getKeywordPost,
+//   matchKeyword,
+//   trackResponses,
+// } from "@/actions/webhook/queries"
+// import { sendDM, sendPrivateMessage } from "@/lib/fetch"
+// import { openai } from "@/lib/openai"
+// import { client } from "@/lib/prisma"
+// import { getVoiceflowResponse, processVoiceflowResponse, createVoiceflowUser } from "@/lib/voiceflow"
+// import { storeConversationMessage } from "@/actions/chats/queries"
+// import { createMarketingInfoAction } from "@/actions/details"
+// import { analyzeLead } from "@/lib/lead-qualification"
+// import type { VoiceflowVariables } from "@/types/voiceflow"
 
-/**
- * Instagram Quick Reply button type
- */
-type InstagramQuickReply = {
-  content_type: "text"
-  title: string
-  payload: string
-}
+// /**
+//  * Instagram Quick Reply button type
+//  */
+// type InstagramQuickReply = {
+//   content_type: "text"
+//   title: string
+//   payload: string
+// }
 
-interface VoiceflowResponseWithButtons {
-  text: string
-  buttons?: { name: string; payload: string | object | any }[]
-}
+// interface VoiceflowResponseWithButtons {
+//   text: string
+//   buttons?: { name: string; payload: string | object | any }[]
+// }
 
-/**
- * Transforms Voiceflow buttons to Instagram-compatible quick replies
- * Handles both string and non-string payloads
- */
-function transformButtonsToInstagram(
-  buttons?: { name: string; payload: string | object | any }[],
-): InstagramQuickReply[] | undefined {
-  if (!buttons || buttons.length === 0) return undefined
+// /**
+//  * Transforms Voiceflow buttons to Instagram-compatible quick replies
+//  * Handles both string and non-string payloads
+//  */
+// function transformButtonsToInstagram(
+//   buttons?: { name: string; payload: string | object | any }[],
+// ): InstagramQuickReply[] | undefined {
+//   if (!buttons || buttons.length === 0) return undefined
 
-  // Instagram allows max 11 quick replies and has character limits
-  return buttons.slice(0, 11).map((button) => {
-    // Convert name to string and trim to Instagram's limit
-    const buttonName = String(button.name || "").substring(0, 20)
+//   // Instagram allows max 11 quick replies and has character limits
+//   return buttons.slice(0, 11).map((button) => {
+//     // Convert name to string and trim to Instagram's limit
+//     const buttonName = String(button.name || "").substring(0, 20)
 
-    // Safely handle various payload types
-    let buttonPayload: string
-    if (typeof button.payload === "string") {
-      buttonPayload = button.payload.substring(0, 1000) // String payloads can use substring directly
-    } else if (button.payload === null || button.payload === undefined) {
-      buttonPayload = buttonName // Fallback to using the button name as payload
-    } else {
-      // For objects or other types, stringify them first
-      try {
-        buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
-      } catch (e) {
-        buttonPayload = String(button.payload).substring(0, 1000)
-      }
-    }
+//     // Safely handle various payload types
+//     let buttonPayload: string
+//     if (typeof button.payload === "string") {
+//       buttonPayload = button.payload.substring(0, 1000) // String payloads can use substring directly
+//     } else if (button.payload === null || button.payload === undefined) {
+//       buttonPayload = buttonName // Fallback to using the button name as payload
+//     } else {
+//       // For objects or other types, stringify them first
+//       try {
+//         buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
+//       } catch (e) {
+//         buttonPayload = String(button.payload).substring(0, 1000)
+//       }
+//     }
 
-    return {
-      content_type: "text",
-      title: buttonName,
-      payload: buttonPayload,
-    }
-  })
-}
+//     return {
+//       content_type: "text",
+//       title: buttonName,
+//       payload: buttonPayload,
+//     }
+//   })
+// }
 
-interface WebhookData {
-  pageId: string
-  senderId: string
-  recipientId?: string
-  userMessage: string
-  messageId?: string
-  commentId?: string
-  messageType: "DM" | "COMMENT"
-}
+// interface WebhookData {
+//   pageId: string
+//   senderId: string
+//   recipientId?: string
+//   userMessage: string
+//   messageId?: string
+//   commentId?: string
+//   messageType: "DM" | "COMMENT"
+// }
 
-/**
- * Extracts relevant data from webhook payload
- */
-function extractWebhookData(payload: any): WebhookData | null {
-  try {
-    if (payload?.entry?.[0]?.messaging) {
-      return {
-        pageId: payload.entry[0].id,
-        senderId: payload.entry[0].messaging[0].sender.id,
-        recipientId: payload.entry[0].messaging[0].recipient.id,
-        userMessage: payload.entry[0].messaging[0].message.text,
-        messageId: payload.entry[0].messaging[0].message.mid,
-        messageType: "DM",
-      }
-    } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
-      return {
-        pageId: payload.entry[0].id,
-        senderId: payload.entry[0].changes[0].value.from.id,
-        userMessage: payload.entry[0].changes[0].value.text,
-        commentId: payload.entry[0].changes[0].value.id,
-        messageType: "COMMENT",
-      }
-    }
-  } catch (error) {
-    console.error("Error extracting webhook data:", error)
-  }
-  return null
-}
+// /**
+//  * Extracts relevant data from webhook payload
+//  */
+// function extractWebhookData(payload: any): WebhookData | null {
+//   try {
+//     if (payload?.entry?.[0]?.messaging) {
+//       return {
+//         pageId: payload.entry[0].id,
+//         senderId: payload.entry[0].messaging[0].sender.id,
+//         recipientId: payload.entry[0].messaging[0].recipient.id,
+//         userMessage: payload.entry[0].messaging[0].message.text,
+//         messageId: payload.entry[0].messaging[0].message.mid,
+//         messageType: "DM",
+//       }
+//     } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+//       return {
+//         pageId: payload.entry[0].id,
+//         senderId: payload.entry[0].changes[0].value.from.id,
+//         userMessage: payload.entry[0].changes[0].value.text,
+//         commentId: payload.entry[0].changes[0].value.id,
+//         messageType: "COMMENT",
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error extracting webhook data:", error)
+//   }
+//   return null
+// }
 
-export async function GET(req: NextRequest) {
-  const hub = req.nextUrl.searchParams.get("hub.challenge")
-  return new NextResponse(hub)
-}
+// export async function GET(req: NextRequest) {
+//   const hub = req.nextUrl.searchParams.get("hub.challenge")
+//   return new NextResponse(hub)
+// }
 
-export async function POST(req: NextRequest) {
-  console.log("POST request received")
-  let webhook_payload
+// export async function POST(req: NextRequest) {
+//   console.log("POST request received")
+//   let webhook_payload
 
-  try {
-    webhook_payload = await req.json()
-    console.log("Received webhook payload:", JSON.stringify(webhook_payload, null, 2))
+//   try {
+//     webhook_payload = await req.json()
+//     console.log("Received webhook payload:", JSON.stringify(webhook_payload, null, 2))
 
-    // Extract data from webhook payload
-    const data = extractWebhookData(webhook_payload)
-    if (!data) {
-      return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 400 })
-    }
+//     // Extract data from webhook payload
+//     const data = extractWebhookData(webhook_payload)
+//     if (!data) {
+//       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 400 })
+//     }
 
-    const { pageId, senderId, userMessage, messageType } = data
-    const userId = `${pageId}_${senderId}`
+//     const { pageId, senderId, userMessage, messageType } = data
+//     const userId = `${pageId}_${senderId}`
 
-    // Check for keyword match
-    const matcher = await matchKeyword(userMessage)
+//     // Check for keyword match
+//     const matcher = await matchKeyword(userMessage)
 
-    // Check if the conversation is already active
-    const conversationState = await client.conversationState.findUnique({
-      where: { userId },
-    })
+//     // Check if the conversation is already active
+//     const conversationState = await client.conversationState.findUnique({
+//       where: { userId },
+//     })
 
-    let isConversationActive = conversationState?.isActive || false
+//     let isConversationActive = conversationState?.isActive || false
 
-    if (!isConversationActive && !matcher?.automationId) {
-      // No keyword match and conversation not active, don't respond
-      return NextResponse.json({ message: "No keyword match" }, { status: 200 })
-    }
+//     if (!isConversationActive && !matcher?.automationId) {
+//       // No keyword match and conversation not active, don't respond
+//       return NextResponse.json({ message: "No keyword match" }, { status: 200 })
+//     }
 
-    // Set conversation as active if keyword matched
-    if (matcher?.automationId) {
-      await client.conversationState.upsert({
-        where: { userId },
-        update: { isActive: true, updatedAt: new Date() },
-        create: { userId, isActive: true },
-      })
-      isConversationActive = true
-    }
+//     // Set conversation as active if keyword matched
+//     if (matcher?.automationId) {
+//       await client.conversationState.upsert({
+//         where: { userId },
+//         update: { isActive: true, updatedAt: new Date() },
+//         create: { userId, isActive: true },
+//       })
+//       isConversationActive = true
+//     }
 
-    // Get automation details
-    let automation
-    if (matcher && matcher.automationId) {
-      automation = await getKeywordAutomation(matcher.automationId, messageType === "DM")
-    } else {
-      const customer_history = await getChatHistory(pageId, senderId)
-      if (customer_history.history.length > 0) {
-        automation = await findAutomation(customer_history.automationId!)
-      }
-    }
+//     // Get automation details
+//     let automation
+//     if (matcher && matcher.automationId) {
+//       automation = await getKeywordAutomation(matcher.automationId, messageType === "DM")
+//     } else {
+//       const customer_history = await getChatHistory(pageId, senderId)
+//       if (customer_history.history.length > 0) {
+//         automation = await findAutomation(customer_history.automationId!)
+//       }
+//     }
 
-    // Process for lead qualification
-    if (automation?.userId) {
-      try {
-        await analyzeLead({
-          userId: automation.userId,
-          automationId: automation.id,
-          platformId: pageId,
-          customerId: senderId,
-          message: userMessage,
-          messageType,
-          timestamp: new Date(),
-        })
-      } catch (error) {
-        console.error("Error analyzing lead:", error)
-        // Continue processing even if lead analysis fails
-      }
-    }
+//     // Process for lead qualification
+//     if (automation?.userId) {
+//       try {
+//         await analyzeLead({
+//           userId: automation.userId,
+//           automationId: automation.id,
+//           platformId: pageId,
+//           customerId: senderId,
+//           message: userMessage,
+//           messageType,
+//           timestamp: new Date(),
+//         })
+//       } catch (error) {
+//         console.error("Error analyzing lead:", error)
+//         // Continue processing even if lead analysis fails
+//       }
+//     }
 
-    // Handle based on subscription plan
-    if (automation?.User?.subscription?.plan === "PRO") {
-      // PRO users get Voiceflow
-      console.log("Using Voiceflow for PRO user")
+//     // Handle based on subscription plan
+//     if (automation?.User?.subscription?.plan === "PRO") {
+//       // PRO users get Voiceflow
+//       console.log("Using Voiceflow for PRO user")
 
-      // Create Voiceflow user
-      console.log("Attempting to create Voiceflow user:", userId)
-      const userCreated = await createVoiceflowUser(userId)
-      if (!userCreated) {
-        console.warn(`Failed to create Voiceflow user: ${userId}. Proceeding with the request.`)
-      }
+//       // Create Voiceflow user
+//       console.log("Attempting to create Voiceflow user:", userId)
+//       const userCreated = await createVoiceflowUser(userId)
+//       if (!userCreated) {
+//         console.warn(`Failed to create Voiceflow user: ${userId}. Proceeding with the request.`)
+//       }
 
-      // Get business context
-      let businessVariables: Record<string, string> = {}
-      if (automation?.userId) {
-        try {
+//       // Get business context
+//       let businessVariables: Record<string, string> = {}
+//       if (automation?.userId) {
+//         try {
                   
-          const business = await client.business.findFirst({
-            where: { userId: automation.userId },
-          })
-          if (business) {
-            businessVariables = {
-              business_name: business.businessName || "Test Name",
-              welcome_message: business.welcomeMessage || "Test",
-              business_industry: business.industry || "",
-              business_type: business.businessType || "",
-              business_description: business.businessDescription || "",
-              instagram_handle: business.instagramHandle || "",
-              website: business.website || "",
-              target_audience: business.targetAudience || "",
-              response_language: business.responseLanguage || "",
-              business_hours: business.businessHours || "",
-              auto_reply_enabled: business.autoReplyEnabled ? "Yes" : "No",
-              promotion_message: business.promotionMessage || "",
-              automation_setup_complete: business.automationSetupComplete ? "Yes" : "No",
-              automation_setup_date: business.automationSetupDate?.toISOString() || "",
-              automation_additional_notes: business.automationAdditionalNotes || "",
+//           const business = await client.business.findFirst({
+//             where: { userId: automation.userId },
+//           })
+//           if (business) {
+//             businessVariables = {
+//               business_name: business.businessName || "Test Name",
+//               welcome_message: business.welcomeMessage || "Test",
+//               business_industry: business.industry || "",
+//               business_type: business.businessType || "",
+//               business_description: business.businessDescription || "",
+//               instagram_handle: business.instagramHandle || "",
+//               website: business.website || "",
+//               target_audience: business.targetAudience || "",
+//               response_language: business.responseLanguage || "",
+//               business_hours: business.businessHours || "",
+//               auto_reply_enabled: business.autoReplyEnabled ? "Yes" : "No",
+//               promotion_message: business.promotionMessage || "",
+//               automation_setup_complete: business.automationSetupComplete ? "Yes" : "No",
+//               automation_setup_date: business.automationSetupDate?.toISOString() || "",
+//               automation_additional_notes: business.automationAdditionalNotes || "",
              
-            }
+//             }
 
-            // Parse and add JSON fields
-            if (business.automationGoals) {
-              try {
-                const automationGoals = JSON.parse(business.automationGoals as string)
-                businessVariables.primary_goal = automationGoals.primaryGoal || ""
-                businessVariables.response_time = automationGoals.responseTime?.toString() || ""
-                businessVariables.custom_goals = automationGoals.customGoals || ""
-              } catch (e) {
-                console.error("Error parsing automationGoals:", e)
-              }
-            }
+//             // Parse and add JSON fields
+//             if (business.automationGoals) {
+//               try {
+//                 const automationGoals = JSON.parse(business.automationGoals as string)
+//                 businessVariables.primary_goal = automationGoals.primaryGoal || ""
+//                 businessVariables.response_time = automationGoals.responseTime?.toString() || ""
+//                 businessVariables.custom_goals = automationGoals.customGoals || ""
+//               } catch (e) {
+//                 console.error("Error parsing automationGoals:", e)
+//               }
+//             }
 
-            if (business.customerJourney) {
-              try {
-                const customerJourney = JSON.parse(business.customerJourney as string)
-                businessVariables.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
-              } catch (e) {
-                console.error("Error parsing customerJourney:", e)
-              }
-            }
+//             if (business.customerJourney) {
+//               try {
+//                 const customerJourney = JSON.parse(business.customerJourney as string)
+//                 businessVariables.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
+//               } catch (e) {
+//                 console.error("Error parsing customerJourney:", e)
+//               }
+//             }
 
-            if (business.features) {
-              try {
-                const features = JSON.parse(business.features as string)
-                businessVariables.enabled_features =
-                  features.features
-                    ?.filter((f: any) => f.enabled)
-                    .map((f: any) => f.name)
-                    .join(", ") || ""
-              } catch (e) {
-                console.error("Error parsing features:", e)
-              }
-            }
+//             if (business.features) {
+//               try {
+//                 const features = JSON.parse(business.features as string)
+//                 businessVariables.enabled_features =
+//                   features.features
+//                     ?.filter((f: any) => f.enabled)
+//                     .map((f: any) => f.name)
+//                     .join(", ") || ""
+//               } catch (e) {
+//                 console.error("Error parsing features:", e)
+//               }
+//             }
 
-            if (business.businessTypeData) {
-              businessVariables.business_type_data = business.businessTypeData as string
-            }
+//             if (business.businessTypeData) {
+//               businessVariables.business_type_data = business.businessTypeData as string
+//             }
 
-            if (business.websiteAnalysis) {
-              businessVariables.website_analysis = business.websiteAnalysis as string
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching business:", error)
-        }
-      }
+//             if (business.websiteAnalysis) {
+//               businessVariables.website_analysis = business.websiteAnalysis as string
+//             }
+//           }
+//         } catch (error) {
+//           console.error("Error fetching business:", error)
+//         }
+//       }
 
-      // Get Voiceflow response
-      let voiceflowResponse: VoiceflowResponseWithButtons = {
-        text: "I'm sorry, but I'm having trouble processing your request right now. Please try again later.",
-        buttons: undefined,
-      }
-      let voiceflowVariables: VoiceflowVariables = {}
+//       // Get Voiceflow response
+//       let voiceflowResponse: VoiceflowResponseWithButtons = {
+//         text: "I'm sorry, but I'm having trouble processing your request right now. Please try again later.",
+//         buttons: undefined,
+//       }
+//       let voiceflowVariables: VoiceflowVariables = {}
 
-      try {
-        const { response, variables } = await getVoiceflowResponse(userMessage, userId, businessVariables)
-        voiceflowResponse = processVoiceflowResponse(response)
-        voiceflowVariables = variables
+//       try {
+//         const { response, variables } = await getVoiceflowResponse(userMessage, userId, businessVariables)
+//         voiceflowResponse = processVoiceflowResponse(response)
+//         voiceflowVariables = variables
 
-        // Store marketing info if available
-        if (voiceflowVariables.clientname || voiceflowVariables.clientemail || voiceflowVariables.clientphone) {
-          try {
-            const marketingInfo = {
-              name: voiceflowVariables.clientname,
-              email: voiceflowVariables.clientemail,
-              phone: voiceflowVariables.clientphone,
-            }
-            await createMarketingInfoAction(marketingInfo)
-          } catch (error) {
-            console.error("Error storing marketing info:", error)
-          }
-        }
+//         // Store marketing info if available
+//         if (voiceflowVariables.clientname || voiceflowVariables.clientemail || voiceflowVariables.clientphone) {
+//           try {
+//             const marketingInfo = {
+//               name: voiceflowVariables.clientname,
+//               email: voiceflowVariables.clientemail,
+//               phone: voiceflowVariables.clientphone,
+//             }
+//             await createMarketingInfoAction(marketingInfo)
+//           } catch (error) {
+//             console.error("Error storing marketing info:", error)
+//           }
+//         }
 
-        // Store conversation
-        await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
-        await storeConversationMessage(pageId, "bot", voiceflowResponse.text, true, automation?.id || null)
+//         // Store conversation
+//         await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
+//         await storeConversationMessage(pageId, "bot", voiceflowResponse.text, true, automation?.id || null)
 
-        // Transform buttons to Instagram format
-        const instagramButtons = transformButtonsToInstagram(voiceflowResponse.buttons)
+//         // Transform buttons to Instagram format
+//         const instagramButtons = transformButtonsToInstagram(voiceflowResponse.buttons)
 
-        // Send response based on message type
-        if (messageType === "DM") {
-          const direct_message = await sendDM(
-            pageId,
-            senderId,
-            voiceflowResponse.text,
-            automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
-            instagramButtons,
-          )
+//         // Send response based on message type
+//         if (messageType === "DM") {
+//           const direct_message = await sendDM(
+//             pageId,
+//             senderId,
+//             voiceflowResponse.text,
+//             automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
+//             instagramButtons,
+//           )
 
-          if (direct_message.status === 200) {
-            if (automation) {
-              await trackResponses(automation.id, "DM")
-            }
-            await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
-            await createChatHistory(automation?.id || "default", pageId, senderId, voiceflowResponse.text)
-            return NextResponse.json({ message: "Message sent" }, { status: 200 })
-          }
-        } else if (messageType === "COMMENT" && data.commentId) {
-          const comment = await sendPrivateMessage(
-            pageId,
-            data.commentId,
-            voiceflowResponse.text,
-            automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
-            instagramButtons,
-          )
+//           if (direct_message.status === 200) {
+//             if (automation) {
+//               await trackResponses(automation.id, "DM")
+//             }
+//             await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
+//             await createChatHistory(automation?.id || "default", pageId, senderId, voiceflowResponse.text)
+//             return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//           }
+//         } else if (messageType === "COMMENT" && data.commentId) {
+//           const comment = await sendPrivateMessage(
+//             pageId,
+//             data.commentId,
+//             voiceflowResponse.text,
+//             automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
+//             instagramButtons,
+//           )
 
-          if (comment.status === 200) {
-            if (automation) {
-              await trackResponses(automation.id, "COMMENT")
-            }
-            return NextResponse.json({ message: "Message sent" }, { status: 200 })
-          }
-        }
-      } catch (error) {
-        console.error("Error in Voiceflow processing:", error)
-        // Fallback to sending just text if buttons fail
-        if (messageType === "DM") {
-          await sendDM(
-            pageId,
-            senderId,
-            voiceflowResponse.text,
-            automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
-          )
-        } else if (messageType === "COMMENT" && data.commentId) {
-          await sendPrivateMessage(
-            pageId,
-            data.commentId,
-            voiceflowResponse.text,
-            automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
-          )
-        }
-      }
-    } else {
-      // Free users get OpenAI
-      console.log("Using OpenAI for free user")
+//           if (comment.status === 200) {
+//             if (automation) {
+//               await trackResponses(automation.id, "COMMENT")
+//             }
+//             return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//           }
+//         }
+//       } catch (error) {
+//         console.error("Error in Voiceflow processing:", error)
+//         // Fallback to sending just text if buttons fail
+//         if (messageType === "DM") {
+//           await sendDM(
+//             pageId,
+//             senderId,
+//             voiceflowResponse.text,
+//             automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
+//           )
+//         } else if (messageType === "COMMENT" && data.commentId) {
+//           await sendPrivateMessage(
+//             pageId,
+//             data.commentId,
+//             voiceflowResponse.text,
+//             automation?.User?.integrations[0].token || process.env.DEFAULT_PAGE_TOKEN!,
+//           )
+//         }
+//       }
+//     } else {
+//       // Free users get OpenAI
+//       console.log("Using OpenAI for free user")
 
-      if (messageType === "DM") {
-        if (automation && automation.trigger) {
-          if (automation.listener && automation.listener.listener === "MESSAGE") {
-            const direct_message = await sendDM(
-              pageId,
-              senderId,
-              automation.listener?.prompt,
-              automation.User?.integrations[0].token!,
-            )
+//       if (messageType === "DM") {
+//         if (automation && automation.trigger) {
+//           if (automation.listener && automation.listener.listener === "MESSAGE") {
+//             const direct_message = await sendDM(
+//               pageId,
+//               senderId,
+//               automation.listener?.prompt,
+//               automation.User?.integrations[0].token!,
+//             )
 
-            if (direct_message.status === 200) {
-              const tracked = await trackResponses(automation.id, "DM")
-              if (tracked) {
-                return NextResponse.json({ message: "Message sent" }, { status: 200 })
-              }
-            }
-          }
+//             if (direct_message.status === 200) {
+//               const tracked = await trackResponses(automation.id, "DM")
+//               if (tracked) {
+//                 return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//               }
+//             }
+//           }
 
-          if (automation.listener && automation.listener.listener === "SMARTAI") {
-            const smart_ai_message = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "assistant",
-                  content: `${automation.listener?.prompt}: Keep responses under 2 sentences`,
-                },
-              ],
-            })
+//           if (automation.listener && automation.listener.listener === "SMARTAI") {
+//             const smart_ai_message = await openai.chat.completions.create({
+//               model: "gpt-4o",
+//               messages: [
+//                 {
+//                   role: "assistant",
+//                   content: `${automation.listener?.prompt}: Keep responses under 2 sentences`,
+//                 },
+//               ],
+//             })
 
-            if (smart_ai_message.choices[0].message.content) {
-              const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
+//             if (smart_ai_message.choices[0].message.content) {
+//               const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
 
-              const sender = createChatHistory(
-                automation.id,
-                pageId,
-                senderId,
-                smart_ai_message.choices[0].message.content,
-              )
+//               const sender = createChatHistory(
+//                 automation.id,
+//                 pageId,
+//                 senderId,
+//                 smart_ai_message.choices[0].message.content,
+//               )
 
-              await client.$transaction([reciever, sender])
+//               await client.$transaction([reciever, sender])
 
-              const direct_message = await sendDM(
-                pageId,
-                senderId,
-                smart_ai_message.choices[0].message.content,
-                automation.User?.integrations[0].token!,
-              )
+//               const direct_message = await sendDM(
+//                 pageId,
+//                 senderId,
+//                 smart_ai_message.choices[0].message.content,
+//                 automation.User?.integrations[0].token!,
+//               )
 
-              if (direct_message.status === 200) {
-                const tracked = await trackResponses(automation.id, "DM")
-                if (tracked) {
-                  return NextResponse.json({ message: "Message sent" }, { status: 200 })
-                }
-              }
-            }
-          }
-        }
-      }
+//               if (direct_message.status === 200) {
+//                 const tracked = await trackResponses(automation.id, "DM")
+//                 if (tracked) {
+//                   return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       }
 
-      if (messageType === "COMMENT" && data.commentId) {
-        const automations_post = await getKeywordPost(
-          webhook_payload.entry[0].changes[0].value.media.id,
-          automation?.id!,
-        )
+//       if (messageType === "COMMENT" && data.commentId) {
+//         const automations_post = await getKeywordPost(
+//           webhook_payload.entry[0].changes[0].value.media.id,
+//           automation?.id!,
+//         )
 
-        if (automation && automations_post && automation.trigger) {
-          if (automation.listener) {
-            if (automation.listener.listener === "MESSAGE") {
-              const direct_message = await sendPrivateMessage(
-                pageId,
-                data.commentId,
-                automation.listener?.prompt,
-                automation.User?.integrations[0].token!,
-              )
+//         if (automation && automations_post && automation.trigger) {
+//           if (automation.listener) {
+//             if (automation.listener.listener === "MESSAGE") {
+//               const direct_message = await sendPrivateMessage(
+//                 pageId,
+//                 data.commentId,
+//                 automation.listener?.prompt,
+//                 automation.User?.integrations[0].token!,
+//               )
 
-              if (direct_message.status === 200) {
-                const tracked = await trackResponses(automation.id, "COMMENT")
-                if (tracked) {
-                  return NextResponse.json({ message: "Message sent" }, { status: 200 })
-                }
-              }
-            }
+//               if (direct_message.status === 200) {
+//                 const tracked = await trackResponses(automation.id, "COMMENT")
+//                 if (tracked) {
+//                   return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//                 }
+//               }
+//             }
 
-            if (automation.listener.listener === "SMARTAI") {
-              const smart_ai_message = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                  {
-                    role: "assistant",
-                    content: `${automation.listener?.prompt}: keep responses under 2 sentences`,
-                  },
-                ],
-              })
+//             if (automation.listener.listener === "SMARTAI") {
+//               const smart_ai_message = await openai.chat.completions.create({
+//                 model: "gpt-4o",
+//                 messages: [
+//                   {
+//                     role: "assistant",
+//                     content: `${automation.listener?.prompt}: keep responses under 2 sentences`,
+//                   },
+//                 ],
+//               })
 
-              if (smart_ai_message.choices[0].message.content) {
-                const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
+//               if (smart_ai_message.choices[0].message.content) {
+//                 const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
 
-                const sender = createChatHistory(
-                  automation.id,
-                  pageId,
-                  senderId,
-                  smart_ai_message.choices[0].message.content,
-                )
+//                 const sender = createChatHistory(
+//                   automation.id,
+//                   pageId,
+//                   senderId,
+//                   smart_ai_message.choices[0].message.content,
+//                 )
 
-                await client.$transaction([reciever, sender])
+//                 await client.$transaction([reciever, sender])
 
-                const direct_message = await sendPrivateMessage(
-                  pageId,
-                  data.commentId,
-                  smart_ai_message.choices[0].message.content,
-                  automation.User?.integrations[0].token!,
-                )
+//                 const direct_message = await sendPrivateMessage(
+//                   pageId,
+//                   data.commentId,
+//                   smart_ai_message.choices[0].message.content,
+//                   automation.User?.integrations[0].token!,
+//                 )
 
-                if (direct_message.status === 200) {
-                  const tracked = await trackResponses(automation.id, "COMMENT")
-                  if (tracked) {
-                    return NextResponse.json({ message: "Message sent" }, { status: 200 })
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+//                 if (direct_message.status === 200) {
+//                   const tracked = await trackResponses(automation.id, "COMMENT")
+//                   if (tracked) {
+//                     return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       }
 
-      // Handle continued conversations for free users
-      if (!matcher && messageType === "DM" && data.recipientId) {
-        const customer_history = await getChatHistory(data.recipientId, senderId)
+//       // Handle continued conversations for free users
+//       if (!matcher && messageType === "DM" && data.recipientId) {
+//         const customer_history = await getChatHistory(data.recipientId, senderId)
 
-        if (customer_history.history.length > 0) {
-          const automation = await findAutomation(customer_history.automationId!)
+//         if (customer_history.history.length > 0) {
+//           const automation = await findAutomation(customer_history.automationId!)
 
-          if (automation?.listener?.listener === "SMARTAI") {
-            const smart_ai_message = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "assistant",
-                  content: `${automation.listener?.prompt}: keep responses under 2 sentences`,
-                },
-                ...customer_history.history,
-                {
-                  role: "user",
-                  content: userMessage,
-                },
-              ],
-            })
+//           if (automation?.listener?.listener === "SMARTAI") {
+//             const smart_ai_message = await openai.chat.completions.create({
+//               model: "gpt-4o",
+//               messages: [
+//                 {
+//                   role: "assistant",
+//                   content: `${automation.listener?.prompt}: keep responses under 2 sentences`,
+//                 },
+//                 ...customer_history.history,
+//                 {
+//                   role: "user",
+//                   content: userMessage,
+//                 },
+//               ],
+//             })
 
-            if (smart_ai_message.choices[0].message.content) {
-              const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
+//             if (smart_ai_message.choices[0].message.content) {
+//               const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
 
-              const sender = createChatHistory(
-                automation.id,
-                pageId,
-                senderId,
-                smart_ai_message.choices[0].message.content,
-              )
+//               const sender = createChatHistory(
+//                 automation.id,
+//                 pageId,
+//                 senderId,
+//                 smart_ai_message.choices[0].message.content,
+//               )
 
-              await client.$transaction([reciever, sender])
+//               await client.$transaction([reciever, sender])
 
-              const direct_message = await sendDM(
-                pageId,
-                senderId,
-                smart_ai_message.choices[0].message.content,
-                automation.User?.integrations[0].token!,
-              )
+//               const direct_message = await sendDM(
+//                 pageId,
+//                 senderId,
+//                 smart_ai_message.choices[0].message.content,
+//                 automation.User?.integrations[0].token!,
+//               )
 
-              if (direct_message.status === 200) {
-                return NextResponse.json({ message: "Message sent" }, { status: 200 })
-              }
-            }
-          }
-        }
-      }
-    }
+//               if (direct_message.status === 200) {
+//                 return NextResponse.json({ message: "Message sent" }, { status: 200 })
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
 
-    return NextResponse.json({ message: "Request processed" }, { status: 200 })
-  } catch (error) {
-    console.error("Unhandled error in POST function:", error)
-    return NextResponse.json(
-      {
-        message: "Error processing request",
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      },
-      { status: 500 },
-    )
-  }
-}
+//     return NextResponse.json({ message: "Request processed" }, { status: 200 })
+//   } catch (error) {
+//     console.error("Unhandled error in POST function:", error)
+//     return NextResponse.json(
+//       {
+//         message: "Error processing request",
+//         error: error instanceof Error ? error.message : String(error),
+//         stack: error instanceof Error ? error.stack : undefined,
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
 
 
 
@@ -3783,6 +3783,760 @@ export async function POST(req: NextRequest) {
 
 
 
+import { type NextRequest, NextResponse } from "next/server"
+import { findAutomation } from "@/actions/automations/queries"
+import {
+  createChatHistory,
+  getChatHistory,
+  getKeywordPost,
+  trackResponses,
+  checkProcessedMessage,
+  markMessageAsProcessed,
+  decideTriggerAction,
+  getAutomationWithTriggers,
+  updateConversationState,
+  logTriggerExecution,
+} from "@/actions/webhook/queries"
+import { sendDM, sendPrivateMessage } from "@/lib/fetch"
+import { openai } from "@/lib/openai"
+import { client } from "@/lib/prisma"
+import { getVoiceflowResponse, processVoiceflowResponse, createVoiceflowUser } from "@/lib/voiceflow"
+import { storeConversationMessage } from "@/actions/chats/queries"
+import { analyzeLead } from "@/lib/lead-qualification"
+import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
+import { verifyInstagramWebhook } from "@/utils/instagram"
+import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+
+import type { VoiceflowVariables } from "@/types/voiceflow"
+
+type InstagramQuickReply = {
+  content_type: "text"
+  title: string
+  payload: string
+}
+
+interface VoiceflowResponseWithButtons {
+  text: string
+  buttons?: { name: string; payload: string | object | any }[]
+}
+
+interface WebhookData {
+  pageId: string
+  senderId: string
+  recipientId?: string
+  userMessage: string
+  messageId?: string
+  commentId?: string
+  messageType: "DM" | "COMMENT"
+  isEcho?: boolean
+}
+
+function transformButtonsToInstagram(
+  buttons?: { name: string; payload: string | object | any }[],
+): InstagramQuickReply[] | undefined {
+  if (!buttons || buttons.length === 0) return undefined
+
+  return buttons.slice(0, 11).map((button) => {
+    const buttonName = String(button.name || "").substring(0, 20)
+
+    let buttonPayload: string
+    if (typeof button.payload === "string") {
+      buttonPayload = button.payload.substring(0, 1000)
+    } else if (button.payload === null || button.payload === undefined) {
+      buttonPayload = buttonName
+    } else {
+      try {
+        buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
+      } catch (e) {
+        buttonPayload = String(button.payload).substring(0, 1000)
+      }
+    }
+
+    return {
+      content_type: "text",
+      title: buttonName,
+      payload: buttonPayload,
+    }
+  })
+}
+
+function extractWebhookData(payload: any): WebhookData | null {
+  try {
+    if (payload?.entry?.[0]?.messaging) {
+      const messaging = payload.entry[0].messaging[0]
+      const isEcho = messaging.message?.is_echo === true
+
+      return {
+        pageId: payload.entry[0].id,
+        senderId: messaging.sender.id,
+        recipientId: messaging.recipient.id,
+        userMessage: messaging.message.text,
+        messageId: messaging.message.mid,
+        messageType: "DM",
+        isEcho,
+      }
+    } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+      return {
+        pageId: payload.entry[0].id,
+        senderId: payload.entry[0].changes[0].value.from.id,
+        userMessage: payload.entry[0].changes[0].value.text,
+        commentId: payload.entry[0].changes[0].value.id,
+        messageType: "COMMENT",
+        isEcho: false,
+      }
+    }
+  } catch (error) {
+    console.error("Error extracting webhook data:", error)
+  }
+  return null
+}
+
+function generateMessageKey(data: WebhookData, timestamp: number): string {
+  const baseId = data.messageId || data.commentId || `${timestamp}_${Math.random().toString(36).substr(2, 9)}`
+  const messageContent = data.userMessage.substring(0, 50)
+  const messageLength = data.userMessage.length
+
+  return `${data.pageId}_${data.senderId}_${baseId}_${messageLength}_${messageContent.replace(/\s+/g, "_")}`
+}
+
+function isDeauthWebhook(payload: any): boolean {
+  return payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "deauthorizations"
+}
+
+function isDataDeletionWebhook(payload: any): boolean {
+  return payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion"
+}
+
+export async function GET(req: NextRequest) {
+  const hub = req.nextUrl.searchParams.get("hub.challenge")
+  return new NextResponse(hub)
+}
+
+export async function POST(req: NextRequest) {
+  console.log("🚀 POST request received")
+  const startTime = Date.now()
+  let webhook_payload
+
+  try {
+    webhook_payload = await req.json()
+    console.log("📥 Received webhook payload:", JSON.stringify(webhook_payload, null, 2))
+
+    if (isDeauthWebhook(webhook_payload)) {
+      console.log("🔐 Processing Instagram deauthorization webhook")
+      const signature = req.headers.get("x-hub-signature-256")
+      const body = JSON.stringify(webhook_payload)
+
+      if (!signature || !verifyInstagramWebhook(signature, body, process.env.INSTAGRAM_CLIENT_SECRET!)) {
+        console.error("❌ Invalid webhook signature for deauth")
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+      }
+
+      const result = await handleInstagramDeauthWebhook(webhook_payload)
+      return NextResponse.json(result, { status: result.status })
+    }
+
+    if (isDataDeletionWebhook(webhook_payload)) {
+      console.log("🗑️ Processing Instagram data deletion webhook")
+      const signature = req.headers.get("x-hub-signature-256")
+      const body = JSON.stringify(webhook_payload)
+
+      if (!signature || !verifyInstagramWebhook(signature, body, process.env.INSTAGRAM_CLIENT_SECRET!)) {
+        console.error("❌ Invalid webhook signature for data deletion")
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+      }
+
+      const result = await handleInstagramDataDeletionWebhook(webhook_payload)
+      return NextResponse.json(result, { status: result.status })
+    }
+
+    const data = extractWebhookData(webhook_payload)
+    if (!data) {
+      console.log("⚠️ Unsupported webhook payload structure")
+      return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 400 })
+    }
+
+    // Skip echo messages (messages sent by the bot)
+    if (data.isEcho) {
+      console.log("🔄 Skipping echo message (sent by bot)")
+      return NextResponse.json({ message: "Echo message ignored" }, { status: 200 })
+    }
+
+    const { pageId, senderId, userMessage, messageType } = data
+    const conversationUserId = `${pageId}_${senderId}` // For conversation tracking
+    const messageKey = generateMessageKey(data, startTime)
+
+    console.log(`📨 Processing ${messageType}: "${userMessage.substring(0, 100)}..." from ${senderId}`)
+
+    const isProcessed = await checkProcessedMessage(messageKey)
+    if (isProcessed) {
+      console.log(`⏭️ Skipping duplicate message: ${messageKey.substring(0, 50)}...`)
+      return NextResponse.json({ message: "Duplicate message skipped" }, { status: 200 })
+    }
+
+    await markMessageAsProcessed(messageKey)
+    console.log(`✅ Marked message as processed: ${messageKey.substring(0, 50)}...`)
+
+    const triggerDecision = await decideTriggerAction(pageId, senderId, userMessage, messageType)
+    console.log(`🎯 Trigger Decision:`, triggerDecision)
+
+    if (triggerDecision.triggerType === "NO_MATCH") {
+      console.log("❌ No automation triggered - message ignored")
+      return NextResponse.json({ message: "No matching automation found" }, { status: 200 })
+    }
+
+    let automation = null
+    try {
+      automation = await getAutomationWithTriggers(triggerDecision.automationId!, messageType)
+      console.log(`🔍 Automation lookup result:`, automation ? `Found: ${automation.id}` : "Not found")
+    } catch (error) {
+      console.error(`❌ Error fetching automation ${triggerDecision.automationId}:`, error)
+    }
+
+    if (!automation) {
+      console.log(`❌ Automation not found or inactive: ${triggerDecision.automationId}`)
+      try {
+        const fallbackAutomation = await client.automation.findUnique({
+          where: { id: triggerDecision.automationId! },
+          include: {
+            User: {
+              select: {
+                id: true,
+                subscription: { select: { plan: true } },
+                integrations: { select: { token: true } },
+              },
+            },
+            listener: true,
+            trigger: true,
+          },
+        })
+
+        if (fallbackAutomation) {
+          console.log(
+            `⚠️ Found automation but it may be inactive: ${fallbackAutomation.id}, active: ${fallbackAutomation.active}`,
+          )
+          automation = fallbackAutomation
+        }
+      } catch (fallbackError) {
+        console.error("❌ Fallback automation lookup failed:", fallbackError)
+      }
+
+      if (!automation) {
+        return NextResponse.json({ message: "Automation not found or inactive" }, { status: 404 })
+      }
+    }
+
+    console.log(
+      `🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"}) - Active: ${automation.active}`,
+    )
+
+    // FIXED: Log trigger execution with proper user UUID from automation owner
+    if (triggerDecision.automationId && triggerDecision.triggerId && automation.User?.id) {
+      try {
+        await logTriggerExecution({
+          triggerId: triggerDecision.triggerId,
+          automationId: triggerDecision.automationId,
+          userId: automation.User.id, // ← FIXED: Use actual user UUID, not pageId_senderId
+          messageContent: userMessage,
+          triggerType: triggerDecision.triggerType as any,
+          confidence: triggerDecision.confidence,
+          reason: triggerDecision.reason,
+          success: true,
+          responseTime: Date.now() - startTime,
+        })
+        console.log(`📊 Logged trigger execution: ${triggerDecision.triggerId}`)
+      } catch (error) {
+        console.error("❌ Error logging trigger execution:", error)
+      }
+    } else {
+      console.log(
+        `⚠️ Skipping trigger execution log - missing data: triggerId=${triggerDecision.triggerId}, automationId=${triggerDecision.automationId}, userId=${automation.User?.id}`,
+      )
+    }
+
+    await updateConversationState(conversationUserId, {
+      isActive: true,
+      lastTriggerType: triggerDecision.triggerType,
+      lastTriggerReason: triggerDecision.reason,
+      automationId: automation.id,
+      listenMode: triggerDecision.triggerType === "KEYWORD" ? "KEYWORDS" : "ALL_MESSAGES",
+      lastMessageLength: userMessage.length,
+    })
+
+    let leadAnalysisResult = null
+    if (automation.User?.id && senderId !== pageId) {
+      try {
+        leadAnalysisResult = await analyzeLead({
+          userId: automation.User.id,
+          automationId: automation.id,
+          platformId: pageId,
+          customerId: senderId,
+          message: userMessage,
+          messageType,
+          timestamp: new Date(),
+        })
+        console.log(
+          `📊 Lead analysis completed:`,
+          leadAnalysisResult?.lead?.id ? "Lead created/updated" : "No lead action",
+        )
+      } catch (error) {
+        console.error("❌ Error analyzing lead:", error)
+      }
+    }
+
+    if (automation.User?.subscription?.plan === "PRO") {
+      console.log("🚀 Using Voiceflow for PRO user")
+      console.log(`🔍 Automation User ID: ${automation.User?.id}`)
+      console.log(`🔍 Subscription Plan: ${automation.User?.subscription?.plan}`)
+      console.log(`🔍 Conversation User ID: ${conversationUserId}`)
+      console.log(`🔍 Message Type: ${messageType}`)
+      console.log(`🔍 User Message: "${userMessage}"`)
+
+      try {
+        await handleVoiceflowResponse(
+          data,
+          automation,
+          conversationUserId,
+          userMessage,
+          leadAnalysisResult,
+          triggerDecision,
+        )
+        console.log("✅ Voiceflow response handling completed")
+      } catch (error) {
+        console.error("💥 Error in Voiceflow response handling:", error)
+        throw error // Re-throw to see the full error
+      }
+    } else {
+      console.log("🤖 Using OpenAI for free user")
+      console.log(`🔍 Subscription Plan: ${automation.User?.subscription?.plan || "FREE/UNDEFINED"}`)
+      await handleOpenAIResponse(data, automation, webhook_payload, userMessage, triggerDecision)
+    }
+
+    const processingTime = Date.now() - startTime
+    console.log(`✅ Successfully processed message in ${processingTime}ms: ${messageKey.substring(0, 50)}...`)
+    return NextResponse.json(
+      {
+        message: "Request processed successfully",
+        processingTime,
+        triggerType: triggerDecision.triggerType,
+        automationId: automation.id,
+      },
+      { status: 200 },
+    )
+  } catch (error) {
+    console.error("💥 Unhandled error in POST function:", error)
+    return NextResponse.json(
+      {
+        message: "Error processing request",
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    )
+  }
+}
+
+async function handleVoiceflowResponse(
+  data: WebhookData,
+  automation: any,
+  conversationUserId: string,
+  userMessage: string,
+  leadAnalysisResult: any,
+  triggerDecision: any,
+) {
+  console.log("🎙️ === VOICEFLOW HANDLER STARTED ===")
+  console.log(`🎙️ Data:`, { pageId: data.pageId, senderId: data.senderId, messageType: data.messageType })
+  console.log(`🎙️ Automation ID: ${automation?.id}`)
+  console.log(`🎙️ Conversation User ID: ${conversationUserId}`)
+  console.log(`🎙️ User Message: "${userMessage}"`)
+  console.log(`🎙️ Trigger Decision:`, triggerDecision)
+
+  const { pageId, senderId, messageType } = data
+
+  try {
+    console.log("🎙️ Starting Voiceflow processing...")
+
+    // Add a step-by-step log for each major operation
+    console.log("🎙️ Step 1: Creating Voiceflow user...")
+    const userCreated = await createVoiceflowUser(conversationUserId)
+    console.log(`🎙️ Step 1 Result: User created = ${userCreated}`)
+
+    if (!userCreated) {
+      console.warn(`⚠️ Failed to create Voiceflow user: ${conversationUserId}. Proceeding with the request.`)
+    }
+
+    console.log("🎙️ Step 2: Preparing business variables...")
+    let businessVariables: Record<string, string> = {}
+    if (automation?.User?.id) {
+      try {
+        const business = await client.business.findFirst({
+          where: { userId: automation.User.id },
+        })
+        if (business) {
+          businessVariables = {
+            business_name: business.businessName || "Test Name",
+            welcome_message: business.welcomeMessage || "Test",
+            business_industry: business.industry || "",
+            business_type: business.businessType || "",
+            business_description: business.businessDescription || "",
+            instagram_handle: business.instagramHandle || "",
+            website: business.website || "",
+            target_audience: business.targetAudience || "",
+            response_language: business.responseLanguage || "",
+            business_hours: business.businessHours || "",
+            auto_reply_enabled: business.autoReplyEnabled ? "Yes" : "No",
+            promotion_message: business.promotionMessage || "",
+            automation_setup_complete: business.automationSetupComplete ? "Yes" : "No",
+            automation_setup_date: business.automationSetupDate?.toISOString() || "",
+            automation_additional_notes: business.automationAdditionalNotes || "",
+            trigger_type: triggerDecision.triggerType,
+            trigger_reason: triggerDecision.reason,
+            trigger_confidence: triggerDecision.confidence.toString(),
+          }
+
+          if (business.automationGoals) {
+            try {
+              const automationGoals =
+                typeof business.automationGoals === "string"
+                  ? JSON.parse(business.automationGoals)
+                  : business.automationGoals
+              businessVariables.primary_goal = automationGoals.primaryGoal || ""
+              businessVariables.response_time = automationGoals.responseTime?.toString() || ""
+              businessVariables.custom_goals = automationGoals.customGoals || ""
+            } catch (e) {
+              console.error("❌ Error parsing automationGoals:", e)
+            }
+          }
+
+          if (business.customerJourney) {
+            try {
+              const customerJourney =
+                typeof business.customerJourney === "string"
+                  ? JSON.parse(business.customerJourney)
+                  : business.customerJourney
+              businessVariables.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
+            } catch (e) {
+              console.error("❌ Error parsing customerJourney:", e)
+            }
+          }
+
+          if (business.features) {
+            try {
+              const features = typeof business.features === "string" ? JSON.parse(business.features) : business.features
+              businessVariables.enabled_features =
+                features.features
+                  ?.filter((f: any) => f.enabled)
+                  .map((f: any) => f.name)
+                  .join(", ") || ""
+            } catch (e) {
+              console.error("❌ Error parsing features:", e)
+            }
+          }
+
+          if (business.businessTypeData) {
+            businessVariables.business_type_data = business.businessTypeData as string
+          }
+
+          if (business.websiteAnalysis) {
+            businessVariables.website_analysis = business.websiteAnalysis as string
+          }
+        }
+      } catch (error) {
+        console.error("❌ Error fetching business:", error)
+      }
+    }
+
+    let voiceflowResponse: VoiceflowResponseWithButtons = {
+      text: "Thanks for your message! I'm a bit busy at the moment but I'll get back to you soon with a proper answer. 😊",
+      buttons: undefined,
+    }
+    let voiceflowVariables: VoiceflowVariables = {}
+
+    console.log("🎯 Getting Voiceflow response...")
+    const { response, variables } = await getVoiceflowResponse(userMessage, conversationUserId, businessVariables)
+    voiceflowResponse = processVoiceflowResponse(response)
+    voiceflowVariables = variables
+
+    console.log(`💬 Voiceflow response: "${voiceflowResponse.text.substring(0, 100)}..."`)
+    if (voiceflowResponse.buttons?.length) {
+      console.log(`🔘 Response includes ${voiceflowResponse.buttons.length} buttons`)
+    }
+
+    if (voiceflowVariables.clientname || voiceflowVariables.clientemail || voiceflowVariables.clientphone) {
+      try {
+        const automationUserId = automation?.User?.id
+
+        if (automationUserId) {
+          await client.marketingInfo.create({
+            data: {
+              name: voiceflowVariables.clientname || voiceflowVariables.name,
+              email: voiceflowVariables.clientemail || voiceflowVariables.email,
+              phone: voiceflowVariables.clientphone || voiceflowVariables.phone,
+              userId: automationUserId,
+            },
+          })
+
+          if (leadAnalysisResult?.lead?.id) {
+            const existingLead = await client.lead.findUnique({
+              where: { id: leadAnalysisResult.lead.id },
+              select: { metadata: true },
+            })
+
+            const currentMetadata = (existingLead?.metadata as Record<string, any>) || {}
+
+            await client.lead.update({
+              where: { id: leadAnalysisResult.lead.id },
+              data: {
+                name: voiceflowVariables.clientname || voiceflowVariables.name,
+                email: voiceflowVariables.clientemail || voiceflowVariables.email,
+                phone: voiceflowVariables.clientphone || voiceflowVariables.phone,
+                metadata: {
+                  ...currentMetadata,
+                  marketingInfoCaptured: true,
+                  lastMarketingUpdate: new Date().toISOString(),
+                },
+              },
+            })
+          }
+
+          console.log("📝 Marketing info stored successfully")
+        }
+      } catch (error) {
+        console.error("❌ Error storing marketing info:", error)
+      }
+    }
+
+    await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
+
+    if (automation?.id) {
+      await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
+    }
+
+    await storeConversationMessage(pageId, "bot", voiceflowResponse.text, true, automation?.id || null)
+
+    const instagramButtons = transformButtonsToInstagram(voiceflowResponse.buttons)
+    const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+    if (messageType === "DM") {
+      console.log("📤 Sending DM response...")
+      const direct_message = await sendDM(pageId, senderId, voiceflowResponse.text, token, instagramButtons)
+
+      if (direct_message.status === 200) {
+        console.log("✅ DM sent successfully")
+        if (automation) {
+          await trackResponses(automation.id, "DM")
+        }
+        await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
+        await createChatHistory(automation?.id || "default", pageId, senderId, voiceflowResponse.text)
+      } else {
+        console.error("❌ Failed to send DM:", direct_message)
+      }
+    } else if (messageType === "COMMENT" && data.commentId) {
+      console.log("📤 Sending comment response...")
+      const comment = await sendPrivateMessage(pageId, data.commentId, voiceflowResponse.text, token, instagramButtons)
+
+      if (comment.status === 200) {
+        console.log("✅ Comment response sent successfully")
+        if (automation) {
+          await trackResponses(automation.id, "COMMENT")
+        }
+      } else {
+        console.error("❌ Failed to send comment response:", comment)
+      }
+    }
+  } catch (error) {
+    console.error("💥 Error in Voiceflow processing:", error)
+    const fallbackText =
+      "Thanks for your message! I'm a bit busy at the moment but I'll get back to you soon with a proper answer. 😊"
+
+    console.log("🔄 Sending fallback response...")
+    const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+    if (messageType === "DM") {
+      await sendDM(pageId, senderId, fallbackText, token)
+    } else if (messageType === "COMMENT" && data.commentId) {
+      await sendPrivateMessage(pageId, data.commentId, fallbackText, token)
+    }
+  }
+}
+
+async function handleOpenAIResponse(
+  data: WebhookData,
+  automation: any,
+  webhook_payload: any,
+  userMessage: string,
+  triggerDecision: any,
+) {
+  const { pageId, senderId, messageType } = data
+
+  console.log("🤖 Processing with OpenAI for free user...")
+
+  if (messageType === "DM") {
+    if (automation && automation.trigger) {
+      if (automation.listener && automation.listener.listener === "MESSAGE") {
+        console.log("📝 Using MESSAGE listener")
+        const direct_message = await sendDM(
+          pageId,
+          senderId,
+          automation.listener?.prompt,
+          automation.User?.integrations[0].token!,
+        )
+
+        if (direct_message.status === 200) {
+          console.log("✅ MESSAGE response sent successfully")
+          await trackResponses(automation.id, "DM")
+        }
+      }
+
+      if (automation.listener && automation.listener.listener === "SMARTAI") {
+        console.log("🧠 Using SMARTAI listener")
+        const smart_ai_message = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "assistant",
+              content: `${automation.listener?.prompt}: Keep responses under 2 sentences. Context: This was triggered by ${triggerDecision.triggerType} (${triggerDecision.reason})`,
+            },
+          ],
+        })
+
+        if (smart_ai_message.choices[0].message.content) {
+          const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
+          const sender = createChatHistory(automation.id, pageId, senderId, smart_ai_message.choices[0].message.content)
+
+          await client.$transaction([reciever, sender])
+
+          if (automation?.id) {
+            await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
+          }
+
+          const direct_message = await sendDM(
+            pageId,
+            senderId,
+            smart_ai_message.choices[0].message.content,
+            automation.User?.integrations[0].token!,
+          )
+
+          if (direct_message.status === 200) {
+            console.log("✅ SMARTAI response sent successfully")
+            await trackResponses(automation.id, "DM")
+          }
+        }
+      }
+    }
+  }
+
+  if (messageType === "COMMENT" && data.commentId) {
+    const automations_post = await getKeywordPost(webhook_payload.entry[0].changes[0].value.media.id, automation?.id!)
+
+    if (automation && automations_post && automation.trigger) {
+      if (automation.listener) {
+        if (automation.listener.listener === "MESSAGE") {
+          console.log("📝 Using MESSAGE listener for comment")
+          const direct_message = await sendPrivateMessage(
+            pageId,
+            data.commentId,
+            automation.listener?.prompt,
+            automation.User?.integrations[0].token!,
+          )
+
+          if (direct_message.status === 200) {
+            console.log("✅ MESSAGE comment response sent successfully")
+            await trackResponses(automation.id, "COMMENT")
+          }
+        }
+
+        if (automation.listener.listener === "SMARTAI") {
+          console.log("🧠 Using SMARTAI listener for comment")
+          const smart_ai_message = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "assistant",
+                content: `${automation.listener?.prompt}: keep responses under 2 sentences. Context: This was triggered by ${triggerDecision.triggerType} (${triggerDecision.reason})`,
+              },
+            ],
+          })
+
+          if (smart_ai_message.choices[0].message.content) {
+            const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
+            const sender = createChatHistory(
+              automation.id,
+              pageId,
+              senderId,
+              smart_ai_message.choices[0].message.content,
+            )
+
+            await client.$transaction([reciever, sender])
+
+            if (automation?.id) {
+              await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
+            }
+
+            const direct_message = await sendPrivateMessage(
+              pageId,
+              data.commentId,
+              smart_ai_message.choices[0].message.content,
+              automation.User?.integrations[0].token!,
+            )
+
+            if (direct_message.status === 200) {
+              console.log("✅ SMARTAI comment response sent successfully")
+              await trackResponses(automation.id, "COMMENT")
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (messageType === "DM" && data.recipientId && triggerDecision.triggerType === "HISTORY_CONTINUE") {
+    console.log("📚 Continuing conversation based on chat history")
+    const customer_history = await getChatHistory(data.recipientId, senderId)
+
+    if (customer_history.history.length > 0) {
+      const automation = await findAutomation(customer_history.automationId!)
+
+      if (automation?.listener?.listener === "SMARTAI") {
+        console.log("🧠 Using SMARTAI for conversation continuation")
+        const smart_ai_message = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "assistant",
+              content: `${automation.listener?.prompt}: keep responses under 2 sentences. Context: Continuing previous conversation.`,
+            },
+            ...customer_history.history,
+            {
+              role: "user",
+              content: userMessage,
+            },
+          ],
+        })
+
+        if (smart_ai_message.choices[0].message.content) {
+          const reciever = createChatHistory(automation.id, pageId, senderId, userMessage)
+          const sender = createChatHistory(automation.id, pageId, senderId, smart_ai_message.choices[0].message.content)
+
+          await client.$transaction([reciever, sender])
+
+          if (automation?.id) {
+            await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
+          }
+
+          const direct_message = await sendDM(
+            pageId,
+            senderId,
+            smart_ai_message.choices[0].message.content,
+            automation.User?.integrations[0].token!,
+          )
+
+          if (direct_message.status === 200) {
+            console.log("✅ Conversation continuation response sent successfully")
+          }
+        }
+      }
+    }
+  }
+}
 
 
 
