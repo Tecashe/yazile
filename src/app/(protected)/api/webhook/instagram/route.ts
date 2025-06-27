@@ -3773,7 +3773,6 @@
 
 
 
-
 import { type NextRequest, NextResponse } from "next/server"
 import { findAutomation } from "@/actions/automations/queries"
 import {
@@ -3953,7 +3952,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { pageId, senderId, userMessage, messageType } = data
-    const userId = `${pageId}_${senderId}`
+    const conversationUserId = `${pageId}_${senderId}` // For conversation tracking
     const messageKey = generateMessageKey(data, startTime)
 
     console.log(`📨 Processing ${messageType}: "${userMessage.substring(0, 100)}..." from ${senderId}`)
@@ -3969,30 +3968,6 @@ export async function POST(req: NextRequest) {
 
     const triggerDecision = await decideTriggerAction(pageId, senderId, userMessage, messageType)
     console.log(`🎯 Trigger Decision:`, triggerDecision)
-
-    // Log trigger execution for analytics
-    if (triggerDecision.automationId && triggerDecision.triggerId) {
-      try {
-        await logTriggerExecution({
-          triggerId: triggerDecision.triggerId,
-          automationId: triggerDecision.automationId,
-          userId,
-          messageContent: userMessage,
-          triggerType: triggerDecision.triggerType as any,
-          confidence: triggerDecision.confidence,
-          reason: triggerDecision.reason,
-          success: true,
-          responseTime: Date.now() - startTime,
-        })
-        console.log(`📊 Logged trigger execution: ${triggerDecision.triggerId}`)
-      } catch (error) {
-        console.error("❌ Error logging trigger execution:", error)
-      }
-    } else {
-      console.log(
-        `⚠️ Skipping trigger execution log - missing triggerId: ${triggerDecision.triggerId} or automationId: ${triggerDecision.automationId}`,
-      )
-    }
 
     if (triggerDecision.triggerType === "NO_MATCH") {
       console.log("❌ No automation triggered - message ignored")
@@ -4015,6 +3990,7 @@ export async function POST(req: NextRequest) {
           include: {
             User: {
               select: {
+                id: true,
                 subscription: { select: { plan: true } },
                 integrations: { select: { token: true } },
               },
@@ -4043,7 +4019,31 @@ export async function POST(req: NextRequest) {
       `🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"}) - Active: ${automation.active}`,
     )
 
-    await updateConversationState(userId, {
+    // FIXED: Log trigger execution with proper user UUID from automation owner
+    if (triggerDecision.automationId && triggerDecision.triggerId && automation.User?.id) {
+      try {
+        await logTriggerExecution({
+          triggerId: triggerDecision.triggerId,
+          automationId: triggerDecision.automationId,
+          userId: automation.User.id, // ← FIXED: Use actual user UUID, not pageId_senderId
+          messageContent: userMessage,
+          triggerType: triggerDecision.triggerType as any,
+          confidence: triggerDecision.confidence,
+          reason: triggerDecision.reason,
+          success: true,
+          responseTime: Date.now() - startTime,
+        })
+        console.log(`📊 Logged trigger execution: ${triggerDecision.triggerId}`)
+      } catch (error) {
+        console.error("❌ Error logging trigger execution:", error)
+      }
+    } else {
+      console.log(
+        `⚠️ Skipping trigger execution log - missing data: triggerId=${triggerDecision.triggerId}, automationId=${triggerDecision.automationId}, userId=${automation.User?.id}`,
+      )
+    }
+
+    await updateConversationState(conversationUserId, {
       isActive: true,
       lastTriggerType: triggerDecision.triggerType,
       lastTriggerReason: triggerDecision.reason,
@@ -4053,10 +4053,10 @@ export async function POST(req: NextRequest) {
     })
 
     let leadAnalysisResult = null
-    if (automation.userId && senderId !== pageId) {
+    if (automation.User?.id && senderId !== pageId) {
       try {
         leadAnalysisResult = await analyzeLead({
-          userId: automation.userId,
+          userId: automation.User.id,
           automationId: automation.id,
           platformId: pageId,
           customerId: senderId,
@@ -4075,7 +4075,14 @@ export async function POST(req: NextRequest) {
 
     if (automation.User?.subscription?.plan === "PRO") {
       console.log("🚀 Using Voiceflow for PRO user")
-      await handleVoiceflowResponse(data, automation, userId, userMessage, leadAnalysisResult, triggerDecision)
+      await handleVoiceflowResponse(
+        data,
+        automation,
+        conversationUserId,
+        userMessage,
+        leadAnalysisResult,
+        triggerDecision,
+      )
     } else {
       console.log("🤖 Using OpenAI for free user")
       await handleOpenAIResponse(data, automation, webhook_payload, userMessage, triggerDecision)
@@ -4107,7 +4114,7 @@ export async function POST(req: NextRequest) {
 async function handleVoiceflowResponse(
   data: WebhookData,
   automation: any,
-  userId: string,
+  conversationUserId: string,
   userMessage: string,
   leadAnalysisResult: any,
   triggerDecision: any,
@@ -4117,9 +4124,9 @@ async function handleVoiceflowResponse(
   try {
     console.log("🎙️ Starting Voiceflow processing...")
 
-    const userCreated = await createVoiceflowUser(userId)
+    const userCreated = await createVoiceflowUser(conversationUserId)
     if (!userCreated) {
-      console.warn(`⚠️ Failed to create Voiceflow user: ${userId}. Proceeding with the request.`)
+      console.warn(`⚠️ Failed to create Voiceflow user: ${conversationUserId}. Proceeding with the request.`)
     }
 
     let businessVariables: Record<string, string> = {}
@@ -4209,7 +4216,7 @@ async function handleVoiceflowResponse(
     let voiceflowVariables: VoiceflowVariables = {}
 
     console.log("🎯 Getting Voiceflow response...")
-    const { response, variables } = await getVoiceflowResponse(userMessage, userId, businessVariables)
+    const { response, variables } = await getVoiceflowResponse(userMessage, conversationUserId, businessVariables)
     voiceflowResponse = processVoiceflowResponse(response)
     voiceflowVariables = variables
 
