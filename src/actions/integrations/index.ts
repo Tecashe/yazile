@@ -664,7 +664,7 @@ export const refreshInstagramDatas = async (userId: string) => {
 }
 
 /**
- * Fetch user's Instagram media posts with metadata
+ * Fetch user's Instagram media posts with metadat
  */
 export const fetchInstagramMedias = async (userId: string, limit: number = 25) => {
   const functionName = 'fetchInstagramMedia'
