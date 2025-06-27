@@ -3771,7 +3771,6 @@
 //   }
 // }
 
-
 import { type NextRequest, NextResponse } from "next/server"
 import { findAutomation } from "@/actions/automations/queries"
 import {
@@ -3984,19 +3983,26 @@ export async function POST(req: NextRequest) {
     const triggerDecision = await decideTriggerAction(pageId, senderId, userMessage, messageType)
     console.log(`🎯 Trigger Decision:`, triggerDecision)
 
-    // Log trigger execution for analytics
-    if (triggerDecision.automationId) {
-      await logTriggerExecution({
-        triggerId: triggerDecision.automationId,
-        automationId: triggerDecision.automationId,
-        userId,
-        messageContent: userMessage,
-        triggerType: triggerDecision.triggerType as any,
-        confidence: triggerDecision.confidence,
-        reason: triggerDecision.reason,
-        success: true,
-        responseTime: Date.now() - startTime,
-      })
+    // Log trigger execution for analytics - UPDATED
+    if (triggerDecision.automationId && triggerDecision.triggerId) {
+      try {
+        await logTriggerExecution({
+          triggerId: triggerDecision.triggerId, // Use the actual trigger ID from decision
+          automationId: triggerDecision.automationId,
+          userId,
+          messageContent: userMessage,
+          triggerType: triggerDecision.triggerType as any,
+          confidence: triggerDecision.confidence,
+          reason: triggerDecision.reason,
+          success: true,
+          responseTime: Date.now() - startTime,
+        })
+      } catch (error) {
+        console.error("❌ Error logging trigger execution:", error)
+        // Don't throw - this is just for analytics
+      }
+    } else {
+      console.log(`⚠️ Skipping trigger execution log - missing triggerId or automationId`)
     }
 
     // Handle no match case
@@ -4006,7 +4012,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get full automation details with triggers
-    const automation = await getAutomationWithTriggers(triggerDecision.automationId!, messageType)
+    let automation = null
+    if (!automation) {
+      automation = await getAutomationWithTriggers(triggerDecision.automationId!, messageType)
+    }
 
     if (!automation) {
       console.log(`❌ Automation not found or inactive: ${triggerDecision.automationId}`)

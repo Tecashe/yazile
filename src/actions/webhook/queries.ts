@@ -2188,10 +2188,15 @@ export const decideTriggerAction = async (
   // Step 1: Check for exact keyword match (highest priority)
   const keywordMatch = await matchKeyword(userMessage)
   if (keywordMatch?.automationId) {
+    // Get the actual trigger for this automation
+    const automation = await getAutomationWithTriggers(keywordMatch.automationId, messageType)
+    const actualTriggerId = automation?.trigger?.[0]?.id || null
+
     console.log(`🎯 Keyword trigger matched: "${keywordMatch.word}" -> ${keywordMatch.automationId}`)
     return {
       triggerType: "KEYWORD" as const,
       automationId: keywordMatch.automationId,
+      triggerId: actualTriggerId, // Add actual trigger ID
       reason: `Keyword match: "${keywordMatch.word}"`,
       confidence: 1.0,
     }
@@ -2203,10 +2208,15 @@ export const decideTriggerAction = async (
   })
 
   if (conversationState?.isActive && conversationState.automationId) {
+    // Get the actual trigger for this automation
+    const automation = await getAutomationWithTriggers(conversationState.automationId, messageType)
+    const actualTriggerId = automation?.trigger?.[0]?.id || null
+
     console.log(`💬 Active conversation continues with automation: ${conversationState.automationId}`)
     return {
       triggerType: "CONVERSATION_CONTINUE" as const,
       automationId: conversationState.automationId,
+      triggerId: actualTriggerId, // Add actual trigger ID
       reason: "Active conversation continuation",
       confidence: 0.9,
     }
@@ -2215,10 +2225,13 @@ export const decideTriggerAction = async (
   // Step 3: Check for fallback automation
   const fallbackAutomation = await getFallbackAutomation(pageId, messageType)
   if (fallbackAutomation) {
+    const actualTriggerId = fallbackAutomation.trigger?.[0]?.id || null
+
     console.log(`🔄 Fallback automation triggered: ${fallbackAutomation.id}`)
     return {
       triggerType: "FALLBACK" as const,
       automationId: fallbackAutomation.id,
+      triggerId: actualTriggerId, // Add actual trigger ID
       reason: "No keyword match, using fallback",
       confidence: 0.5,
     }
@@ -2227,10 +2240,15 @@ export const decideTriggerAction = async (
   // Step 4: Check for existing chat history (for free users)
   const chatHistory = await getChatHistory(pageId, senderId)
   if (chatHistory.history.length > 0 && chatHistory.automationId) {
+    // Get the actual trigger for this automation
+    const automation = await getAutomationWithTriggers(chatHistory.automationId, messageType)
+    const actualTriggerId = automation?.trigger?.[0]?.id || null
+
     console.log(`📚 Chat history found, continuing with automation: ${chatHistory.automationId}`)
     return {
       triggerType: "HISTORY_CONTINUE" as const,
       automationId: chatHistory.automationId,
+      triggerId: actualTriggerId, // Add actual trigger ID
       reason: "Existing chat history found",
       confidence: 0.7,
     }
@@ -2240,6 +2258,7 @@ export const decideTriggerAction = async (
   return {
     triggerType: "NO_MATCH" as const,
     automationId: null,
+    triggerId: null, // No trigger ID for no match
     reason: "No matching triggers found",
     confidence: 0.0,
   }
