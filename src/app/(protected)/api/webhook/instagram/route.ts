@@ -3772,7 +3772,6 @@
 // }
 
 
-
 import { type NextRequest, NextResponse } from "next/server"
 import { findAutomation } from "@/actions/automations/queries"
 import {
@@ -4075,16 +4074,29 @@ export async function POST(req: NextRequest) {
 
     if (automation.User?.subscription?.plan === "PRO") {
       console.log("🚀 Using Voiceflow for PRO user")
-      await handleVoiceflowResponse(
-        data,
-        automation,
-        conversationUserId,
-        userMessage,
-        leadAnalysisResult,
-        triggerDecision,
-      )
+      console.log(`🔍 Automation User ID: ${automation.User?.id}`)
+      console.log(`🔍 Subscription Plan: ${automation.User?.subscription?.plan}`)
+      console.log(`🔍 Conversation User ID: ${conversationUserId}`)
+      console.log(`🔍 Message Type: ${messageType}`)
+      console.log(`🔍 User Message: "${userMessage}"`)
+
+      try {
+        await handleVoiceflowResponse(
+          data,
+          automation,
+          conversationUserId,
+          userMessage,
+          leadAnalysisResult,
+          triggerDecision,
+        )
+        console.log("✅ Voiceflow response handling completed")
+      } catch (error) {
+        console.error("💥 Error in Voiceflow response handling:", error)
+        throw error // Re-throw to see the full error
+      }
     } else {
       console.log("🤖 Using OpenAI for free user")
+      console.log(`🔍 Subscription Plan: ${automation.User?.subscription?.plan || "FREE/UNDEFINED"}`)
       await handleOpenAIResponse(data, automation, webhook_payload, userMessage, triggerDecision)
     }
 
@@ -4119,16 +4131,28 @@ async function handleVoiceflowResponse(
   leadAnalysisResult: any,
   triggerDecision: any,
 ) {
+  console.log("🎙️ === VOICEFLOW HANDLER STARTED ===")
+  console.log(`🎙️ Data:`, { pageId: data.pageId, senderId: data.senderId, messageType: data.messageType })
+  console.log(`🎙️ Automation ID: ${automation?.id}`)
+  console.log(`🎙️ Conversation User ID: ${conversationUserId}`)
+  console.log(`🎙️ User Message: "${userMessage}"`)
+  console.log(`🎙️ Trigger Decision:`, triggerDecision)
+
   const { pageId, senderId, messageType } = data
 
   try {
     console.log("🎙️ Starting Voiceflow processing...")
 
+    // Add a step-by-step log for each major operation
+    console.log("🎙️ Step 1: Creating Voiceflow user...")
     const userCreated = await createVoiceflowUser(conversationUserId)
+    console.log(`🎙️ Step 1 Result: User created = ${userCreated}`)
+
     if (!userCreated) {
       console.warn(`⚠️ Failed to create Voiceflow user: ${conversationUserId}. Proceeding with the request.`)
     }
 
+    console.log("🎙️ Step 2: Preparing business variables...")
     let businessVariables: Record<string, string> = {}
     if (automation?.User?.id) {
       try {
