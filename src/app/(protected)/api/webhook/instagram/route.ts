@@ -3771,6 +3771,10 @@
 //   }
 // }
 
+
+
+
+
 import { type NextRequest, NextResponse } from "next/server"
 import { findAutomation } from "@/actions/automations/queries"
 import {
@@ -3819,6 +3823,7 @@ interface WebhookData {
   messageId?: string
   commentId?: string
   messageType: "DM" | "COMMENT"
+  isEcho?: boolean // NEW: Track if this is an echo message
 }
 
 /**
@@ -3854,18 +3859,24 @@ function transformButtonsToInstagram(
 }
 
 /**
- * Extracts relevant data from webhook payload
+ * UPDATED: Extracts relevant data from webhook payload and handles echo messages
  */
 function extractWebhookData(payload: any): WebhookData | null {
   try {
     if (payload?.entry?.[0]?.messaging) {
+      const messaging = payload.entry[0].messaging[0]
+
+      // Check if this is an echo message (sent by the bot)
+      const isEcho = messaging.message?.is_echo === true
+
       return {
         pageId: payload.entry[0].id,
-        senderId: payload.entry[0].messaging[0].sender.id,
-        recipientId: payload.entry[0].messaging[0].recipient.id,
-        userMessage: payload.entry[0].messaging[0].message.text,
-        messageId: payload.entry[0].messaging[0].message.mid,
+        senderId: messaging.sender.id,
+        recipientId: messaging.recipient.id,
+        userMessage: messaging.message.text,
+        messageId: messaging.message.mid,
         messageType: "DM",
+        isEcho, // NEW: Include echo status
       }
     } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
       return {
@@ -3874,6 +3885,7 @@ function extractWebhookData(payload: any): WebhookData | null {
         userMessage: payload.entry[0].changes[0].value.text,
         commentId: payload.entry[0].changes[0].value.id,
         messageType: "COMMENT",
+        isEcho: false, // Comments are never echo messages
       }
     }
   } catch (error) {
@@ -3962,6 +3974,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 400 })
     }
 
+    // NEW: Skip echo messages (messages sent by the bot)
+    if (data.isEcho) {
+      console.log("🔄 Skipping echo message (sent by bot)")
+      return NextResponse.json({ message: "Echo message ignored" }, { status: 200 })
+    }
+
     const { pageId, senderId, userMessage, messageType } = data
     const userId = `${pageId}_${senderId}`
     const messageKey = generateMessageKey(data, startTime)
@@ -3997,12 +4015,15 @@ export async function POST(req: NextRequest) {
           success: true,
           responseTime: Date.now() - startTime,
         })
+        console.log(`📊 Logged trigger execution: ${triggerDecision.triggerId}`)
       } catch (error) {
         console.error("❌ Error logging trigger execution:", error)
         // Don't throw - this is just for analytics
       }
     } else {
-      console.log(`⚠️ Skipping trigger execution log - missing triggerId or automationId`)
+      console.log(
+        `⚠️ Skipping trigger execution log - missing triggerId: ${triggerDecision.triggerId} or automationId: ${triggerDecision.automationId}`,
+      )
     }
 
     // Handle no match case
@@ -4011,18 +4032,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "No matching automation found" }, { status: 200 })
     }
 
-    // Get full automation details with triggers
+    // Get full automation details with triggers - UPDATED with better error handling
     let automation = null
-    if (!automation) {
+    try {
       automation = await getAutomationWithTriggers(triggerDecision.automationId!, messageType)
+      console.log(`🔍 Automation lookup result:`, automation ? `Found: ${automation.id}` : "Not found")
+    } catch (error) {
+      console.error(`❌ Error fetching automation ${triggerDecision.automationId}:`, error)
     }
 
     if (!automation) {
       console.log(`❌ Automation not found or inactive: ${triggerDecision.automationId}`)
-      return NextResponse.json({ message: "Automation not found or inactive" }, { status: 404 })
+      // Try to get automation without the active filter as a fallback
+      try {
+        const fallbackAutomation = await client.automation.findUnique({
+          where: { id: triggerDecision.automationId! },
+          include: {
+            User: {
+              select: {
+                subscription: { select: { plan: true } },
+                integrations: { select: { token: true } },
+              },
+            },
+            listener: true,
+            trigger: true,
+          },
+        })
+
+        if (fallbackAutomation) {
+          console.log(
+            `⚠️ Found automation but it may be inactive: ${fallbackAutomation.id}, active: ${fallbackAutomation.active}`,
+          )
+          automation = fallbackAutomation
+        }
+      } catch (fallbackError) {
+        console.error("❌ Fallback automation lookup failed:", fallbackError)
+      }
+
+      if (!automation) {
+        return NextResponse.json({ message: "Automation not found or inactive" }, { status: 404 })
+      }
     }
 
-    console.log(`🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
+    console.log(
+      `🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"}) - Active: ${automation.active}`,
+    )
 
     // Update conversation state based on trigger type
     await updateConversationState(userId, {
@@ -4036,10 +4090,10 @@ export async function POST(req: NextRequest) {
 
     // Process for lead qualification
     let leadAnalysisResult = null
-    if (automation.User?.id && senderId !== pageId) {
+    if (automation.userId && senderId !== pageId) {
       try {
         leadAnalysisResult = await analyzeLead({
-          userId: automation.User.id,
+          userId: automation.userId || "1",
           automationId: automation.id,
           platformId: pageId,
           customerId: senderId,
