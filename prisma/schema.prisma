@@ -2447,12 +2447,15 @@ enum CustomerType {
 }
 
 model ProcessedMessage {
-  id         String   @id @default(cuid())
-  messageKey String   @unique
-  createdAt  DateTime @default(now())
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageKey   String   @unique
+  createdAt    DateTime @default(now())
+  processCount Int      @default(1)  // NEW: Track how many times we've seen this message
+  updatedAt    DateTime @updatedAt   // NEW: Track when it was last updated
 
   @@index([messageKey])
   @@index([createdAt])
+  @@index([processCount])  // NEW: Index for analytics queries
 }
 
 
