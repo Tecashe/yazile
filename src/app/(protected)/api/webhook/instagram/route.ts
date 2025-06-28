@@ -7376,9 +7376,7 @@
 //   }
 // }
 
-
 import { type NextRequest, NextResponse } from "next/server"
-
 import {
   createChatHistory,
   trackResponses,
@@ -7389,33 +7387,23 @@ import {
   updateConversationState,
   logTriggerExecution,
   checkDuplicateResponse,
-  markResponseAsSent,
   getRecentResponseCount,
+  markResponseAsSent,
 } from "@/actions/webhook/queries"
-
 import { getBusinessProfileForAutomation, getOrCreateDefaultAutomation } from "@/actions/webhook/business-profile"
-
 import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
-
 import {
   createVoiceflowUser,
   fetchEnhancedBusinessVariables,
   getVoiceflowHealth,
   getEnhancedVoiceflowResponse,
 } from "@/lib/voiceflow"
-
 import { analyzeLead } from "@/lib/lead-qualification"
-
 import { sendDM, sendPrivateMessage } from "@/lib/fetch"
-
 import { client } from "@/lib/prisma"
-
 import { storeConversationMessage } from "@/actions/chats/queries"
-
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
-
 import { verifyInstagramWebhook } from "@/utils/instagram"
-
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
 
 type InstagramQuickReply = {
@@ -7765,12 +7753,6 @@ async function handleEnhancedVoiceflowWithDataCollection(
   console.log("🎙️ === ENHANCED VOICEFLOW WITH DATA COLLECTION STARTED ===")
   const { pageId, senderId, messageType } = data
 
-  // Initialize response variables
-  let finalResponse = ""
-  let finalButtons: any[] | undefined
-  let aiSystemUsed = "enhanced_voiceflow"
-  let extractedCustomerData: any = {}
-
   try {
     // Check if we've sent too many responses recently (rate limiting)
     const recentResponseCount = await getRecentResponseCount(pageId, senderId, messageType, 2)
@@ -7780,66 +7762,22 @@ async function handleEnhancedVoiceflowWithDataCollection(
     }
 
     console.log("🎙️ Starting enhanced Voiceflow processing with data collection...")
+    const userCreated = await createVoiceflowUser(conversationUserId)
+    console.log(`🎙️ User created: ${userCreated}`)
 
-    // Create Voiceflow user with error handling
-    let userCreated = false
-    try {
-      userCreated = await createVoiceflowUser(conversationUserId)
-      console.log(`🎙️ User created: ${userCreated}`)
-    } catch (error) {
-      console.error("❌ Error creating Voiceflow user (continuing anyway):", error)
-    }
-
-    // Build enhanced conversation context with error handling
-    let conversationHistory: any[] = []
-    let businessContext: any = {}
-    let profileContent = ""
-
-    try {
-      conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
-      const businessProfile = await getBusinessProfileForAutomation(automation.id)
-      profileContent = businessProfile.profileContent
-      businessContext = businessProfile.businessContext
-    } catch (error) {
-      console.error("❌ Error building conversation context (using fallback):", error)
-      businessContext = {
-        businessName: "Our Business",
-        welcomeMessage: "Hello! How can I help you today?",
-        industry: "",
-        businessDescription: "",
-        targetAudience: "",
-        responseLanguage: "English",
-      }
-    }
+    // Build enhanced conversation context
+    const conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
+    const { profileContent, businessContext } = await getBusinessProfileForAutomation(automation.id)
 
     // Determine customer type and context
     const isNewUser = conversationHistory.length === 0
     const customerType = conversationHistory.length >= 10 ? "VIP" : conversationHistory.length > 0 ? "RETURNING" : "NEW"
 
     console.log("📋 Building enhanced business variables with conversation context...")
+    let businessVariables: Record<string, any> = {}
 
-    // Enhanced business variables with comprehensive fallback
-    let businessVariables: Record<string, any> = {
-      business_name: businessContext.businessName || "Our Business",
-      welcome_message: businessContext.welcomeMessage || "Hello! How can I help you today?",
-      business_industry: businessContext.industry || "",
-      business_description: businessContext.businessDescription || "",
-      target_audience: businessContext.targetAudience || "",
-      response_language: businessContext.responseLanguage || "English",
-      customer_type: customerType,
-      is_new_user: isNewUser.toString(),
-      conversation_length: conversationHistory.length.toString(),
-      trigger_type: triggerDecision.triggerType,
-      trigger_reason: triggerDecision.reason,
-      user_message: userMessage,
-      page_id: pageId,
-      sender_id: senderId,
-      message_type: messageType,
-    }
-
-    // Try to fetch enhanced business variables but don't let it block the process
     try {
-      const enhancedVariables = await fetchEnhancedBusinessVariables(automation.User?.id || "", automation.id, {
+      businessVariables = await fetchEnhancedBusinessVariables(automation.User?.id || "", automation.id, {
         pageId,
         senderId,
         userMessage,
@@ -7847,26 +7785,46 @@ async function handleEnhancedVoiceflowWithDataCollection(
         customerType,
         messageHistory: conversationHistory,
       })
-
-      // Merge enhanced variables with fallback
-      businessVariables = { ...businessVariables, ...enhancedVariables }
-      console.log("✅ Successfully fetched and merged enhanced business variables")
+      console.log("✅ Successfully fetched enhanced business variables")
     } catch (error: any) {
       console.error("❌ Error in fetchEnhancedBusinessVariables (using fallback):", error)
-      // Continue with fallback variables - don't let this stop the process
+
+      // Fallback business variables if the fetch fails
+      businessVariables = {
+        business_name: businessContext.businessName || "Our Business",
+        welcome_message: businessContext.welcomeMessage || "Hello! How can I help you today?",
+        business_industry: businessContext.industry || "",
+        business_description: businessContext.businessDescription || "",
+        target_audience: businessContext.targetAudience || "",
+        response_language: businessContext.responseLanguage || "English",
+        customer_type: customerType,
+        is_new_user: isNewUser.toString(),
+        conversation_length: conversationHistory.length.toString(),
+        trigger_type: triggerDecision.triggerType,
+        trigger_reason: triggerDecision.reason,
+      }
     }
 
     console.log("🎯 Attempting enhanced Voiceflow response with data collection...")
-
-    // Try Voiceflow with multiple fallback layers
-    let voiceflowResult: any = { success: false, error: "Not attempted" }
-
+    let voiceflowResult
     try {
       voiceflowResult = await getEnhancedVoiceflowResponse(userMessage, conversationUserId, businessVariables)
     } catch (error) {
       console.error("❌ Error in getEnhancedVoiceflowResponse:", error)
-      voiceflowResult = { success: false, error: error instanceof Error ? error.message : String(error) }
+      // Handle the error gracefully, e.g., by setting a default response
+      voiceflowResult = {
+        success: false,
+        response: {
+          text: "I'm sorry, I encountered an issue processing your request. Please try again later.",
+          buttons: [],
+        },
+      }
     }
+
+    let finalResponse: string
+    let finalButtons: any[] | undefined
+    let aiSystemUsed: string
+    let extractedCustomerData: any = {}
 
     if (voiceflowResult.success && voiceflowResult.response) {
       console.log("✅ Enhanced Voiceflow response with data collection successful")
@@ -7892,11 +7850,12 @@ async function handleEnhancedVoiceflowWithDataCollection(
         }
       }
 
-      // Enhanced lead analysis with collected data (non-blocking)
-      try {
-        if (automation.User?.id && senderId !== pageId) {
+      // Enhanced lead analysis with collected data
+      let leadAnalysisResult = null
+      if (automation.User?.id && senderId !== pageId) {
+        try {
           console.log("🔍 Starting enhanced lead analysis with collected data...")
-          await analyzeLead({
+          leadAnalysisResult = await analyzeLead({
             userId: automation.User.id,
             automationId: automation.id,
             platformId: pageId,
@@ -7906,16 +7865,17 @@ async function handleEnhancedVoiceflowWithDataCollection(
             timestamp: new Date(),
           })
           console.log(`📊 Enhanced lead analysis completed`)
+        } catch (error) {
+          console.error("❌ Error in enhanced lead analysis (continuing anyway):", error)
         }
-      } catch (error) {
-        console.error("❌ Error in enhanced lead analysis (continuing anyway):", error)
       }
 
-      // Handle marketing info capture (non-blocking)
-      try {
-        if (extractedCustomerData.name || extractedCustomerData.email || extractedCustomerData.phone) {
+      // Handle marketing info capture (name, email, phone only)
+      if (extractedCustomerData.name || extractedCustomerData.email || extractedCustomerData.phone) {
+        try {
           const automationUserId = automation?.User?.id
           if (automationUserId) {
+            // Create marketing info without metadata field (it doesn't exist in the schema)
             await client.marketingInfo.create({
               data: {
                 name: extractedCustomerData.name,
@@ -7924,90 +7884,65 @@ async function handleEnhancedVoiceflowWithDataCollection(
                 userId: automationUserId,
               },
             })
+
+            if (leadAnalysisResult?.lead?.id) {
+              await client.lead.update({
+                where: { id: leadAnalysisResult.lead.id },
+                data: {
+                  name: extractedCustomerData.name,
+                  email: extractedCustomerData.email,
+                  phone: extractedCustomerData.phone,
+                  metadata: {
+                    basicDataCollection: {
+                      name: extractedCustomerData.name,
+                      email: extractedCustomerData.email,
+                      phone: extractedCustomerData.phone,
+                      lastDataUpdate: new Date().toISOString(),
+                    },
+                  },
+                },
+              })
+            }
             console.log("📝 Basic marketing info stored successfully")
           }
+        } catch (error) {
+          console.error("❌ Error storing basic marketing info:", error)
         }
-      } catch (error) {
-        console.error("❌ Error storing basic marketing info (continuing anyway):", error)
       }
     } else {
       console.log(`🔄 Voiceflow failed, falling back to enhanced Gemini for PRO user`)
-
       // Enhanced Gemini fallback for PRO users with collected data context
-      try {
-        finalResponse = await generateGeminiResponse({
-          userMessage,
-          businessProfile: profileContent,
-          conversationHistory,
-          businessContext,
-          isPROUser: true,
-          isVoiceflowFallback: true,
-          voiceflowAttemptedResponse: voiceflowResult.error,
-        })
-        finalButtons = undefined
-        aiSystemUsed = "enhanced_gemini_pro_fallback_with_data"
-        console.log("✅ Enhanced Gemini fallback response generated for PRO user with data context")
-      } catch (geminiError) {
-        console.error("❌ Enhanced Gemini fallback also failed:", geminiError)
-
-        // Ultimate fallback - human-like response
-        const humanFallbacks = [
-          "Hey there! Thanks for reaching out. I'm getting a lot of messages right now, but I definitely want to help you out. Can you give me just a few minutes to get back to you properly? 😊",
-          "Hi! I'm not a bot, but I'm currently unavailable. I'll get back to you shortly with a personalized response that addresses exactly what you need.",
-          "Thanks for your message! I'm here to help, but I need a moment to gather the right information for you. I'll be back with you soon with something valuable!",
-          "Hello! I'm a real person, and I'm excited to help you. I just need a few minutes to prepare a personalized response that'll be worth your time.",
-          "Hey! I see your message and I want to give you a proper response. I'm just finishing up with another customer - give me a few minutes and I'll be right with you! 🙏",
-        ]
-
-        finalResponse = humanFallbacks[Math.floor(Math.random() * humanFallbacks.length)]
-        aiSystemUsed = "human_fallback"
-        console.log("🔄 Using human-like fallback response")
-      }
+      finalResponse = await generateGeminiResponse({
+        userMessage,
+        businessProfile: profileContent,
+        conversationHistory,
+        businessContext,
+        isPROUser: true,
+        isVoiceflowFallback: true,
+        voiceflowAttemptedResponse: voiceflowResult.error,
+      })
+      finalButtons = undefined
+      aiSystemUsed = "enhanced_gemini_pro_fallback_with_data"
+      console.log("✅ Enhanced Gemini fallback response generated for PRO user with data context")
     }
 
-    // Ensure we have a response before proceeding
-    if (!finalResponse || finalResponse.trim().length === 0) {
-      finalResponse = "Thanks for your message! I'll get back to you shortly with a helpful response. 😊"
-      console.log("🔄 Using emergency fallback response")
-    }
-  } catch (error) {
-    console.error("💥 Critical error in enhanced Voiceflow processing:", error)
-
-    // Emergency fallback response
-    const emergencyFallbacks = [
-      "Hey there! Thanks for reaching out. I'm having some technical difficulties right now, but I'm a real person and I'll get back to you as soon as possible! 😊",
-      "Hi! I see your message and I want to help. I'm experiencing some system issues at the moment, but I'll respond personally as soon as I can.",
-      "Thanks for your message! I'm having some technical challenges right now, but I'm here and I'll get back to you with a proper response soon.",
-    ]
-
-    finalResponse = emergencyFallbacks[Math.floor(Math.random() * emergencyFallbacks.length)]
-    aiSystemUsed = "emergency_fallback"
-    console.log("🚨 Using emergency fallback response due to critical error")
-  }
-
-  // GUARANTEED RESPONSE SENDING - This section ensures a response is always sent
-  try {
     // 🚫 CHECK FOR DUPLICATE RESPONSE BEFORE SENDING
     const isDuplicate = await checkDuplicateResponse(pageId, senderId, finalResponse, messageType)
     if (isDuplicate) {
-      console.log("🚫 Duplicate response detected, modifying response")
-      finalResponse = finalResponse + " 👋"
+      console.log("🚫 Duplicate response detected, skipping send")
+      return
     }
 
     console.log(
       `💬 Final response (${aiSystemUsed}): "${finalResponse.substring(0, 100)}..." (${finalResponse.length} chars)`,
     )
 
-    // Store conversation messages (non-blocking)
-    try {
-      await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
-      if (automation?.id) {
-        await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
-      }
-      await storeConversationMessage(pageId, "bot", finalResponse, true, automation?.id || null)
-    } catch (error) {
-      console.error("❌ Error storing conversation messages (continuing anyway):", error)
+    // Store conversation messages
+    await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
+    if (automation?.id) {
+      await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
     }
+    await storeConversationMessage(pageId, "bot", finalResponse, true, automation?.id || null)
 
     // Send response immediately (no typing delay)
     const instagramButtons = transformButtonsToInstagram(finalButtons)
@@ -8015,85 +7950,38 @@ async function handleEnhancedVoiceflowWithDataCollection(
 
     if (messageType === "DM") {
       console.log("📤 Sending enhanced DM response...")
-      try {
-        const direct_message = await sendDM(pageId, senderId, finalResponse, token, instagramButtons)
-        if (direct_message.status === 200) {
-          console.log("✅ Enhanced DM sent successfully")
-          // Mark response as sent to prevent duplicates
-          await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
-          if (automation) {
-            await trackResponses(automation.id, "DM")
-          }
-          await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
-          await createChatHistory(automation?.id || "default", pageId, senderId, finalResponse)
-        } else {
-          console.error("❌ Failed to send DM:", direct_message)
-          throw new Error(`DM send failed with status: ${direct_message.status}`)
+      const direct_message = await sendDM(pageId, senderId, finalResponse, token, instagramButtons)
+      if (direct_message.status === 200) {
+        console.log("✅ Enhanced DM sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
+        if (automation) {
+          await trackResponses(automation.id, "DM")
         }
-      } catch (error) {
-        console.error("❌ Error sending DM, trying emergency response:", error)
-
-        // Emergency response attempt
-        const emergencyResponse = "Thanks for your message! I'll get back to you soon. 😊"
-        try {
-          const emergency_dm = await sendDM(pageId, senderId, emergencyResponse, token)
-          if (emergency_dm.status === 200) {
-            console.log("✅ Emergency DM sent successfully")
-            await markResponseAsSent(pageId, senderId, emergencyResponse, messageType, automation.id)
-          }
-        } catch (emergencyError) {
-          console.error("💥 Even emergency DM failed:", emergencyError)
-        }
+        await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
+        await createChatHistory(automation?.id || "default", pageId, senderId, finalResponse)
+      } else {
+        console.error("❌ Failed to send DM:", direct_message)
       }
     } else if (messageType === "COMMENT" && data.commentId) {
       console.log("📤 Sending enhanced comment response...")
-      try {
-        const comment = await sendPrivateMessage(pageId, data.commentId, finalResponse, token, instagramButtons)
-        if (comment.status === 200) {
-          console.log("✅ Enhanced comment response sent successfully")
-          // Mark response as sent to prevent duplicates
-          await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
-          if (automation) {
-            await trackResponses(automation.id, "COMMENT")
-          }
-        } else {
-          console.error("❌ Failed to send comment response:", comment)
-          throw new Error(`Comment send failed with status: ${comment.status}`)
+      const comment = await sendPrivateMessage(pageId, data.commentId, finalResponse, token, instagramButtons)
+      if (comment.status === 200) {
+        console.log("✅ Enhanced comment response sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
+        if (automation) {
+          await trackResponses(automation.id, "COMMENT")
         }
-      } catch (error) {
-        console.error("❌ Error sending comment, trying emergency response:", error)
-
-        // Emergency response attempt
-        const emergencyResponse = "Thanks for your comment! I'll get back to you soon. 😊"
-        try {
-          const emergency_comment = await sendPrivateMessage(pageId, data.commentId, emergencyResponse, token)
-          if (emergency_comment.status === 200) {
-            console.log("✅ Emergency comment sent successfully")
-            await markResponseAsSent(pageId, senderId, emergencyResponse, messageType, automation.id)
-          }
-        } catch (emergencyError) {
-          console.error("💥 Even emergency comment failed:", emergencyError)
-        }
+      } else {
+        console.error("❌ Failed to send comment response:", comment)
       }
     }
   } catch (error) {
-    console.error("💥 Critical error in guaranteed response sending:", error)
-
-    // Last resort - try to send a basic message
-    try {
-      const lastResortResponse = "Hi! I got your message 👋"
-      const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
-
-      if (messageType === "DM") {
-        await sendDM(pageId, senderId, lastResortResponse, token)
-      } else if (messageType === "COMMENT" && data.commentId) {
-        await sendPrivateMessage(pageId, data.commentId, lastResortResponse, token)
-      }
-
-      console.log("✅ Last resort response sent")
-    } catch (lastResortError) {
-      console.error("💥 Even last resort response failed:", lastResortError)
-    }
+    console.error("💥 Error in enhanced Voiceflow processing with data collection:", error)
+    // Final fallback to enhanced Gemini
+    console.log("🔄 Final fallback to enhanced Gemini due to error...")
+    await handleEnhancedGeminiResponse(data, automation, userMessage, triggerDecision, true)
   }
 }
 
@@ -8107,8 +7995,6 @@ async function handleEnhancedGeminiResponse(
   console.log("🔮 === ENHANCED GEMINI HANDLER STARTED ===")
   const { pageId, senderId, messageType } = data
 
-  let finalResponse = ""
-
   try {
     // Check if we've sent too many responses recently (rate limiting)
     const recentResponseCount = await getRecentResponseCount(pageId, senderId, messageType, 2)
@@ -8117,171 +8003,97 @@ async function handleEnhancedGeminiResponse(
       return
     }
 
-    // Get business profile and conversation context with error handling
-    let profileContent = ""
-    let businessContext: any = {}
-    let conversationHistory: any[] = []
-
-    try {
-      const businessProfile = await getBusinessProfileForAutomation(automation.id)
-      profileContent = businessProfile.profileContent
-      businessContext = businessProfile.businessContext
-      conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
-      console.log("📋 Business profile and conversation context loaded for enhanced Gemini")
-    } catch (error) {
-      console.error("❌ Error loading business context (using fallback):", error)
-      businessContext = {
-        businessName: "Our Business",
-        welcomeMessage: "Hello! How can I help you today?",
-        industry: "",
-        businessDescription: "",
-        targetAudience: "",
-        responseLanguage: "English",
-      }
-    }
+    // Get business profile and conversation context
+    const { profileContent, businessContext } = await getBusinessProfileForAutomation(automation.id)
+    const conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
+    console.log("📋 Business profile and conversation context loaded for enhanced Gemini")
 
     const isPROUser = automation.User?.subscription?.plan === "PRO"
     console.log("🔮 Generating enhanced Gemini response...")
 
-    try {
-      finalResponse = await generateGeminiResponse({
-        userMessage,
-        businessProfile: profileContent,
-        conversationHistory,
-        businessContext,
-        isPROUser,
-        isVoiceflowFallback: isErrorFallback,
-      })
-    } catch (error) {
-      console.error("❌ Error generating Gemini response:", error)
+    const geminiResponse = await generateGeminiResponse({
+      userMessage,
+      businessProfile: profileContent,
+      conversationHistory,
+      businessContext,
+      isPROUser,
+      isVoiceflowFallback: isErrorFallback,
+    })
 
-      // Human-like fallback responses
-      const humanFallbacks = [
-        "Hey there! Thanks for reaching out. I'm getting a lot of messages right now, but I definitely want to help you out. Can you give me just a few minutes to get back to you properly? 😊",
-        "Hi! I'm not a bot, but I'm currently unavailable. I'll get back to you shortly with a personalized response that addresses exactly what you need.",
-        "Thanks for your message! I'm here to help, but I need a moment to gather the right information for you. I'll be back with you soon with something valuable!",
-        "Hello! I'm a real person, and I'm excited to help you. I just need a few minutes to prepare a personalized response that'll be worth your time.",
-        "Hey! I see your message and I want to give you a proper response. I'm just finishing up with another customer - give me a few minutes and I'll be right with you! 🙏",
-      ]
-
-      finalResponse = humanFallbacks[Math.floor(Math.random() * humanFallbacks.length)]
-    }
-
-    // Ensure we have a response
-    if (!finalResponse || finalResponse.trim().length === 0) {
-      finalResponse = "Thanks for your message! I'll get back to you shortly with a helpful response. 😊"
-    }
-  } catch (error) {
-    console.error("💥 Critical error in enhanced Gemini processing:", error)
-    finalResponse =
-      "Hey there! Thanks for reaching out. I'm having some technical difficulties right now, but I'm a real person and I'll get back to you as soon as possible! 😊"
-  }
-
-  // GUARANTEED RESPONSE SENDING
-  try {
     // 🚫 CHECK FOR DUPLICATE RESPONSE BEFORE SENDING
-    const isDuplicate = await checkDuplicateResponse(pageId, senderId, finalResponse, messageType)
+    const isDuplicate = await checkDuplicateResponse(pageId, senderId, geminiResponse, messageType)
     if (isDuplicate) {
-      console.log("🚫 Duplicate response detected, modifying response")
-      finalResponse = finalResponse + " 👋"
+      console.log("🚫 Duplicate response detected, skipping send")
+      return
     }
 
-    console.log(`💬 Enhanced Gemini response: "${finalResponse.substring(0, 100)}..." (${finalResponse.length} chars)`)
+    console.log(
+      `💬 Enhanced Gemini response: "${geminiResponse.substring(0, 100)}..." (${geminiResponse.length} chars)`,
+    )
 
-    // Store conversation messages (non-blocking)
-    try {
-      await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
-      if (automation?.id) {
-        await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
-      }
-      await storeConversationMessage(pageId, "bot", finalResponse, true, automation?.id || null)
-    } catch (error) {
-      console.error("❌ Error storing conversation messages (continuing anyway):", error)
+    // Store conversation messages
+    await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
+    if (automation?.id) {
+      await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
     }
+    await storeConversationMessage(pageId, "bot", geminiResponse, true, automation?.id || null)
 
     // Send response immediately (no typing delay)
     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
 
     if (messageType === "DM") {
       console.log("📤 Sending enhanced DM response...")
-      try {
-        const direct_message = await sendDM(pageId, senderId, finalResponse, token)
-        if (direct_message.status === 200) {
-          console.log("✅ Enhanced DM sent successfully")
-          // Mark response as sent to prevent duplicates
-          await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
-          if (automation) {
-            await trackResponses(automation.id, "DM")
-          }
-          await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
-          await createChatHistory(automation?.id || "default", pageId, senderId, finalResponse)
-        } else {
-          console.error("❌ Failed to send DM:", direct_message)
-          throw new Error(`DM send failed with status: ${direct_message.status}`)
+      const direct_message = await sendDM(pageId, senderId, geminiResponse, token)
+      if (direct_message.status === 200) {
+        console.log("✅ Enhanced DM sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, geminiResponse, messageType, automation.id)
+        if (automation) {
+          await trackResponses(automation.id, "DM")
         }
-      } catch (error) {
-        console.error("❌ Error sending DM, trying emergency response:", error)
-
-        // Emergency response attempt
-        const emergencyResponse = "Thanks for your message! I'll get back to you soon. 😊"
-        try {
-          const emergency_dm = await sendDM(pageId, senderId, emergencyResponse, token)
-          if (emergency_dm.status === 200) {
-            console.log("✅ Emergency DM sent successfully")
-            await markResponseAsSent(pageId, senderId, emergencyResponse, messageType, automation.id)
-          }
-        } catch (emergencyError) {
-          console.error("💥 Even emergency DM failed:", emergencyError)
-        }
+        await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
+        await createChatHistory(automation?.id || "default", pageId, senderId, geminiResponse)
+      } else {
+        console.error("❌ Failed to send DM:", direct_message)
       }
     } else if (messageType === "COMMENT" && data.commentId) {
       console.log("📤 Sending enhanced comment response...")
-      try {
-        const comment = await sendPrivateMessage(pageId, data.commentId, finalResponse, token)
-        if (comment.status === 200) {
-          console.log("✅ Enhanced comment response sent successfully")
-          // Mark response as sent to prevent duplicates
-          await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
-          if (automation) {
-            await trackResponses(automation.id, "COMMENT")
-          }
-        } else {
-          console.error("❌ Failed to send comment response:", comment)
-          throw new Error(`Comment send failed with status: ${comment.status}`)
+      const comment = await sendPrivateMessage(pageId, data.commentId, geminiResponse, token)
+      if (comment.status === 200) {
+        console.log("✅ Enhanced comment response sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, geminiResponse, messageType, automation.id)
+        if (automation) {
+          await trackResponses(automation.id, "COMMENT")
         }
-      } catch (error) {
-        console.error("❌ Error sending comment, trying emergency response:", error)
-
-        // Emergency response attempt
-        const emergencyResponse = "Thanks for your comment! I'll get back to you soon. 😊"
-        try {
-          const emergency_comment = await sendPrivateMessage(pageId, data.commentId, emergencyResponse, token)
-          if (emergency_comment.status === 200) {
-            console.log("✅ Emergency comment sent successfully")
-            await markResponseAsSent(pageId, senderId, emergencyResponse, messageType, automation.id)
-          }
-        } catch (emergencyError) {
-          console.error("💥 Even emergency comment failed:", emergencyError)
-        }
+      } else {
+        console.error("❌ Failed to send comment response:", comment)
       }
     }
   } catch (error) {
-    console.error("💥 Critical error in guaranteed response sending:", error)
-
-    // Last resort - try to send a basic message
-    try {
-      const lastResortResponse = "Hi! I got your message 👋"
-      const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
-
-      if (messageType === "DM") {
-        await sendDM(pageId, senderId, lastResortResponse, token)
-      } else if (messageType === "COMMENT" && data.commentId) {
-        await sendPrivateMessage(pageId, data.commentId, lastResortResponse, token)
+    console.error("💥 Error in enhanced Gemini processing:", error)
+    // Only send fallback if we haven't sent any responses recently
+    const recentCount = await getRecentResponseCount(pageId, senderId, messageType, 1)
+    if (recentCount === 0) {
+      const fallbackText =
+        "Hey there! Thanks for reaching out. I'm getting a lot of messages right now, but I definitely want to help you out. Can you give me just a few minutes to get back to you properly? 😊"
+      // Check if this fallback would be a duplicate
+      const isFallbackDuplicate = await checkDuplicateResponse(pageId, senderId, fallbackText, messageType)
+      if (!isFallbackDuplicate) {
+        console.log("🔄 Sending final fallback response...")
+        const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+        if (messageType === "DM") {
+          const result = await sendDM(pageId, senderId, fallbackText, token)
+          if (result.status === 200) {
+            await markResponseAsSent(pageId, senderId, fallbackText, messageType, automation.id)
+          }
+        } else if (messageType === "COMMENT" && data.commentId) {
+          const result = await sendPrivateMessage(pageId, data.commentId, fallbackText, token)
+          if (result.status === 200) {
+            await markResponseAsSent(pageId, senderId, fallbackText, messageType, automation.id)
+          }
+        }
       }
-
-      console.log("✅ Last resort response sent")
-    } catch (lastResortError) {
-      console.error("💥 Even last resort response failed:", lastResortError)
     }
   }
 }
