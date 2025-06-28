@@ -6309,7 +6309,7 @@ async function updateLeadWithEnhancedAnalysis(
   }
 }
 
-// Export the enhanced analyze function as the main one
+// Export the enhanced analyze function as the main on
 export { analyzeLead as analyzeEnhancedLead }
 
 /**
