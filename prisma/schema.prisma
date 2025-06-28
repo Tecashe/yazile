@@ -2877,3 +2877,22 @@ model CrmSyncSettings {
 
   @@map("CrmSyncSettings")
 }
+
+
+
+
+
+model SentResponse {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipientKey    String   // pageId_senderId_messageType
+  responseHash    String   // SHA256 hash of response content
+  responseContent String   // First 1000 chars of response for debugging
+  messageType     String   // "DM" or "COMMENT"
+  automationId    String?
+  sentAt          DateTime @default(now())
+
+  @@index([recipientKey])
+  @@index([responseHash])
+  @@index([sentAt])
+  @@index([recipientKey, sentAt])
+}

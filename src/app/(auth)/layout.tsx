@@ -1,166 +1,27 @@
-// import type React from "react"
 
-// type Props = {
-//   children: React.ReactNode
-// }
-
-// const Layout = ({ children }: Props) => {
-//   return (
-//     <div className="relative min-h-screen w-full bg-gray-950 flex flex-col lg:flex-row items-center justify-center p-4 md:p-6 lg:p-8">
-//       {/* Subtle background pattern */}
-//       <div
-//         className="absolute inset-0"
-//         style={{
-//           backgroundImage: `radial-gradient(#4B5563 1px, transparent 1px)`,
-//           backgroundSize: "40px 40px",
-//           opacity: "0.05",
-//         }}
-//       ></div>
-
-//       {/* Left side with illustration (desktop only) */}
-//       <div className="hidden lg:flex lg:w-1/2 lg:h-full items-center justify-center p-8">
-//         <div className="relative w-full max-w-lg">
-//           {/* Business Solutions Dashboard SVG */}
-//           <svg
-//             viewBox="0 0 400 400"
-//             fill="none"
-//             xmlns="http://www.w3.org/2000/svg"
-//             className="w-full h-auto drop-shadow-lg"
-//           >
-//             {/* Main dashboard container */}
-//             <rect x="40" y="60" width="320" height="280" rx="12" fill="#1F2937" stroke="#374151" strokeWidth="2" />
-
-//             {/* Header bar */}
-//             <rect x="40" y="60" width="320" height="40" rx="12" fill="#374151" />
-
-//             {/* Header dots */}
-//             <circle cx="65" cy="80" r="6" fill="#EF4444" fillOpacity="0.8" />
-//             <circle cx="85" cy="80" r="6" fill="#F59E0B" fillOpacity="0.8" />
-//             <circle cx="105" cy="80" r="6" fill="#10B981" fillOpacity="0.8" />
-
-//             {/* Left sidebar */}
-//             <rect x="40" y="100" width="80" height="240" fill="#111827" />
-
-//             {/* Sidebar menu items */}
-//             <rect x="55" y="120" width="50" height="8" rx="4" fill="#4B5563" />
-//             <rect x="55" y="140" width="50" height="8" rx="4" fill="#4B5563" />
-//             <rect x="55" y="160" width="50" height="8" rx="4" fill="#4B5563" />
-//             <rect x="55" y="180" width="50" height="8" rx="4" fill="#4B5563" />
-//             <rect x="55" y="200" width="50" height="8" rx="4" fill="#4B5563" />
-
-//             {/* Main content area - Analytics */}
-
-//             {/* Title */}
-//             <rect x="140" y="120" width="100" height="10" rx="5" fill="#6B7280" />
-
-//             {/* Charts */}
-//             <rect x="140" y="145" width="100" height="70" rx="6" fill="#374151" />
-//             <rect x="250" y="145" width="100" height="70" rx="6" fill="#374151" />
-
-//             {/* Bar chart elements */}
-//             <rect x="150" y="185" width="10" height="20" rx="2" fill="#9CA3AF" />
-//             <rect x="165" y="175" width="10" height="30" rx="2" fill="#9CA3AF" />
-//             <rect x="180" y="165" width="10" height="40" rx="2" fill="#9CA3AF" />
-//             <rect x="195" y="155" width="10" height="50" rx="2" fill="#9CA3AF" />
-//             <rect x="210" y="175" width="10" height="30" rx="2" fill="#9CA3AF" />
-//             <rect x="225" y="180" width="10" height="25" rx="2" fill="#9CA3AF" />
-
-//             {/* Line chart */}
-//             <path
-//               d="M260 195 L270 175 L285 185 L300 165 L315 180 L330 160"
-//               stroke="#9CA3AF"
-//               strokeWidth="2"
-//               strokeLinecap="round"
-//             />
-
-//             {/* Data cards */}
-//             <rect x="140" y="225" width="70" height="50" rx="6" fill="#374151" />
-//             <rect x="220" y="225" width="70" height="50" rx="6" fill="#374151" />
-//             <rect x="300" y="225" width="50" height="50" rx="6" fill="#374151" />
-
-//             {/* Card icons */}
-//             <circle cx="155" cy="240" r="8" fill="#4B5563" />
-//             <circle cx="235" cy="240" r="8" fill="#4B5563" />
-//             <circle cx="315" cy="240" r="8" fill="#4B5563" />
-
-//             {/* Card data */}
-//             <rect x="150" y="255" width="50" height="6" rx="3" fill="#6B7280" />
-//             <rect x="150" y="265" width="30" height="6" rx="3" fill="#6B7280" />
-
-//             <rect x="230" y="255" width="50" height="6" rx="3" fill="#6B7280" />
-//             <rect x="230" y="265" width="30" height="6" rx="3" fill="#6B7280" />
-
-//             <rect x="310" y="255" width="30" height="6" rx="3" fill="#6B7280" />
-//             <rect x="310" y="265" width="20" height="6" rx="3" fill="#6B7280" />
-//           </svg>
-//         </div>
-//       </div>
-
-//       {/* Right side content */}
-//       <div className="w-full max-w-md lg:w-1/2 lg:max-w-lg mx-auto">
-//         {/* Logo and product name for mobile */}
-//         <div className="flex flex-col items-center mb-6 lg:hidden space-y-3">
-//           <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center shadow-lg shadow-gray-900/20">
-//             <svg
-//               xmlns="http://www.w3.org/2000/svg"
-//               className="h-6 w-6 text-white"
-//               fill="none"
-//               viewBox="0 0 24 24"
-//               stroke="currentColor"
-//             >
-//               <path
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//                 strokeWidth={2}
-//                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-//               />
-//             </svg>
-//           </div>
-//         </div>
-
-//         {/* Auth container */}
-//         <div className="relative group">
-//           {/* Border gradient */}
-//           <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 opacity-75 blur-sm group-hover:opacity-100 transition-opacity"></div>
-
-//           {/* Main content */}
-//           <div className="relative bg-gray-900 rounded-xl shadow-2xl shadow-black/40 border border-white/10 overflow-hidden">
-//             <div className="p-6 sm:p-8 flex justify-center items-center">{children}</div>
-
-//             {/* Footer */}
-//             <div className="border-t border-white/10 p-4 bg-black/20">
-//               <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-//                 <p className="text-xs text-white/60">Secure • Automated • Scalable</p>
-//                 <div className="flex items-center space-x-4">
-//                   <a href="#" className="text-xs text-white/60 hover:text-white transition-colors">
-//                     Privacy
-//                   </a>
-//                   <a href="#" className="text-xs text-white/60 hover:text-white transition-colors">
-//                     Terms
-//                   </a>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Bottom text */}
-//         <p className="text-center text-xs text-white/40 mt-6">
-//           © {new Date().getFullYear()} Yazil. All rights reserved.
-//         </p>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default Layout
 
 // import type React from "react"
 
 // import { Suspense } from "react"
 // import { Loader2 } from "lucide-react"
-// import { CardCarousel } from "@/components/global/onboarding/CardCarousel"
-// import { Server, Bot, Clock, LineChartIcon as ChartLine, Infinity } from "lucide-react"
+// import { DynamicCardShowcase } from "@/components/global/onboarding/DynamicCards"
+// import {
+//   Server,
+//   Bot,
+//   Clock,
+//   LineChartIcon as ChartLine,
+//   Infinity,
+//   Shield,
+//   Zap,
+//   Users,
+//   Code,
+//   Database,
+//   Globe,
+//   Smartphone,
+//   Cloud,
+//   Layers,
+//   Settings,
+// } from "lucide-react"
 
 // const slides = [
 //   {
@@ -198,6 +59,76 @@
 //     color: "from-pink-500 to-rose-400",
 //     stats: "Track ROI in real-time",
 //   },
+//   {
+//     title: "Enterprise Security",
+//     description: "Bank-level security with end-to-end encryption and compliance with global standards.",
+//     icon: <Shield size={48} className="text-white" />,
+//     color: "from-violet-500 to-purple-400",
+//     stats: "SOC 2 and GDPR compliant",
+//   },
+//   {
+//     title: "Lightning Fast",
+//     description: "Optimized performance with sub-second response times even for complex operations.",
+//     icon: <Zap size={48} className="text-white" />,
+//     color: "from-yellow-500 to-amber-400",
+//     stats: "50ms average response time",
+//   },
+//   {
+//     title: "Team Collaboration",
+//     description: "Work together seamlessly with real-time updates and role-based permissions.",
+//     icon: <Users size={48} className="text-white" />,
+//     color: "from-red-500 to-rose-400",
+//     stats: "Increase team productivity by 40%",
+//   },
+//   {
+//     title: "Developer API",
+//     description: "Extend functionality with our comprehensive API and developer tools.",
+//     icon: <Code size={48} className="text-white" />,
+//     color: "from-sky-500 to-blue-400",
+//     stats: "1000+ API endpoints available",
+//   },
+//   {
+//     title: "Data Management",
+//     description: "Organize and access your data with powerful search and filtering capabilities.",
+//     icon: <Database size={48} className="text-white" />,
+//     color: "from-teal-500 to-green-400",
+//     stats: "Process up to 10TB of data daily",
+//   },
+//   {
+//     title: "Global CDN",
+//     description: "Lightning-fast content delivery with edge locations worldwide for minimal latency.",
+//     icon: <Globe size={48} className="text-white" />,
+//     color: "from-fuchsia-500 to-purple-400",
+//     stats: "200+ edge locations globally",
+//   },
+//   {
+//     title: "Mobile Experience",
+//     description: "Full-featured mobile apps with offline capabilities and push notifications.",
+//     icon: <Smartphone size={48} className="text-white" />,
+//     color: "from-lime-500 to-green-400",
+//     stats: "4.8 star rating on app stores",
+//   },
+//   {
+//     title: "Cloud Storage",
+//     description: "Secure, scalable storage for all your files with automatic versioning and backups.",
+//     icon: <Cloud size={48} className="text-white" />,
+//     color: "from-cyan-500 to-blue-400",
+//     stats: "Unlimited storage capacity",
+//   },
+//   {
+//     title: "Multi-environment",
+//     description: "Separate development, staging, and production environments with one-click deployment.",
+//     icon: <Layers size={48} className="text-white" />,
+//     color: "from-orange-500 to-red-400",
+//     stats: "Deploy in under 30 seconds",
+//   },
+//   {
+//     title: "Custom Workflows",
+//     description: "Build your own automation workflows with our intuitive drag-and-drop interface.",
+//     icon: <Settings size={48} className="text-white" />,
+//     color: "from-purple-500 to-indigo-400",
+//     stats: "Create workflows in minutes, not days",
+//   },
 // ]
 
 // export default function Layout({
@@ -232,7 +163,7 @@
 
 //       <div className="relative z-10 flex min-h-screen">
 //         {/* Left sidebar with brand elements - increased width to 45% */}
-//         <div className="hidden lg:flex w-[45%] bg-black/30 backdrop-blur-xl flex-col justify-between p-8 border-r border-white/10">
+//         <div className="hidden lg:flex w-[45%] bg-black/30 flex-col justify-between p-8 border-r border-white/10">
 //           <div>
 //             <div className="flex items-center space-x-2 mb-12">
 //               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center glow">
@@ -241,9 +172,9 @@
 //               <h1 className="text-3xl font-bold text-white">Yazzil</h1>
 //             </div>
 
-//             {/* Three-position card carousel */}
+//             {/* Dynamic Card Showcase */}
 //             <div className="mb-8">
-//               <CardCarousel slides={slides} />
+//               <DynamicCardShowcase slides={slides} autoplaySpeed={6000} />
 //             </div>
 //           </div>
 
@@ -270,7 +201,7 @@
 //           </div>
 
 //           <main className="flex-1 p-6 md:p-10 flex items-center justify-center">
-//             <div className="w-full max-w-3xl bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+//             <div className="w-full max-w-3xl bg-black/40 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
 //               <Suspense
 //                 fallback={
 //                   <div className="flex flex-col items-center justify-center min-h-[600px]">
@@ -278,7 +209,7 @@
 //                       <Loader2 className="h-12 w-12 animate-spin text-indigo-500" />
 //                       <div className="absolute inset-0 h-12 w-12 rounded-full blur-lg bg-indigo-500/20 animate-pulse"></div>
 //                     </div>
-//                     <span className="mt-4 text-white">Secure • Automated • Scalable</span>
+//                     <span className="mt-4 text-white">Loading your experience...</span>
 //                   </div>
 //                 }
 //               >
@@ -289,7 +220,7 @@
 
 //           {/* Floating help button with enhanced glow effect */}
 //           <div className="fixed bottom-6 right-6 z-50">
-//             <button className="group flex items-center space-x-2 bg-white/10 hover:bg-white/20 backdrop-blur-lg rounded-full py-2 px-4 text-white transition-all duration-300 border border-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(79,70,229,0.5)]">
+//             <button className="group flex items-center space-x-2 bg-white/10 hover:bg-white/20 rounded-full py-2 px-4 text-white transition-all duration-300 border border-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(79,70,229,0.5)]">
 //               <span className="w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center group-hover:shadow-[0_0_10px_rgba(79,70,229,0.8)]">
 //                 ?
 //               </span>
@@ -303,7 +234,6 @@
 // }
 
 import type React from "react"
-
 import { Suspense } from "react"
 import { Loader2 } from "lucide-react"
 import { DynamicCardShowcase } from "@/components/global/onboarding/DynamicCards"
@@ -439,10 +369,10 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 overflow-hidden">
+    <div className="relative min-h-screen w-full bg-background overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 z-0 opacity-30">
-        <div className="absolute inset-0 bg-grid-white/[0.02]" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] dark:bg-grid-white/[0.02]" />
       </div>
 
       {/* Floating geometric shapes with enhanced glow */}
@@ -465,13 +395,13 @@ export default function Layout({
 
       <div className="relative z-10 flex min-h-screen">
         {/* Left sidebar with brand elements - increased width to 45% */}
-        <div className="hidden lg:flex w-[45%] bg-black/30 flex-col justify-between p-8 border-r border-white/10">
+        <div className="hidden lg:flex w-[45%] bg-card/30 backdrop-blur-xl flex-col justify-between p-8 border-r border-border/50">
           <div>
             <div className="flex items-center space-x-2 mb-12">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center glow">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center glow shadow-lg">
                 <span className="text-white font-bold text-2xl">Y</span>
               </div>
-              <h1 className="text-3xl font-bold text-white">Yazzil</h1>
+              <h1 className="text-3xl font-bold text-foreground">Yazzil</h1>
             </div>
 
             {/* Dynamic Card Showcase */}
@@ -481,7 +411,7 @@ export default function Layout({
           </div>
 
           {/* Footer with enhanced styling */}
-          <div className="text-gray-400 text-sm border-t border-white/5 pt-4 mt-4">
+          <div className="text-muted-foreground text-sm border-t border-border/30 pt-4 mt-4">
             <p className="flex items-center">
               <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>© 2025 Yazzil.
               All rights reserved.
@@ -492,7 +422,7 @@ export default function Layout({
         {/* Main content area */}
         <div className="flex-1 flex flex-col">
           {/* Animated progress bar at the top */}
-          <div className="h-1 bg-gray-800 w-full">
+          <div className="h-1 bg-muted w-full">
             <div
               className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-shimmer"
               style={{
@@ -503,15 +433,15 @@ export default function Layout({
           </div>
 
           <main className="flex-1 p-6 md:p-10 flex items-center justify-center">
-            <div className="w-full max-w-3xl bg-black/40 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+            <div className="w-full max-w-3xl bg-card/40 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
               <Suspense
                 fallback={
                   <div className="flex flex-col items-center justify-center min-h-[600px]">
                     <div className="relative">
-                      <Loader2 className="h-12 w-12 animate-spin text-indigo-500" />
-                      <div className="absolute inset-0 h-12 w-12 rounded-full blur-lg bg-indigo-500/20 animate-pulse"></div>
+                      <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                      <div className="absolute inset-0 h-12 w-12 rounded-full blur-lg bg-primary/20 animate-pulse"></div>
                     </div>
-                    <span className="mt-4 text-white">Loading your experience...</span>
+                    <span className="mt-4 text-foreground">Loading your experience...</span>
                   </div>
                 }
               >
@@ -522,8 +452,8 @@ export default function Layout({
 
           {/* Floating help button with enhanced glow effect */}
           <div className="fixed bottom-6 right-6 z-50">
-            <button className="group flex items-center space-x-2 bg-white/10 hover:bg-white/20 rounded-full py-2 px-4 text-white transition-all duration-300 border border-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(79,70,229,0.5)]">
-              <span className="w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center group-hover:shadow-[0_0_10px_rgba(79,70,229,0.8)]">
+            <button className="group flex items-center space-x-2 bg-card/80 hover:bg-card backdrop-blur-lg rounded-full py-2 px-4 text-foreground transition-all duration-300 border border-border/50 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(79,70,229,0.5)]">
+              <span className="w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center group-hover:shadow-[0_0_10px_rgba(79,70,229,0.8)] text-white text-sm font-bold">
                 ?
               </span>
               <span className="hidden group-hover:inline transition-all duration-300">Need help?</span>

@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .animate-spin-slow {
+    animation: spin 10s linear infinite;
+  }
+  .animate-fade {
+    animation: fade 0.5s ease-in-out;
+  }
+  .animate-yazzil-spin {
+    animation: yazzil-spin 1.4s linear infinite;
+  }
+
+  @keyframes yazzil-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -123,51 +151,31 @@
 }
 
 .radial--gradient {
-  background-image: radial-gradient(
-    ellipse farthest-side,
-    rgba(51, 82, 204, 0.15) 20%,
-    #09090b 100%
-  );
+  background-image: radial-gradient(ellipse farthest-side, rgba(51, 82, 204, 0.15) 20%, #09090b 100%);
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
 
 .radial--gradient--pink {
-  background-image: radial-gradient(
-    at center,
-    rgba(148, 52, 230, 0.1) 10%,
-    transparent 50%
-  );
+  background-image: radial-gradient(at center, rgba(148, 52, 230, 0.1) 10%, transparent 50%);
   background-size: 70% 80%;
   background-repeat: no-repeat;
 }
 
 .radial--gradient--automations {
-  background-image: radial-gradient(
-    at top left,
-    rgba(51, 82, 204, 0.05) 40%,
-    #1d1d1d 60%
-  );
+  background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.05) 40%, #1d1d1d 60%);
   background-size: 40% 100%;
   background-repeat: no-repeat;
 }
 
 .radial--double--gradient--cards--top {
-  background-image: radial-gradient(
-    at top left,
-    rgba(51, 82, 204, 0.3) 50%,
-    transparent 70%
-  );
+  background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.3) 50%, transparent 70%);
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
 
 .radial--double--gradient--cards--bottom {
-  background-image: radial-gradient(
-    at bottom right,
-    rgba(51, 82, 204, 0.1) 50%,
-    transparent 70%
-  );
+  background-image: radial-gradient(at bottom right, rgba(51, 82, 204, 0.1) 50%, transparent 70%);
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
@@ -219,12 +227,7 @@
 }
 
 .shimmerBorder {
-  background: linear-gradient(
-    90deg,
-    rgba(51, 82, 204, 0.1) 0%,
-    rgba(51, 82, 204, 0.3) 50%,
-    rgba(51, 82, 204, 0.1) 100%
-  );
+  background: linear-gradient(90deg, rgba(51, 82, 204, 0.1) 0%, rgba(51, 82, 204, 0.3) 50%, rgba(51, 82, 204, 0.1) 100%);
   background-size: 200% 100%;
   animation: automation-shimmer 3s infinite;
 }
@@ -381,44 +384,6 @@
   }
 }
 
-
-
-@layer utilities {
-  .animate-spin-slow {
-    animation: spin 10s linear infinite;
-  }
-  .animate-fade {
-    animation: fade 0.5s ease-in-out;
-  }
-  .animate-yazzil-spin {
-    animation: yazzil-spin 1.4s linear infinite;
-  }
-
-  @keyframes yazzil-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -444,50 +409,6 @@
   opacity: 1;
   transition: opacity 0.3s ease 0.1s;
 }
-
-
-/* Add to your global.css */
-.dark .glassEffect {
-  backdrop-filter: blur(10px);
-  background-color: rgba(30, 30, 30, 0.7);
-  border-color: hsl(var(--border));
-}
-
-.dark .glow {
-  box-shadow: 0 0 15px rgba(51, 82, 204, 0.3);
-}
-
-.dark .glowHover:hover {
-  box-shadow: 0 0 20px rgba(51, 82, 204, 0.4);
-}
-
-/* Enhance the radial gradient for dark mode */
-.dark .radial--gradient--automations {
-  background-image: radial-gradient(
-    at top left,
-    rgba(51, 82, 204, 0.08) 40%,
-    hsl(var(--background)) 60%
-  );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* Template Card specific animations - SUBTLE VERSION */
 .template-card-glow {
@@ -562,19 +483,6 @@
   overflow: hidden;
   border-radius: 0.5rem;
   transition: all 0.3s ease;
-}
-
-/* REMOVED: All ::before and ::after hover overlay effects */
-
-/* REMOVED: Colorful badge shine animation */
-.colorful-badge {
-  position: relative;
-  overflow: hidden;
-}
-
-/* REMOVED: Gradient button background position animation */
-.gradient-button {
-  background-size: 200% 100%;
 }
 
 /* Creative card shapes */
@@ -727,4 +635,41 @@
 .card-border-custom:hover {
   border-color: rgba(249, 115, 22, 0.7);
   box-shadow: 0 0 18px rgba(249, 115, 22, 0.25);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dark .glassEffect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(30, 30, 30, 0.7);
+  border-color: hsl(var(--border));
+}
+
+.dark .glow {
+  box-shadow: 0 0 15px rgba(51, 82, 204, 0.3);
+}
+
+.dark .glowHover:hover {
+  box-shadow: 0 0 20px rgba(51, 82, 204, 0.4);
+}
+
+/* Enhance the radial gradient for dark mode */
+.dark .radial--gradient--automations {
+  background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.08) 40%, hsl(var(--background)) 60%);
 }

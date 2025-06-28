@@ -5320,6 +5320,642 @@
 
 
 
+// import { type NextRequest, NextResponse } from "next/server"
+// import {
+//   createChatHistory,
+//   trackResponses,
+//   checkProcessedMessage,
+//   markMessageAsProcessed,
+//   decideTriggerAction,
+//   getAutomationWithTriggers,
+//   updateConversationState,
+//   logTriggerExecution,
+// } from "@/actions/webhook/queries"
+// import { getBusinessProfileForAutomation, getOrCreateDefaultAutomation } from "@/actions/webhook/business-profile"
+// import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
+// import {
+//   getEnhancedVoiceflowResponse,
+//   createVoiceflowUser,
+//   fetchEnhancedBusinessVariables,
+//   calculateTypingDelay,
+//   getVoiceflowHealth,
+// } from "@/lib/voiceflow"
+// import { sendDM, sendPrivateMessage } from "@/lib/fetch"
+// import { client } from "@/lib/prisma"
+// import { storeConversationMessage } from "@/actions/chats/queries"
+// import { analyzeLead } from "@/lib/lead-qualification"
+// import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
+// import { verifyInstagramWebhook } from "@/utils/instagram"
+// import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+
+// type InstagramQuickReply = {
+//   content_type: "text"
+//   title: string
+//   payload: string
+// }
+
+// interface WebhookData {
+//   pageId: string
+//   senderId: string
+//   recipientId?: string
+//   userMessage: string
+//   messageId?: string
+//   commentId?: string
+//   messageType: "DM" | "COMMENT"
+//   isEcho?: boolean
+// }
+
+// function transformButtonsToInstagram(
+//   buttons?: { name: string; payload: string | object | any }[],
+// ): InstagramQuickReply[] | undefined {
+//   if (!buttons || buttons.length === 0) return undefined
+
+//   return buttons.slice(0, 11).map((button) => {
+//     const buttonName = String(button.name || "").substring(0, 20)
+
+//     let buttonPayload: string
+//     if (typeof button.payload === "string") {
+//       buttonPayload = button.payload.substring(0, 1000)
+//     } else if (button.payload === null || button.payload === undefined) {
+//       buttonPayload = buttonName
+//     } else {
+//       try {
+//         buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
+//       } catch (e) {
+//         buttonPayload = String(button.payload).substring(0, 1000)
+//       }
+//     }
+
+//     return {
+//       content_type: "text",
+//       title: buttonName,
+//       payload: buttonPayload,
+//     }
+//   })
+// }
+
+// function extractWebhookData(payload: any): WebhookData | null {
+//   try {
+//     if (payload?.entry?.[0]?.messaging) {
+//       const messaging = payload.entry[0].messaging[0]
+//       const isEcho = messaging.message?.is_echo === true
+
+//       return {
+//         pageId: payload.entry[0].id,
+//         senderId: messaging.sender.id,
+//         recipientId: messaging.recipient.id,
+//         userMessage: messaging.message.text,
+//         messageId: messaging.message.mid,
+//         messageType: "DM",
+//         isEcho,
+//       }
+//     } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+//       return {
+//         pageId: payload.entry[0].id,
+//         senderId: payload.entry[0].changes[0].value.from.id,
+//         userMessage: payload.entry[0].changes[0].value.text,
+//         commentId: payload.entry[0].changes[0].value.id,
+//         messageType: "COMMENT",
+//         isEcho: false,
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error extracting webhook data:", error)
+//   }
+//   return null
+// }
+
+// function generateMessageKey(data: WebhookData, timestamp: number): string {
+//   const baseId = data.messageId || data.commentId || `${timestamp}_${Math.random().toString(36).substr(2, 9)}`
+//   const messageContent = data.userMessage.substring(0, 50)
+//   const messageLength = data.userMessage.length
+
+//   return `${data.pageId}_${data.senderId}_${baseId}_${messageLength}_${messageContent.replace(/\s+/g, "_")}`
+// }
+
+// function isDeauthWebhook(payload: any): boolean {
+//   return payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "deauthorizations"
+// }
+
+// function isDataDeletionWebhook(payload: any): boolean {
+//   return payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion"
+// }
+
+// export async function GET(req: NextRequest) {
+//   const hub = req.nextUrl.searchParams.get("hub.challenge")
+//   return new NextResponse(hub)
+// }
+
+// export async function POST(req: NextRequest) {
+//   console.log("🚀 POST request received")
+//   const startTime = Date.now()
+//   let webhook_payload
+
+//   try {
+//     webhook_payload = await req.json()
+//     console.log("📥 Received webhook payload:", JSON.stringify(webhook_payload, null, 2))
+
+//     if (isDeauthWebhook(webhook_payload)) {
+//       console.log("🔐 Processing Instagram deauthorization webhook")
+//       const signature = req.headers.get("x-hub-signature-256")
+//       const body = JSON.stringify(webhook_payload)
+
+//       if (!signature || !verifyInstagramWebhook(signature, body, process.env.INSTAGRAM_CLIENT_SECRET!)) {
+//         console.error("❌ Invalid webhook signature for deauth")
+//         return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+//       }
+
+//       const result = await handleInstagramDeauthWebhook(webhook_payload)
+//       return NextResponse.json(result, { status: result.status })
+//     }
+
+//     if (isDataDeletionWebhook(webhook_payload)) {
+//       console.log("🗑️ Processing Instagram data deletion webhook")
+//       const signature = req.headers.get("x-hub-signature-256")
+//       const body = JSON.stringify(webhook_payload)
+
+//       if (!signature || !verifyInstagramWebhook(signature, body, process.env.INSTAGRAM_CLIENT_SECRET!)) {
+//         console.error("❌ Invalid webhook signature for data deletion")
+//         return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+//       }
+
+//       const result = await handleInstagramDataDeletionWebhook(webhook_payload)
+//       return NextResponse.json(result, { status: result.status })
+//     }
+
+//     const data = extractWebhookData(webhook_payload)
+//     if (!data) {
+//       console.log("⚠️ Unsupported webhook payload structure")
+//       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 400 })
+//     }
+
+//     // Skip echo messages (messages sent by the bot)
+//     if (data.isEcho) {
+//       console.log("🔄 Skipping echo message (sent by bot)")
+//       return NextResponse.json({ message: "Echo message ignored" }, { status: 200 })
+//     }
+
+//     const { pageId, senderId, userMessage, messageType } = data
+//     const conversationUserId = `${pageId}_${senderId}`
+//     const messageKey = generateMessageKey(data, startTime)
+
+//     console.log(`📨 Processing ${messageType}: "${userMessage.substring(0, 100)}..." from ${senderId}`)
+
+//     const isProcessed = await checkProcessedMessage(messageKey)
+//     if (isProcessed) {
+//       console.log(`⏭️ Skipping duplicate message: ${messageKey.substring(0, 50)}...`)
+//       return NextResponse.json({ message: "Duplicate message skipped" }, { status: 200 })
+//     }
+
+//     await markMessageAsProcessed(messageKey)
+//     console.log(`✅ Marked message as processed: ${messageKey.substring(0, 50)}...`)
+
+//     const triggerDecision = await decideTriggerAction(pageId, senderId, userMessage, messageType)
+//     console.log(`🎯 Trigger Decision:`, triggerDecision)
+
+//     let automation = null
+
+//     // If no specific automation matched, try to get/create default automation
+//     if (triggerDecision.triggerType === "NO_MATCH") {
+//       console.log("🔄 No specific automation matched, checking for default automation...")
+//       automation = await getOrCreateDefaultAutomation(pageId)
+
+//       if (!automation) {
+//         console.log("❌ No default automation available - message ignored")
+//         return NextResponse.json({ message: "No automation available" }, { status: 200 })
+//       }
+
+//       console.log(`🎯 Using default automation: ${automation.id}`)
+//     } else {
+//       // Get the specific automation that was triggered
+//       try {
+//         automation = await getAutomationWithTriggers(triggerDecision.automationId!, messageType)
+//         console.log(`🔍 Automation lookup result:`, automation ? `Found: ${automation.id}` : "Not found")
+//       } catch (error) {
+//         console.error(`❌ Error fetching automation ${triggerDecision.automationId}:`, error)
+//       }
+
+//       if (!automation) {
+//         console.log(`❌ Specific automation not found: ${triggerDecision.automationId}`)
+//         // Fallback to default automation
+//         automation = await getOrCreateDefaultAutomation(pageId)
+//         if (!automation) {
+//           return NextResponse.json({ message: "Automation not found" }, { status: 404 })
+//         }
+//       }
+//     }
+
+//     const isPROUser = automation.User?.subscription?.plan === "PRO"
+//     console.log(
+//       `🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"}) - PRO: ${isPROUser}`,
+//     )
+
+//     // Log Voiceflow health
+//     const voiceflowHealth = getVoiceflowHealth()
+//     console.log(
+//       `🏥 Voiceflow Health - Score: ${voiceflowHealth.healthScore.toFixed(2)}, State: ${voiceflowHealth.circuitBreakerState}, Cache: ${voiceflowHealth.cacheSize}`,
+//     )
+
+//     // Log trigger execution
+//     if (triggerDecision.automationId && triggerDecision.triggerId && automation.User?.id) {
+//       try {
+//         await logTriggerExecution({
+//           triggerId: triggerDecision.triggerId,
+//           automationId: triggerDecision.automationId,
+//           userId: automation.User.id,
+//           messageContent: userMessage,
+//           triggerType: triggerDecision.triggerType as any,
+//           confidence: triggerDecision.confidence,
+//           reason: triggerDecision.reason,
+//           success: true,
+//           responseTime: Date.now() - startTime,
+//         })
+//         console.log(`📊 Logged trigger execution: ${triggerDecision.triggerId}`)
+//       } catch (error) {
+//         console.error("❌ Error logging trigger execution:", error)
+//       }
+//     }
+
+//     // Update conversation state
+//     await updateConversationState(conversationUserId, {
+//       isActive: true,
+//       lastTriggerType: triggerDecision.triggerType,
+//       lastTriggerReason: triggerDecision.reason,
+//       automationId: automation.id,
+//       listenMode: triggerDecision.triggerType === "KEYWORD" ? "KEYWORDS" : "ALL_MESSAGES",
+//       lastMessageLength: userMessage.length,
+//     })
+
+//     // Lead analysis with timeout
+//     let leadAnalysisResult = null
+//     if (automation.User?.id && senderId !== pageId) {
+//       try {
+//         console.log("🔍 Starting lead analysis...")
+//         const leadAnalysisPromise = analyzeLead({
+//           userId: automation.User.id,
+//           automationId: automation.id,
+//           platformId: pageId,
+//           customerId: senderId,
+//           message: userMessage,
+//           messageType,
+//           timestamp: new Date(),
+//         })
+
+//         const timeoutPromise = new Promise((_, reject) =>
+//           setTimeout(() => reject(new Error("Lead analysis timeout")), 5000),
+//         )
+
+//         leadAnalysisResult = await Promise.race([leadAnalysisPromise, timeoutPromise])
+//         console.log(`📊 Lead analysis completed`)
+//       } catch (error) {
+//         console.error("❌ Error analyzing lead (continuing anyway):", error)
+//       }
+//     }
+
+//     console.log("🎯 Lead analysis finished, proceeding to response handling...")
+
+//     // 🚀 ENHANCED: Route based on subscription plan with intelligent fallback
+//     if (isPROUser) {
+//       console.log("🎙️ Using Enhanced Voiceflow for PRO user (with intelligent Gemini fallback)")
+//       await handleSuperiorVoiceflowResponse(
+//         data,
+//         automation,
+//         conversationUserId,
+//         userMessage,
+//         leadAnalysisResult,
+//         triggerDecision,
+//       )
+//     } else {
+//       console.log("🔮 Using Enhanced Gemini for non-PRO user")
+//       await handleSuperiorGeminiResponse(data, automation, userMessage, triggerDecision)
+//     }
+
+//     const processingTime = Date.now() - startTime
+//     console.log(`✅ Successfully processed message in ${processingTime}ms: ${messageKey.substring(0, 50)}...`)
+//     return NextResponse.json(
+//       {
+//         message: "Request processed successfully",
+//         processingTime,
+//         triggerType: triggerDecision.triggerType,
+//         automationId: automation.id,
+//         aiSystem: isPROUser ? "enhanced_voiceflow_with_gemini_fallback" : "enhanced_gemini",
+//         voiceflowHealth: voiceflowHealth,
+//       },
+//       { status: 200 },
+//     )
+//   } catch (error) {
+//     console.error("💥 Unhandled error in POST function:", error)
+//     return NextResponse.json(
+//       {
+//         message: "Error processing request",
+//         error: error instanceof Error ? error.message : String(error),
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
+
+// async function handleSuperiorVoiceflowResponse(
+//   data: WebhookData,
+//   automation: any,
+//   conversationUserId: string,
+//   userMessage: string,
+//   leadAnalysisResult: any,
+//   triggerDecision: any,
+// ) {
+//   console.log("🎙️ === SUPERIOR VOICEFLOW HANDLER STARTED ===")
+//   const { pageId, senderId, messageType } = data
+
+//   try {
+//     console.log("🎙️ Starting superior Voiceflow processing...")
+
+//     const userCreated = await createVoiceflowUser(conversationUserId)
+//     console.log(`🎙️ User created: ${userCreated}`)
+
+//     // Build enhanced conversation context
+//     const conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
+//     const { profileContent, businessContext } = await getBusinessProfileForAutomation(automation.id)
+
+//     // Determine customer type and context
+//     const isNewUser = conversationHistory.length === 0
+//     const customerType = conversationHistory.length >= 10 ? "VIP" : conversationHistory.length > 0 ? "RETURNING" : "NEW"
+
+//     console.log("📋 Building enhanced business variables with conversation context...")
+//     const businessVariables = await fetchEnhancedBusinessVariables(automation.User?.id || "", automation.id, {
+//       pageId,
+//       senderId,
+//       userMessage,
+//       isNewUser,
+//       customerType,
+//       messageHistory: conversationHistory,
+//     })
+
+//     console.log("🎯 Attempting enhanced Voiceflow response...")
+//     const voiceflowResult = await getEnhancedVoiceflowResponse(userMessage, conversationUserId, businessVariables, {
+//       maxRetries: 3,
+//       timeoutMs: 15000,
+//       enableFallbackDetection: true,
+//     })
+
+//     let finalResponse: string
+//     let finalButtons: any[] | undefined
+//     let aiSystemUsed: string
+//     let typingDelay: number
+//     let responseComplexity: "simple" | "medium" | "complex" = "medium"
+
+//     if (voiceflowResult.success && voiceflowResult.response) {
+//       console.log("✅ Enhanced Voiceflow response successful")
+//       finalResponse = voiceflowResult.response.text
+//       finalButtons = voiceflowResult.response.buttons
+//       responseComplexity = voiceflowResult.response.complexity || "medium"
+//       aiSystemUsed = "enhanced_voiceflow"
+
+//       // Handle marketing info capture
+//       if (
+//         voiceflowResult.variables?.clientname ||
+//         voiceflowResult.variables?.clientemail ||
+//         voiceflowResult.variables?.clientphone
+//       ) {
+//         try {
+//           const automationUserId = automation?.User?.id
+
+//           if (automationUserId) {
+//             await client.marketingInfo.create({
+//               data: {
+//                 name: voiceflowResult.variables.clientname || voiceflowResult.variables.name,
+//                 email: voiceflowResult.variables.clientemail || voiceflowResult.variables.email,
+//                 phone: voiceflowResult.variables.clientphone || voiceflowResult.variables.phone,
+//                 userId: automationUserId,
+//               },
+//             })
+
+//             if (leadAnalysisResult?.lead?.id) {
+//               const existingLead = await client.lead.findUnique({
+//                 where: { id: leadAnalysisResult.lead.id },
+//                 select: { metadata: true },
+//               })
+
+//               const currentMetadata = (existingLead?.metadata as Record<string, any>) || {}
+
+//               await client.lead.update({
+//                 where: { id: leadAnalysisResult.lead.id },
+//                 data: {
+//                   name: voiceflowResult.variables.clientname || voiceflowResult.variables.name,
+//                   email: voiceflowResult.variables.clientemail || voiceflowResult.variables.email,
+//                   phone: voiceflowResult.variables.clientphone || voiceflowResult.variables.phone,
+//                   metadata: {
+//                     ...currentMetadata,
+//                     marketingInfoCaptured: true,
+//                     lastMarketingUpdate: new Date().toISOString(),
+//                     voiceflowHealthScore: voiceflowResult.healthScore,
+//                   },
+//                 },
+//               })
+//             }
+
+//             console.log("📝 Marketing info stored successfully")
+//           }
+//         } catch (error) {
+//           console.error("❌ Error storing marketing info:", error)
+//         }
+//       }
+
+//       // Handle human handoff if required
+//       if (voiceflowResult.response.requiresHumanHandoff) {
+//         console.log("🤝 Human handoff required, updating conversation state...")
+//         await updateConversationState(conversationUserId, {
+//           isInHandoff: true,
+//           handoffReason: "Voiceflow requested human handoff",
+//         })
+//       }
+//     } else {
+//       console.log(
+//         `🔄 Voiceflow failed (${voiceflowResult.fallbackReason}), falling back to superior Gemini for PRO user`,
+//       )
+
+//       // Superior Gemini fallback for PRO users
+//       finalResponse = await generateGeminiResponse({
+//         userMessage,
+//         businessProfile: profileContent,
+//         conversationHistory,
+//         businessContext,
+//         isPROUser: true,
+//         isVoiceflowFallback: true,
+//         voiceflowAttemptedResponse: voiceflowResult.error,
+//       })
+
+//       finalButtons = undefined
+//       aiSystemUsed = "superior_gemini_pro_fallback"
+//       responseComplexity = "complex" // PRO users get complex responses
+
+//       console.log("✅ Superior Gemini fallback response generated for PRO user")
+//     }
+
+//     // Calculate intelligent typing delay
+//     typingDelay = calculateTypingDelay(finalResponse.length, {
+//       isPROUser: true,
+//       messageComplexity: responseComplexity,
+//       includeThinkingTime: true,
+//       baseWPM: 50, // Slightly faster for PRO users
+//     })
+
+//     console.log(
+//       `💬 Final response (${aiSystemUsed}): "${finalResponse.substring(0, 100)}..." (${finalResponse.length} chars, ${Math.round(typingDelay / 1000)}s delay)`,
+//     )
+
+//     // Store conversation messages
+//     await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
+//     if (automation?.id) {
+//       await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
+//     }
+//     await storeConversationMessage(pageId, "bot", finalResponse, true, automation?.id || null)
+
+//     // Add natural typing delay for PRO users
+//     if (typingDelay > 1000) {
+//       console.log(`⏳ Adding natural typing delay: ${Math.round(typingDelay / 1000)}s`)
+//       await new Promise((resolve) => setTimeout(resolve, typingDelay))
+//     }
+
+//     // Send response
+//     const instagramButtons = transformButtonsToInstagram(finalButtons)
+//     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     if (messageType === "DM") {
+//       console.log("📤 Sending superior DM response...")
+//       const direct_message = await sendDM(pageId, senderId, finalResponse, token, instagramButtons)
+
+//       if (direct_message.status === 200) {
+//         console.log("✅ Superior DM sent successfully")
+//         if (automation) {
+//           await trackResponses(automation.id, "DM")
+//         }
+//         await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
+//         await createChatHistory(automation?.id || "default", pageId, senderId, finalResponse)
+//       } else {
+//         console.error("❌ Failed to send DM:", direct_message)
+//       }
+//     } else if (messageType === "COMMENT" && data.commentId) {
+//       console.log("📤 Sending superior comment response...")
+//       const comment = await sendPrivateMessage(pageId, data.commentId, finalResponse, token, instagramButtons)
+
+//       if (comment.status === 200) {
+//         console.log("✅ Superior comment response sent successfully")
+//         if (automation) {
+//           await trackResponses(automation.id, "COMMENT")
+//         }
+//       } else {
+//         console.error("❌ Failed to send comment response:", comment)
+//       }
+//     }
+//   } catch (error) {
+//     console.error("💥 Error in superior Voiceflow processing:", error)
+
+//     // Final fallback to superior Gemini
+//     console.log("🔄 Final fallback to superior Gemini due to error...")
+//     await handleSuperiorGeminiResponse(data, automation, userMessage, triggerDecision, true)
+//   }
+// }
+
+// async function handleSuperiorGeminiResponse(
+//   data: WebhookData,
+//   automation: any,
+//   userMessage: string,
+//   triggerDecision: any,
+//   isErrorFallback = false,
+// ) {
+//   console.log("🔮 === SUPERIOR GEMINI HANDLER STARTED ===")
+//   const { pageId, senderId, messageType } = data
+
+//   try {
+//     // Get business profile and conversation context
+//     const { profileContent, businessContext } = await getBusinessProfileForAutomation(automation.id)
+//     const conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
+//     console.log("📋 Business profile and conversation context loaded for superior Gemini")
+
+//     const isPROUser = automation.User?.subscription?.plan === "PRO"
+
+//     console.log("🔮 Generating superior Gemini response...")
+//     const geminiResponse = await generateGeminiResponse({
+//       userMessage,
+//       businessProfile: profileContent,
+//       conversationHistory,
+//       businessContext,
+//       isPROUser,
+//       isVoiceflowFallback: isErrorFallback,
+//     })
+
+//     // Calculate intelligent typing delay
+//     const typingDelay = calculateTypingDelay(geminiResponse.length, {
+//       isPROUser,
+//       messageComplexity: isPROUser ? "complex" : "medium",
+//       includeThinkingTime: true,
+//     })
+
+//     console.log(
+//       `💬 Superior Gemini response: "${geminiResponse.substring(0, 100)}..." (${geminiResponse.length} chars, ${Math.round(typingDelay / 1000)}s delay)`,
+//     )
+
+//     // Store conversation messages
+//     await storeConversationMessage(pageId, senderId, userMessage, false, automation?.id || null)
+//     if (automation?.id) {
+//       await trackMessageForSentiment(automation.id, pageId, senderId, userMessage)
+//     }
+//     await storeConversationMessage(pageId, "bot", geminiResponse, true, automation?.id || null)
+
+//     // Add natural typing delay
+//     if (typingDelay > 1000) {
+//       console.log(`⏳ Adding natural typing delay: ${Math.round(typingDelay / 1000)}s`)
+//       await new Promise((resolve) => setTimeout(resolve, typingDelay))
+//     }
+
+//     // Send response
+//     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     if (messageType === "DM") {
+//       console.log("📤 Sending superior DM response...")
+//       const direct_message = await sendDM(pageId, senderId, geminiResponse, token)
+
+//       if (direct_message.status === 200) {
+//         console.log("✅ Superior DM sent successfully")
+//         if (automation) {
+//           await trackResponses(automation.id, "DM")
+//         }
+//         await createChatHistory(automation?.id || "default", pageId, senderId, userMessage)
+//         await createChatHistory(automation?.id || "default", pageId, senderId, geminiResponse)
+//       } else {
+//         console.error("❌ Failed to send DM:", direct_message)
+//       }
+//     } else if (messageType === "COMMENT" && data.commentId) {
+//       console.log("📤 Sending superior comment response...")
+//       const comment = await sendPrivateMessage(pageId, data.commentId, geminiResponse, token)
+
+//       if (comment.status === 200) {
+//         console.log("✅ Superior comment response sent successfully")
+//         if (automation) {
+//           await trackResponses(automation.id, "COMMENT")
+//         }
+//       } else {
+//         console.error("❌ Failed to send comment response:", comment)
+//       }
+//     }
+//   } catch (error) {
+//     console.error("💥 Error in superior Gemini processing:", error)
+//     const fallbackText =
+//       "Thanks for your message! I'm here to help. Let me get back to you with the right information. 😊"
+
+//     console.log("🔄 Sending final fallback response...")
+//     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     if (messageType === "DM") {
+//       await sendDM(pageId, senderId, fallbackText, token)
+//     } else if (messageType === "COMMENT" && data.commentId) {
+//       await sendPrivateMessage(pageId, data.commentId, fallbackText, token)
+//     }
+//   }
+// }
+
+
+
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createChatHistory,
@@ -5330,20 +5966,22 @@ import {
   getAutomationWithTriggers,
   updateConversationState,
   logTriggerExecution,
+  checkDuplicateResponse,
+  markResponseAsSent,
+  getRecentResponseCount,
 } from "@/actions/webhook/queries"
 import { getBusinessProfileForAutomation, getOrCreateDefaultAutomation } from "@/actions/webhook/business-profile"
 import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
 import {
-  getEnhancedVoiceflowResponse,
   createVoiceflowUser,
   fetchEnhancedBusinessVariables,
-  calculateTypingDelay,
   getVoiceflowHealth,
+  getEnhancedVoiceflowResponse,
 } from "@/lib/voiceflow"
+import { analyzeLead } from "@/lib/lead-qualification"
 import { sendDM, sendPrivateMessage } from "@/lib/fetch"
 import { client } from "@/lib/prisma"
 import { storeConversationMessage } from "@/actions/chats/queries"
-import { analyzeLead } from "@/lib/lead-qualification"
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
 import { verifyInstagramWebhook } from "@/utils/instagram"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
@@ -5586,48 +6224,19 @@ export async function POST(req: NextRequest) {
       lastMessageLength: userMessage.length,
     })
 
-    // Lead analysis with timeout
-    let leadAnalysisResult = null
-    if (automation.User?.id && senderId !== pageId) {
-      try {
-        console.log("🔍 Starting lead analysis...")
-        const leadAnalysisPromise = analyzeLead({
-          userId: automation.User.id,
-          automationId: automation.id,
-          platformId: pageId,
-          customerId: senderId,
-          message: userMessage,
-          messageType,
-          timestamp: new Date(),
-        })
-
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Lead analysis timeout")), 5000),
-        )
-
-        leadAnalysisResult = await Promise.race([leadAnalysisPromise, timeoutPromise])
-        console.log(`📊 Lead analysis completed`)
-      } catch (error) {
-        console.error("❌ Error analyzing lead (continuing anyway):", error)
-      }
-    }
-
-    console.log("🎯 Lead analysis finished, proceeding to response handling...")
-
-    // 🚀 ENHANCED: Route based on subscription plan with intelligent fallback
+    // 🚀 ENHANCED: Route based on subscription plan with intelligent fallback and data collection
     if (isPROUser) {
-      console.log("🎙️ Using Enhanced Voiceflow for PRO user (with intelligent Gemini fallback)")
-      await handleSuperiorVoiceflowResponse(
+      console.log("🎙️ Using Enhanced Voiceflow with Data Collection for PRO user")
+      await handleEnhancedVoiceflowWithDataCollection(
         data,
         automation,
         conversationUserId,
         userMessage,
-        leadAnalysisResult,
         triggerDecision,
       )
     } else {
       console.log("🔮 Using Enhanced Gemini for non-PRO user")
-      await handleSuperiorGeminiResponse(data, automation, userMessage, triggerDecision)
+      await handleEnhancedGeminiResponse(data, automation, userMessage, triggerDecision)
     }
 
     const processingTime = Date.now() - startTime
@@ -5638,7 +6247,7 @@ export async function POST(req: NextRequest) {
         processingTime,
         triggerType: triggerDecision.triggerType,
         automationId: automation.id,
-        aiSystem: isPROUser ? "enhanced_voiceflow_with_gemini_fallback" : "enhanced_gemini",
+        aiSystem: isPROUser ? "enhanced_voiceflow_with_data_collection" : "enhanced_gemini",
         voiceflowHealth: voiceflowHealth,
       },
       { status: 200 },
@@ -5655,19 +6264,25 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleSuperiorVoiceflowResponse(
+async function handleEnhancedVoiceflowWithDataCollection(
   data: WebhookData,
   automation: any,
   conversationUserId: string,
   userMessage: string,
-  leadAnalysisResult: any,
   triggerDecision: any,
 ) {
-  console.log("🎙️ === SUPERIOR VOICEFLOW HANDLER STARTED ===")
+  console.log("🎙️ === ENHANCED VOICEFLOW WITH DATA COLLECTION STARTED ===")
   const { pageId, senderId, messageType } = data
 
   try {
-    console.log("🎙️ Starting superior Voiceflow processing...")
+    // Check if we've sent too many responses recently (rate limiting)
+    const recentResponseCount = await getRecentResponseCount(pageId, senderId, messageType, 2)
+    if (recentResponseCount >= 3) {
+      console.log(`🚫 Rate limit: ${recentResponseCount} responses sent in last 2 minutes, skipping`)
+      return
+    }
+
+    console.log("🎙️ Starting enhanced Voiceflow processing with data collection...")
 
     const userCreated = await createVoiceflowUser(conversationUserId)
     console.log(`🎙️ User created: ${userCreated}`)
@@ -5690,90 +6305,103 @@ async function handleSuperiorVoiceflowResponse(
       messageHistory: conversationHistory,
     })
 
-    console.log("🎯 Attempting enhanced Voiceflow response...")
-    const voiceflowResult = await getEnhancedVoiceflowResponse(userMessage, conversationUserId, businessVariables, {
-      maxRetries: 3,
-      timeoutMs: 15000,
-      enableFallbackDetection: true,
-    })
+    console.log("🎯 Attempting enhanced Voiceflow response with data collection...")
+    const voiceflowResult = await getEnhancedVoiceflowResponse(userMessage, conversationUserId, businessVariables)
 
     let finalResponse: string
     let finalButtons: any[] | undefined
     let aiSystemUsed: string
-    let typingDelay: number
-    let responseComplexity: "simple" | "medium" | "complex" = "medium"
+    let extractedCustomerData: any = {}
 
     if (voiceflowResult.success && voiceflowResult.response) {
-      console.log("✅ Enhanced Voiceflow response successful")
+      console.log("✅ Enhanced Voiceflow response with data collection successful")
       finalResponse = voiceflowResult.response.text
       finalButtons = voiceflowResult.response.buttons
-      responseComplexity = voiceflowResult.response.complexity || "medium"
       aiSystemUsed = "enhanced_voiceflow"
 
-      // Handle marketing info capture
-      if (
-        voiceflowResult.variables?.clientname ||
-        voiceflowResult.variables?.clientemail ||
-        voiceflowResult.variables?.clientphone
-      ) {
+      // Simple data extraction from Voiceflow variables
+      if (voiceflowResult.success && voiceflowResult.variables) {
+        extractedCustomerData = {
+          name:
+            voiceflowResult.variables.customer_name ||
+            voiceflowResult.variables.clientname ||
+            voiceflowResult.variables.name,
+          email:
+            voiceflowResult.variables.customer_email ||
+            voiceflowResult.variables.clientemail ||
+            voiceflowResult.variables.email,
+          phone:
+            voiceflowResult.variables.customer_phone ||
+            voiceflowResult.variables.clientphone ||
+            voiceflowResult.variables.phone,
+        }
+      }
+
+      // Enhanced lead analysis with collected data
+      let leadAnalysisResult = null
+      if (automation.User?.id && senderId !== pageId) {
+        try {
+          console.log("🔍 Starting enhanced lead analysis with collected data...")
+          leadAnalysisResult = await analyzeLead({
+            userId: automation.User.id,
+            automationId: automation.id,
+            platformId: pageId,
+            customerId: senderId,
+            message: userMessage,
+            messageType,
+            timestamp: new Date(),
+          })
+          console.log(`📊 Enhanced lead analysis completed`)
+        } catch (error) {
+          console.error("❌ Error in enhanced lead analysis (continuing anyway):", error)
+        }
+      }
+
+      // Handle marketing info capture (name, email, phone only)
+      if (extractedCustomerData.name || extractedCustomerData.email || extractedCustomerData.phone) {
         try {
           const automationUserId = automation?.User?.id
 
           if (automationUserId) {
+            // Create marketing info without metadata field (it doesn't exist in the schema)
             await client.marketingInfo.create({
               data: {
-                name: voiceflowResult.variables.clientname || voiceflowResult.variables.name,
-                email: voiceflowResult.variables.clientemail || voiceflowResult.variables.email,
-                phone: voiceflowResult.variables.clientphone || voiceflowResult.variables.phone,
+                name: extractedCustomerData.name,
+                email: extractedCustomerData.email,
+                phone: extractedCustomerData.phone,
                 userId: automationUserId,
               },
             })
 
             if (leadAnalysisResult?.lead?.id) {
-              const existingLead = await client.lead.findUnique({
-                where: { id: leadAnalysisResult.lead.id },
-                select: { metadata: true },
-              })
-
-              const currentMetadata = (existingLead?.metadata as Record<string, any>) || {}
-
               await client.lead.update({
                 where: { id: leadAnalysisResult.lead.id },
                 data: {
-                  name: voiceflowResult.variables.clientname || voiceflowResult.variables.name,
-                  email: voiceflowResult.variables.clientemail || voiceflowResult.variables.email,
-                  phone: voiceflowResult.variables.clientphone || voiceflowResult.variables.phone,
+                  name: extractedCustomerData.name,
+                  email: extractedCustomerData.email,
+                  phone: extractedCustomerData.phone,
                   metadata: {
-                    ...currentMetadata,
-                    marketingInfoCaptured: true,
-                    lastMarketingUpdate: new Date().toISOString(),
-                    voiceflowHealthScore: voiceflowResult.healthScore,
+                    basicDataCollection: {
+                      name: extractedCustomerData.name,
+                      email: extractedCustomerData.email,
+                      phone: extractedCustomerData.phone,
+                      lastDataUpdate: new Date().toISOString(),
+                    },
                   },
                 },
               })
             }
 
-            console.log("📝 Marketing info stored successfully")
+            console.log("📝 Basic marketing info stored successfully")
           }
         } catch (error) {
-          console.error("❌ Error storing marketing info:", error)
+          console.error("❌ Error storing basic marketing info:", error)
         }
       }
-
-      // Handle human handoff if required
-      if (voiceflowResult.response.requiresHumanHandoff) {
-        console.log("🤝 Human handoff required, updating conversation state...")
-        await updateConversationState(conversationUserId, {
-          isInHandoff: true,
-          handoffReason: "Voiceflow requested human handoff",
-        })
-      }
     } else {
-      console.log(
-        `🔄 Voiceflow failed (${voiceflowResult.fallbackReason}), falling back to superior Gemini for PRO user`,
-      )
+      console.log(`🔄 Voiceflow failed, falling back to enhanced Gemini for PRO user`)
 
-      // Superior Gemini fallback for PRO users
+      // Enhanced Gemini fallback for PRO users with collected data context
       finalResponse = await generateGeminiResponse({
         userMessage,
         businessProfile: profileContent,
@@ -5785,22 +6413,20 @@ async function handleSuperiorVoiceflowResponse(
       })
 
       finalButtons = undefined
-      aiSystemUsed = "superior_gemini_pro_fallback"
-      responseComplexity = "complex" // PRO users get complex responses
+      aiSystemUsed = "enhanced_gemini_pro_fallback_with_data"
 
-      console.log("✅ Superior Gemini fallback response generated for PRO user")
+      console.log("✅ Enhanced Gemini fallback response generated for PRO user with data context")
     }
 
-    // Calculate intelligent typing delay
-    typingDelay = calculateTypingDelay(finalResponse.length, {
-      isPROUser: true,
-      messageComplexity: responseComplexity,
-      includeThinkingTime: true,
-      baseWPM: 50, // Slightly faster for PRO users
-    })
+    // 🚫 CHECK FOR DUPLICATE RESPONSE BEFORE SENDING
+    const isDuplicate = await checkDuplicateResponse(pageId, senderId, finalResponse, messageType)
+    if (isDuplicate) {
+      console.log("🚫 Duplicate response detected, skipping send")
+      return
+    }
 
     console.log(
-      `💬 Final response (${aiSystemUsed}): "${finalResponse.substring(0, 100)}..." (${finalResponse.length} chars, ${Math.round(typingDelay / 1000)}s delay)`,
+      `💬 Final response (${aiSystemUsed}): "${finalResponse.substring(0, 100)}..." (${finalResponse.length} chars)`,
     )
 
     // Store conversation messages
@@ -5810,22 +6436,19 @@ async function handleSuperiorVoiceflowResponse(
     }
     await storeConversationMessage(pageId, "bot", finalResponse, true, automation?.id || null)
 
-    // Add natural typing delay for PRO users
-    if (typingDelay > 1000) {
-      console.log(`⏳ Adding natural typing delay: ${Math.round(typingDelay / 1000)}s`)
-      await new Promise((resolve) => setTimeout(resolve, typingDelay))
-    }
-
-    // Send response
+    // Send response immediately (no typing delay)
     const instagramButtons = transformButtonsToInstagram(finalButtons)
     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
 
     if (messageType === "DM") {
-      console.log("📤 Sending superior DM response...")
+      console.log("📤 Sending enhanced DM response...")
       const direct_message = await sendDM(pageId, senderId, finalResponse, token, instagramButtons)
 
       if (direct_message.status === 200) {
-        console.log("✅ Superior DM sent successfully")
+        console.log("✅ Enhanced DM sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
+
         if (automation) {
           await trackResponses(automation.id, "DM")
         }
@@ -5835,11 +6458,14 @@ async function handleSuperiorVoiceflowResponse(
         console.error("❌ Failed to send DM:", direct_message)
       }
     } else if (messageType === "COMMENT" && data.commentId) {
-      console.log("📤 Sending superior comment response...")
+      console.log("📤 Sending enhanced comment response...")
       const comment = await sendPrivateMessage(pageId, data.commentId, finalResponse, token, instagramButtons)
 
       if (comment.status === 200) {
-        console.log("✅ Superior comment response sent successfully")
+        console.log("✅ Enhanced comment response sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
+
         if (automation) {
           await trackResponses(automation.id, "COMMENT")
         }
@@ -5848,33 +6474,40 @@ async function handleSuperiorVoiceflowResponse(
       }
     }
   } catch (error) {
-    console.error("💥 Error in superior Voiceflow processing:", error)
+    console.error("💥 Error in enhanced Voiceflow processing with data collection:", error)
 
-    // Final fallback to superior Gemini
-    console.log("🔄 Final fallback to superior Gemini due to error...")
-    await handleSuperiorGeminiResponse(data, automation, userMessage, triggerDecision, true)
+    // Final fallback to enhanced Gemini
+    console.log("🔄 Final fallback to enhanced Gemini due to error...")
+    await handleEnhancedGeminiResponse(data, automation, userMessage, triggerDecision, true)
   }
 }
 
-async function handleSuperiorGeminiResponse(
+async function handleEnhancedGeminiResponse(
   data: WebhookData,
   automation: any,
   userMessage: string,
   triggerDecision: any,
   isErrorFallback = false,
 ) {
-  console.log("🔮 === SUPERIOR GEMINI HANDLER STARTED ===")
+  console.log("🔮 === ENHANCED GEMINI HANDLER STARTED ===")
   const { pageId, senderId, messageType } = data
 
   try {
+    // Check if we've sent too many responses recently (rate limiting)
+    const recentResponseCount = await getRecentResponseCount(pageId, senderId, messageType, 2)
+    if (recentResponseCount >= 3) {
+      console.log(`🚫 Rate limit: ${recentResponseCount} responses sent in last 2 minutes, skipping`)
+      return
+    }
+
     // Get business profile and conversation context
     const { profileContent, businessContext } = await getBusinessProfileForAutomation(automation.id)
     const conversationHistory = await buildConversationContext(pageId, senderId, automation.id)
-    console.log("📋 Business profile and conversation context loaded for superior Gemini")
+    console.log("📋 Business profile and conversation context loaded for enhanced Gemini")
 
     const isPROUser = automation.User?.subscription?.plan === "PRO"
 
-    console.log("🔮 Generating superior Gemini response...")
+    console.log("🔮 Generating enhanced Gemini response...")
     const geminiResponse = await generateGeminiResponse({
       userMessage,
       businessProfile: profileContent,
@@ -5884,15 +6517,15 @@ async function handleSuperiorGeminiResponse(
       isVoiceflowFallback: isErrorFallback,
     })
 
-    // Calculate intelligent typing delay
-    const typingDelay = calculateTypingDelay(geminiResponse.length, {
-      isPROUser,
-      messageComplexity: isPROUser ? "complex" : "medium",
-      includeThinkingTime: true,
-    })
+    // 🚫 CHECK FOR DUPLICATE RESPONSE BEFORE SENDING
+    const isDuplicate = await checkDuplicateResponse(pageId, senderId, geminiResponse, messageType)
+    if (isDuplicate) {
+      console.log("🚫 Duplicate response detected, skipping send")
+      return
+    }
 
     console.log(
-      `💬 Superior Gemini response: "${geminiResponse.substring(0, 100)}..." (${geminiResponse.length} chars, ${Math.round(typingDelay / 1000)}s delay)`,
+      `💬 Enhanced Gemini response: "${geminiResponse.substring(0, 100)}..." (${geminiResponse.length} chars)`,
     )
 
     // Store conversation messages
@@ -5902,21 +6535,18 @@ async function handleSuperiorGeminiResponse(
     }
     await storeConversationMessage(pageId, "bot", geminiResponse, true, automation?.id || null)
 
-    // Add natural typing delay
-    if (typingDelay > 1000) {
-      console.log(`⏳ Adding natural typing delay: ${Math.round(typingDelay / 1000)}s`)
-      await new Promise((resolve) => setTimeout(resolve, typingDelay))
-    }
-
-    // Send response
+    // Send response immediately (no typing delay)
     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
 
     if (messageType === "DM") {
-      console.log("📤 Sending superior DM response...")
+      console.log("📤 Sending enhanced DM response...")
       const direct_message = await sendDM(pageId, senderId, geminiResponse, token)
 
       if (direct_message.status === 200) {
-        console.log("✅ Superior DM sent successfully")
+        console.log("✅ Enhanced DM sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, geminiResponse, messageType, automation.id)
+
         if (automation) {
           await trackResponses(automation.id, "DM")
         }
@@ -5926,11 +6556,14 @@ async function handleSuperiorGeminiResponse(
         console.error("❌ Failed to send DM:", direct_message)
       }
     } else if (messageType === "COMMENT" && data.commentId) {
-      console.log("📤 Sending superior comment response...")
+      console.log("📤 Sending enhanced comment response...")
       const comment = await sendPrivateMessage(pageId, data.commentId, geminiResponse, token)
 
       if (comment.status === 200) {
-        console.log("✅ Superior comment response sent successfully")
+        console.log("✅ Enhanced comment response sent successfully")
+        // Mark response as sent to prevent duplicates
+        await markResponseAsSent(pageId, senderId, geminiResponse, messageType, automation.id)
+
         if (automation) {
           await trackResponses(automation.id, "COMMENT")
         }
@@ -5939,17 +6572,32 @@ async function handleSuperiorGeminiResponse(
       }
     }
   } catch (error) {
-    console.error("💥 Error in superior Gemini processing:", error)
-    const fallbackText =
-      "Thanks for your message! I'm here to help. Let me get back to you with the right information. 😊"
+    console.error("💥 Error in enhanced Gemini processing:", error)
 
-    console.log("🔄 Sending final fallback response...")
-    const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+    // Only send fallback if we haven't sent any responses recently
+    const recentCount = await getRecentResponseCount(pageId, senderId, messageType, 1)
+    if (recentCount === 0) {
+      const fallbackText =
+        "Thanks for your message! I'm here to help. Let me get back to you with the right information. 😊"
 
-    if (messageType === "DM") {
-      await sendDM(pageId, senderId, fallbackText, token)
-    } else if (messageType === "COMMENT" && data.commentId) {
-      await sendPrivateMessage(pageId, data.commentId, fallbackText, token)
+      // Check if this fallback would be a duplicate
+      const isFallbackDuplicate = await checkDuplicateResponse(pageId, senderId, fallbackText, messageType)
+      if (!isFallbackDuplicate) {
+        console.log("🔄 Sending final fallback response...")
+        const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+        if (messageType === "DM") {
+          const result = await sendDM(pageId, senderId, fallbackText, token)
+          if (result.status === 200) {
+            await markResponseAsSent(pageId, senderId, fallbackText, messageType, automation.id)
+          }
+        } else if (messageType === "COMMENT" && data.commentId) {
+          const result = await sendPrivateMessage(pageId, data.commentId, fallbackText, token)
+          if (result.status === 200) {
+            await markResponseAsSent(pageId, senderId, fallbackText, messageType, automation.id)
+          }
+        }
+      }
     }
   }
 }

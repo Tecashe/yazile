@@ -2472,6 +2472,551 @@
 // }
 
 
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { motion, AnimatePresence } from "framer-motion"
+// import { useRouter } from "next/navigation"
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent } from "@/components/ui/card"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Badge } from "@/components/ui/badge"
+// import { Progress } from "@/components/ui/progress"
+// import { toast } from "@/hooks/use-toast"
+// import { Star, ChevronRight, Loader2, Check, Building2 } from "lucide-react"
+
+// import { initializeOnboarding, updateOnboardingStep, completeOnboarding, setThisUserType } from "@/actions/onboarding"
+
+// // Simplified categories for quick selection
+// const quickCategories = [
+//   { name: "Fashion", icon: "👗", color: "bg-pink-100" },
+//   { name: "Food", icon: "🍕", color: "bg-yellow-100" },
+//   { name: "Tech", icon: "📱", color: "bg-blue-100" },
+//   { name: "Fitness", icon: "💪", color: "bg-green-100" },
+//   { name: "Travel", icon: "✈️", color: "bg-purple-100" },
+//   { name: "Business", icon: "💼", color: "bg-gray-100" },
+// ]
+
+// // Business types for quick setup
+// const businessTypes = [
+//   { name: "E-commerce", icon: "🛍️", description: "Online store or retail" },
+//   { name: "Restaurant", icon: "🍽️", description: "Food & beverage business" },
+//   { name: "Service", icon: "🔧", description: "Professional services" },
+//   { name: "SaaS", icon: "💻", description: "Software as a service" },
+//   { name: "Agency", icon: "🎯", description: "Marketing or creative agency" },
+//   { name: "Other", icon: "📋", description: "Something else" },
+// ]
+
+// export default function SimplifiedOnboardingPage() {
+//   const router = useRouter()
+//   const [step, setStep] = useState(0)
+//   const [userType, setUserType] = useState<"regular" | "influencer" | null>(null)
+//   const [isLoading, setIsLoading] = useState(false)
+//   const [progress, setProgress] = useState(0)
+
+//   // Form data
+//   const [formData, setFormData] = useState({
+//     profileImage: "",
+//     businessName: "",
+//     businessType: "",
+//     instagramHandle: "",
+//     email: "",
+//     phone: "",
+//     categories: [] as string[],
+//     goals: "",
+//     monthlyGoal: 5000,
+//   })
+
+//   // Calculate total steps based on user type
+//   const totalSteps = userType === "influencer" ? 4 : 4 // Simplified to 4 steps for both
+
+//   // Update progress
+//   useEffect(() => {
+//     setProgress(((step + 1) / totalSteps) * 100)
+//   }, [step, totalSteps])
+
+//   // Handle user type selection and initialize onboarding
+//   const selectUserType = async (type: "regular" | "influencer") => {
+//     setIsLoading(true)
+//     try {
+//       setUserType(type)
+//       await setThisUserType(type)
+//       await initializeOnboarding(type, totalSteps)
+
+//       // Trigger n8n workflow for onboarding start
+//       await fetch("/api/n8n/onboarding-start", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           userType: type,
+//           timestamp: new Date().toISOString(),
+//           step: "user_type_selected",
+//         }),
+//       })
+
+//       setStep(1)
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: "Failed to initialize onboarding",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   // Handle next step
+//   const nextStep = async () => {
+//     setIsLoading(true)
+//     try {
+//       // Save current step data
+//       await updateOnboardingStep(step, "COMPLETED", formData)
+
+//       // Trigger n8n workflow for step completion
+//       await fetch("/api/n8n/onboarding-step", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           userType,
+//           step,
+//           data: formData,
+//           timestamp: new Date().toISOString(),
+//         }),
+//       })
+
+//       if (step < totalSteps - 1) {
+//         setStep(step + 1)
+//       } else {
+//         await completeOnboarding()
+
+//         // Final n8n trigger for completion
+//         await fetch("/api/n8n/onboarding-complete", {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({
+//             userType,
+//             finalData: formData,
+//             timestamp: new Date().toISOString(),
+//           }),
+//         })
+
+//         toast({
+//           title: "Welcome aboard! 🎉",
+//           description: "Your account is ready to go!",
+//         })
+
+//         // Redirect based on user type
+//         setTimeout(() => {
+//           router.push(userType === "influencer" ? "/influencers" : "/dashboard")
+//         }, 1500)
+//       }
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: "Something went wrong. Please try again.",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   // Handle form data updates
+//   const updateFormData = (key: string, value: any) => {
+//     setFormData((prev) => ({ ...prev, [key]: value }))
+//   }
+
+//   // Handle category toggle
+//   const toggleCategory = (category: string) => {
+//     const newCategories = formData.categories.includes(category)
+//       ? formData.categories.filter((c) => c !== category)
+//       : [...formData.categories, category].slice(0, 3) // Max 3 categories
+
+//     updateFormData("categories", newCategories)
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+//       <Card className="w-full max-w-lg shadow-xl border-0">
+//         <CardContent className="p-0">
+//           {/* Header */}
+//           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <h1 className="text-2xl font-bold">Welcome to Yazzil</h1>
+//                 <p className="text-blue-100">Let&apos;s get you started in 2 minutes</p>
+//               </div>
+//               <div className="text-right">
+//                 <div className="text-sm opacity-90">
+//                   Step {step + 1} of {totalSteps}
+//                 </div>
+//                 <div className="text-xs opacity-75">{Math.round(progress)}% complete</div>
+//               </div>
+//             </div>
+
+//             <div className="mt-4">
+//               <Progress value={progress} className="h-2 bg-blue-500/30" />
+//             </div>
+//           </div>
+
+//           {/* Content */}
+//           <div className="p-6 min-h-[400px]">
+//             <AnimatePresence mode="wait">
+//               {/* Step 0: User Type Selection */}
+//               {step === 0 && (
+//                 <motion.div
+//                   key="step0"
+//                   initial={{ opacity: 0, y: 20 }}
+//                   animate={{ opacity: 1, y: 0 }}
+//                   exit={{ opacity: 0, y: -20 }}
+//                   className="space-y-6"
+//                 >
+//                   <div className="text-center">
+//                     <h2 className="text-xl font-semibold mb-2">What brings you here?</h2>
+//                     <p className="text-gray-600">Choose the option that best describes you</p>
+//                   </div>
+
+//                   <div className="space-y-4">
+//                     <motion.button
+//                       whileHover={{ scale: 1.02 }}
+//                       whileTap={{ scale: 0.98 }}
+//                       onClick={() => selectUserType("regular")}
+//                       disabled={isLoading}
+//                       className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+//                     >
+//                       <div className="flex items-center gap-4">
+//                         <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+//                           <Building2 className="h-6 w-6 text-blue-600" />
+//                         </div>
+//                         <div className="flex-1">
+//                           <h3 className="font-semibold">Business Owner</h3>
+//                           <p className="text-sm text-gray-600">
+//                             I want to grow my business and automate customer interactions
+//                           </p>
+//                         </div>
+//                         <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+//                       </div>
+//                     </motion.button>
+
+//                     <motion.button
+//                       whileHover={{ scale: 1.02 }}
+//                       whileTap={{ scale: 0.98 }}
+//                       onClick={() => selectUserType("influencer")}
+//                       disabled={isLoading}
+//                       className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left group"
+//                     >
+//                       <div className="flex items-center gap-4">
+//                         <div className="p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 transition-colors">
+//                           <Star className="h-6 w-6 text-purple-600" />
+//                         </div>
+//                         <div className="flex-1">
+//                           <h3 className="font-semibold">Content Creator</h3>
+//                           <p className="text-sm text-gray-600">
+//                             I&apos;m an influencer looking to monetize and manage collaborations
+//                           </p>
+//                         </div>
+//                         <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600" />
+//                       </div>
+//                     </motion.button>
+//                   </div>
+
+//                   {isLoading && (
+//                     <div className="flex items-center justify-center py-4">
+//                       <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+//                       <span className="ml-2 text-sm text-gray-600">Setting up your account...</span>
+//                     </div>
+//                   )}
+//                 </motion.div>
+//               )}
+
+//               {/* Step 1: Basic Info */}
+//               {step === 1 && (
+//                 <motion.div
+//                   key="step1"
+//                   initial={{ opacity: 0, y: 20 }}
+//                   animate={{ opacity: 1, y: 0 }}
+//                   exit={{ opacity: 0, y: -20 }}
+//                   className="space-y-6"
+//                 >
+//                   <div className="text-center">
+//                     <h2 className="text-xl font-semibold mb-2">
+//                       {userType === "influencer" ? "Your Creator Profile" : "Your Business Info"}
+//                     </h2>
+//                     <p className="text-gray-600">Tell us a bit about yourself</p>
+//                   </div>
+
+//                   <div className="space-y-4">
+//                     {userType === "regular" && (
+//                       <>
+//                         <div>
+//                           <Label htmlFor="businessName">Business Name</Label>
+//                           <Input
+//                             id="businessName"
+//                             placeholder="Enter your business name"
+//                             value={formData.businessName}
+//                             onChange={(e) => updateFormData("businessName", e.target.value)}
+//                           />
+//                         </div>
+
+//                         <div>
+//                           <Label>Business Type</Label>
+//                           <div className="grid grid-cols-2 gap-2 mt-2">
+//                             {businessTypes.map((type) => (
+//                               <button
+//                                 key={type.name}
+//                                 onClick={() => updateFormData("businessType", type.name)}
+//                                 className={`p-3 border rounded-lg text-left transition-all ${
+//                                   formData.businessType === type.name
+//                                     ? "border-blue-500 bg-blue-50"
+//                                     : "border-gray-200 hover:border-gray-300"
+//                                 }`}
+//                               >
+//                                 <div className="flex items-center gap-2">
+//                                   <span className="text-lg">{type.icon}</span>
+//                                   <div>
+//                                     <div className="font-medium text-sm">{type.name}</div>
+//                                     <div className="text-xs text-gray-500">{type.description}</div>
+//                                   </div>
+//                                 </div>
+//                               </button>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </>
+//                     )}
+
+//                     <div>
+//                       <Label htmlFor="instagram">Instagram Handle</Label>
+//                       <div className="relative">
+//                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
+//                         <Input
+//                           id="instagram"
+//                           placeholder="yourusername"
+//                           className="pl-8"
+//                           value={formData.instagramHandle}
+//                           onChange={(e) => updateFormData("instagramHandle", e.target.value)}
+//                         />
+//                       </div>
+//                     </div>
+
+//                     <div>
+//                       <Label htmlFor="email">Email Address</Label>
+//                       <Input
+//                         id="email"
+//                         type="email"
+//                         placeholder="your@email.com"
+//                         value={formData.email}
+//                         onChange={(e) => updateFormData("email", e.target.value)}
+//                       />
+//                     </div>
+//                   </div>
+
+//                   <Button
+//                     onClick={nextStep}
+//                     className="w-full"
+//                     disabled={isLoading || !formData.email || !formData.instagramHandle}
+//                   >
+//                     {isLoading ? (
+//                       <>
+//                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                         Saving...
+//                       </>
+//                     ) : (
+//                       "Continue"
+//                     )}
+//                   </Button>
+//                 </motion.div>
+//               )}
+
+//               {/* Step 2: Categories & Interests */}
+//               {step === 2 && (
+//                 <motion.div
+//                   key="step2"
+//                   initial={{ opacity: 0, y: 20 }}
+//                   animate={{ opacity: 1, y: 0 }}
+//                   exit={{ opacity: 0, y: -20 }}
+//                   className="space-y-6"
+//                 >
+//                   <div className="text-center">
+//                     <h2 className="text-xl font-semibold mb-2">
+//                       {userType === "influencer" ? "Your Content Niche" : "Your Industry"}
+//                     </h2>
+//                     <p className="text-gray-600">Select up to 3 categories that best describe you</p>
+//                   </div>
+
+//                   <div className="grid grid-cols-2 gap-3">
+//                     {quickCategories.map((category) => (
+//                       <motion.button
+//                         key={category.name}
+//                         whileHover={{ scale: 1.05 }}
+//                         whileTap={{ scale: 0.95 }}
+//                         onClick={() => toggleCategory(category.name)}
+//                         className={`p-4 rounded-lg border-2 transition-all ${
+//                           formData.categories.includes(category.name)
+//                             ? "border-blue-500 bg-blue-50"
+//                             : "border-gray-200 hover:border-gray-300"
+//                         }`}
+//                       >
+//                         <div
+//                           className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center mx-auto mb-2`}
+//                         >
+//                           <span className="text-xl">{category.icon}</span>
+//                         </div>
+//                         <div className="font-medium text-sm">{category.name}</div>
+//                       </motion.button>
+//                     ))}
+//                   </div>
+
+//                   <div className="text-center">
+//                     <Badge variant="outline">{formData.categories.length}/3 selected</Badge>
+//                   </div>
+
+//                   <Button
+//                     onClick={nextStep}
+//                     className="w-full"
+//                     disabled={isLoading || formData.categories.length === 0}
+//                   >
+//                     {isLoading ? (
+//                       <>
+//                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                         Saving...
+//                       </>
+//                     ) : (
+//                       "Continue"
+//                     )}
+//                   </Button>
+//                 </motion.div>
+//               )}
+
+//               {/* Step 3: Goals & Expectations */}
+//               {step === 3 && (
+//                 <motion.div
+//                   key="step3"
+//                   initial={{ opacity: 0, y: 20 }}
+//                   animate={{ opacity: 1, y: 0 }}
+//                   exit={{ opacity: 0, y: -20 }}
+//                   className="space-y-6"
+//                 >
+//                   <div className="text-center">
+//                     <h2 className="text-xl font-semibold mb-2">Your Goals</h2>
+//                     <p className="text-gray-600">
+//                       {userType === "influencer"
+//                         ? "What do you want to achieve as a creator?"
+//                         : "What do you want to achieve with your business?"}
+//                     </p>
+//                   </div>
+
+//                   <div className="space-y-4">
+//                     <div>
+//                       <Label htmlFor="goals">Tell us about your main goals</Label>
+//                       <Textarea
+//                         id="goals"
+//                         placeholder={
+//                           userType === "influencer"
+//                             ? "I want to grow my following, work with brands, and monetize my content..."
+//                             : "I want to automate customer service, increase sales, and grow my online presence..."
+//                         }
+//                         value={formData.goals}
+//                         onChange={(e) => updateFormData("goals", e.target.value)}
+//                         className="min-h-[100px]"
+//                       />
+//                     </div>
+
+//                     <div>
+//                       <Label>Monthly Revenue Goal</Label>
+//                       <div className="mt-2">
+//                         <div className="flex items-center gap-4">
+//                           <span className="text-2xl font-bold text-green-600">
+//                             ${formData.monthlyGoal.toLocaleString()}
+//                           </span>
+//                           <span className="text-sm text-gray-500">per month</span>
+//                         </div>
+//                         <input
+//                           type="range"
+//                           min="1000"
+//                           max="50000"
+//                           step="1000"
+//                           value={formData.monthlyGoal}
+//                           onChange={(e) => updateFormData("monthlyGoal", Number.parseInt(e.target.value))}
+//                           className="w-full mt-2"
+//                         />
+//                         <div className="flex justify-between text-xs text-gray-500 mt-1">
+//                           <span>$1K</span>
+//                           <span>$50K+</span>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <Button onClick={nextStep} className="w-full" disabled={isLoading || !formData.goals.trim()}>
+//                     {isLoading ? (
+//                       <>
+//                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                         Completing Setup...
+//                       </>
+//                     ) : (
+//                       "Complete Setup"
+//                     )}
+//                   </Button>
+//                 </motion.div>
+//               )}
+
+//               {/* Final Step: Success */}
+//               {step === totalSteps && (
+//                 <motion.div
+//                   key="success"
+//                   initial={{ opacity: 0, scale: 0.9 }}
+//                   animate={{ opacity: 1, scale: 1 }}
+//                   className="text-center space-y-6 py-8"
+//                 >
+//                   <motion.div
+//                     initial={{ scale: 0 }}
+//                     animate={{ scale: 1 }}
+//                     transition={{ delay: 0.2, type: "spring" }}
+//                     className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto"
+//                   >
+//                     <Check className="h-10 w-10 text-green-600" />
+//                   </motion.div>
+
+//                   <div>
+//                     <h2 className="text-2xl font-bold text-gray-900 mb-2">You&apos;re all set! 🎉</h2>
+//                     <p className="text-gray-600">
+//                       Welcome to Yazzil! Your {userType === "influencer" ? "creator" : "business"} dashboard is ready.
+//                     </p>
+//                   </div>
+
+//                   <div className="bg-gray-50 rounded-lg p-4">
+//                     <h3 className="font-semibold mb-2">What&apos;s next?</h3>
+//                     <ul className="text-sm text-gray-600 space-y-1">
+//                       {userType === "influencer" ? (
+//                         <>
+//                           <li>• Set up your creator profile</li>
+//                           <li>• Browse collaboration opportunities</li>
+//                           <li>• Connect with brands</li>
+//                         </>
+//                       ) : (
+//                         <>
+//                           <li>• Set up your first automation</li>
+//                           <li>• Connect your Instagram account</li>
+//                           <li>• Start engaging with customers</li>
+//                         </>
+//                       )}
+//                     </ul>
+//                   </div>
+//                 </motion.div>
+//               )}
+//             </AnimatePresence>
+//           </div>
+//         </CardContent>
+//       </Card>
+//     </div>
+//   )
+// }
+
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -2485,18 +3030,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "@/hooks/use-toast"
-import { Star, ChevronRight, Loader2, Check, Building2 } from "lucide-react"
+import { Star, ChevronRight, Loader2, Check, Building2, Sparkles } from "lucide-react"
 
 import { initializeOnboarding, updateOnboardingStep, completeOnboarding, setThisUserType } from "@/actions/onboarding"
 
 // Simplified categories for quick selection
 const quickCategories = [
-  { name: "Fashion", icon: "👗", color: "bg-pink-100" },
-  { name: "Food", icon: "🍕", color: "bg-yellow-100" },
-  { name: "Tech", icon: "📱", color: "bg-blue-100" },
-  { name: "Fitness", icon: "💪", color: "bg-green-100" },
-  { name: "Travel", icon: "✈️", color: "bg-purple-100" },
-  { name: "Business", icon: "💼", color: "bg-gray-100" },
+  { name: "Fashion", icon: "👗", color: "bg-pink-500/10 border-pink-500/20" },
+  { name: "Food", icon: "🍕", color: "bg-yellow-500/10 border-yellow-500/20" },
+  { name: "Tech", icon: "📱", color: "bg-blue-500/10 border-blue-500/20" },
+  { name: "Fitness", icon: "💪", color: "bg-green-500/10 border-green-500/20" },
+  { name: "Travel", icon: "✈️", color: "bg-purple-500/10 border-purple-500/20" },
+  { name: "Business", icon: "💼", color: "bg-gray-500/10 border-gray-500/20" },
 ]
 
 // Business types for quick setup
@@ -2639,14 +3184,17 @@ export default function SimplifiedOnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg shadow-xl border-0">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg shadow-2xl border border-border/50 bg-card/50 backdrop-blur-xl">
         <CardContent className="p-0">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-xl">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold">Welcome to Yazzil</h1>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-6 w-6" />
+                  Welcome to Yazzil
+                </h1>
                 <p className="text-blue-100">Let&apos;s get you started in 2 minutes</p>
               </div>
               <div className="text-right">
@@ -2675,8 +3223,8 @@ export default function SimplifiedOnboardingPage() {
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <h2 className="text-xl font-semibold mb-2">What brings you here?</h2>
-                    <p className="text-gray-600">Choose the option that best describes you</p>
+                    <h2 className="text-xl font-semibold mb-2 text-foreground">What brings you here?</h2>
+                    <p className="text-muted-foreground">Choose the option that best describes you</p>
                   </div>
 
                   <div className="space-y-4">
@@ -2685,19 +3233,19 @@ export default function SimplifiedOnboardingPage() {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => selectUserType("regular")}
                       disabled={isLoading}
-                      className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                      className="w-full p-4 border-2 border-border rounded-lg hover:border-blue-500 hover:bg-blue-500/5 transition-all text-left group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+                        <div className="p-3 bg-blue-500/10 rounded-full group-hover:bg-blue-500/20 transition-colors">
                           <Building2 className="h-6 w-6 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold">Business Owner</h3>
-                          <p className="text-sm text-gray-600">
+                          <h3 className="font-semibold text-foreground">Business Owner</h3>
+                          <p className="text-sm text-muted-foreground">
                             I want to grow my business and automate customer interactions
                           </p>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-blue-600" />
                       </div>
                     </motion.button>
 
@@ -2706,27 +3254,27 @@ export default function SimplifiedOnboardingPage() {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => selectUserType("influencer")}
                       disabled={isLoading}
-                      className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left group"
+                      className="w-full p-4 border-2 border-border rounded-lg hover:border-purple-500 hover:bg-purple-500/5 transition-all text-left group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 transition-colors">
+                        <div className="p-3 bg-purple-500/10 rounded-full group-hover:bg-purple-500/20 transition-colors">
                           <Star className="h-6 w-6 text-purple-600" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold">Content Creator</h3>
-                          <p className="text-sm text-gray-600">
+                          <h3 className="font-semibold text-foreground">Content Creator</h3>
+                          <p className="text-sm text-muted-foreground">
                             I&apos;m an influencer looking to monetize and manage collaborations
                           </p>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-purple-600" />
                       </div>
                     </motion.button>
                   </div>
 
                   {isLoading && (
                     <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                      <span className="ml-2 text-sm text-gray-600">Setting up your account...</span>
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      <span className="ml-2 text-sm text-muted-foreground">Setting up your account...</span>
                     </div>
                   )}
                 </motion.div>
@@ -2742,27 +3290,30 @@ export default function SimplifiedOnboardingPage() {
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <h2 className="text-xl font-semibold mb-2">
+                    <h2 className="text-xl font-semibold mb-2 text-foreground">
                       {userType === "influencer" ? "Your Creator Profile" : "Your Business Info"}
                     </h2>
-                    <p className="text-gray-600">Tell us a bit about yourself</p>
+                    <p className="text-muted-foreground">Tell us a bit about yourself</p>
                   </div>
 
                   <div className="space-y-4">
                     {userType === "regular" && (
                       <>
                         <div>
-                          <Label htmlFor="businessName">Business Name</Label>
+                          <Label htmlFor="businessName" className="text-foreground">
+                            Business Name
+                          </Label>
                           <Input
                             id="businessName"
                             placeholder="Enter your business name"
                             value={formData.businessName}
                             onChange={(e) => updateFormData("businessName", e.target.value)}
+                            className="bg-background/50 border-border focus:border-primary"
                           />
                         </div>
 
                         <div>
-                          <Label>Business Type</Label>
+                          <Label className="text-foreground">Business Type</Label>
                           <div className="grid grid-cols-2 gap-2 mt-2">
                             {businessTypes.map((type) => (
                               <button
@@ -2770,15 +3321,15 @@ export default function SimplifiedOnboardingPage() {
                                 onClick={() => updateFormData("businessType", type.name)}
                                 className={`p-3 border rounded-lg text-left transition-all ${
                                   formData.businessType === type.name
-                                    ? "border-blue-500 bg-blue-50"
-                                    : "border-gray-200 hover:border-gray-300"
+                                    ? "border-blue-500 bg-blue-500/10"
+                                    : "border-border hover:border-border/80"
                                 }`}
                               >
                                 <div className="flex items-center gap-2">
                                   <span className="text-lg">{type.icon}</span>
                                   <div>
-                                    <div className="font-medium text-sm">{type.name}</div>
-                                    <div className="text-xs text-gray-500">{type.description}</div>
+                                    <div className="font-medium text-sm text-foreground">{type.name}</div>
+                                    <div className="text-xs text-muted-foreground">{type.description}</div>
                                   </div>
                                 </div>
                               </button>
@@ -2789,13 +3340,17 @@ export default function SimplifiedOnboardingPage() {
                     )}
 
                     <div>
-                      <Label htmlFor="instagram">Instagram Handle</Label>
+                      <Label htmlFor="instagram" className="text-foreground">
+                        Instagram Handle
+                      </Label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                          @
+                        </span>
                         <Input
                           id="instagram"
                           placeholder="yourusername"
-                          className="pl-8"
+                          className="pl-8 bg-background/50 border-border focus:border-primary"
                           value={formData.instagramHandle}
                           onChange={(e) => updateFormData("instagramHandle", e.target.value)}
                         />
@@ -2803,20 +3358,23 @@ export default function SimplifiedOnboardingPage() {
                     </div>
 
                     <div>
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email" className="text-foreground">
+                        Email Address
+                      </Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="your@email.com"
                         value={formData.email}
                         onChange={(e) => updateFormData("email", e.target.value)}
+                        className="bg-background/50 border-border focus:border-primary"
                       />
                     </div>
                   </div>
 
                   <Button
                     onClick={nextStep}
-                    className="w-full"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     disabled={isLoading || !formData.email || !formData.instagramHandle}
                   >
                     {isLoading ? (
@@ -2841,10 +3399,10 @@ export default function SimplifiedOnboardingPage() {
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <h2 className="text-xl font-semibold mb-2">
+                    <h2 className="text-xl font-semibold mb-2 text-foreground">
                       {userType === "influencer" ? "Your Content Niche" : "Your Industry"}
                     </h2>
-                    <p className="text-gray-600">Select up to 3 categories that best describe you</p>
+                    <p className="text-muted-foreground">Select up to 3 categories that best describe you</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -2856,27 +3414,29 @@ export default function SimplifiedOnboardingPage() {
                         onClick={() => toggleCategory(category.name)}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           formData.categories.includes(category.name)
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-gray-300"
+                            ? "border-blue-500 bg-blue-500/10"
+                            : "border-border hover:border-border/80"
                         }`}
                       >
                         <div
-                          className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center mx-auto mb-2`}
+                          className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center mx-auto mb-2 border`}
                         >
                           <span className="text-xl">{category.icon}</span>
                         </div>
-                        <div className="font-medium text-sm">{category.name}</div>
+                        <div className="font-medium text-sm text-foreground">{category.name}</div>
                       </motion.button>
                     ))}
                   </div>
 
                   <div className="text-center">
-                    <Badge variant="outline">{formData.categories.length}/3 selected</Badge>
+                    <Badge variant="outline" className="border-border text-foreground">
+                      {formData.categories.length}/3 selected
+                    </Badge>
                   </div>
 
                   <Button
                     onClick={nextStep}
-                    className="w-full"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     disabled={isLoading || formData.categories.length === 0}
                   >
                     {isLoading ? (
@@ -2901,8 +3461,8 @@ export default function SimplifiedOnboardingPage() {
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <h2 className="text-xl font-semibold mb-2">Your Goals</h2>
-                    <p className="text-gray-600">
+                    <h2 className="text-xl font-semibold mb-2 text-foreground">Your Goals</h2>
+                    <p className="text-muted-foreground">
                       {userType === "influencer"
                         ? "What do you want to achieve as a creator?"
                         : "What do you want to achieve with your business?"}
@@ -2911,7 +3471,9 @@ export default function SimplifiedOnboardingPage() {
 
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="goals">Tell us about your main goals</Label>
+                      <Label htmlFor="goals" className="text-foreground">
+                        Tell us about your main goals
+                      </Label>
                       <Textarea
                         id="goals"
                         placeholder={
@@ -2921,18 +3483,18 @@ export default function SimplifiedOnboardingPage() {
                         }
                         value={formData.goals}
                         onChange={(e) => updateFormData("goals", e.target.value)}
-                        className="min-h-[100px]"
+                        className="min-h-[100px] bg-background/50 border-border focus:border-primary"
                       />
                     </div>
 
                     <div>
-                      <Label>Monthly Revenue Goal</Label>
+                      <Label className="text-foreground">Monthly Revenue Goal</Label>
                       <div className="mt-2">
                         <div className="flex items-center gap-4">
                           <span className="text-2xl font-bold text-green-600">
                             ${formData.monthlyGoal.toLocaleString()}
                           </span>
-                          <span className="text-sm text-gray-500">per month</span>
+                          <span className="text-sm text-muted-foreground">per month</span>
                         </div>
                         <input
                           type="range"
@@ -2941,9 +3503,9 @@ export default function SimplifiedOnboardingPage() {
                           step="1000"
                           value={formData.monthlyGoal}
                           onChange={(e) => updateFormData("monthlyGoal", Number.parseInt(e.target.value))}
-                          className="w-full mt-2"
+                          className="w-full mt-2 accent-blue-600"
                         />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
                           <span>$1K</span>
                           <span>$50K+</span>
                         </div>
@@ -2951,7 +3513,11 @@ export default function SimplifiedOnboardingPage() {
                     </div>
                   </div>
 
-                  <Button onClick={nextStep} className="w-full" disabled={isLoading || !formData.goals.trim()}>
+                  <Button
+                    onClick={nextStep}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    disabled={isLoading || !formData.goals.trim()}
+                  >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -2976,21 +3542,21 @@ export default function SimplifiedOnboardingPage() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring" }}
-                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto"
+                    className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20"
                   >
                     <Check className="h-10 w-10 text-green-600" />
                   </motion.div>
 
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">You&apos;re all set! 🎉</h2>
-                    <p className="text-gray-600">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">You&apos;re all set! 🎉</h2>
+                    <p className="text-muted-foreground">
                       Welcome to Yazzil! Your {userType === "influencer" ? "creator" : "business"} dashboard is ready.
                     </p>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">What&apos;s next?</h3>
-                    <ul className="text-sm text-gray-600 space-y-1">
+                  <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+                    <h3 className="font-semibold mb-2 text-foreground">What&apos;s next?</h3>
+                    <ul className="text-sm text-muted-foreground space-y-1">
                       {userType === "influencer" ? (
                         <>
                           <li>• Set up your creator profile</li>
