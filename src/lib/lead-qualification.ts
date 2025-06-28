@@ -6378,3 +6378,106 @@ export async function getEnhancedLeadAnalytics(userId: string) {
     throw error
   }
 }
+
+
+/**
+ * Helper function to merge arrays and remove duplicates
+ */
+function mergeUniqueArrays(arr1: string[], arr2: string[]): string[] {
+  const combined = [...arr1, ...arr2]
+  return Array.from(new Set(combined))
+}
+
+
+export async function mergeDuplicateLeads(userId: string) {
+  try {
+    // Find potential duplicates based on instagramUserId and pageId
+    const duplicateGroups = await client.lead.groupBy({
+      by: ["instagramUserId", "pageId"],
+      where: { userId },
+      having: {
+        id: { _count: { gt: 1 } },
+      },
+      _count: { id: true },
+    })
+
+    for (const group of duplicateGroups) {
+      // Get all leads in this duplicate group
+      const duplicateLeads = await client.lead.findMany({
+        where: {
+          userId,
+          instagramUserId: group.instagramUserId,
+          pageId: group.pageId,
+        },
+        include: {
+          interactions: true,
+          qualificationData: true,
+        },
+        orderBy: { firstContactDate: "asc" }, // Keep the oldest one as primary
+      })
+
+      if (duplicateLeads.length > 1) {
+        const primaryLead = duplicateLeads[0]
+        const duplicatesToMerge = duplicateLeads.slice(1)
+
+        // Merge interactions and data
+        for (const duplicate of duplicatesToMerge) {
+          // Move interactions to primary lead
+          await client.leadInteraction.updateMany({
+            where: { leadId: duplicate.id },
+            data: { leadId: primaryLead.id },
+          })
+
+          // Merge qualification data (keep highest scores)
+          if (duplicate.qualificationData && primaryLead.qualificationData) {
+            await client.leadQualificationData.update({
+              where: { leadId: primaryLead.id },
+              data: {
+                intentScore: Math.max(
+                  duplicate.qualificationData.intentScore,
+                  primaryLead.qualificationData.intentScore,
+                ),
+                sentimentScore: Math.max(
+                  duplicate.qualificationData.sentimentScore,
+                  primaryLead.qualificationData.sentimentScore,
+                ),
+                engagementScore: Math.max(
+                  duplicate.qualificationData.engagementScore,
+                  primaryLead.qualificationData.engagementScore,
+                ),
+              },
+            })
+          }
+
+          // Update primary lead with best data
+          await client.lead.update({
+            where: { id: primaryLead.id },
+            data: {
+              score: Math.max(duplicate.score, primaryLead.score),
+              lastContactDate:
+                duplicate.lastContactDate > primaryLead.lastContactDate
+                  ? duplicate.lastContactDate
+                  : primaryLead.lastContactDate,
+              name: duplicate.name || primaryLead.name,
+              email: duplicate.email || primaryLead.email,
+              phone: duplicate.phone || primaryLead.phone,
+              tags: mergeUniqueArrays(primaryLead.tags, duplicate.tags),
+            },
+          })
+
+          // Delete the duplicate lead
+          await client.lead.delete({
+            where: { id: duplicate.id },
+          })
+        }
+
+        console.log(`Merged ${duplicatesToMerge.length} duplicate leads for ${group.instagramUserId}`)
+      }
+    }
+
+    return { mergedGroups: duplicateGroups.length }
+  } catch (error) {
+    console.error("Error merging duplicate leads:", error)
+    throw error
+  }
+}
