@@ -5957,6 +5957,7 @@
 
 
 import { type NextRequest, NextResponse } from "next/server"
+
 import {
   createChatHistory,
   trackResponses,
@@ -5970,20 +5971,30 @@ import {
   markResponseAsSent,
   getRecentResponseCount,
 } from "@/actions/webhook/queries"
+
 import { getBusinessProfileForAutomation, getOrCreateDefaultAutomation } from "@/actions/webhook/business-profile"
+
 import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
+
 import {
   createVoiceflowUser,
   fetchEnhancedBusinessVariables,
   getVoiceflowHealth,
   getEnhancedVoiceflowResponse,
 } from "@/lib/voiceflow"
+
 import { analyzeLead } from "@/lib/lead-qualification"
+
 import { sendDM, sendPrivateMessage } from "@/lib/fetch"
+
 import { client } from "@/lib/prisma"
+
 import { storeConversationMessage } from "@/actions/chats/queries"
+
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
+
 import { verifyInstagramWebhook } from "@/utils/instagram"
+
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
 
 type InstagramQuickReply = {
@@ -6010,8 +6021,8 @@ function transformButtonsToInstagram(
 
   return buttons.slice(0, 11).map((button) => {
     const buttonName = String(button.name || "").substring(0, 20)
-
     let buttonPayload: string
+
     if (typeof button.payload === "string") {
       buttonPayload = button.payload.substring(0, 1000)
     } else if (button.payload === null || button.payload === undefined) {
@@ -6036,23 +6047,66 @@ function extractWebhookData(payload: any): WebhookData | null {
   try {
     if (payload?.entry?.[0]?.messaging) {
       const messaging = payload.entry[0].messaging[0]
-      const isEcho = messaging.message?.is_echo === true
+
+      // Check if this is a read receipt - ignore these
+      if (messaging.read) {
+        console.log("📖 Received read receipt - ignoring")
+        return null
+      }
+
+      // Check if this is a delivery receipt - ignore these
+      if (messaging.delivery) {
+        console.log("📬 Received delivery receipt - ignoring")
+        return null
+      }
+
+      // Check if this is a regular message
+      if (messaging.message) {
+        const isEcho = messaging.message?.is_echo === true
+
+        // Make sure the message has text content
+        if (!messaging.message.text) {
+          console.log("📷 Received message without text (possibly media) - ignoring")
+          return null
+        }
+
+        return {
+          pageId: payload.entry[0].id,
+          senderId: messaging.sender.id,
+          recipientId: messaging.recipient.id,
+          userMessage: messaging.message.text,
+          messageId: messaging.message.mid,
+          messageType: "DM",
+          isEcho,
+        }
+      }
+
+      // Check if this is a postback (button click)
+      if (messaging.postback) {
+        return {
+          pageId: payload.entry[0].id,
+          senderId: messaging.sender.id,
+          recipientId: messaging.recipient.id,
+          userMessage: messaging.postback.payload || messaging.postback.title || "Button clicked",
+          messageId: `postback_${Date.now()}`,
+          messageType: "DM",
+          isEcho: false,
+        }
+      }
+    } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+      const changeValue = payload.entry[0].changes[0].value
+
+      // Make sure the comment has text
+      if (!changeValue.text) {
+        console.log("📷 Received comment without text - ignoring")
+        return null
+      }
 
       return {
         pageId: payload.entry[0].id,
-        senderId: messaging.sender.id,
-        recipientId: messaging.recipient.id,
-        userMessage: messaging.message.text,
-        messageId: messaging.message.mid,
-        messageType: "DM",
-        isEcho,
-      }
-    } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
-      return {
-        pageId: payload.entry[0].id,
-        senderId: payload.entry[0].changes[0].value.from.id,
-        userMessage: payload.entry[0].changes[0].value.text,
-        commentId: payload.entry[0].changes[0].value.id,
+        senderId: changeValue.from.id,
+        userMessage: changeValue.text,
+        commentId: changeValue.id,
         messageType: "COMMENT",
         isEcho: false,
       }
@@ -6060,6 +6114,7 @@ function extractWebhookData(payload: any): WebhookData | null {
   } catch (error) {
     console.error("Error extracting webhook data:", error)
   }
+
   return null
 }
 
@@ -6067,7 +6122,6 @@ function generateMessageKey(data: WebhookData, timestamp: number): string {
   const baseId = data.messageId || data.commentId || `${timestamp}_${Math.random().toString(36).substr(2, 9)}`
   const messageContent = data.userMessage.substring(0, 50)
   const messageLength = data.userMessage.length
-
   return `${data.pageId}_${data.senderId}_${baseId}_${messageLength}_${messageContent.replace(/\s+/g, "_")}`
 }
 
@@ -6077,6 +6131,14 @@ function isDeauthWebhook(payload: any): boolean {
 
 function isDataDeletionWebhook(payload: any): boolean {
   return payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion"
+}
+
+function isReadReceiptOrDelivery(payload: any): boolean {
+  if (payload?.entry?.[0]?.messaging) {
+    const messaging = payload.entry[0].messaging[0]
+    return !!(messaging.read || messaging.delivery)
+  }
+  return false
 }
 
 export async function GET(req: NextRequest) {
@@ -6093,6 +6155,7 @@ export async function POST(req: NextRequest) {
     webhook_payload = await req.json()
     console.log("📥 Received webhook payload:", JSON.stringify(webhook_payload, null, 2))
 
+    // Handle deauth webhooks
     if (isDeauthWebhook(webhook_payload)) {
       console.log("🔐 Processing Instagram deauthorization webhook")
       const signature = req.headers.get("x-hub-signature-256")
@@ -6107,6 +6170,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(result, { status: result.status })
     }
 
+    // Handle data deletion webhooks
     if (isDataDeletionWebhook(webhook_payload)) {
       console.log("🗑️ Processing Instagram data deletion webhook")
       const signature = req.headers.get("x-hub-signature-256")
@@ -6121,10 +6185,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(result, { status: result.status })
     }
 
+    // Handle read receipts and delivery confirmations - just acknowledge them
+    if (isReadReceiptOrDelivery(webhook_payload)) {
+      console.log("📖 Received read receipt or delivery confirmation - acknowledging")
+      return NextResponse.json({ message: "Read receipt acknowledged" }, { status: 200 })
+    }
+
     const data = extractWebhookData(webhook_payload)
+
     if (!data) {
-      console.log("⚠️ Unsupported webhook payload structure")
-      return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 400 })
+      console.log("⚠️ Unsupported webhook payload structure or non-text message")
+      return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 200 })
     }
 
     // Skip echo messages (messages sent by the bot)
@@ -6157,12 +6228,10 @@ export async function POST(req: NextRequest) {
     if (triggerDecision.triggerType === "NO_MATCH") {
       console.log("🔄 No specific automation matched, checking for default automation...")
       automation = await getOrCreateDefaultAutomation(pageId)
-
       if (!automation) {
         console.log("❌ No default automation available - message ignored")
         return NextResponse.json({ message: "No automation available" }, { status: 200 })
       }
-
       console.log(`🎯 Using default automation: ${automation.id}`)
     } else {
       // Get the specific automation that was triggered
@@ -6241,6 +6310,7 @@ export async function POST(req: NextRequest) {
 
     const processingTime = Date.now() - startTime
     console.log(`✅ Successfully processed message in ${processingTime}ms: ${messageKey.substring(0, 50)}...`)
+
     return NextResponse.json(
       {
         message: "Request processed successfully",
@@ -6283,7 +6353,6 @@ async function handleEnhancedVoiceflowWithDataCollection(
     }
 
     console.log("🎙️ Starting enhanced Voiceflow processing with data collection...")
-
     const userCreated = await createVoiceflowUser(conversationUserId)
     console.log(`🎙️ User created: ${userCreated}`)
 
@@ -6361,7 +6430,6 @@ async function handleEnhancedVoiceflowWithDataCollection(
       if (extractedCustomerData.name || extractedCustomerData.email || extractedCustomerData.phone) {
         try {
           const automationUserId = automation?.User?.id
-
           if (automationUserId) {
             // Create marketing info without metadata field (it doesn't exist in the schema)
             await client.marketingInfo.create({
@@ -6391,7 +6459,6 @@ async function handleEnhancedVoiceflowWithDataCollection(
                 },
               })
             }
-
             console.log("📝 Basic marketing info stored successfully")
           }
         } catch (error) {
@@ -6400,7 +6467,6 @@ async function handleEnhancedVoiceflowWithDataCollection(
       }
     } else {
       console.log(`🔄 Voiceflow failed, falling back to enhanced Gemini for PRO user`)
-
       // Enhanced Gemini fallback for PRO users with collected data context
       finalResponse = await generateGeminiResponse({
         userMessage,
@@ -6411,10 +6477,8 @@ async function handleEnhancedVoiceflowWithDataCollection(
         isVoiceflowFallback: true,
         voiceflowAttemptedResponse: voiceflowResult.error,
       })
-
       finalButtons = undefined
       aiSystemUsed = "enhanced_gemini_pro_fallback_with_data"
-
       console.log("✅ Enhanced Gemini fallback response generated for PRO user with data context")
     }
 
@@ -6443,12 +6507,10 @@ async function handleEnhancedVoiceflowWithDataCollection(
     if (messageType === "DM") {
       console.log("📤 Sending enhanced DM response...")
       const direct_message = await sendDM(pageId, senderId, finalResponse, token, instagramButtons)
-
       if (direct_message.status === 200) {
         console.log("✅ Enhanced DM sent successfully")
         // Mark response as sent to prevent duplicates
         await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
-
         if (automation) {
           await trackResponses(automation.id, "DM")
         }
@@ -6460,12 +6522,10 @@ async function handleEnhancedVoiceflowWithDataCollection(
     } else if (messageType === "COMMENT" && data.commentId) {
       console.log("📤 Sending enhanced comment response...")
       const comment = await sendPrivateMessage(pageId, data.commentId, finalResponse, token, instagramButtons)
-
       if (comment.status === 200) {
         console.log("✅ Enhanced comment response sent successfully")
         // Mark response as sent to prevent duplicates
         await markResponseAsSent(pageId, senderId, finalResponse, messageType, automation.id)
-
         if (automation) {
           await trackResponses(automation.id, "COMMENT")
         }
@@ -6475,7 +6535,6 @@ async function handleEnhancedVoiceflowWithDataCollection(
     }
   } catch (error) {
     console.error("💥 Error in enhanced Voiceflow processing with data collection:", error)
-
     // Final fallback to enhanced Gemini
     console.log("🔄 Final fallback to enhanced Gemini due to error...")
     await handleEnhancedGeminiResponse(data, automation, userMessage, triggerDecision, true)
@@ -6506,8 +6565,8 @@ async function handleEnhancedGeminiResponse(
     console.log("📋 Business profile and conversation context loaded for enhanced Gemini")
 
     const isPROUser = automation.User?.subscription?.plan === "PRO"
-
     console.log("🔮 Generating enhanced Gemini response...")
+
     const geminiResponse = await generateGeminiResponse({
       userMessage,
       businessProfile: profileContent,
@@ -6541,12 +6600,10 @@ async function handleEnhancedGeminiResponse(
     if (messageType === "DM") {
       console.log("📤 Sending enhanced DM response...")
       const direct_message = await sendDM(pageId, senderId, geminiResponse, token)
-
       if (direct_message.status === 200) {
         console.log("✅ Enhanced DM sent successfully")
         // Mark response as sent to prevent duplicates
         await markResponseAsSent(pageId, senderId, geminiResponse, messageType, automation.id)
-
         if (automation) {
           await trackResponses(automation.id, "DM")
         }
@@ -6558,12 +6615,10 @@ async function handleEnhancedGeminiResponse(
     } else if (messageType === "COMMENT" && data.commentId) {
       console.log("📤 Sending enhanced comment response...")
       const comment = await sendPrivateMessage(pageId, data.commentId, geminiResponse, token)
-
       if (comment.status === 200) {
         console.log("✅ Enhanced comment response sent successfully")
         // Mark response as sent to prevent duplicates
         await markResponseAsSent(pageId, senderId, geminiResponse, messageType, automation.id)
-
         if (automation) {
           await trackResponses(automation.id, "COMMENT")
         }
@@ -6573,19 +6628,16 @@ async function handleEnhancedGeminiResponse(
     }
   } catch (error) {
     console.error("💥 Error in enhanced Gemini processing:", error)
-
     // Only send fallback if we haven't sent any responses recently
     const recentCount = await getRecentResponseCount(pageId, senderId, messageType, 1)
     if (recentCount === 0) {
       const fallbackText =
-        "Thanks for your message! I'm here to help. Let me get back to you with the right information. 😊"
-
+        "Hello there, my name is LadyCashe, how can I help you?"
       // Check if this fallback would be a duplicate
       const isFallbackDuplicate = await checkDuplicateResponse(pageId, senderId, fallbackText, messageType)
       if (!isFallbackDuplicate) {
         console.log("🔄 Sending final fallback response...")
         const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
-
         if (messageType === "DM") {
           const result = await sendDM(pageId, senderId, fallbackText, token)
           if (result.status === 200) {
