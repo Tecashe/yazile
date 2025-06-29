@@ -8098,7 +8098,6 @@
 //   }
 // }
 
-
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createChatHistory,
@@ -8172,26 +8171,38 @@ interface ProcessingContext {
   messageKey: string
 }
 
+interface ProcessingResult {
+  success: boolean
+  responseText?: string
+  buttons?: any[]
+  variables?: Record<string, any>
+  aiSystem: string
+  error?: string
+}
+
 // ============================================================================
 // CONFIGURATION & CONSTANTS
 // ============================================================================
 
 const CONFIG = {
-  DELAYS: {
-    MIN: 30000, // 30 seconds
-    MAX: 120000, // 2 minutes
-  },
   TIMEOUTS: {
-    VOICEFLOW: 10000,
-    GEMINI: 8000,
-    PROFILE: 3000,
-    BUSINESS_VARS: 5000,
+    VOICEFLOW: 12000, // 12 seconds
+    GEMINI: 10000, // 10 seconds
+    PROFILE: 5000, // 5 seconds
+    BUSINESS_VARS: 5000, // 5 seconds
+    TOTAL_PROCESSING: 25000, // 25 seconds max total
   },
   RATE_LIMITS: {
     MAX_RESPONSES_PER_2MIN: 3,
-    DUPLICATE_WINDOW: 10000, // 10 seconds
+    DUPLICATE_WINDOW: 8000, // 8 seconds
   },
   CLEANUP_INTERVAL: 5 * 60 * 1000, // 5 minutes
+  FALLBACK_RESPONSES: {
+    PRO: "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you with detailed information shortly. 🌟",
+    STANDARD: "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊",
+    EMERGENCY: "Hi! Thanks for reaching out. I'm here to help! 😊",
+    SIMPLE: "Hello! 👋",
+  },
 } as const
 
 // ============================================================================
@@ -8201,6 +8212,7 @@ const CONFIG = {
 class MemoryManager {
   private static instance: MemoryManager
   private recentMessages = new Map<string, number>()
+  private processingMessages = new Set<string>()
   private cleanupInterval: NodeJS.Timeout
 
   private constructor() {
@@ -8221,8 +8233,20 @@ class MemoryManager {
     return lastTime ? timestamp - lastTime < CONFIG.RATE_LIMITS.DUPLICATE_WINDOW : false
   }
 
+  isProcessing(key: string): boolean {
+    return this.processingMessages.has(key)
+  }
+
   markMessage(key: string, timestamp: number): void {
     this.recentMessages.set(key, timestamp)
+  }
+
+  startProcessing(key: string): void {
+    this.processingMessages.add(key)
+  }
+
+  finishProcessing(key: string): void {
+    this.processingMessages.delete(key)
   }
 
   private cleanup(): void {
@@ -8239,7 +8263,10 @@ class MemoryManager {
       this.recentMessages.delete(key)
     })
 
-    console.log(`🧹 Cleaned up ${keysToDelete.length} old message entries`)
+    // Clear old processing entries (safety cleanup)
+    this.processingMessages.clear()
+
+    console.log(`🧹 Memory cleanup: removed ${keysToDelete.length} old entries`)
   }
 }
 
@@ -8249,35 +8276,44 @@ class MemoryManager {
 
 class Logger {
   static info(message: string, data?: any): void {
-    console.log(`ℹ️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ℹ️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
   }
 
   static success(message: string, data?: any): void {
-    console.log(`✅ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ✅ ${message}`, data ? JSON.stringify(data, null, 2) : "")
   }
 
   static warning(message: string, data?: any): void {
-    console.log(`⚠️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ⚠️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
   }
 
   static error(message: string, error?: any): void {
-    console.error(`❌ ${message}`, error)
+    const timestamp = new Date().toISOString()
+    console.error(`[${timestamp}] ❌ ${message}`, error)
   }
 
   static debug(message: string, data?: any): void {
-    console.log(`🔍 ${message}`, data ? JSON.stringify(data, null, 2) : "")
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] 🔍 ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static performance(message: string, startTime: number): void {
+    const duration = Date.now() - startTime
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ⚡ ${message} (${duration}ms)`)
   }
 }
 
-class DelayManager {
-  static async randomDelay(): Promise<number> {
-    const delayMs = Math.floor(Math.random() * (CONFIG.DELAYS.MAX - CONFIG.DELAYS.MIN + 1)) + CONFIG.DELAYS.MIN
-    Logger.info(`Initiating strategic delay: ${delayMs / 1000}s`)
+class TimeoutManager {
+  static async withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(`${operation} timeout after ${timeoutMs}ms`)), timeoutMs)
+    })
 
-    await new Promise((resolve) => setTimeout(resolve, delayMs))
-
-    Logger.success(`Delay completed, proceeding with processing`)
-    return delayMs
+    return Promise.race([promise, timeoutPromise])
   }
 }
 
@@ -8372,73 +8408,91 @@ class MessageProcessor {
     return `${data.pageId}_${data.senderId}_${baseId}_${messageLength}_${messageContent.replace(/\s+/g, "_")}`
   }
 
-  static async process(data: WebhookData, startTime: number): Promise<void> {
+  static async processImmediate(data: WebhookData, startTime: number): Promise<void> {
     const messageKey = this.generateKey(data, startTime)
     const duplicateKey = `${data.pageId}_${data.senderId}_${data.userMessage}_${data.messageType}`
 
-    Logger.info(`Processing ${data.messageType} from ${data.senderId}: "${data.userMessage.substring(0, 100)}..."`)
+    Logger.info(`🚀 IMMEDIATE PROCESSING: ${data.messageType} from ${data.senderId}`)
+    Logger.debug(`Message: "${data.userMessage.substring(0, 100)}..."`)
+
+    const memoryManager = MemoryManager.getInstance()
 
     // Check for duplicates
-    const memoryManager = MemoryManager.getInstance()
     if (memoryManager.isDuplicate(duplicateKey, startTime)) {
-      Logger.warning(`Duplicate message detected: ${duplicateKey}`)
+      Logger.warning(`Duplicate message blocked: ${duplicateKey}`)
+      return
+    }
+
+    // Check if currently processing
+    if (memoryManager.isProcessing(duplicateKey)) {
+      Logger.warning(`Message already being processed: ${duplicateKey}`)
       return
     }
 
     // Check database processing status
     const isProcessed = await checkProcessedMessage(messageKey)
     if (isProcessed) {
-      Logger.warning(`Message already processed: ${messageKey.substring(0, 50)}...`)
+      Logger.warning(`Message already processed in DB: ${messageKey.substring(0, 50)}...`)
       return
     }
 
-    // Mark as processed and store in memory
-    await markMessageAsProcessed(messageKey)
+    // Mark as processing
+    memoryManager.startProcessing(duplicateKey)
     memoryManager.markMessage(duplicateKey, startTime)
 
-    Logger.success(`Message marked for processing: ${messageKey.substring(0, 50)}...`)
+    try {
+      // Mark as processed in database
+      await markMessageAsProcessed(messageKey)
+      Logger.success(`Message marked for processing: ${messageKey.substring(0, 50)}...`)
 
-    // Process with delay - CRITICAL: Use setImmediate to ensure this runs
-    setImmediate(async () => {
-      try {
-        await this.processWithDelay(data, messageKey, startTime)
-      } catch (error) {
-        Logger.error("Critical error in delayed processing", error)
-        await this.sendEmergencyResponse(data)
-      }
-    })
+      // Process immediately with timeout protection
+      await TimeoutManager.withTimeout(
+        this.processMessage(data, messageKey, startTime),
+        CONFIG.TIMEOUTS.TOTAL_PROCESSING,
+        "Total message processing",
+      )
+
+      Logger.performance("Message processing completed", startTime)
+    } catch (error) {
+      Logger.error("Message processing failed", error)
+      await this.handleProcessingFailure(data, error)
+    } finally {
+      memoryManager.finishProcessing(duplicateKey)
+    }
   }
 
-  private static async processWithDelay(data: WebhookData, messageKey: string, startTime: number): Promise<void> {
-    try {
-      // Strategic delay
-      await DelayManager.randomDelay()
+  private static async processMessage(data: WebhookData, messageKey: string, startTime: number): Promise<void> {
+    Logger.info(`🎯 Processing message: ${messageKey.substring(0, 50)}...`)
 
-      Logger.info(`🎬 Beginning message processing: ${messageKey.substring(0, 50)}...`)
-
-      // Get automation context
-      const context = await this.buildProcessingContext(data, messageKey, startTime)
-      if (!context) {
-        Logger.error("Failed to build processing context")
-        return
-      }
-
-      // Route to appropriate handler
-      const isPROUser = context.automation.User?.subscription?.plan === "PRO"
-      Logger.info(`Routing to ${isPROUser ? "PRO Voiceflow" : "Standard Gemini"} handler`)
-
-      if (isPROUser) {
-        await VoiceflowHandler.handle(context)
-      } else {
-        await GeminiHandler.handle(context)
-      }
-
-      const processingTime = Date.now() - startTime
-      Logger.success(`Message processing completed in ${processingTime}ms: ${messageKey.substring(0, 50)}...`)
-    } catch (error) {
-      Logger.error("Error in delayed message processing", error)
-      await this.sendEmergencyResponse(data)
+    // Build processing context
+    const context = await this.buildProcessingContext(data, messageKey, startTime)
+    if (!context) {
+      throw new Error("Failed to build processing context")
     }
+
+    // Route to appropriate handler
+    const isPROUser = context.automation.User?.subscription?.plan === "PRO"
+    Logger.info(`Routing to ${isPROUser ? "PRO Voiceflow" : "Standard Gemini"} handler`)
+
+    let result: ProcessingResult
+
+    if (isPROUser) {
+      result = await VoiceflowHandler.handle(context)
+    } else {
+      result = await GeminiHandler.handle(context)
+    }
+
+    if (!result.success) {
+      throw new Error(`AI processing failed: ${result.error}`)
+    }
+
+    // Send response
+    await ResponseSender.send(context, result.responseText!, result.buttons)
+
+    // Background tasks (non-blocking)
+    BackgroundProcessor.process(context, result.responseText!)
+
+    Logger.success(`✨ Message successfully processed with ${result.aiSystem}`)
   }
 
   private static async buildProcessingContext(
@@ -8447,16 +8501,28 @@ class MessageProcessor {
     startTime: number,
   ): Promise<ProcessingContext | null> {
     try {
-      const triggerDecision = await decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType)
-      Logger.debug("Trigger decision", triggerDecision)
+      Logger.debug("Building processing context...")
 
-      const automation = await getAutomationWithTriggers(triggerDecision.automationId!, data.messageType)
+      const triggerDecision = await TimeoutManager.withTimeout(
+        decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType),
+        5000,
+        "Trigger decision",
+      )
+
+      Logger.debug("Trigger decision completed", triggerDecision)
+
+      const automation = await TimeoutManager.withTimeout(
+        getAutomationWithTriggers(triggerDecision.automationId!, data.messageType),
+        5000,
+        "Automation lookup",
+      )
+
       if (!automation) {
         Logger.error(`Automation not found: ${triggerDecision.automationId}`)
         return null
       }
 
-      Logger.success(`Automation loaded: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
+      Logger.success(`Context built - Automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
 
       return {
         data,
@@ -8473,9 +8539,11 @@ class MessageProcessor {
     }
   }
 
-  private static async sendEmergencyResponse(data: WebhookData): Promise<void> {
+  private static async handleProcessingFailure(data: WebhookData, error: any): Promise<void> {
+    Logger.error("Handling processing failure", error)
+
     try {
-      const emergencyResponse = "Hi! Thanks for your message. I'm here to help! 😊"
+      const emergencyResponse = CONFIG.FALLBACK_RESPONSES.EMERGENCY
       const token = process.env.DEFAULT_PAGE_TOKEN!
 
       if (data.messageType === "DM") {
@@ -8485,8 +8553,8 @@ class MessageProcessor {
       }
 
       Logger.success("Emergency response sent successfully")
-    } catch (error) {
-      Logger.error("Emergency response failed", error)
+    } catch (emergencyError) {
+      Logger.error("Emergency response also failed", emergencyError)
     }
   }
 }
@@ -8496,27 +8564,39 @@ class MessageProcessor {
 // ============================================================================
 
 class VoiceflowHandler {
-  static async handle(context: ProcessingContext): Promise<void> {
+  static async handle(context: ProcessingContext): Promise<ProcessingResult> {
     Logger.info("🎙️ === VOICEFLOW HANDLER INITIATED ===")
 
     try {
-      // Rate limiting
-      if (await this.isRateLimited(context)) return
+      // Rate limiting check
+      if (await this.isRateLimited(context)) {
+        return {
+          success: false,
+          aiSystem: "voiceflow_rate_limited",
+          error: "Rate limit exceeded",
+        }
+      }
 
-      // Get context data
+      // Gather context data
       const contextData = await this.gatherContext(context)
 
       // Process with Voiceflow
       const response = await this.processVoiceflow(context, contextData)
 
-      // Send response
-      await ResponseSender.send(context, response.text, response.buttons)
-
-      // Background tasks
-      BackgroundProcessor.process(context, contextData, response.text)
+      return {
+        success: true,
+        responseText: response.text,
+        buttons: response.buttons,
+        variables: response.variables,
+        aiSystem: response.aiSystem,
+      }
     } catch (error) {
       Logger.error("Voiceflow handler failed", error)
-      await ResponseSender.sendFallback(context, "PRO")
+      return {
+        success: false,
+        aiSystem: "voiceflow_failed",
+        error: error instanceof Error ? error.message : String(error),
+      }
     }
   }
 
@@ -8530,22 +8610,37 @@ class VoiceflowHandler {
   }
 
   private static async gatherContext(context: ProcessingContext) {
+    Logger.debug("Gathering Voiceflow context...")
+
     const [historyResult, profileResult] = await Promise.allSettled([
-      buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
-      getBusinessProfileForAutomation(context.automation.id),
+      TimeoutManager.withTimeout(
+        buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
+        CONFIG.TIMEOUTS.PROFILE,
+        "Conversation history",
+      ),
+      TimeoutManager.withTimeout(
+        getBusinessProfileForAutomation(context.automation.id),
+        CONFIG.TIMEOUTS.PROFILE,
+        "Business profile",
+      ),
     ])
 
-    return {
-      conversationHistory:
-        historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : [],
-      profile:
-        profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
-          ? profileResult.value
-          : { profileContent: "", businessContext: {} },
-    }
+    const conversationHistory =
+      historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : []
+
+    const profile =
+      profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
+        ? profileResult.value
+        : { profileContent: "", businessContext: {} }
+
+    Logger.success(`Context gathered - History: ${conversationHistory.length} messages`)
+
+    return { conversationHistory, profile }
   }
 
   private static async processVoiceflow(context: ProcessingContext, contextData: any) {
+    Logger.debug("Processing with Voiceflow...")
+
     // Create Voiceflow user (non-blocking)
     createVoiceflowUser(context.conversationUserId).catch((error) =>
       Logger.warning("Voiceflow user creation failed", error),
@@ -8554,39 +8649,60 @@ class VoiceflowHandler {
     // Build business variables
     const businessVariables = this.buildBusinessVariables(context, contextData)
 
-    // Get Voiceflow response
+    // Try Voiceflow first
     try {
-      const voiceflowResult = await Promise.race([
+      const voiceflowResult = await TimeoutManager.withTimeout(
         getEnhancedVoiceflowResponse(context.userMessage, context.conversationUserId, businessVariables),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Voiceflow timeout")), CONFIG.TIMEOUTS.VOICEFLOW)),
-      ])
+        CONFIG.TIMEOUTS.VOICEFLOW,
+        "Voiceflow response",
+      )
 
       if (this.isVoiceflowResponse(voiceflowResult) && voiceflowResult.success && voiceflowResult.response?.text) {
-        Logger.success("Voiceflow response received")
+        Logger.success("✨ Voiceflow response successful")
         return {
           text: voiceflowResult.response.text,
           buttons: voiceflowResult.response.buttons,
           variables: voiceflowResult.variables,
+          aiSystem: "enhanced_voiceflow",
         }
       }
     } catch (error) {
-      Logger.warning("Voiceflow failed, using Gemini fallback", error)
+      Logger.warning("Voiceflow failed, falling back to Gemini", error)
     }
 
-    // Fallback to Gemini
-    const geminiResponse = await generateGeminiResponse({
-      userMessage: context.userMessage,
-      businessProfile: contextData.profile.profileContent,
-      conversationHistory: contextData.conversationHistory,
-      businessContext: contextData.profile.businessContext,
-      isPROUser: true,
-      isVoiceflowFallback: true,
-    })
+    // Fallback to Gemini Pro
+    Logger.info("🔄 Using Gemini Pro fallback...")
+    try {
+      const geminiResponse = await TimeoutManager.withTimeout(
+        generateGeminiResponse({
+          userMessage: context.userMessage,
+          businessProfile: contextData.profile.profileContent,
+          conversationHistory: contextData.conversationHistory,
+          businessContext: contextData.profile.businessContext,
+          isPROUser: true,
+          isVoiceflowFallback: true,
+        }),
+        CONFIG.TIMEOUTS.GEMINI,
+        "Gemini Pro fallback",
+      )
 
-    return {
-      text: typeof geminiResponse === "string" ? geminiResponse : "Thanks for your message! I'm here to help. 😊",
-      buttons: undefined,
-      variables: undefined,
+      const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.PRO
+
+      Logger.success("✨ Gemini Pro fallback successful")
+      return {
+        text: responseText,
+        buttons: undefined,
+        variables: undefined,
+        aiSystem: "gemini_pro_fallback",
+      }
+    } catch (error) {
+      Logger.warning("Gemini Pro fallback also failed", error)
+      return {
+        text: CONFIG.FALLBACK_RESPONSES.PRO,
+        buttons: undefined,
+        variables: undefined,
+        aiSystem: "static_pro_fallback",
+      }
     }
   }
 
@@ -8626,11 +8742,11 @@ class VoiceflowHandler {
 }
 
 class GeminiHandler {
-  static async handle(context: ProcessingContext): Promise<void> {
+  static async handle(context: ProcessingContext): Promise<ProcessingResult> {
     Logger.info("🔮 === GEMINI HANDLER INITIATED ===")
 
     try {
-      // Rate limiting
+      // Rate limiting check
       const count = await getRecentResponseCount(
         context.data.pageId,
         context.data.senderId,
@@ -8639,30 +8755,39 @@ class GeminiHandler {
       )
       if (count >= CONFIG.RATE_LIMITS.MAX_RESPONSES_PER_2MIN) {
         Logger.warning(`Rate limit exceeded: ${count} responses`)
-        return
+        return {
+          success: false,
+          aiSystem: "gemini_rate_limited",
+          error: "Rate limit exceeded",
+        }
       }
 
-      // Get context
+      // Get context with timeout protection
       const [profileResult, historyResult] = await Promise.allSettled([
-        Promise.race([
+        TimeoutManager.withTimeout(
           getBusinessProfileForAutomation(context.automation.id),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Profile timeout")), CONFIG.TIMEOUTS.PROFILE)),
-        ]),
-        Promise.race([
+          CONFIG.TIMEOUTS.PROFILE,
+          "Business profile",
+        ),
+        TimeoutManager.withTimeout(
           buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("History timeout")), CONFIG.TIMEOUTS.PROFILE)),
-        ]),
+          CONFIG.TIMEOUTS.PROFILE,
+          "Conversation history",
+        ),
       ])
 
       const profile =
         profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
           ? profileResult.value
           : { profileContent: "", businessContext: {} }
+
       const history =
         historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : []
 
-      // Generate response
-      const geminiResponse = await Promise.race([
+      Logger.success(`Gemini context gathered - History: ${history.length} messages`)
+
+      // Generate response with timeout
+      const geminiResponse = await TimeoutManager.withTimeout(
         generateGeminiResponse({
           userMessage: context.userMessage,
           businessProfile: profile.profileContent,
@@ -8670,22 +8795,29 @@ class GeminiHandler {
           businessContext: profile.businessContext,
           isPROUser: false,
         }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Gemini timeout")), CONFIG.TIMEOUTS.GEMINI)),
-      ])
+        CONFIG.TIMEOUTS.GEMINI,
+        "Gemini response",
+      )
 
-      const responseText =
-        typeof geminiResponse === "string"
-          ? geminiResponse
-          : "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊"
+      const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.STANDARD
 
-      // Send response
-      await ResponseSender.send(context, responseText)
+      Logger.success("✨ Gemini response successful")
 
-      // Background tasks
-      BackgroundProcessor.process(context, { conversationHistory: history }, responseText)
+      return {
+        success: true,
+        responseText,
+        buttons: undefined,
+        variables: undefined,
+        aiSystem: "enhanced_gemini",
+      }
     } catch (error) {
       Logger.error("Gemini handler failed", error)
-      await ResponseSender.sendFallback(context, "STANDARD")
+      return {
+        success: false,
+        responseText: CONFIG.FALLBACK_RESPONSES.STANDARD,
+        aiSystem: "gemini_failed_fallback",
+        error: error instanceof Error ? error.message : String(error),
+      }
     }
   }
 
@@ -8700,6 +8832,8 @@ class GeminiHandler {
 
 class ResponseSender {
   static async send(context: ProcessingContext, text: string, buttons?: any[]): Promise<void> {
+    Logger.info(`📤 Sending response: "${text.substring(0, 100)}..."`)
+
     // Check for duplicates
     const isDuplicate = await checkDuplicateResponse(
       context.data.pageId,
@@ -8712,65 +8846,75 @@ class ResponseSender {
       return
     }
 
-    Logger.info(`Sending response: "${text.substring(0, 100)}..."`)
-
     const instagramButtons = this.transformButtons(buttons)
     const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
 
-    const fallbackResponses = [text, "Thanks for your message! I'm here to help you. 😊", "Hi! I got your message 👋"]
+    // Multiple fallback responses for guaranteed delivery
+    const fallbackResponses = [
+      text,
+      CONFIG.FALLBACK_RESPONSES.STANDARD,
+      CONFIG.FALLBACK_RESPONSES.EMERGENCY,
+      CONFIG.FALLBACK_RESPONSES.SIMPLE,
+    ]
 
     for (let i = 0; i < fallbackResponses.length; i++) {
       try {
         const currentResponse = fallbackResponses[i]
         let result
 
+        Logger.debug(`Attempt ${i + 1}: Sending "${currentResponse.substring(0, 50)}..."`)
+
         if (context.data.messageType === "DM") {
-          result = await sendDM(
-            context.data.pageId,
-            context.data.senderId,
-            currentResponse,
-            token,
-            i === 0 ? instagramButtons : undefined,
+          result = await TimeoutManager.withTimeout(
+            sendDM(
+              context.data.pageId,
+              context.data.senderId,
+              currentResponse,
+              token,
+              i === 0 ? instagramButtons : undefined,
+            ),
+            10000,
+            `DM send attempt ${i + 1}`,
           )
         } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
-          result = await sendPrivateMessage(
-            context.data.pageId,
-            context.data.commentId,
-            currentResponse,
-            token,
-            i === 0 ? instagramButtons : undefined,
+          result = await TimeoutManager.withTimeout(
+            sendPrivateMessage(
+              context.data.pageId,
+              context.data.commentId,
+              currentResponse,
+              token,
+              i === 0 ? instagramButtons : undefined,
+            ),
+            10000,
+            `Comment send attempt ${i + 1}`,
           )
         }
 
         if (result?.status === 200) {
-          Logger.success(`Response sent successfully (attempt ${i + 1})`)
-          await markResponseAsSent(
-            context.data.pageId,
-            context.data.senderId,
-            currentResponse,
-            context.data.messageType,
-            context.automation.id,
-          )
-          await trackResponses(context.automation.id, context.data.messageType)
+          Logger.success(`✅ Response sent successfully (attempt ${i + 1})`)
+
+          // Track the successful response
+          await Promise.allSettled([
+            markResponseAsSent(
+              context.data.pageId,
+              context.data.senderId,
+              currentResponse,
+              context.data.messageType,
+              context.automation.id,
+            ),
+            trackResponses(context.automation.id, context.data.messageType),
+          ])
+
           return
+        } else {
+          Logger.warning(`Attempt ${i + 1} returned status: ${result?.status}`)
         }
       } catch (error) {
         Logger.error(`Send attempt ${i + 1} failed`, error)
-        if (i === fallbackResponses.length - 1) throw error
+        if (i === fallbackResponses.length - 1) {
+          throw new Error(`All ${fallbackResponses.length} send attempts failed`)
+        }
       }
-    }
-  }
-
-  static async sendFallback(context: ProcessingContext, userType: "PRO" | "STANDARD"): Promise<void> {
-    const fallbackText =
-      userType === "PRO"
-        ? "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you shortly. 🌟"
-        : "Hi! Thanks for reaching out. I'm here to help! 😊"
-
-    try {
-      await this.send(context, fallbackText)
-    } catch (error) {
-      Logger.error("Even fallback response failed", error)
     }
   }
 
@@ -8809,8 +8953,10 @@ class ResponseSender {
 // ============================================================================
 
 class BackgroundProcessor {
-  static process(context: ProcessingContext, contextData: any, responseText: string): void {
-    // Store conversation messages
+  static process(context: ProcessingContext, responseText: string): void {
+    Logger.debug("🔄 Starting background tasks...")
+
+    // Store conversation messages (non-blocking)
     Promise.allSettled([
       storeConversationMessage(
         context.data.pageId,
@@ -8836,7 +8982,14 @@ class BackgroundProcessor {
       ),
       createChatHistory(context.automation?.id || "default", context.data.pageId, context.data.senderId, responseText),
     ])
-      .then(() => Logger.success("Background tasks completed"))
+      .then((results) => {
+        const failures = results.filter((r) => r.status === "rejected").length
+        if (failures === 0) {
+          Logger.success("✅ All background tasks completed successfully")
+        } else {
+          Logger.warning(`⚠️ ${failures} background tasks failed`)
+        }
+      })
       .catch((error) => Logger.warning("Background tasks failed", error))
   }
 }
@@ -8847,44 +9000,47 @@ class BackgroundProcessor {
 
 export async function GET(req: NextRequest) {
   const hub = req.nextUrl.searchParams.get("hub.challenge")
+  Logger.info(`📞 Webhook verification: ${hub}`)
   return new NextResponse(hub)
 }
 
 export async function POST(req: NextRequest) {
-  Logger.info("🚀 Webhook request received")
   const startTime = Date.now()
+  Logger.info("🚀 === WEBHOOK REQUEST RECEIVED ===")
 
   try {
     const payload = await req.json()
-    Logger.debug("Webhook payload received", payload)
+    Logger.debug("📥 Webhook payload received")
 
     // Handle special webhooks
     const specialType = WebhookValidator.isSpecialWebhook(payload)
     if (specialType) {
-      Logger.info(`Special webhook handled: ${specialType}`)
+      Logger.info(`🔧 Special webhook handled: ${specialType}`)
       return NextResponse.json({ message: `${specialType} processed` }, { status: 200 })
     }
 
     // Extract and validate data
     const data = WebhookValidator.extractData(payload)
     if (!data) {
-      Logger.warning("Unsupported webhook payload or non-text message")
+      Logger.warning("⚠️ Unsupported webhook payload or non-text message")
       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 200 })
     }
 
     // Skip echo messages
     if (data.isEcho) {
-      Logger.debug("Echo message ignored")
+      Logger.debug("🔄 Echo message ignored")
       return NextResponse.json({ message: "Echo message ignored" }, { status: 200 })
     }
 
-    // Process the message
-    await MessageProcessor.process(data, startTime)
+    // Process immediately (no delays)
+    await MessageProcessor.processImmediate(data, startTime)
 
-    // Return immediately to Instagram
-    return NextResponse.json({ message: "Message received and queued for processing" }, { status: 200 })
+    Logger.performance("Total webhook processing time", startTime)
+
+    // Return success to Instagram
+    return NextResponse.json({ message: "Message processed successfully" }, { status: 200 })
   } catch (error) {
-    Logger.error("Unhandled error in webhook", error)
+    Logger.error("💥 Unhandled webhook error", error)
     return NextResponse.json(
       {
         message: "Error processing request",
