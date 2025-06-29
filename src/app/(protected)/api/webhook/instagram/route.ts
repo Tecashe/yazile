@@ -8099,8 +8099,6 @@
 // }
 
 
-
-
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createChatHistory,
@@ -8161,6 +8159,33 @@ interface BusinessProfile {
     promotionMessage?: string
   }
 }
+
+// Simple delay function
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// In-memory store for recent messages to handle duplicates
+const recentMessages = new Map<string, number>()
+
+// Clean up old entries every 5 minutes
+setInterval(
+  () => {
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
+    const keysToDelete: string[] = []
+
+    recentMessages.forEach((timestamp, key) => {
+      if (timestamp < fiveMinutesAgo) {
+        keysToDelete.push(key)
+      }
+    })
+
+    keysToDelete.forEach((key) => {
+      recentMessages.delete(key)
+    })
+  },
+  5 * 60 * 1000,
+)
 
 function transformButtonsToInstagram(
   buttons?: { name: string; payload: string | object | any }[],
@@ -8308,91 +8333,6 @@ function isConversationHistory(value: unknown): value is Array<{ role: "user" | 
   return Array.isArray(value)
 }
 
-// Store messages and timeouts for each user
-const messageQueue: { [userId: string]: { message: WebhookData; timestamp: number }[] } = {}
-const userTimeouts: { [userId: string]: NodeJS.Timeout } = {}
-
-async function processUserMessages(userId: string) {
-  console.log(`⏳ Processing messages for user: ${userId}`)
-  const messages = messageQueue[userId] || []
-  delete messageQueue[userId] // Clear the queue
-
-  if (messages.length === 0) {
-    console.log(`ℹ️ No messages to process for user: ${userId}`)
-    return
-  }
-
-  // Aggregate messages
-  const aggregatedMessage = messages.map((m) => m.message.userMessage).join("\n")
-  const firstMessage = messages[0].message // Use data from the first message
-
-  console.log(`📝 Aggregated message: "${aggregatedMessage.substring(0, 100)}..."`)
-
-  // Deduplication key based on aggregated message
-  const aggregatedMessageKey = generateMessageKey(
-    { ...firstMessage, userMessage: aggregatedMessage },
-    messages[0].timestamp,
-  )
-
-  // Check if the aggregated message has already been processed
-  const isProcessed = await checkProcessedMessage(aggregatedMessageKey)
-  if (isProcessed) {
-    console.log(`⏭️ Skipping duplicate aggregated message: ${aggregatedMessageKey.substring(0, 50)}...`)
-    return
-  }
-
-  await markMessageAsProcessed(aggregatedMessageKey)
-  console.log(`✅ Marked aggregated message as processed: ${aggregatedMessageKey.substring(0, 50)}...`)
-
-  const triggerDecision = await decideTriggerAction(
-    firstMessage.pageId,
-    firstMessage.senderId,
-    aggregatedMessage,
-    firstMessage.messageType,
-  )
-  console.log(`🎯 Trigger Decision:`, triggerDecision)
-
-  let automation = null
-
-  try {
-    automation = await getAutomationWithTriggers(triggerDecision.automationId!, firstMessage.messageType)
-    console.log(`🔍 Automation lookup result:`, automation ? `Found: ${automation.id}` : "Not found")
-  } catch (error) {
-    console.error(`❌ Error fetching automation ${triggerDecision.automationId}:`, error)
-  }
-
-  if (!automation) {
-    console.log(`❌ Automation not found: ${triggerDecision.automationId}`)
-    return
-  }
-
-  const isPROUser = automation.User?.subscription?.plan === "PRO"
-  console.log(
-    `🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"}) - PRO: ${isPROUser}`,
-  )
-
-  const conversationUserId = `${firstMessage.pageId}_${firstMessage.senderId}` // Declare conversationUserId here
-
-  if (isPROUser) {
-    console.log("🎙️ Using Enhanced Voiceflow with Data Collection for PRO user")
-    await handleEnhancedVoiceflowWithDataCollection(
-      { ...firstMessage, userMessage: aggregatedMessage },
-      automation,
-      conversationUserId,
-      aggregatedMessage,
-      triggerDecision,
-    )
-  } else {
-    console.log("🔮 Using Enhanced Gemini for non-PRO user")
-    await handleEnhancedGeminiResponse(
-      { ...firstMessage, userMessage: aggregatedMessage },
-      automation,
-      aggregatedMessage,
-      triggerDecision,
-    )
-  }
-}
-
 export async function GET(req: NextRequest) {
   const hub = req.nextUrl.searchParams.get("hub.challenge")
   return new NextResponse(hub)
@@ -8406,6 +8346,24 @@ export async function POST(req: NextRequest) {
   try {
     webhook_payload = await req.json()
     console.log("📥 Received webhook payload:", JSON.stringify(webhook_payload, null, 2))
+
+    // Handle deauth webhooks
+    if (isDeauthWebhook(webhook_payload)) {
+      console.log("🔐 Processing Instagram deauthorization webhook")
+      return NextResponse.json({ message: "Deauth processed" }, { status: 200 })
+    }
+
+    // Handle data deletion webhooks
+    if (isDataDeletionWebhook(webhook_payload)) {
+      console.log("🗑️ Processing Instagram data deletion webhook")
+      return NextResponse.json({ message: "Data deletion processed" }, { status: 200 })
+    }
+
+    // Handle read receipts and delivery confirmations
+    if (isReadReceiptOrDelivery(webhook_payload)) {
+      console.log("📖 Received read receipt or delivery confirmation - acknowledging")
+      return NextResponse.json({ message: "Read receipt acknowledged" }, { status: 200 })
+    }
 
     // Extract data from webhook payload
     const data = extractWebhookData(webhook_payload)
@@ -8421,25 +8379,39 @@ export async function POST(req: NextRequest) {
     }
 
     const { pageId, senderId, userMessage, messageType } = data
-    const userId = `${pageId}_${senderId}`
+    const messageKey = generateMessageKey(data, startTime)
 
-    // Add message to queue
-    if (!messageQueue[userId]) {
-      messageQueue[userId] = []
+    // Check for duplicate messages using in-memory store
+    const duplicateKey = `${pageId}_${senderId}_${userMessage}_${messageType}`
+    const lastMessageTime = recentMessages.get(duplicateKey)
+
+    if (lastMessageTime && startTime - lastMessageTime < 10000) {
+      // 10 seconds
+      console.log(`⏭️ Skipping duplicate message within 10 seconds: ${duplicateKey}`)
+      return NextResponse.json({ message: "Duplicate message ignored" }, { status: 200 })
     }
-    messageQueue[userId].push({ message: data, timestamp: startTime })
 
-    // Set or reset timeout
-    if (userTimeouts[userId]) {
-      clearTimeout(userTimeouts[userId])
+    // Store this message timestamp
+    recentMessages.set(duplicateKey, startTime)
+
+    console.log(`📨 Processing ${messageType}: "${userMessage.substring(0, 100)}..." from ${senderId}`)
+
+    // Check if already processed in database
+    const isProcessed = await checkProcessedMessage(messageKey)
+    if (isProcessed) {
+      console.log(`⏭️ Skipping already processed message: ${messageKey.substring(0, 50)}...`)
+      return NextResponse.json({ message: "Message already processed" }, { status: 200 })
     }
 
-    const delay = Math.floor(Math.random() * (120000 - 30000 + 1)) + 30000 // Random delay between 30 seconds and 2 minutes
-    userTimeouts[userId] = setTimeout(() => processUserMessages(userId), delay)
+    // Mark as processed immediately
+    await markMessageAsProcessed(messageKey)
+    console.log(`✅ Marked message as processed: ${messageKey.substring(0, 50)}...`)
 
-    console.log(`⏱️ Message queued for user ${userId}, timeout set for ${delay / 1000} seconds`)
+    // Process the message with delay in background
+    processMessageWithDelay(data, userMessage, messageKey, startTime)
 
-    return NextResponse.json({ message: "Message queued for processing" }, { status: 200 })
+    // Return immediately to Instagram
+    return NextResponse.json({ message: "Message received and will be processed" }, { status: 200 })
   } catch (error) {
     console.error("💥 Unhandled error in POST function:", error)
     return NextResponse.json(
@@ -8449,6 +8421,81 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 },
     )
+  }
+}
+
+// Process message with random delay (30 seconds to 2 minutes)
+async function processMessageWithDelay(data: WebhookData, userMessage: string, messageKey: string, startTime: number) {
+  try {
+    // Random delay between 30 seconds and 2 minutes
+    const delayMs = Math.floor(Math.random() * (120000 - 30000 + 1)) + 30000
+    console.log(`⏱️ Waiting ${delayMs / 1000} seconds before processing message...`)
+
+    await delay(delayMs)
+
+    console.log(`🎬 Starting to process message after delay: ${messageKey.substring(0, 50)}...`)
+
+    const { pageId, senderId, messageType } = data
+
+    // Get trigger decision
+    const triggerDecision = await decideTriggerAction(pageId, senderId, userMessage, messageType)
+    console.log(`🎯 Trigger Decision:`, triggerDecision)
+
+    let automation = null
+
+    try {
+      automation = await getAutomationWithTriggers(triggerDecision.automationId!, messageType)
+      console.log(`🔍 Automation lookup result:`, automation ? `Found: ${automation.id}` : "Not found")
+    } catch (error) {
+      console.error(`❌ Error fetching automation ${triggerDecision.automationId}:`, error)
+    }
+
+    if (!automation) {
+      console.log(`❌ Automation not found: ${triggerDecision.automationId}`)
+      return
+    }
+
+    const isPROUser = automation.User?.subscription?.plan === "PRO"
+    console.log(
+      `🤖 Using automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"}) - PRO: ${isPROUser}`,
+    )
+
+    const conversationUserId = `${pageId}_${senderId}`
+
+    if (isPROUser) {
+      console.log("🎙️ Using Enhanced Voiceflow with Data Collection for PRO user")
+      await handleEnhancedVoiceflowWithDataCollection(
+        data,
+        automation,
+        conversationUserId,
+        userMessage,
+        triggerDecision,
+      )
+    } else {
+      console.log("🔮 Using Enhanced Gemini for non-PRO user")
+      await handleEnhancedGeminiResponse(data, automation, userMessage, triggerDecision)
+    }
+
+    const processingTime = Date.now() - startTime
+    console.log(`✅ Successfully processed message in ${processingTime}ms: ${messageKey.substring(0, 50)}...`)
+  } catch (error) {
+    console.error("💥 Error in delayed message processing:", error)
+
+    // Emergency response if processing fails
+    try {
+      const emergencyResponse = "Hi! Thanks for your message. I'm here to help! 😊"
+      const token = process.env.DEFAULT_PAGE_TOKEN!
+
+      if (data.messageType === "DM") {
+        await sendDM(data.pageId, data.senderId, emergencyResponse, token)
+      } else if (data.messageType === "COMMENT" && data.commentId) {
+        await sendPrivateMessage(data.pageId, data.commentId, emergencyResponse, token)
+      }
+
+      console.log("✅ Emergency response sent")
+    } catch (emergencyError) {
+      console.error("💥 Even emergency response failed:", emergencyError)
+    }
   }
 }
 
@@ -8737,7 +8784,7 @@ async function processMarketingDataInBackground(
   senderId: string,
   pageId: string,
   userMessage: string,
-  messageType: "DM" | "COMMENT", // Changed from string to union type
+  messageType: "DM" | "COMMENT",
 ) {
   try {
     if (extractedData.name || extractedData.email || extractedData.phone) {
