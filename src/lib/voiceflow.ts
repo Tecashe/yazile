@@ -1,314 +1,314 @@
-// import axios, { type AxiosError } from "axios"
-// import { getBusinessForWebhook } from "@/actions/businfo"
-// import type { VoiceflowVariables, VoiceflowResult } from "@/types/voiceflow"
-// import type { JsonValue } from "@prisma/client/runtime/library"
+import axios, { type AxiosError } from "axios"
+import { getBusinessForWebhook } from "@/actions/businfo"
+import type { VoiceflowVariables, VoiceflowResult } from "@/types/voiceflow"
+import type { JsonValue } from "@prisma/client/runtime/library"
 
 
-// import { client } from "@/lib/prisma"
+import { client } from "@/lib/prisma"
 
 
-// const API_KEY = process.env.VOICEFLOW_API_KEY
-// const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
-// const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
+const API_KEY = process.env.VOICEFLOW_API_KEY
+const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
+const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
 
-// interface VoiceflowResponse {
-//   type: string
-//   payload: any
-// }
-
-
-// interface VoiceflowButton {
-//   name: string;
-//   request?: {
-//     payload?: string;
-//     type?: string;
-//   };
-// }
-
-// interface VoiceflowChoicePayload {
-//   buttons?: VoiceflowButton[];
-// }
-
-// interface VoiceflowTextPayload {
-//   message: string;
-// }
-
-// interface VoiceflowTrace {
-//   type: string;
-//   payload: VoiceflowChoicePayload | VoiceflowTextPayload | any;
-// }
+interface VoiceflowResponse {
+  type: string
+  payload: any
+}
 
 
+interface VoiceflowButton {
+  name: string;
+  request?: {
+    payload?: string;
+    type?: string;
+  };
+}
 
-// interface BusinessData {
-//   id: string
-//   name: string | null
-//   businessName: string
-//   businessType: string
-//   businessDescription: string
-//   industry: string
-//   automationSetupComplete: boolean
-//   automationSetupDate: Date | null
-//   automationAdditionalNotes: string | null
-//   automationGoals: JsonValue | null
-//   customerJourney: JsonValue | null
-//   features: JsonValue | null
-//   businessTypeData: JsonValue | null
-//   websiteAnalysis: JsonValue | null
-//   targetAudience: string
-//   website: string
-//   instagramHandle: string
-//   welcomeMessage: string
-//   responseLanguage: string
-//   businessHours: string
-//   autoReplyEnabled: boolean
-//   promotionMessage: string
-//   createdAt: Date
-//   updatedAt: Date
-//   userId: string | null
-// }
+interface VoiceflowChoicePayload {
+  buttons?: VoiceflowButton[];
+}
 
-// export async function fetchBusinessVariables(businessId: string): Promise<Record<string, string>> {
-//   console.log("Entering fetchBusinessVariables function")
-//   try {
-//     const businessResponse = await getBusinessForWebhook(businessId)
-//     console.log("getBusinessForWebhook response:", JSON.stringify(businessResponse, null, 2))
+interface VoiceflowTextPayload {
+  message: string;
+}
 
-//     if (businessResponse.status !== 200 || !businessResponse.data.business) {
-//       throw new Error(`Failed to fetch business data. Status: ${businessResponse.status}`)
-//     }
-
-//     const businessData: BusinessData = businessResponse.data.business
-
-//     if (!businessData.businessName && !businessData.welcomeMessage && !businessData.industry) {
-//       throw new Error("All business data fields are empty")
-//     }
-
-//     const result: Record<string, string> = {
-//       business_name: businessData.businessName || "Default Business Name",
-//       welcome_message: businessData.welcomeMessage || "Welcome to our business!",
-//       business_industry: businessData.industry || "General",
-//       business_type: businessData.businessType || "General",
-//       business_description: businessData.businessDescription || "No description provided",
-//       instagram_handle: businessData.instagramHandle || "",
-//       response_language: businessData.responseLanguage || "English",
-//       business_hours: businessData.businessHours || "Not specified",
-//       auto_reply_enabled: businessData.autoReplyEnabled ? "Yes" : "No",
-//       promotion_message: businessData.promotionMessage || "No current promotions",
-//     }
-
-//     // Parse and add JSON fields
-//     if (businessData.automationGoals) {
-//       const automationGoals = businessData.automationGoals as Record<string, any>
-//       result.primary_goal = automationGoals.primaryGoal || ""
-//       result.response_time = automationGoals.responseTime?.toString() || ""
-//       result.custom_goals = automationGoals.customGoals || ""
-//     }
-
-//     if (businessData.customerJourney) {
-//       const customerJourney = businessData.customerJourney as Record<string, any>
-//       result.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
-//     }
-
-//     if (businessData.features) {
-//       const features = businessData.features as Record<string, any>
-//       result.enabled_features =
-//         features.features
-//           ?.filter((f: any) => f.enabled)
-//           .map((f: any) => f.name)
-//           .join(", ") || ""
-//     }
-
-//     if (businessData.businessTypeData) {
-//       result.business_type_data = JSON.stringify(businessData.businessTypeData)
-//     }
-
-//     if (businessData.websiteAnalysis) {
-//       result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
-//     }
-
-//     result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
-//     result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
-//     result.automation_additional_notes = businessData.automationAdditionalNotes || ""
-
-//     return result
-//   } catch (error) {
-//     console.error("Error in fetchBusinessVariables:", error)
-//     throw error
-//   }
-// }
-
-// export async function getVoiceflowResponse(
-//   userInput: string,
-//   userId: string,
-//   businessVariables: Record<string, string>,
-// ): Promise<VoiceflowResult> {
-//   try {
-//     const response = await axios.post<VoiceflowResponse[]>(
-//       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-//       {
-//         request: { type: "text", payload: userInput },
-//         state: { variables: businessVariables },
-//       },
-//       {
-//         headers: {
-//           Authorization: API_KEY,
-//           versionID: VERSION_ID,
-//           accept: "application/json",
-//           "content-type": "application/json",
-//         },
-//       },
-//     )
-
-//     const updatedVariables = await fetchVoiceflowVariables(userId)
-//     return { response: response.data, variables: updatedVariables }
-//   } catch (error) {
-//     console.error("Error interacting with Voiceflow:", error)
-//     throw error
-//   }
-// }
-
-// async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
-//   try {
-//     const response = await axios.get<{ variables: VoiceflowVariables }>(
-//       `https://general-runtime.voiceflow.com/state/user/${userId}`,
-//       {
-//         headers: {
-//           Authorization: API_KEY,
-//           versionID: VERSION_ID,
-//           accept: "application/json",
-//         },
-//       },
-//     )
-//     return response.data.variables || {}
-//   } catch (error) {
-//     console.error("Error fetching Voiceflow variables:", error)
-//     throw error
-//   }
-// }
+interface VoiceflowTrace {
+  type: string;
+  payload: VoiceflowChoicePayload | VoiceflowTextPayload | any;
+}
 
 
 
-// export function processVoiceflowResponse(traces: VoiceflowTrace[]): { 
-//   text: string; 
-//   buttons?: { name: string; payload: string }[] 
-// } {
-//   let result = "";
-//   const buttons: { name: string; payload: string }[] = [];
+interface BusinessData {
+  id: string
+  name: string | null
+  businessName: string
+  businessType: string
+  businessDescription: string
+  industry: string
+  automationSetupComplete: boolean
+  automationSetupDate: Date | null
+  automationAdditionalNotes: string | null
+  automationGoals: JsonValue | null
+  customerJourney: JsonValue | null
+  features: JsonValue | null
+  businessTypeData: JsonValue | null
+  websiteAnalysis: JsonValue | null
+  targetAudience: string
+  website: string
+  instagramHandle: string
+  welcomeMessage: string
+  responseLanguage: string
+  businessHours: string
+  autoReplyEnabled: boolean
+  promotionMessage: string
+  createdAt: Date
+  updatedAt: Date
+  userId: string | null
+}
 
-//   for (const trace of traces) {
-//     switch (trace.type) {
-//       case "text":
-//         // Type guard for text payload
-//         if ('message' in trace.payload) {
-//           result += (trace.payload as VoiceflowTextPayload).message + "\n";
-//         }
-//         break;
+export async function fetchBusinessVariables(businessId: string): Promise<Record<string, string>> {
+  console.log("Entering fetchBusinessVariables function")
+  try {
+    const businessResponse = await getBusinessForWebhook(businessId)
+    console.log("getBusinessForWebhook response:", JSON.stringify(businessResponse, null, 2))
+
+    if (businessResponse.status !== 200 || !businessResponse.data.business) {
+      throw new Error(`Failed to fetch business data. Status: ${businessResponse.status}`)
+    }
+
+    const businessData: BusinessData = businessResponse.data.business
+
+    if (!businessData.businessName && !businessData.welcomeMessage && !businessData.industry) {
+      throw new Error("All business data fields are empty")
+    }
+
+    const result: Record<string, string> = {
+      business_name: businessData.businessName || "Default Business Name",
+      welcome_message: businessData.welcomeMessage || "Welcome to our business!",
+      business_industry: businessData.industry || "General",
+      business_type: businessData.businessType || "General",
+      business_description: businessData.businessDescription || "No description provided",
+      instagram_handle: businessData.instagramHandle || "",
+      response_language: businessData.responseLanguage || "English",
+      business_hours: businessData.businessHours || "Not specified",
+      auto_reply_enabled: businessData.autoReplyEnabled ? "Yes" : "No",
+      promotion_message: businessData.promotionMessage || "No current promotions",
+    }
+
+    // Parse and add JSON fields
+    if (businessData.automationGoals) {
+      const automationGoals = businessData.automationGoals as Record<string, any>
+      result.primary_goal = automationGoals.primaryGoal || ""
+      result.response_time = automationGoals.responseTime?.toString() || ""
+      result.custom_goals = automationGoals.customGoals || ""
+    }
+
+    if (businessData.customerJourney) {
+      const customerJourney = businessData.customerJourney as Record<string, any>
+      result.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
+    }
+
+    if (businessData.features) {
+      const features = businessData.features as Record<string, any>
+      result.enabled_features =
+        features.features
+          ?.filter((f: any) => f.enabled)
+          .map((f: any) => f.name)
+          .join(", ") || ""
+    }
+
+    if (businessData.businessTypeData) {
+      result.business_type_data = JSON.stringify(businessData.businessTypeData)
+    }
+
+    if (businessData.websiteAnalysis) {
+      result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
+    }
+
+    result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
+    result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
+    result.automation_additional_notes = businessData.automationAdditionalNotes || ""
+
+    return result
+  } catch (error) {
+    console.error("Error in fetchBusinessVariables:", error)
+    throw error
+  }
+}
+
+export async function getVoiceflowResponse(
+  userInput: string,
+  userId: string,
+  businessVariables: Record<string, string>,
+): Promise<VoiceflowResult> {
+  try {
+    const response = await axios.post<VoiceflowResponse[]>(
+      `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+      {
+        request: { type: "text", payload: userInput },
+        state: { variables: businessVariables },
+      },
+      {
+        headers: {
+          Authorization: API_KEY,
+          versionID: VERSION_ID,
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+      },
+    )
+
+    const updatedVariables = await fetchVoiceflowVariables(userId)
+    return { response: response.data, variables: updatedVariables }
+  } catch (error) {
+    console.error("Error interacting with Voiceflow:", error)
+    throw error
+  }
+}
+
+async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
+  try {
+    const response = await axios.get<{ variables: VoiceflowVariables }>(
+      `https://general-runtime.voiceflow.com/state/user/${userId}`,
+      {
+        headers: {
+          Authorization: API_KEY,
+          versionID: VERSION_ID,
+          accept: "application/json",
+        },
+      },
+    )
+    return response.data.variables || {}
+  } catch (error) {
+    console.error("Error fetching Voiceflow variables:", error)
+    throw error
+  }
+}
+
+
+
+export function processVoiceflowResponse(traces: VoiceflowTrace[]): { 
+  text: string; 
+  buttons?: { name: string; payload: string }[] 
+} {
+  let result = "";
+  const buttons: { name: string; payload: string }[] = [];
+
+  for (const trace of traces) {
+    switch (trace.type) {
+      case "text":
+        // Type guard for text payload
+        if ('message' in trace.payload) {
+          result += (trace.payload as VoiceflowTextPayload).message + "\n";
+        }
+        break;
         
-//       case "choice":
-//         // Type guard for choice payload
-//         if ('buttons' in trace.payload && Array.isArray(trace.payload.buttons)) {
-//           if (!result.includes("Select one:")) {
-//             result += "\nSelect one:\n";
-//           }
-//           trace.payload.buttons.forEach((button: VoiceflowButton) => {
-//             buttons.push({
-//               name: button.name,
-//               payload: button.request?.payload || button.name
-//             });
-//           });
-//         }
-//         break;
+      case "choice":
+        // Type guard for choice payload
+        if ('buttons' in trace.payload && Array.isArray(trace.payload.buttons)) {
+          if (!result.includes("Select one:")) {
+            result += "\nSelect one:\n";
+          }
+          trace.payload.buttons.forEach((button: VoiceflowButton) => {
+            buttons.push({
+              name: button.name,
+              payload: button.request?.payload || button.name
+            });
+          });
+        }
+        break;
         
-//       case "visual":
-//         // Handle visual responses (images, cards, etc.)
-//         if ('image' in trace.payload) {
-//           result += `[Image: ${trace.payload.image}]\n`;
-//         }
-//         break;
+      case "visual":
+        // Handle visual responses (images, cards, etc.)
+        if ('image' in trace.payload) {
+          result += `[Image: ${trace.payload.image}]\n`;
+        }
+        break;
         
-//       case "speak":
-//         // Handle voice responses
-//         if ('message' in trace.payload) {
-//           result += (trace.payload as VoiceflowTextPayload).message + "\n";
-//         }
-//         break;
+      case "speak":
+        // Handle voice responses
+        if ('message' in trace.payload) {
+          result += (trace.payload as VoiceflowTextPayload).message + "\n";
+        }
+        break;
         
-//       case "end":
-//         // Handle conversation end
-//         result += "\n[Conversation ended]";
-//         break;
+      case "end":
+        // Handle conversation end
+        result += "\n[Conversation ended]";
+        break;
         
-//       case "flow":
-//         // Handle flow direction changes
-//         if ('direction' in trace.payload) {
-//           result += `[Flow: ${trace.payload.direction}]\n`;
-//         }
-//         break;
+      case "flow":
+        // Handle flow direction changes
+        if ('direction' in trace.payload) {
+          result += `[Flow: ${trace.payload.direction}]\n`;
+        }
+        break;
         
-//       case "debug":
-//         // Handle debug information
-//         console.log('Voiceflow debug:', trace.payload);
-//         break;
+      case "debug":
+        // Handle debug information
+        console.log('Voiceflow debug:', trace.payload);
+        break;
         
-//       default:
-//         console.warn(`Unhandled trace type: ${trace.type}`, trace);
-//         break;
-//     }
-//   }
+      default:
+        console.warn(`Unhandled trace type: ${trace.type}`, trace);
+        break;
+    }
+  }
 
-//   return { 
-//     text: result.trim(), 
-//     buttons: buttons.length > 0 ? buttons : undefined 
-//   };
-// }
+  return { 
+    text: result.trim(), 
+    buttons: buttons.length > 0 ? buttons : undefined 
+  };
+}
 
 
 
-// export async function createVoiceflowUser(userId: string): Promise<boolean> {
-//   try {
-//     await axios.put(
-//       "https://api.voiceflow.com/v2/transcripts",
-//       {
-//         projectID: PROJECT_ID,
-//         versionID: VERSION_ID,
-//         sessionID: userId,
-//       },
-//       {
-//         headers: {
-//           accept: "application/json",
-//           "content-type": "application/json",
-//           Authorization: API_KEY,
-//         },
-//       },
-//     )
-//     return true
-//   } catch (error) {
-//     console.error("Error creating Voiceflow user:", error)
-//     return false
-//   }
-// }
+export async function createVoiceflowUser(userId: string): Promise<boolean> {
+  try {
+    await axios.put(
+      "https://api.voiceflow.com/v2/transcripts",
+      {
+        projectID: PROJECT_ID,
+        versionID: VERSION_ID,
+        sessionID: userId,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          Authorization: API_KEY,
+        },
+      },
+    )
+    return true
+  } catch (error) {
+    console.error("Error creating Voiceflow user:", error)
+    return false
+  }
+}
 
-// export async function resetVoiceflowUser(userId: string): Promise<boolean> {
-//   try {
-//     const response = await axios.post(
-//       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-//       { request: { type: "reset" } },
-//       {
-//         headers: {
-//           Authorization: API_KEY,
-//           versionID: VERSION_ID,
-//           accept: "application/json",
-//           "content-type": "application/json",
-//         },
-//       },
-//     )
-//     return response.status === 200
-//   } catch (error) {
-//     console.error("Error resetting Voiceflow user:", error)
-//     return false
-//   }
-// }
+export async function resetVoiceflowUser(userId: string): Promise<boolean> {
+  try {
+    const response = await axios.post(
+      `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+      { request: { type: "reset" } },
+      {
+        headers: {
+          Authorization: API_KEY,
+          versionID: VERSION_ID,
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+      },
+    )
+    return response.status === 200
+  } catch (error) {
+    console.error("Error resetting Voiceflow user:", error)
+    return false
+  }
+}
 
 
 
@@ -2635,701 +2635,701 @@
 // }
 
 
-import axios from "axios"
-import { getBusinessForWebhook } from "@/actions/businfo"
-import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
-import type { VoiceflowVariables } from "@/types/voiceflow"
-import type { JsonValue } from "@prisma/client/runtime/library"
-
-const API_KEY = process.env.VOICEFLOW_API_KEY
-const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
-const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
-
-interface VoiceflowResponse {
-  type: string
-  payload: any
-}
-
-interface VoiceflowButton {
-  name: string
-  request?: {
-    payload?: string
-    type?: string
-  }
-}
-
-interface VoiceflowChoicePayload {
-  buttons?: VoiceflowButton[]
-}
-
-interface VoiceflowTextPayload {
-  message: string
-}
-
-interface VoiceflowTrace {
-  type: string
-  payload: VoiceflowChoicePayload | VoiceflowTextPayload | any
-}
-
-interface BusinessData {
-  id: string
-  name: string | null
-  businessName: string
-  businessType: string
-  businessDescription: string
-  industry: string
-  automationSetupComplete: boolean
-  automationSetupDate: Date | null
-  automationAdditionalNotes: string | null
-  automationGoals: JsonValue | null
-  customerJourney: JsonValue | null
-  features: JsonValue | null
-  businessTypeData: JsonValue | null
-  websiteAnalysis: JsonValue | null
-  targetAudience: string
-  website: string
-  instagramHandle: string
-  welcomeMessage: string
-  responseLanguage: string
-  businessHours: string
-  autoReplyEnabled: boolean
-  promotionMessage: string
-  createdAt: Date
-  updatedAt: Date
-  userId: string | null
-}
-
-// Enhanced circuit breaker with health monitoring
-class EnhancedCircuitBreaker {
-  private failures = 0
-  private successes = 0
-  private lastFailureTime = 0
-  private lastSuccessTime = 0
-  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED"
-  private healthScore = 1.0
-
-  constructor(
-    private maxFailures = 5,
-    private resetTimeout = 60000,
-    private healthThreshold = 0.7,
-  ) {}
-
-  async execute<T>(operation: () => Promise<T>): Promise<T> {
-    if (this.state === "OPEN") {
-      if (Date.now() - this.lastFailureTime > this.resetTimeout) {
-        this.state = "HALF_OPEN"
-        console.log("🔄 Circuit breaker moving to HALF_OPEN state")
-      } else {
-        throw new Error(`Circuit breaker is OPEN. Health score: ${this.healthScore.toFixed(2)}`)
-      }
-    }
-
-    try {
-      const result = await operation()
-      this.onSuccess()
-      return result
-    } catch (error) {
-      this.onFailure()
-      throw error
-    }
-  }
-
-  private onSuccess() {
-    this.successes++
-    this.lastSuccessTime = Date.now()
-    this.state = "CLOSED"
-
-    // Update health score
-    const totalOperations = this.successes + this.failures
-    this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 1.0
-
-    // Reset failure count on sustained success
-    if (this.successes >= 10) {
-      this.failures = Math.max(0, this.failures - 1)
-    }
-
-    console.log(`✅ Voiceflow operation successful. Health score: ${this.healthScore.toFixed(2)}`)
-  }
-
-  private onFailure() {
-    this.failures++
-    this.lastFailureTime = Date.now()
-
-    // Update health score
-    const totalOperations = this.successes + this.failures
-    this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 0.0
-
-    if (this.failures >= this.maxFailures || this.healthScore < this.healthThreshold) {
-      this.state = "OPEN"
-      console.log(`❌ Circuit breaker OPEN. Failures: ${this.failures}, Health: ${this.healthScore.toFixed(2)}`)
-    }
-  }
-
-  getHealthScore(): number {
-    return this.healthScore
-  }
-
-  getState(): string {
-    return this.state
-  }
-}
-
-const voiceflowCircuitBreaker = new EnhancedCircuitBreaker()
-
-// Enhanced user creation cache with TTL
-const userCreationCache = new Map<string, { promise: Promise<boolean>; timestamp: number }>()
-const USER_CACHE_TTL = 300000 // 5 minutes
-
-// Simple customer data extraction from Voiceflow variables
-export function extractBasicCustomerData(variables: Record<string, any>) {
-  return {
-    name: variables.customer_name || variables.clientname || variables.name || null,
-    email: variables.customer_email || variables.clientemail || variables.email || null,
-    phone: variables.customer_phone || variables.clientphone || variables.phone || null,
-  }
-}
-
-// Enhanced business variables with conversation context
-export async function fetchEnhancedBusinessVariables(
-  businessId: string,
-  automationId: string,
-  conversationContext?: {
-    pageId: string
-    senderId: string
-    userMessage: string
-    isNewUser: boolean
-    customerType: string
-    messageHistory: Array<{ role: "user" | "assistant"; content: string }>
-  },
-): Promise<Record<string, string>> {
-  console.log("🔍 Fetching enhanced business variables...")
-
-  try {
-    // Get business profile description
-    const { profileContent, businessContext } = await getBusinessProfileForAutomation(automationId)
-
-    // Get traditional business data
-    const businessResponse = await getBusinessForWebhook(businessId)
-
-    if (businessResponse.status !== 200 || !businessResponse.data.business) {
-      throw new Error(`Failed to fetch business data. Status: ${businessResponse.status}`)
-    }
-
-    const businessData: BusinessData = businessResponse.data.business
-
-    const result: Record<string, string> = {
-      // Enhanced business profile integration
-      business_profile: profileContent,
-      business_name: businessContext.businessName || businessData.businessName || "Default Business Name",
-      welcome_message: businessContext.welcomeMessage || businessData.welcomeMessage || "Welcome!",
-      business_industry: businessContext.industry || businessData.industry || "General",
-      business_type: businessData.businessType || "General",
-      business_description:
-        businessContext.businessDescription || businessData.businessDescription || "No description provided",
-      instagram_handle: businessData.instagramHandle || "",
-      response_language: businessContext.responseLanguage || businessData.responseLanguage || "English",
-      business_hours: businessData.businessHours || "Not specified",
-      auto_reply_enabled: businessData.autoReplyEnabled ? "Yes" : "No",
-      promotion_message: businessContext.promotionMessage || businessData.promotionMessage || "",
-      target_audience: businessContext.targetAudience || businessData.targetAudience || "",
-      website: businessData.website || "",
-      // Add basic data collection variables for Voiceflow
-      customer_name: "",
-      customer_email: "",
-      customer_phone: "",
-    }
-
-    // Add conversation context if available
-    if (conversationContext) {
-      result.customer_type = conversationContext.customerType
-      result.is_new_user = conversationContext.isNewUser.toString()
-      result.current_message = conversationContext.userMessage
-      result.conversation_history = conversationContext.messageHistory
-        .slice(-5)
-        .map((msg) => `${msg.role}: ${msg.content}`)
-        .join(" | ")
-      result.conversation_length = conversationContext.messageHistory.length.toString()
-
-      // Add conversation insights
-      const hasQuestions = conversationContext.userMessage.includes("?")
-      const hasUrgentWords = /urgent|asap|immediately|emergency|help/i.test(conversationContext.userMessage)
-      const hasPurchaseIntent = /buy|purchase|order|price|cost|payment/i.test(conversationContext.userMessage)
-
-      result.has_questions = hasQuestions.toString()
-      result.is_urgent = hasUrgentWords.toString()
-      result.has_purchase_intent = hasPurchaseIntent.toString()
-    }
-
-    // Parse JSON fields safely with enhanced error handling
-    if (businessData.automationGoals) {
-      try {
-        const automationGoals =
-          typeof businessData.automationGoals === "string"
-            ? JSON.parse(businessData.automationGoals)
-            : (businessData.automationGoals as Record<string, any>)
-        result.primary_goal = automationGoals.primaryGoal || ""
-        result.response_time = automationGoals.responseTime?.toString() || ""
-        result.custom_goals = automationGoals.customGoals || ""
-      } catch (e) {
-        console.error("❌ Error parsing automationGoals:", e)
-      }
-    }
-
-    if (businessData.customerJourney) {
-      try {
-        const customerJourney =
-          typeof businessData.customerJourney === "string"
-            ? JSON.parse(businessData.customerJourney)
-            : (businessData.customerJourney as Record<string, any>)
-        result.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
-      } catch (e) {
-        console.error("❌ Error parsing customerJourney:", e)
-      }
-    }
-
-    if (businessData.features) {
-      try {
-        const features =
-          typeof businessData.features === "string"
-            ? JSON.parse(businessData.features)
-            : (businessData.features as Record<string, any>)
-        result.enabled_features =
-          features.features
-            ?.filter((f: any) => f.enabled)
-            .map((f: any) => f.name)
-            .join(", ") || ""
-      } catch (e) {
-        console.error("❌ Error parsing features:", e)
-      }
-    }
-
-    if (businessData.businessTypeData) {
-      result.business_type_data = JSON.stringify(businessData.businessTypeData)
-    }
-
-    if (businessData.websiteAnalysis) {
-      result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
-    }
-
-    result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
-    result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
-    result.automation_additional_notes = businessData.automationAdditionalNotes || ""
-
-    // Add system context
-    result.system_timestamp = new Date().toISOString()
-    result.voiceflow_health_score = voiceflowCircuitBreaker.getHealthScore().toFixed(2)
-
-    console.log("✅ Enhanced business variables prepared")
-    return result
-  } catch (error) {
-    console.error("❌ Error in fetchEnhancedBusinessVariables:", error)
-    throw error
-  }
-}
-
-// Enhanced Voiceflow response with intelligent retry and fallback detection
-export async function getEnhancedVoiceflowResponse(
-  userInput: string,
-  userId: string,
-  businessVariables: Record<string, string>,
-  options?: {
-    maxRetries?: number
-    timeoutMs?: number
-    enableFallbackDetection?: boolean
-  },
-): Promise<{
-  success: boolean
-  response?: {
-    text: string
-    buttons?: Array<{ name: string; payload: string }>
-    requiresHumanHandoff?: boolean
-    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-    sentiment?: "positive" | "neutral" | "negative"
-    complexity?: "simple" | "medium" | "complex"
-  }
-  variables?: VoiceflowVariables
-  error?: string
-  isEmpty?: boolean
-  healthScore?: number
-  fallbackReason?: string
-}> {
-  const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true } = options || {}
-
-  try {
-    const result = await voiceflowCircuitBreaker.execute(async () => {
-      let lastError: Error | null = null
-
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
-
-          const response = await axios.post<VoiceflowResponse[]>(
-            `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-            {
-              request: { type: "text", payload: userInput },
-              state: { variables: businessVariables },
-            },
-            {
-              headers: {
-                Authorization: API_KEY,
-                versionID: VERSION_ID,
-                accept: "application/json",
-                "content-type": "application/json",
-              },
-              timeout: timeoutMs,
-            },
-          )
-
-          const processedResponse = processEnhancedVoiceflowResponse(response.data)
-          const updatedVariables = await fetchVoiceflowVariables(userId)
-
-          // Enhanced fallback detection
-          if (enableFallbackDetection) {
-            const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
-            if (fallbackCheck.shouldFallback) {
-              console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
-              return {
-                success: false,
-                error: fallbackCheck.reason,
-                isEmpty: fallbackCheck.isEmpty,
-                fallbackReason: fallbackCheck.reason,
-                healthScore: voiceflowCircuitBreaker.getHealthScore(),
-              }
-            }
-          }
-
-          console.log(`✅ Voiceflow API success on attempt ${attempt}`)
-          return {
-            success: true,
-            response: processedResponse,
-            variables: updatedVariables,
-            healthScore: voiceflowCircuitBreaker.getHealthScore(),
-          }
-        } catch (error) {
-          lastError = error as Error
-          console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
-
-          if (attempt < maxRetries) {
-            const baseDelay = Math.pow(2, attempt) * 1000
-            const jitter = Math.random() * 1000
-            const delay = baseDelay + jitter
-
-            console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
-            await new Promise((resolve) => setTimeout(resolve, delay))
-          }
-        }
-      }
-
-      throw lastError || new Error("Failed to get Voiceflow response after all retries")
-    })
-
-    return result
-  } catch (error) {
-    console.error("💥 Voiceflow circuit breaker or final error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      healthScore: voiceflowCircuitBreaker.getHealthScore(),
-      fallbackReason: "Circuit breaker open or API failure",
-    }
-  }
-}
-
-// Enhanced fallback detection
-function detectFallbackConditions(
-  response: any,
-  userInput: string,
-): { shouldFallback: boolean; reason: string; isEmpty: boolean } {
-  // Check for empty response
-  if (!response.text || response.text.trim().length === 0) {
-    return { shouldFallback: true, reason: "Empty response from Voiceflow", isEmpty: true }
-  }
-
-  // Check for generic error responses
-  const genericResponses = [
-    "i don't understand",
-    "sorry, i didn't get that",
-    "can you repeat that",
-    "i'm not sure what you mean",
-    "error",
-    "something went wrong",
-    "please try again",
-    "system error",
-    "unable to process",
-  ]
-
-  const responseText = response.text.toLowerCase()
-  const isGeneric = genericResponses.some((generic) => responseText.includes(generic))
-
-  if (isGeneric) {
-    return { shouldFallback: true, reason: `Generic response detected: "${response.text}"`, isEmpty: false }
-  }
-
-  // Check for very short responses that might indicate issues
-  if (response.text.length < 10 && !response.buttons?.length) {
-    return { shouldFallback: true, reason: "Response too short without buttons", isEmpty: false }
-  }
-
-  // Check for responses that don't seem to address the user input
-  const userWords = userInput.toLowerCase().split(/\s+/)
-  const responseWords = response.text.toLowerCase().split(/\s+/)
-  const commonWords = userWords.filter((word) => responseWords.includes(word) && word.length > 3)
-
-  if (userInput.length > 20 && commonWords.length === 0 && !response.buttons?.length) {
-    return {
-      shouldFallback: true,
-      reason: "Response doesn't seem to address user input",
-      isEmpty: false,
-    }
-  }
-
-  return { shouldFallback: false, reason: "", isEmpty: false }
-}
-
-// Enhanced response processing with intelligence
-export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
-  text: string
-  buttons?: { name: string; payload: string }[]
-  requiresHumanHandoff?: boolean
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-  sentiment?: "positive" | "neutral" | "negative"
-  complexity?: "simple" | "medium" | "complex"
-} {
-  let result = ""
-  const buttons: { name: string; payload: string }[] = []
-  let requiresHumanHandoff = false
-  let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
-  let sentiment: "positive" | "neutral" | "negative" = "neutral"
-  let complexity: "simple" | "medium" | "complex" = "medium"
-
-  for (const trace of traces) {
-    switch (trace.type) {
-      case "text":
-        if ("message" in trace.payload) {
-          const message = (trace.payload as VoiceflowTextPayload).message
-          result += message + "\n"
-
-          // Analyze message complexity
-          if (message.length > 200 || message.split(".").length > 3) {
-            complexity = "complex"
-          } else if (message.length < 50) {
-            complexity = "simple"
-          }
-        }
-        break
-
-      case "choice":
-        if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
-          trace.payload.buttons.forEach((button: VoiceflowButton) => {
-            buttons.push({
-              name: button.name,
-              payload: button.request?.payload || button.name,
-            })
-          })
-        }
-        break
-
-      case "visual":
-        if ("image" in trace.payload) {
-          result += `[Image: ${trace.payload.image}]\n`
-        }
-        break
-
-      case "speak":
-        if ("message" in trace.payload) {
-          result += (trace.payload as VoiceflowTextPayload).message + "\n"
-        }
-        break
-
-      case "end":
-        result += "\n[Conversation ended]"
-        break
-
-      case "handoff":
-        requiresHumanHandoff = true
-        priority = "HIGH"
-        if ("reason" in trace.payload) {
-          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
-        }
-        break
-
-      case "priority":
-        if ("level" in trace.payload) {
-          priority = trace.payload.level
-        }
-        break
-
-      case "sentiment":
-        if ("value" in trace.payload) {
-          sentiment = trace.payload.value
-        }
-        break
-
-      case "debug":
-        console.log("🔍 Voiceflow debug:", trace.payload)
-        break
-
-      default:
-        console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
-        break
-    }
-  }
-
-  // Auto-detect sentiment if not explicitly set
-  if (sentiment === "neutral") {
-    const text = result.toLowerCase()
-    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
-      sentiment = "negative"
-    } else if (
-      text.includes("great") ||
-      text.includes("excellent") ||
-      text.includes("wonderful") ||
-      text.includes("thank")
-    ) {
-      sentiment = "positive"
-    }
-  }
-
-  return {
-    text: result.trim(),
-    buttons: buttons.length > 0 ? buttons : undefined,
-    requiresHumanHandoff,
-    priority,
-    sentiment,
-    complexity,
-  }
-}
-
-// Enhanced Voiceflow variables fetching
-async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
-  const maxRetries = 2
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await axios.get<{ variables: VoiceflowVariables }>(
-        `https://general-runtime.voiceflow.com/state/user/${userId}`,
-        {
-          headers: {
-            Authorization: API_KEY,
-            versionID: VERSION_ID,
-            accept: "application/json",
-          },
-          timeout: 8000,
-        },
-      )
-      return response.data.variables || {}
-    } catch (error) {
-      console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
-
-      if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      }
-    }
-  }
-
-  console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
-  return {}
-}
-
-// Enhanced user creation with cache management
-export async function createVoiceflowUser(userId: string): Promise<boolean> {
-  // Clean expired cache entries
-  const now = Date.now()
-  userCreationCache.forEach((value, key) => {
-    if (now - value.timestamp > USER_CACHE_TTL) {
-      userCreationCache.delete(key)
-    }
-  })
-
-  if (userCreationCache.has(userId)) {
-    console.log(`👤 User creation already in progress for ${userId}`)
-    return await userCreationCache.get(userId)!.promise
-  }
-
-  const creationPromise = createVoiceflowUserInternal(userId)
-  userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
-
-  try {
-    const result = await creationPromise
-    return result
-  } finally {
-    // Clean up cache after completion
-    setTimeout(() => {
-      userCreationCache.delete(userId)
-    }, 10000) // Keep in cache for 10 seconds after completion
-  }
-}
-
-async function createVoiceflowUserInternal(userId: string): Promise<boolean> {
-  const maxRetries = 3
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await axios.put(
-        "https://api.voiceflow.com/v2/transcripts",
-        {
-          projectID: PROJECT_ID,
-          versionID: VERSION_ID,
-          sessionID: userId,
-        },
-        {
-          headers: {
-            accept: "application/json",
-            "content-type": "application/json",
-            Authorization: API_KEY,
-          },
-          timeout: 12000,
-        },
-      )
-      console.log(`✅ Voiceflow user created successfully: ${userId}`)
-      return response.status === 200 || response.status === 201
-    } catch (error) {
-      console.error(`❌ Error creating Voiceflow user (attempt ${attempt}):`, error)
-
-      if (attempt < maxRetries) {
-        const delay = Math.pow(2, attempt - 1) * 1000
-        await new Promise((resolve) => setTimeout(resolve, delay))
-      }
-    }
-  }
-
-  console.error(`💥 Failed to create Voiceflow user after ${maxRetries} attempts`)
-  return false
-}
-
-// Enhanced user reset
-export async function resetVoiceflowUser(userId: string): Promise<boolean> {
-  try {
-    const response = await axios.post(
-      `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-      { request: { type: "reset" } },
-      {
-        headers: {
-          Authorization: API_KEY,
-          versionID: VERSION_ID,
-          accept: "application/json",
-          "content-type": "application/json",
-        },
-        timeout: 10000,
-      },
-    )
-    console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
-    return response.status === 200
-  } catch (error) {
-    console.error("❌ Error resetting Voiceflow user:", error)
-    return false
-  }
-}
-
-// Health monitoring
-export function getVoiceflowHealth(): {
-  healthScore: number
-  circuitBreakerState: string
-  cacheSize: number
-} {
-  return {
-    healthScore: voiceflowCircuitBreaker.getHealthScore(),
-    circuitBreakerState: voiceflowCircuitBreaker.getState(),
-    cacheSize: userCreationCache.size,
-  }
-}
+// import axios from "axios"
+// import { getBusinessForWebhook } from "@/actions/businfo"
+// import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
+// import type { VoiceflowVariables } from "@/types/voiceflow"
+// import type { JsonValue } from "@prisma/client/runtime/library"
+
+// const API_KEY = process.env.VOICEFLOW_API_KEY
+// const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
+// const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
+
+// interface VoiceflowResponse {
+//   type: string
+//   payload: any
+// }
+
+// interface VoiceflowButton {
+//   name: string
+//   request?: {
+//     payload?: string
+//     type?: string
+//   }
+// }
+
+// interface VoiceflowChoicePayload {
+//   buttons?: VoiceflowButton[]
+// }
+
+// interface VoiceflowTextPayload {
+//   message: string
+// }
+
+// interface VoiceflowTrace {
+//   type: string
+//   payload: VoiceflowChoicePayload | VoiceflowTextPayload | any
+// }
+
+// interface BusinessData {
+//   id: string
+//   name: string | null
+//   businessName: string
+//   businessType: string
+//   businessDescription: string
+//   industry: string
+//   automationSetupComplete: boolean
+//   automationSetupDate: Date | null
+//   automationAdditionalNotes: string | null
+//   automationGoals: JsonValue | null
+//   customerJourney: JsonValue | null
+//   features: JsonValue | null
+//   businessTypeData: JsonValue | null
+//   websiteAnalysis: JsonValue | null
+//   targetAudience: string
+//   website: string
+//   instagramHandle: string
+//   welcomeMessage: string
+//   responseLanguage: string
+//   businessHours: string
+//   autoReplyEnabled: boolean
+//   promotionMessage: string
+//   createdAt: Date
+//   updatedAt: Date
+//   userId: string | null
+// }
+
+// // Enhanced circuit breaker with health monitoring
+// class EnhancedCircuitBreaker {
+//   private failures = 0
+//   private successes = 0
+//   private lastFailureTime = 0
+//   private lastSuccessTime = 0
+//   private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED"
+//   private healthScore = 1.0
+
+//   constructor(
+//     private maxFailures = 5,
+//     private resetTimeout = 60000,
+//     private healthThreshold = 0.7,
+//   ) {}
+
+//   async execute<T>(operation: () => Promise<T>): Promise<T> {
+//     if (this.state === "OPEN") {
+//       if (Date.now() - this.lastFailureTime > this.resetTimeout) {
+//         this.state = "HALF_OPEN"
+//         console.log("🔄 Circuit breaker moving to HALF_OPEN state")
+//       } else {
+//         throw new Error(`Circuit breaker is OPEN. Health score: ${this.healthScore.toFixed(2)}`)
+//       }
+//     }
+
+//     try {
+//       const result = await operation()
+//       this.onSuccess()
+//       return result
+//     } catch (error) {
+//       this.onFailure()
+//       throw error
+//     }
+//   }
+
+//   private onSuccess() {
+//     this.successes++
+//     this.lastSuccessTime = Date.now()
+//     this.state = "CLOSED"
+
+//     // Update health score
+//     const totalOperations = this.successes + this.failures
+//     this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 1.0
+
+//     // Reset failure count on sustained success
+//     if (this.successes >= 10) {
+//       this.failures = Math.max(0, this.failures - 1)
+//     }
+
+//     console.log(`✅ Voiceflow operation successful. Health score: ${this.healthScore.toFixed(2)}`)
+//   }
+
+//   private onFailure() {
+//     this.failures++
+//     this.lastFailureTime = Date.now()
+
+//     // Update health score
+//     const totalOperations = this.successes + this.failures
+//     this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 0.0
+
+//     if (this.failures >= this.maxFailures || this.healthScore < this.healthThreshold) {
+//       this.state = "OPEN"
+//       console.log(`❌ Circuit breaker OPEN. Failures: ${this.failures}, Health: ${this.healthScore.toFixed(2)}`)
+//     }
+//   }
+
+//   getHealthScore(): number {
+//     return this.healthScore
+//   }
+
+//   getState(): string {
+//     return this.state
+//   }
+// }
+
+// const voiceflowCircuitBreaker = new EnhancedCircuitBreaker()
+
+// // Enhanced user creation cache with TTL
+// const userCreationCache = new Map<string, { promise: Promise<boolean>; timestamp: number }>()
+// const USER_CACHE_TTL = 300000 // 5 minutes
+
+// // Simple customer data extraction from Voiceflow variables
+// export function extractBasicCustomerData(variables: Record<string, any>) {
+//   return {
+//     name: variables.customer_name || variables.clientname || variables.name || null,
+//     email: variables.customer_email || variables.clientemail || variables.email || null,
+//     phone: variables.customer_phone || variables.clientphone || variables.phone || null,
+//   }
+// }
+
+// // Enhanced business variables with conversation context
+// export async function fetchEnhancedBusinessVariables(
+//   businessId: string,
+//   automationId: string,
+//   conversationContext?: {
+//     pageId: string
+//     senderId: string
+//     userMessage: string
+//     isNewUser: boolean
+//     customerType: string
+//     messageHistory: Array<{ role: "user" | "assistant"; content: string }>
+//   },
+// ): Promise<Record<string, string>> {
+//   console.log("🔍 Fetching enhanced business variables...")
+
+//   try {
+//     // Get business profile description
+//     const { profileContent, businessContext } = await getBusinessProfileForAutomation(automationId)
+
+//     // Get traditional business data
+//     const businessResponse = await getBusinessForWebhook(businessId)
+
+//     if (businessResponse.status !== 200 || !businessResponse.data.business) {
+//       throw new Error(`Failed to fetch business data. Status: ${businessResponse.status}`)
+//     }
+
+//     const businessData: BusinessData = businessResponse.data.business
+
+//     const result: Record<string, string> = {
+//       // Enhanced business profile integration
+//       business_profile: profileContent,
+//       business_name: businessContext.businessName || businessData.businessName || "Default Business Name",
+//       welcome_message: businessContext.welcomeMessage || businessData.welcomeMessage || "Welcome!",
+//       business_industry: businessContext.industry || businessData.industry || "General",
+//       business_type: businessData.businessType || "General",
+//       business_description:
+//         businessContext.businessDescription || businessData.businessDescription || "No description provided",
+//       instagram_handle: businessData.instagramHandle || "",
+//       response_language: businessContext.responseLanguage || businessData.responseLanguage || "English",
+//       business_hours: businessData.businessHours || "Not specified",
+//       auto_reply_enabled: businessData.autoReplyEnabled ? "Yes" : "No",
+//       promotion_message: businessContext.promotionMessage || businessData.promotionMessage || "",
+//       target_audience: businessContext.targetAudience || businessData.targetAudience || "",
+//       website: businessData.website || "",
+//       // Add basic data collection variables for Voiceflow
+//       customer_name: "",
+//       customer_email: "",
+//       customer_phone: "",
+//     }
+
+//     // Add conversation context if available
+//     if (conversationContext) {
+//       result.customer_type = conversationContext.customerType
+//       result.is_new_user = conversationContext.isNewUser.toString()
+//       result.current_message = conversationContext.userMessage
+//       result.conversation_history = conversationContext.messageHistory
+//         .slice(-5)
+//         .map((msg) => `${msg.role}: ${msg.content}`)
+//         .join(" | ")
+//       result.conversation_length = conversationContext.messageHistory.length.toString()
+
+//       // Add conversation insights
+//       const hasQuestions = conversationContext.userMessage.includes("?")
+//       const hasUrgentWords = /urgent|asap|immediately|emergency|help/i.test(conversationContext.userMessage)
+//       const hasPurchaseIntent = /buy|purchase|order|price|cost|payment/i.test(conversationContext.userMessage)
+
+//       result.has_questions = hasQuestions.toString()
+//       result.is_urgent = hasUrgentWords.toString()
+//       result.has_purchase_intent = hasPurchaseIntent.toString()
+//     }
+
+//     // Parse JSON fields safely with enhanced error handling
+//     if (businessData.automationGoals) {
+//       try {
+//         const automationGoals =
+//           typeof businessData.automationGoals === "string"
+//             ? JSON.parse(businessData.automationGoals)
+//             : (businessData.automationGoals as Record<string, any>)
+//         result.primary_goal = automationGoals.primaryGoal || ""
+//         result.response_time = automationGoals.responseTime?.toString() || ""
+//         result.custom_goals = automationGoals.customGoals || ""
+//       } catch (e) {
+//         console.error("❌ Error parsing automationGoals:", e)
+//       }
+//     }
+
+//     if (businessData.customerJourney) {
+//       try {
+//         const customerJourney =
+//           typeof businessData.customerJourney === "string"
+//             ? JSON.parse(businessData.customerJourney)
+//             : (businessData.customerJourney as Record<string, any>)
+//         result.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
+//       } catch (e) {
+//         console.error("❌ Error parsing customerJourney:", e)
+//       }
+//     }
+
+//     if (businessData.features) {
+//       try {
+//         const features =
+//           typeof businessData.features === "string"
+//             ? JSON.parse(businessData.features)
+//             : (businessData.features as Record<string, any>)
+//         result.enabled_features =
+//           features.features
+//             ?.filter((f: any) => f.enabled)
+//             .map((f: any) => f.name)
+//             .join(", ") || ""
+//       } catch (e) {
+//         console.error("❌ Error parsing features:", e)
+//       }
+//     }
+
+//     if (businessData.businessTypeData) {
+//       result.business_type_data = JSON.stringify(businessData.businessTypeData)
+//     }
+
+//     if (businessData.websiteAnalysis) {
+//       result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
+//     }
+
+//     result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
+//     result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
+//     result.automation_additional_notes = businessData.automationAdditionalNotes || ""
+
+//     // Add system context
+//     result.system_timestamp = new Date().toISOString()
+//     result.voiceflow_health_score = voiceflowCircuitBreaker.getHealthScore().toFixed(2)
+
+//     console.log("✅ Enhanced business variables prepared")
+//     return result
+//   } catch (error) {
+//     console.error("❌ Error in fetchEnhancedBusinessVariables:", error)
+//     throw error
+//   }
+// }
+
+// // Enhanced Voiceflow response with intelligent retry and fallback detection
+// export async function getEnhancedVoiceflowResponse(
+//   userInput: string,
+//   userId: string,
+//   businessVariables: Record<string, string>,
+//   options?: {
+//     maxRetries?: number
+//     timeoutMs?: number
+//     enableFallbackDetection?: boolean
+//   },
+// ): Promise<{
+//   success: boolean
+//   response?: {
+//     text: string
+//     buttons?: Array<{ name: string; payload: string }>
+//     requiresHumanHandoff?: boolean
+//     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//     sentiment?: "positive" | "neutral" | "negative"
+//     complexity?: "simple" | "medium" | "complex"
+//   }
+//   variables?: VoiceflowVariables
+//   error?: string
+//   isEmpty?: boolean
+//   healthScore?: number
+//   fallbackReason?: string
+// }> {
+//   const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true } = options || {}
+
+//   try {
+//     const result = await voiceflowCircuitBreaker.execute(async () => {
+//       let lastError: Error | null = null
+
+//       for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//         try {
+//           console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+
+//           const response = await axios.post<VoiceflowResponse[]>(
+//             `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//             {
+//               request: { type: "text", payload: userInput },
+//               state: { variables: businessVariables },
+//             },
+//             {
+//               headers: {
+//                 Authorization: API_KEY,
+//                 versionID: VERSION_ID,
+//                 accept: "application/json",
+//                 "content-type": "application/json",
+//               },
+//               timeout: timeoutMs,
+//             },
+//           )
+
+//           const processedResponse = processEnhancedVoiceflowResponse(response.data)
+//           const updatedVariables = await fetchVoiceflowVariables(userId)
+
+//           // Enhanced fallback detection
+//           if (enableFallbackDetection) {
+//             const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
+//             if (fallbackCheck.shouldFallback) {
+//               console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
+//               return {
+//                 success: false,
+//                 error: fallbackCheck.reason,
+//                 isEmpty: fallbackCheck.isEmpty,
+//                 fallbackReason: fallbackCheck.reason,
+//                 healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//               }
+//             }
+//           }
+
+//           console.log(`✅ Voiceflow API success on attempt ${attempt}`)
+//           return {
+//             success: true,
+//             response: processedResponse,
+//             variables: updatedVariables,
+//             healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//           }
+//         } catch (error) {
+//           lastError = error as Error
+//           console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
+
+//           if (attempt < maxRetries) {
+//             const baseDelay = Math.pow(2, attempt) * 1000
+//             const jitter = Math.random() * 1000
+//             const delay = baseDelay + jitter
+
+//             console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
+//             await new Promise((resolve) => setTimeout(resolve, delay))
+//           }
+//         }
+//       }
+
+//       throw lastError || new Error("Failed to get Voiceflow response after all retries")
+//     })
+
+//     return result
+//   } catch (error) {
+//     console.error("💥 Voiceflow circuit breaker or final error:", error)
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : String(error),
+//       healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//       fallbackReason: "Circuit breaker open or API failure",
+//     }
+//   }
+// }
+
+// // Enhanced fallback detection
+// function detectFallbackConditions(
+//   response: any,
+//   userInput: string,
+// ): { shouldFallback: boolean; reason: string; isEmpty: boolean } {
+//   // Check for empty response
+//   if (!response.text || response.text.trim().length === 0) {
+//     return { shouldFallback: true, reason: "Empty response from Voiceflow", isEmpty: true }
+//   }
+
+//   // Check for generic error responses
+//   const genericResponses = [
+//     "i don't understand",
+//     "sorry, i didn't get that",
+//     "can you repeat that",
+//     "i'm not sure what you mean",
+//     "error",
+//     "something went wrong",
+//     "please try again",
+//     "system error",
+//     "unable to process",
+//   ]
+
+//   const responseText = response.text.toLowerCase()
+//   const isGeneric = genericResponses.some((generic) => responseText.includes(generic))
+
+//   if (isGeneric) {
+//     return { shouldFallback: true, reason: `Generic response detected: "${response.text}"`, isEmpty: false }
+//   }
+
+//   // Check for very short responses that might indicate issues
+//   if (response.text.length < 10 && !response.buttons?.length) {
+//     return { shouldFallback: true, reason: "Response too short without buttons", isEmpty: false }
+//   }
+
+//   // Check for responses that don't seem to address the user input
+//   const userWords = userInput.toLowerCase().split(/\s+/)
+//   const responseWords = response.text.toLowerCase().split(/\s+/)
+//   const commonWords = userWords.filter((word) => responseWords.includes(word) && word.length > 3)
+
+//   if (userInput.length > 20 && commonWords.length === 0 && !response.buttons?.length) {
+//     return {
+//       shouldFallback: true,
+//       reason: "Response doesn't seem to address user input",
+//       isEmpty: false,
+//     }
+//   }
+
+//   return { shouldFallback: false, reason: "", isEmpty: false }
+// }
+
+// // Enhanced response processing with intelligence
+// export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+//   text: string
+//   buttons?: { name: string; payload: string }[]
+//   requiresHumanHandoff?: boolean
+//   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   sentiment?: "positive" | "neutral" | "negative"
+//   complexity?: "simple" | "medium" | "complex"
+// } {
+//   let result = ""
+//   const buttons: { name: string; payload: string }[] = []
+//   let requiresHumanHandoff = false
+//   let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+//   let sentiment: "positive" | "neutral" | "negative" = "neutral"
+//   let complexity: "simple" | "medium" | "complex" = "medium"
+
+//   for (const trace of traces) {
+//     switch (trace.type) {
+//       case "text":
+//         if ("message" in trace.payload) {
+//           const message = (trace.payload as VoiceflowTextPayload).message
+//           result += message + "\n"
+
+//           // Analyze message complexity
+//           if (message.length > 200 || message.split(".").length > 3) {
+//             complexity = "complex"
+//           } else if (message.length < 50) {
+//             complexity = "simple"
+//           }
+//         }
+//         break
+
+//       case "choice":
+//         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+//           trace.payload.buttons.forEach((button: VoiceflowButton) => {
+//             buttons.push({
+//               name: button.name,
+//               payload: button.request?.payload || button.name,
+//             })
+//           })
+//         }
+//         break
+
+//       case "visual":
+//         if ("image" in trace.payload) {
+//           result += `[Image: ${trace.payload.image}]\n`
+//         }
+//         break
+
+//       case "speak":
+//         if ("message" in trace.payload) {
+//           result += (trace.payload as VoiceflowTextPayload).message + "\n"
+//         }
+//         break
+
+//       case "end":
+//         result += "\n[Conversation ended]"
+//         break
+
+//       case "handoff":
+//         requiresHumanHandoff = true
+//         priority = "HIGH"
+//         if ("reason" in trace.payload) {
+//           result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+//         }
+//         break
+
+//       case "priority":
+//         if ("level" in trace.payload) {
+//           priority = trace.payload.level
+//         }
+//         break
+
+//       case "sentiment":
+//         if ("value" in trace.payload) {
+//           sentiment = trace.payload.value
+//         }
+//         break
+
+//       case "debug":
+//         console.log("🔍 Voiceflow debug:", trace.payload)
+//         break
+
+//       default:
+//         console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
+//         break
+//     }
+//   }
+
+//   // Auto-detect sentiment if not explicitly set
+//   if (sentiment === "neutral") {
+//     const text = result.toLowerCase()
+//     if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+//       sentiment = "negative"
+//     } else if (
+//       text.includes("great") ||
+//       text.includes("excellent") ||
+//       text.includes("wonderful") ||
+//       text.includes("thank")
+//     ) {
+//       sentiment = "positive"
+//     }
+//   }
+
+//   return {
+//     text: result.trim(),
+//     buttons: buttons.length > 0 ? buttons : undefined,
+//     requiresHumanHandoff,
+//     priority,
+//     sentiment,
+//     complexity,
+//   }
+// }
+
+// // Enhanced Voiceflow variables fetching
+// async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
+//   const maxRetries = 2
+
+//   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//     try {
+//       const response = await axios.get<{ variables: VoiceflowVariables }>(
+//         `https://general-runtime.voiceflow.com/state/user/${userId}`,
+//         {
+//           headers: {
+//             Authorization: API_KEY,
+//             versionID: VERSION_ID,
+//             accept: "application/json",
+//           },
+//           timeout: 8000,
+//         },
+//       )
+//       return response.data.variables || {}
+//     } catch (error) {
+//       console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
+
+//       if (attempt < maxRetries) {
+//         await new Promise((resolve) => setTimeout(resolve, 2000))
+//       }
+//     }
+//   }
+
+//   console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
+//   return {}
+// }
+
+// // Enhanced user creation with cache management
+// export async function createVoiceflowUser(userId: string): Promise<boolean> {
+//   // Clean expired cache entries
+//   const now = Date.now()
+//   userCreationCache.forEach((value, key) => {
+//     if (now - value.timestamp > USER_CACHE_TTL) {
+//       userCreationCache.delete(key)
+//     }
+//   })
+
+//   if (userCreationCache.has(userId)) {
+//     console.log(`👤 User creation already in progress for ${userId}`)
+//     return await userCreationCache.get(userId)!.promise
+//   }
+
+//   const creationPromise = createVoiceflowUserInternal(userId)
+//   userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
+
+//   try {
+//     const result = await creationPromise
+//     return result
+//   } finally {
+//     // Clean up cache after completion
+//     setTimeout(() => {
+//       userCreationCache.delete(userId)
+//     }, 10000) // Keep in cache for 10 seconds after completion
+//   }
+// }
+
+// async function createVoiceflowUserInternal(userId: string): Promise<boolean> {
+//   const maxRetries = 3
+
+//   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//     try {
+//       const response = await axios.put(
+//         "https://api.voiceflow.com/v2/transcripts",
+//         {
+//           projectID: PROJECT_ID,
+//           versionID: VERSION_ID,
+//           sessionID: userId,
+//         },
+//         {
+//           headers: {
+//             accept: "application/json",
+//             "content-type": "application/json",
+//             Authorization: API_KEY,
+//           },
+//           timeout: 12000,
+//         },
+//       )
+//       console.log(`✅ Voiceflow user created successfully: ${userId}`)
+//       return response.status === 200 || response.status === 201
+//     } catch (error) {
+//       console.error(`❌ Error creating Voiceflow user (attempt ${attempt}):`, error)
+
+//       if (attempt < maxRetries) {
+//         const delay = Math.pow(2, attempt - 1) * 1000
+//         await new Promise((resolve) => setTimeout(resolve, delay))
+//       }
+//     }
+//   }
+
+//   console.error(`💥 Failed to create Voiceflow user after ${maxRetries} attempts`)
+//   return false
+// }
+
+// // Enhanced user reset
+// export async function resetVoiceflowUser(userId: string): Promise<boolean> {
+//   try {
+//     const response = await axios.post(
+//       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//       { request: { type: "reset" } },
+//       {
+//         headers: {
+//           Authorization: API_KEY,
+//           versionID: VERSION_ID,
+//           accept: "application/json",
+//           "content-type": "application/json",
+//         },
+//         timeout: 10000,
+//       },
+//     )
+//     console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
+//     return response.status === 200
+//   } catch (error) {
+//     console.error("❌ Error resetting Voiceflow user:", error)
+//     return false
+//   }
+// }
+
+// // Health monitoring
+// export function getVoiceflowHealth(): {
+//   healthScore: number
+//   circuitBreakerState: string
+//   cacheSize: number
+// } {
+//   return {
+//     healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//     circuitBreakerState: voiceflowCircuitBreaker.getState(),
+//     cacheSize: userCreationCache.size,
+//   }
+// }
