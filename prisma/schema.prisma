@@ -14,8 +14,8 @@ model User {
   id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clerkId          String             @unique
   email            String             @unique
-  firstname        String?            @unique
-  lastname         String?            @unique
+  firstname        String?            
+  lastname         String?            
   phone            String?            @unique
   phoneVerified    Boolean            @default(false)
   isAdmin          Boolean            @default(false)
