@@ -397,11 +397,9 @@ export default function Layout({
         {/* Left sidebar with brand elements - increased width to 45% */}
         <div className="hidden lg:flex w-[45%] bg-card/30 backdrop-blur-xl flex-col justify-between p-8 border-r border-border/50">
           <div>
-            <div className="flex items-center space-x-2 mb-12">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center glow shadow-lg">
-                <span className="text-white font-bold text-2xl">Y</span>
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">Yazzil</h1>
+            <div className="flex items-center gap-2">
+              <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-16 w-16" />
+              <span className="text-xl font-bold">Yazzil</span>
             </div>
 
             {/* Dynamic Card Showcase */}
