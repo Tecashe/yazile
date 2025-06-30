@@ -201,338 +201,338 @@
 //   }
 // }
 
-import { NextResponse } from "next/server";
-import axios from "axios";
-import { client } from "@/lib/prisma";
-import type { INTEGRATIONS } from "@prisma/client";
+// import { NextResponse } from "next/server";
+// import axios from "axios";
+// import { client } from "@/lib/prisma";
+// import type { INTEGRATIONS } from "@prisma/client";
 
-interface InstagramIntegration {
-  id: string;
-  createdAt: Date;
-  name: INTEGRATIONS;
-  userId: string | null;
-  token: string;
-  expiresAt: Date | null;
-  instagramId: string | null;
-  username: string | null;
-  lastUpdated: Date;
-}
+// interface InstagramIntegration {
+//   id: string;
+//   createdAt: Date;
+//   name: INTEGRATIONS;
+//   userId: string | null;
+//   token: string;
+//   expiresAt: Date | null;
+//   instagramId: string | null;
+//   username: string | null;
+//   lastUpdated: Date;
+// }
 
-const logApiError = (context: string, error: any, extra?: Record<string, any>) => {
-  const timestamp = new Date().toISOString();
-  const errorInfo = {
-    timestamp,
-    context,
-    errorName: error?.name || "UnknownError",
-    errorMessage: error?.message || "No error message",
-    stack: error?.stack || "No stack trace",
-    axiosError: error?.isAxiosError ? {
-      url: error?.config?.url,
-      method: error?.config?.method,
-      params: error?.config?.params,
-      data: error?.config?.data,
-      status: error?.response?.status,
-      responseData: error?.response?.data,
-    } : null,
-    ...extra
-  };
+// const logApiError = (context: string, error: any, extra?: Record<string, any>) => {
+//   const timestamp = new Date().toISOString();
+//   const errorInfo = {
+//     timestamp,
+//     context,
+//     errorName: error?.name || "UnknownError",
+//     errorMessage: error?.message || "No error message",
+//     stack: error?.stack || "No stack trace",
+//     axiosError: error?.isAxiosError ? {
+//       url: error?.config?.url,
+//       method: error?.config?.method,
+//       params: error?.config?.params,
+//       data: error?.config?.data,
+//       status: error?.response?.status,
+//       responseData: error?.response?.data,
+//     } : null,
+//     ...extra
+//   };
 
-  console.error(JSON.stringify(errorInfo, null, 2));
-};
+//   console.error(JSON.stringify(errorInfo, null, 2));
+// };
 
-export async function POST(request: Request) {
-  try {
-    const { userId, caption, mediaUrls, mediaType, thumbnailUrl } = await request.json();
+// export async function POST(request: Request) {
+//   try {
+//     const { userId, caption, mediaUrls, mediaType, thumbnailUrl } = await request.json();
     
-    logApiError("POST /api/post-to-instagram - Start", null, {
-      userId,
-      mediaType,
-      mediaUrlCount: mediaUrls.length,
-      hasThumbnail: !!thumbnailUrl
-    });
+//     logApiError("POST /api/post-to-instagram - Start", null, {
+//       userId,
+//       mediaType,
+//       mediaUrlCount: mediaUrls.length,
+//       hasThumbnail: !!thumbnailUrl
+//     });
 
-    // Validate input
-    if (!userId || !caption || !mediaUrls || mediaUrls.length === 0 || !mediaType) {
-      logApiError("POST /api/post-to-instagram - Invalid Input", null, {
-        userId,
-        captionExists: !!caption,
-        mediaUrlCount: mediaUrls?.length || 0,
-        mediaType
-      });
-      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
-    }
+//     // Validate input
+//     if (!userId || !caption || !mediaUrls || mediaUrls.length === 0 || !mediaType) {
+//       logApiError("POST /api/post-to-instagram - Invalid Input", null, {
+//         userId,
+//         captionExists: !!caption,
+//         mediaUrlCount: mediaUrls?.length || 0,
+//         mediaType
+//       });
+//       return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
+//     }
 
-    // Fetch user data
-    const user = await client.user.findUnique({
-      where: { clerkId: userId },
-      include: { integrations: { where: { name: "INSTAGRAM" } } },
-    });
+//     // Fetch user data
+//     const user = await client.user.findUnique({
+//       where: { clerkId: userId },
+//       include: { integrations: { where: { name: "INSTAGRAM" } } },
+//     });
 
-    if (!user) {
-      logApiError("POST /api/post-to-instagram - User Not Found", null, { userId });
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+//     if (!user) {
+//       logApiError("POST /api/post-to-instagram - User Not Found", null, { userId });
+//       return NextResponse.json({ error: "User not found" }, { status: 404 });
+//     }
 
-    if (!user.integrations || user.integrations.length === 0) {
-      logApiError("POST /api/post-to-instagram - Integration Missing", null, { userId });
-      return NextResponse.json({ error: "Instagram integration not found" }, { status: 404 });
-    }
+//     if (!user.integrations || user.integrations.length === 0) {
+//       logApiError("POST /api/post-to-instagram - Integration Missing", null, { userId });
+//       return NextResponse.json({ error: "Instagram integration not found" }, { status: 404 });
+//     }
 
-    const instagramIntegration = user.integrations[0] as InstagramIntegration;
+//     const instagramIntegration = user.integrations[0] as InstagramIntegration;
 
-    if (!instagramIntegration.instagramId) {
-      logApiError("POST /api/post-to-instagram - Missing Instagram ID", null, {
-        integrationId: instagramIntegration.id
-      });
-      return NextResponse.json({ error: "Instagram ID not found" }, { status: 400 });
-    }
+//     if (!instagramIntegration.instagramId) {
+//       logApiError("POST /api/post-to-instagram - Missing Instagram ID", null, {
+//         integrationId: instagramIntegration.id
+//       });
+//       return NextResponse.json({ error: "Instagram ID not found" }, { status: 400 });
+//     }
 
-    if (!instagramIntegration.token) {
-      logApiError("POST /api/post-to-instagram - Missing Access Token", null, {
-        integrationId: instagramIntegration.id
-      });
-      return NextResponse.json({ error: "Instagram access token not found" }, { status: 401 });
-    }
+//     if (!instagramIntegration.token) {
+//       logApiError("POST /api/post-to-instagram - Missing Access Token", null, {
+//         integrationId: instagramIntegration.id
+//       });
+//       return NextResponse.json({ error: "Instagram access token not found" }, { status: 401 });
+//     }
 
-    logApiError("POST /api/post-to-instagram - Integration Details", null, {
-      integrationId: instagramIntegration.id,
-      instagramId: instagramIntegration.instagramId,
-      hasToken: !!instagramIntegration.token,
-      tokenLength: instagramIntegration.token.length,
-      tokenExpires: instagramIntegration.expiresAt
-    });
+//     logApiError("POST /api/post-to-instagram - Integration Details", null, {
+//       integrationId: instagramIntegration.id,
+//       instagramId: instagramIntegration.instagramId,
+//       hasToken: !!instagramIntegration.token,
+//       tokenLength: instagramIntegration.token.length,
+//       tokenExpires: instagramIntegration.expiresAt
+//     });
 
-    // Media validation
-    try {
-      logApiError("POST /api/post-to-instagram - Validating Media URLs", null);
+//     // Media validation
+//     try {
+//       logApiError("POST /api/post-to-instagram - Validating Media URLs", null);
       
-      for (const url of mediaUrls) {
-        const response = await fetch(url, { method: 'HEAD' });
-        if (!response.ok) {
-          logApiError("POST /api/post-to-instagram - Invalid Media URL", null, {
-            url,
-            status: response.status
-          });
-          return NextResponse.json({ error: `Media URL is not accessible: ${url}` }, { status: 400 });
-        }
-      }
-    } catch (error) {
-      logApiError("POST /api/post-to-instagram - Media Validation Failed", error);
-      return NextResponse.json({ error: "Media validation failed" }, { status: 400 });
-    }
+//       for (const url of mediaUrls) {
+//         const response = await fetch(url, { method: 'HEAD' });
+//         if (!response.ok) {
+//           logApiError("POST /api/post-to-instagram - Invalid Media URL", null, {
+//             url,
+//             status: response.status
+//           });
+//           return NextResponse.json({ error: `Media URL is not accessible: ${url}` }, { status: 400 });
+//         }
+//       }
+//     } catch (error) {
+//       logApiError("POST /api/post-to-instagram - Media Validation Failed", error);
+//       return NextResponse.json({ error: "Media validation failed" }, { status: 400 });
+//     }
 
-    // Post to Instagram
-    let postId: string;
-    try {
-      if (mediaUrls.length > 1) {
-        logApiError("POST /api/post-to-instagram - Creating Carousel", null, {
-          itemCount: mediaUrls.length
-        });
+//     // Post to Instagram
+//     let postId: string;
+//     try {
+//       if (mediaUrls.length > 1) {
+//         logApiError("POST /api/post-to-instagram - Creating Carousel", null, {
+//           itemCount: mediaUrls.length
+//         });
         
-        // Carousel creation logic
-        const containerIds = [];
-        for (const mediaUrl of mediaUrls) {
-          const isVideo = mediaUrl.endsWith(".mp4") || mediaUrl.endsWith(".mov");
-          const containerMediaType = isVideo ? "VIDEO" : "IMAGE";
+//         // Carousel creation logic
+//         const containerIds = [];
+//         for (const mediaUrl of mediaUrls) {
+//           const isVideo = mediaUrl.endsWith(".mp4") || mediaUrl.endsWith(".mov");
+//           const containerMediaType = isVideo ? "VIDEO" : "IMAGE";
           
-          const containerId = await createMediaContainer(
-            instagramIntegration.instagramId!,
-            instagramIntegration.token,
-            mediaUrl,
-            containerMediaType,
-            true
-          );
-          containerIds.push(containerId);
-        }
+//           const containerId = await createMediaContainer(
+//             instagramIntegration.instagramId!,
+//             instagramIntegration.token,
+//             mediaUrl,
+//             containerMediaType,
+//             true
+//           );
+//           containerIds.push(containerId);
+//         }
         
-        postId = await createCarouselContainer(
-          instagramIntegration.instagramId!,
-          instagramIntegration.token,
-          containerIds,
-          caption
-        );
-      } else {
-        logApiError("POST /api/post-to-instagram - Creating Single Media", null, {
-          mediaType,
-          url: mediaUrls[0]
-        });
+//         postId = await createCarouselContainer(
+//           instagramIntegration.instagramId!,
+//           instagramIntegration.token,
+//           containerIds,
+//           caption
+//         );
+//       } else {
+//         logApiError("POST /api/post-to-instagram - Creating Single Media", null, {
+//           mediaType,
+//           url: mediaUrls[0]
+//         });
         
-        const isVideo = mediaUrls[0].endsWith(".mp4") || mediaUrls[0].endsWith(".mov");
-        const containerMediaType = isVideo ? "VIDEO" : "IMAGE";
+//         const isVideo = mediaUrls[0].endsWith(".mp4") || mediaUrls[0].endsWith(".mov");
+//         const containerMediaType = isVideo ? "VIDEO" : "IMAGE";
         
-        postId = await createMediaContainer(
-          instagramIntegration.instagramId!,
-          instagramIntegration.token,
-          mediaUrls[0],
-          containerMediaType,
-          false,
-          caption
-        );
-      }
+//         postId = await createMediaContainer(
+//           instagramIntegration.instagramId!,
+//           instagramIntegration.token,
+//           mediaUrls[0],
+//           containerMediaType,
+//           false,
+//           caption
+//         );
+//       }
       
-      logApiError("POST /api/post-to-instagram - Publishing Media", null, { postId });
+//       logApiError("POST /api/post-to-instagram - Publishing Media", null, { postId });
       
-      const publishResult = await publishMedia(
-        instagramIntegration.instagramId!,
-        instagramIntegration.token,
-        postId
-      );
+//       const publishResult = await publishMedia(
+//         instagramIntegration.instagramId!,
+//         instagramIntegration.token,
+//         postId
+//       );
       
-      logApiError("POST /api/post-to-instagram - Media Published Successfully", null, { 
-        publishResult,
-        finalPostId: publishResult
-      });
+//       logApiError("POST /api/post-to-instagram - Media Published Successfully", null, { 
+//         publishResult,
+//         finalPostId: publishResult
+//       });
       
-      return NextResponse.json({ success: true, postId: publishResult });
-    } catch (error) {
-      logApiError("POST /api/post-to-instagram - Publishing Failed", error, {
-        mediaType,
-        mediaUrlCount: mediaUrls.length
-      });
+//       return NextResponse.json({ success: true, postId: publishResult });
+//     } catch (error) {
+//       logApiError("POST /api/post-to-instagram - Publishing Failed", error, {
+//         mediaType,
+//         mediaUrlCount: mediaUrls.length
+//       });
       
-      // More specific error handling
-      if (error instanceof Error && error.message.includes('401')) {
-        return NextResponse.json({ 
-          error: "Instagram authentication failed. Please reconnect your Instagram account." 
-        }, { status: 401 });
-      }
+//       // More specific error handling
+//       if (error instanceof Error && error.message.includes('401')) {
+//         return NextResponse.json({ 
+//           error: "Instagram authentication failed. Please reconnect your Instagram account." 
+//         }, { status: 401 });
+//       }
       
-      return NextResponse.json({ 
-        error: "Failed to publish to Instagram. Please try again." 
-      }, { status: 500 });
-    }
-  } catch (error) {
-    logApiError("POST /api/post-to-instagram - Unhandled Error", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
+//       return NextResponse.json({ 
+//         error: "Failed to publish to Instagram. Please try again." 
+//       }, { status: 500 });
+//     }
+//   } catch (error) {
+//     logApiError("POST /api/post-to-instagram - Unhandled Error", error);
+//     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+//   }
+// }
 
-// Helper functions
-async function createMediaContainer(
-  instagramId: string,
-  token: string,
-  mediaUrl: string,
-  mediaType: string,
-  isCarouselItem = false,
-  caption?: string,
-) {
-  try {
-    const params: any = {
-      [mediaType === "VIDEO" ? "video_url" : "image_url"]: mediaUrl,
-      media_type: mediaType === "VIDEO" ? "VIDEO" : "IMAGE",
-      ...(isCarouselItem && { is_carousel_item: true }),
-    };
+// // Helper functions
+// async function createMediaContainer(
+//   instagramId: string,
+//   token: string,
+//   mediaUrl: string,
+//   mediaType: string,
+//   isCarouselItem = false,
+//   caption?: string,
+// ) {
+//   try {
+//     const params: any = {
+//       [mediaType === "VIDEO" ? "video_url" : "image_url"]: mediaUrl,
+//       media_type: mediaType === "VIDEO" ? "VIDEO" : "IMAGE",
+//       ...(isCarouselItem && { is_carousel_item: true }),
+//     };
 
-    if (caption && !isCarouselItem) {
-      params.caption = caption;
-    }
+//     if (caption && !isCarouselItem) {
+//       params.caption = caption;
+//     }
 
-    logApiError("createMediaContainer - Request", null, {
-      instagramId,
-      mediaType,
-      isCarouselItem,
-      hasCaption: !!caption
-    });
+//     logApiError("createMediaContainer - Request", null, {
+//       instagramId,
+//       mediaType,
+//       isCarouselItem,
+//       hasCaption: !!caption
+//     });
 
-    const response = await axios.post(
-      `https://graph.instagram.com/v22.0/${instagramId}/media`,
-      params,
-      { params: { access_token: token } }
-    );
+//     const response = await axios.post(
+//       `https://graph.instagram.com/v22.0/${instagramId}/media`,
+//       params,
+//       { params: { access_token: token } }
+//     );
     
-    logApiError("createMediaContainer - Success", null, {
-      containerId: response.data.id
-    });
+//     logApiError("createMediaContainer - Success", null, {
+//       containerId: response.data.id
+//     });
     
-    return response.data.id;
-  } catch (error) {
-    logApiError("createMediaContainer - Failed", error, {
-      instagramId,
-      mediaType,
-      isCarouselItem
-    });
-    throw error;
-  }
-}
+//     return response.data.id;
+//   } catch (error) {
+//     logApiError("createMediaContainer - Failed", error, {
+//       instagramId,
+//       mediaType,
+//       isCarouselItem
+//     });
+//     throw error;
+//   }
+// }
 
-async function createCarouselContainer(
-  instagramId: string,
-  token: string,
-  containerIds: string[],
-  caption: string
-) {
-  try {
-    logApiError("createCarouselContainer - Request", null, {
-      instagramId,
-      containerCount: containerIds.length,
-      containerIds
-    });
+// async function createCarouselContainer(
+//   instagramId: string,
+//   token: string,
+//   containerIds: string[],
+//   caption: string
+// ) {
+//   try {
+//     logApiError("createCarouselContainer - Request", null, {
+//       instagramId,
+//       containerCount: containerIds.length,
+//       containerIds
+//     });
 
-    const response = await axios.post(
-      `https://graph.instagram.com/v22.0/${instagramId}/media`,
-      null,
-      {
-        params: {
-          media_type: "CAROUSEL",
-          caption,
-          children: containerIds.join(","),
-          access_token: token,
-        },
-      }
-    );
+//     const response = await axios.post(
+//       `https://graph.instagram.com/v22.0/${instagramId}/media`,
+//       null,
+//       {
+//         params: {
+//           media_type: "CAROUSEL",
+//           caption,
+//           children: containerIds.join(","),
+//           access_token: token,
+//         },
+//       }
+//     );
     
-    logApiError("createCarouselContainer - Success", null, {
-      carouselId: response.data.id
-    });
+//     logApiError("createCarouselContainer - Success", null, {
+//       carouselId: response.data.id
+//     });
     
-    return response.data.id;
-  } catch (error) {
-    logApiError("createCarouselContainer - Failed", error, {
-      instagramId,
-      containerCount: containerIds.length
-    });
-    throw error;
-  }
-}
+//     return response.data.id;
+//   } catch (error) {
+//     logApiError("createCarouselContainer - Failed", error, {
+//       instagramId,
+//       containerCount: containerIds.length
+//     });
+//     throw error;
+//   }
+// }
 
-async function publishMedia(
-  instagramId: string,
-  token: string,
-  containerId: string
-) {
-  try {
-    logApiError("publishMedia - Request", null, {
-      instagramId,
-      containerId
-    });
+// async function publishMedia(
+//   instagramId: string,
+//   token: string,
+//   containerId: string
+// ) {
+//   try {
+//     logApiError("publishMedia - Request", null, {
+//       instagramId,
+//       containerId
+//     });
 
-    // Add delay to ensure container is ready
-    await new Promise(resolve => setTimeout(resolve, 3000));
+//     // Add delay to ensure container is ready
+//     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    const response = await axios.post(
-      `https://graph.instagram.com/v22.0/${instagramId}/media_publish`,
-      null,
-      {
-        params: {
-          creation_id: containerId,
-          access_token: token,
-        },
-      }
-    );
+//     const response = await axios.post(
+//       `https://graph.instagram.com/v22.0/${instagramId}/media_publish`,
+//       null,
+//       {
+//         params: {
+//           creation_id: containerId,
+//           access_token: token,
+//         },
+//       }
+//     );
     
-    logApiError("publishMedia - Success", null, {
-      publishedId: response.data.id
-    });
+//     logApiError("publishMedia - Success", null, {
+//       publishedId: response.data.id
+//     });
     
-    return response.data.id;
-  } catch (error) {
-    logApiError("publishMedia - Failed", error, {
-      instagramId,
-      containerId
-    });
-    throw error;
-  }
-}
+//     return response.data.id;
+//   } catch (error) {
+//     logApiError("publishMedia - Failed", error, {
+//       instagramId,
+//       containerId
+//     });
+//     throw error;
+//   }
+// }
 
 // import { NextResponse } from "next/server";
 // import axios from "axios";
@@ -1312,3 +1312,349 @@ async function publishMedia(
 //   }
 // }
 
+import { NextResponse } from "next/server"
+import axios from "axios"
+import { client } from "@/lib/prisma"
+import type { INTEGRATIONS } from "@prisma/client"
+
+interface InstagramIntegration {
+  id: string
+  createdAt: Date
+  name: INTEGRATIONS
+  userId: string | null
+  token: string
+  expiresAt: Date | null
+  instagramId: string | null
+  username: string | null
+  lastUpdated: Date
+}
+
+const logApiError = (context: string, error: any, extra?: Record<string, any>) => {
+  const timestamp = new Date().toISOString()
+  const errorInfo = {
+    timestamp,
+    context,
+    errorName: error?.name || "UnknownError",
+    errorMessage: error?.message || "No error message",
+    stack: error?.stack || "No stack trace",
+    axiosError: error?.isAxiosError
+      ? {
+          url: error?.config?.url,
+          method: error?.config?.method,
+          params: error?.config?.params,
+          data: error?.config?.data,
+          status: error?.response?.status,
+          responseData: error?.response?.data,
+        }
+      : null,
+    ...extra,
+  }
+
+  console.error(JSON.stringify(errorInfo, null, 2))
+}
+
+export async function POST(request: Request) {
+  try {
+    const { userId, caption, mediaUrls, mediaType } = await request.json()
+
+    logApiError("POST /api/post-to-instagram - Start", null, {
+      userId,
+      mediaType,
+      mediaUrlCount: mediaUrls?.length || 0,
+    })
+
+    // Validate input
+    if (!userId || !caption || !mediaUrls || mediaUrls.length === 0 || !mediaType) {
+      logApiError("POST /api/post-to-instagram - Invalid Input", null, {
+        userId: !!userId,
+        captionExists: !!caption,
+        mediaUrlCount: mediaUrls?.length || 0,
+        mediaType,
+      })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing required parameters",
+        },
+        { status: 400 },
+      )
+    }
+
+    // Fetch user data
+    const user = await client.user.findUnique({
+      where: { clerkId: userId },
+      include: { integrations: { where: { name: "INSTAGRAM" } } },
+    })
+
+    if (!user) {
+      logApiError("POST /api/post-to-instagram - User Not Found", null, { userId })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "User not found",
+        },
+        { status: 404 },
+      )
+    }
+
+    if (!user.integrations || user.integrations.length === 0) {
+      logApiError("POST /api/post-to-instagram - Integration Missing", null, { userId })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Instagram integration not found. Please connect your Instagram account.",
+        },
+        { status: 404 },
+      )
+    }
+
+    const instagramIntegration = user.integrations[0] as InstagramIntegration
+
+    if (!instagramIntegration.instagramId) {
+      logApiError("POST /api/post-to-instagram - Missing Instagram ID", null, {
+        integrationId: instagramIntegration.id,
+      })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Instagram account not properly configured",
+        },
+        { status: 400 },
+      )
+    }
+
+    if (!instagramIntegration.token) {
+      logApiError("POST /api/post-to-instagram - Missing Access Token", null, {
+        integrationId: instagramIntegration.id,
+      })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Instagram access token missing. Please reconnect your account.",
+        },
+        { status: 401 },
+      )
+    }
+
+    // Refresh token if needed
+    let currentToken = instagramIntegration.token
+    try {
+      const refreshResponse = await axios.get(`https://graph.instagram.com/refresh_access_token`, {
+        params: {
+          grant_type: "ig_refresh_token",
+          access_token: instagramIntegration.token,
+        },
+        timeout: 10000,
+      })
+
+      if (refreshResponse.data.access_token) {
+        currentToken = refreshResponse.data.access_token
+
+        // Update token in database
+        await client.integrations.update({
+          where: { id: instagramIntegration.id },
+          data: {
+            token: currentToken,
+            lastUpdated: new Date(),
+          },
+        })
+
+        logApiError("POST /api/post-to-instagram - Token Refreshed", null)
+      }
+    } catch (tokenError) {
+      logApiError("POST /api/post-to-instagram - Token Refresh Failed", tokenError)
+      // Continue with existing token
+    }
+
+    // Validate media URLs
+    for (const url of mediaUrls) {
+      try {
+        const response = await fetch(url, { method: "HEAD" })
+        if (!response.ok) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Media URL is not accessible: ${url}`,
+            },
+            { status: 400 },
+          )
+        }
+      } catch (error) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Failed to validate media URL: ${url}`,
+          },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Post to Instagram
+    let finalPostId: string
+    try {
+      if (mediaUrls.length > 1) {
+        // Carousel post
+        logApiError("POST /api/post-to-instagram - Creating Carousel", null, {
+          itemCount: mediaUrls.length,
+        })
+
+        const containerIds = []
+        for (const mediaUrl of mediaUrls) {
+          const isVideo = /\.(mp4|mov|avi|webm|mkv|m4v)$/i.test(mediaUrl)
+          const containerMediaType = isVideo ? "VIDEO" : "IMAGE"
+
+          const containerId = await createMediaContainer(
+            instagramIntegration.instagramId!,
+            currentToken,
+            mediaUrl,
+            containerMediaType,
+            true,
+          )
+          containerIds.push(containerId)
+        }
+
+        const carouselId = await createCarouselContainer(
+          instagramIntegration.instagramId!,
+          currentToken,
+          containerIds,
+          caption,
+        )
+
+        finalPostId = await publishMedia(instagramIntegration.instagramId!, currentToken, carouselId)
+      } else {
+        // Single media post
+        const isVideo = /\.(mp4|mov|avi|webm|mkv|m4v)$/i.test(mediaUrls[0])
+        const containerMediaType = isVideo ? "VIDEO" : "IMAGE"
+
+        const containerId = await createMediaContainer(
+          instagramIntegration.instagramId!,
+          currentToken,
+          mediaUrls[0],
+          containerMediaType,
+          false,
+          caption,
+        )
+
+        finalPostId = await publishMedia(instagramIntegration.instagramId!, currentToken, containerId)
+      }
+
+      logApiError("POST /api/post-to-instagram - Success", null, {
+        finalPostId,
+      })
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          instagramPostId: finalPostId,
+          publishedAt: new Date().toISOString(),
+        },
+      })
+    } catch (publishError) {
+      logApiError("POST /api/post-to-instagram - Publishing Failed", publishError, {
+        mediaType,
+        mediaUrlCount: mediaUrls.length,
+      })
+
+      // More specific error handling
+      if (publishError instanceof Error) {
+        if (publishError.message.includes("401") || publishError.message.includes("unauthorized")) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Instagram authentication failed. Please reconnect your Instagram account.",
+            },
+            { status: 401 },
+          )
+        }
+
+        if (publishError.message.includes("400") || publishError.message.includes("bad request")) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Invalid media format or content. Please check your media files.",
+            },
+            { status: 400 },
+          )
+        }
+      }
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to publish to Instagram. Please try again.",
+        },
+        { status: 500 },
+      )
+    }
+  } catch (error) {
+    logApiError("POST /api/post-to-instagram - Unhandled Error", error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Internal server error",
+      },
+      { status: 500 },
+    )
+  }
+}
+
+// Helper functions
+async function createMediaContainer(
+  instagramId: string,
+  token: string,
+  mediaUrl: string,
+  mediaType: string,
+  isCarouselItem = false,
+  caption?: string,
+) {
+  const params: any = {
+    [mediaType === "VIDEO" ? "video_url" : "image_url"]: mediaUrl,
+    media_type: mediaType,
+    access_token: token,
+  }
+
+  if (isCarouselItem) {
+    params.is_carousel_item = true
+  }
+
+  if (caption && !isCarouselItem) {
+    params.caption = caption
+  }
+
+  const response = await axios.post(`https://graph.instagram.com/v22.0/${instagramId}/media`, null, {
+    params,
+    timeout: 30000,
+  })
+
+  return response.data.id
+}
+
+async function createCarouselContainer(instagramId: string, token: string, containerIds: string[], caption: string) {
+  const response = await axios.post(`https://graph.instagram.com/v22.0/${instagramId}/media`, null, {
+    params: {
+      media_type: "CAROUSEL",
+      caption,
+      children: containerIds.join(","),
+      access_token: token,
+    },
+    timeout: 30000,
+  })
+
+  return response.data.id
+}
+
+async function publishMedia(instagramId: string, token: string, containerId: string) {
+  // Add delay to ensure container is ready
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+
+  const response = await axios.post(`https://graph.instagram.com/v22.0/${instagramId}/media_publish`, null, {
+    params: {
+      creation_id: containerId,
+      access_token: token,
+    },
+    timeout: 30000,
+  })
+
+  return response.data.id
+}
