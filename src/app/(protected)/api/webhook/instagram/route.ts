@@ -10022,6 +10022,649 @@
 //   }
 // }
 
+// import { type NextRequest, NextResponse } from "next/server"
+// import {
+//   createChatHistory,
+//   trackResponses,
+//   decideTriggerAction,
+//   getAutomationWithTriggers,
+// } from "@/actions/webhook/queries"
+// import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
+// import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
+// import { getEnhancedVoiceflowResponse, createVoiceflowUser, fetchEnhancedBusinessVariables } from "@/lib/voiceflow"
+// import { sendDM, sendPrivateMessage } from "@/lib/fetch"
+// import { storeConversationMessage } from "@/actions/chats/queries"
+// import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+
+// // ============================================================================
+// // IN-MEMORY DUPLICATE PREVENTION - NO DATABASE NEEDED
+// // ============================================================================
+
+// class InMemoryDuplicateManager {
+//   private static instance: InMemoryDuplicateManager
+//   private processedMessages = new Map<string, number>()
+//   private recentResponses = new Map<string, { text: string; timestamp: number }>()
+//   private processingLocks = new Set<string>()
+//   private globalLocks = new Map<string, number>()
+//   private cleanupInterval: NodeJS.Timeout
+
+//   private constructor() {
+//     // Clean up old entries every 2 minutes
+//     this.cleanupInterval = setInterval(() => {
+//       this.cleanup()
+//     }, 120000)
+//   }
+
+//   static getInstance(): InMemoryDuplicateManager {
+//     if (!InMemoryDuplicateManager.instance) {
+//       InMemoryDuplicateManager.instance = new InMemoryDuplicateManager()
+//     }
+//     return InMemoryDuplicateManager.instance
+//   }
+
+//   // Generate unique message key
+//   private generateMessageKey(data: WebhookData): string {
+//     const content = data.userMessage.substring(0, 100).replace(/\s+/g, "_")
+//     const timestamp = Math.floor(Date.now() / 10000) // 10-second window
+//     return `${data.pageId}_${data.senderId}_${content}_${timestamp}`
+//   }
+
+//   // Generate response key for duplicate response detection
+//   private generateResponseKey(pageId: string, senderId: string, text: string): string {
+//     const textHash = text.substring(0, 50).replace(/\s+/g, "_")
+//     return `${pageId}_${senderId}_${textHash}`
+//   }
+
+//   // Check if message was already processed
+//   isMessageProcessed(data: WebhookData): boolean {
+//     const key = this.generateMessageKey(data)
+//     const lastProcessed = this.processedMessages.get(key)
+
+//     if (lastProcessed && Date.now() - lastProcessed < 30000) {
+//       // 30 second window
+//       console.log(`🚫 DUPLICATE MESSAGE BLOCKED: ${key}`)
+//       return true
+//     }
+
+//     return false
+//   }
+
+//   // Mark message as processed
+//   markMessageProcessed(data: WebhookData): void {
+//     const key = this.generateMessageKey(data)
+//     this.processedMessages.set(key, Date.now())
+//     console.log(`✅ MESSAGE MARKED PROCESSED: ${key}`)
+//   }
+
+//   // Check if we recently sent the same response
+//   isDuplicateResponse(pageId: string, senderId: string, text: string): boolean {
+//     const key = this.generateResponseKey(pageId, senderId, text)
+//     const lastResponse = this.recentResponses.get(key)
+
+//     if (lastResponse && Date.now() - lastResponse.timestamp < 60000) {
+//       // 1 minute window
+//       console.log(`🚫 DUPLICATE RESPONSE BLOCKED: ${key}`)
+//       return true
+//     }
+
+//     return false
+//   }
+
+//   // Mark response as sent
+//   markResponseSent(pageId: string, senderId: string, text: string): void {
+//     const key = this.generateResponseKey(pageId, senderId, text)
+//     this.recentResponses.set(key, { text, timestamp: Date.now() })
+//     console.log(`✅ RESPONSE MARKED SENT: ${key}`)
+//   }
+
+//   // Global processing lock to prevent race conditions
+//   acquireProcessingLock(pageId: string, senderId: string): boolean {
+//     const lockKey = `${pageId}_${senderId}`
+
+//     if (this.processingLocks.has(lockKey)) {
+//       console.log(`🔒 PROCESSING LOCK BLOCKED: ${lockKey}`)
+//       return false
+//     }
+
+//     this.processingLocks.add(lockKey)
+//     this.globalLocks.set(lockKey, Date.now())
+//     console.log(`🔓 PROCESSING LOCK ACQUIRED: ${lockKey}`)
+//     return true
+//   }
+
+//   // Release processing lock
+//   releaseProcessingLock(pageId: string, senderId: string): void {
+//     const lockKey = `${pageId}_${senderId}`
+//     this.processingLocks.delete(lockKey)
+//     this.globalLocks.delete(lockKey)
+//     console.log(`🔓 PROCESSING LOCK RELEASED: ${lockKey}`)
+//   }
+
+//   // Cleanup old entries
+//   private cleanup(): void {
+//     const cutoff = Date.now() - 300000 // 5 minutes
+//     let cleaned = 0
+
+//     // Clean processed messages
+//     this.processedMessages.forEach((timestamp, key) => {
+//       if (timestamp < cutoff) {
+//         this.processedMessages.delete(key)
+//         cleaned++
+//       }
+//     })
+
+//     // Clean recent responses
+//     this.recentResponses.forEach((data, key) => {
+//       if (data.timestamp < cutoff) {
+//         this.recentResponses.delete(key)
+//         cleaned++
+//       }
+//     })
+
+//     // Clean stuck locks (older than 2 minutes)
+//     const lockCutoff = Date.now() - 120000
+//     this.globalLocks.forEach((timestamp, key) => {
+//       if (timestamp < lockCutoff) {
+//         this.processingLocks.delete(key)
+//         this.globalLocks.delete(key)
+//         cleaned++
+//       }
+//     })
+
+//     if (cleaned > 0) {
+//       console.log(`🧹 CLEANUP: Removed ${cleaned} old entries`)
+//     }
+//   }
+
+//   // Get stats for debugging
+//   getStats() {
+//     return {
+//       processedMessages: this.processedMessages.size,
+//       recentResponses: this.recentResponses.size,
+//       activeLocks: this.processingLocks.size,
+//     }
+//   }
+// }
+
+// // ============================================================================
+// // TYPES & INTERFACES
+// // ============================================================================
+
+// interface WebhookData {
+//   pageId: string
+//   senderId: string
+//   recipientId?: string
+//   userMessage: string
+//   messageId?: string
+//   commentId?: string
+//   messageType: "DM" | "COMMENT"
+//   isEcho?: boolean
+// }
+
+// // ============================================================================
+// // ENHANCED ECHO DETECTION
+// // ============================================================================
+
+// class EchoDetector {
+//   private static botResponsePatterns = [
+//     "Hi! I'm Lady Luck",
+//     "Thank you for your message",
+//     "Thanks for your message",
+//     "Hi! Thanks for reaching out",
+//     "Hello! 👋",
+//     "Thanks for contacting",
+//     "I appreciate you reaching out",
+//     "Welcome to our business",
+//     "How can I help you",
+//     "I'm here to help",
+//   ]
+
+//   static isEchoMessage(data: WebhookData): boolean {
+//     // Check explicit echo flag
+//     if (data.isEcho) {
+//       console.log(`🔄 EXPLICIT ECHO DETECTED: ${data.messageId}`)
+//       return true
+//     }
+
+//     // Check for bot response patterns
+//     const message = data.userMessage.toLowerCase()
+//     const isPatternMatch = this.botResponsePatterns.some((pattern) => message.includes(pattern.toLowerCase()))
+
+//     if (isPatternMatch) {
+//       console.log(`🔄 PATTERN ECHO DETECTED: "${data.userMessage.substring(0, 50)}..."`)
+//       return true
+//     }
+
+//     // Check for very generic responses that might be echoes
+//     const genericPhrases = ["hello", "hi", "hey", "thanks", "thank you"]
+//     const isVeryShort = data.userMessage.length < 10
+//     const isGeneric = genericPhrases.includes(message.trim())
+
+//     if (isVeryShort && isGeneric) {
+//       console.log(`🔄 GENERIC ECHO SUSPECTED: "${data.userMessage}"`)
+//       return true
+//     }
+
+//     return false
+//   }
+// }
+
+// // ============================================================================
+// // WEBHOOK VALIDATOR
+// // ============================================================================
+
+// class WebhookValidator {
+//   static extractData(payload: any): WebhookData | null {
+//     try {
+//       if (payload?.entry?.[0]?.messaging) {
+//         const messaging = payload.entry[0].messaging[0]
+
+//         // Skip read receipts and delivery confirmations
+//         if (messaging.read || messaging.delivery) {
+//           console.log("📖 SKIPPING: Read receipt or delivery confirmation")
+//           return null
+//         }
+
+//         if (messaging.message) {
+//           // Skip non-text messages
+//           if (!messaging.message.text) {
+//             console.log("📷 SKIPPING: Non-text message (image/video/etc)")
+//             return null
+//           }
+
+//           return {
+//             pageId: payload.entry[0].id,
+//             senderId: messaging.sender.id,
+//             recipientId: messaging.recipient.id,
+//             userMessage: messaging.message.text,
+//             messageId: messaging.message.mid,
+//             messageType: "DM",
+//             isEcho: messaging.message?.is_echo === true,
+//           }
+//         }
+
+//         if (messaging.postback) {
+//           return {
+//             pageId: payload.entry[0].id,
+//             senderId: messaging.sender.id,
+//             recipientId: messaging.recipient.id,
+//             userMessage: messaging.postback.payload || messaging.postback.title || "Button clicked",
+//             messageId: `postback_${Date.now()}`,
+//             messageType: "DM",
+//             isEcho: false,
+//           }
+//         }
+//       } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+//         const changeValue = payload.entry[0].changes[0].value
+
+//         if (!changeValue.text) {
+//           console.log("💬 SKIPPING: Comment without text")
+//           return null
+//         }
+
+//         return {
+//           pageId: payload.entry[0].id,
+//           senderId: changeValue.from.id,
+//           userMessage: changeValue.text,
+//           commentId: changeValue.id,
+//           messageType: "COMMENT",
+//           isEcho: false,
+//         }
+//       }
+//     } catch (error) {
+//       console.error("❌ WEBHOOK EXTRACTION ERROR:", error)
+//     }
+
+//     return null
+//   }
+
+//   static isSpecialWebhook(payload: any): string | null {
+//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "deauthorizations") {
+//       return "deauth"
+//     }
+//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion") {
+//       return "data_deletion"
+//     }
+//     if (payload?.entry?.[0]?.messaging?.[0]?.read || payload?.entry?.[0]?.messaging?.[0]?.delivery) {
+//       return "receipt"
+//     }
+//     return null
+//   }
+// }
+
+// // ============================================================================
+// // RATE LIMITER
+// // ============================================================================
+
+// class RateLimiter {
+//   private static instance: RateLimiter
+//   private userRequests = new Map<string, number[]>()
+
+//   static getInstance(): RateLimiter {
+//     if (!RateLimiter.instance) {
+//       RateLimiter.instance = new RateLimiter()
+//     }
+//     return RateLimiter.instance
+//   }
+
+//   isRateLimited(pageId: string, senderId: string): boolean {
+//     const key = `${pageId}_${senderId}`
+//     const now = Date.now()
+//     const windowMs = 120000 // 2 minutes
+//     const maxRequests = 5
+
+//     // Get existing requests for this user
+//     const requests = this.userRequests.get(key) || []
+
+//     // Filter out old requests
+//     const recentRequests = requests.filter((timestamp) => now - timestamp < windowMs)
+
+//     // Check if rate limited
+//     if (recentRequests.length >= maxRequests) {
+//       console.log(`🚫 RATE LIMITED: ${key} (${recentRequests.length} requests in 2 minutes)`)
+//       return true
+//     }
+
+//     // Add current request
+//     recentRequests.push(now)
+//     this.userRequests.set(key, recentRequests)
+
+//     return false
+//   }
+// }
+
+// // ============================================================================
+// // MAIN MESSAGE PROCESSOR
+// // ============================================================================
+
+// class MessageProcessor {
+//   private static duplicateManager = InMemoryDuplicateManager.getInstance()
+//   private static rateLimiter = RateLimiter.getInstance()
+
+//   static async processMessage(data: WebhookData): Promise<void> {
+//     const startTime = Date.now()
+//     console.log(`🚀 PROCESSING MESSAGE: ${data.messageType} from ${data.senderId}`)
+//     console.log(`📝 MESSAGE: "${data.userMessage.substring(0, 100)}..."`)
+
+//     // Step 1: Echo detection
+//     if (EchoDetector.isEchoMessage(data)) {
+//       console.log("🔄 ECHO MESSAGE IGNORED")
+//       return
+//     }
+
+//     // Step 2: Duplicate message detection
+//     if (this.duplicateManager.isMessageProcessed(data)) {
+//       console.log("🚫 DUPLICATE MESSAGE IGNORED")
+//       return
+//     }
+
+//     // Step 3: Rate limiting
+//     if (this.rateLimiter.isRateLimited(data.pageId, data.senderId)) {
+//       console.log("🚫 RATE LIMITED - IGNORED")
+//       return
+//     }
+
+//     // Step 4: Acquire processing lock
+//     if (!this.duplicateManager.acquireProcessingLock(data.pageId, data.senderId)) {
+//       console.log("🔒 PROCESSING LOCK FAILED - IGNORED")
+//       return
+//     }
+
+//     try {
+//       // Step 5: Mark message as processed immediately
+//       this.duplicateManager.markMessageProcessed(data)
+
+//       // Step 6: Get automation and trigger decision
+//       const triggerDecision = await decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType)
+
+//       if (!triggerDecision.automationId) {
+//         console.log("❌ NO AUTOMATION FOUND")
+//         return
+//       }
+
+//       const automation = await getAutomationWithTriggers(triggerDecision.automationId, data.messageType)
+//       if (!automation) {
+//         console.log("❌ AUTOMATION NOT FOUND")
+//         return
+//       }
+
+//       console.log(`✅ AUTOMATION FOUND: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
+
+//       // Step 7: Process with appropriate AI system
+//       const isPROUser = automation.User?.subscription?.plan === "PRO"
+//       let responseText: string
+//       let buttons: any[] | undefined
+
+//       if (isPROUser) {
+//         console.log("🎙️ PROCESSING WITH VOICEFLOW (PRO)")
+//         const result = await this.processWithVoiceflow(data, automation)
+//         responseText = result.text
+//         buttons = result.buttons
+//       } else {
+//         console.log("🔮 PROCESSING WITH GEMINI (FREE)")
+//         const result = await this.processWithGemini(data, automation)
+//         responseText = result.text
+//         buttons = result.buttons
+//       }
+
+//       // Step 8: Check for duplicate response
+//       if (this.duplicateManager.isDuplicateResponse(data.pageId, data.senderId, responseText)) {
+//         console.log("🚫 DUPLICATE RESPONSE BLOCKED")
+//         return
+//       }
+
+//       // Step 9: Send response
+//       await this.sendResponse(data, responseText, buttons, automation)
+
+//       // Step 10: Mark response as sent
+//       this.duplicateManager.markResponseSent(data.pageId, data.senderId, responseText)
+
+//       // Step 11: Background tasks (non-blocking)
+//       this.performBackgroundTasks(data, responseText, automation).catch((error) =>
+//         console.error("⚠️ Background task error:", error),
+//       )
+
+//       console.log(`✅ MESSAGE PROCESSED SUCCESSFULLY (${Date.now() - startTime}ms)`)
+//     } catch (error) {
+//       console.error("❌ MESSAGE PROCESSING ERROR:", error)
+
+//       // Emergency fallback response
+//       try {
+//         const emergencyResponse =
+//           "Hi! Thanks for your message. I'm experiencing some technical difficulties right now, but I'll get back to you shortly! 😊"
+//         await this.sendResponse(data, emergencyResponse, undefined, null)
+//         console.log("🆘 EMERGENCY RESPONSE SENT")
+//       } catch (emergencyError) {
+//         console.error("💥 EMERGENCY RESPONSE FAILED:", emergencyError)
+//       }
+//     } finally {
+//       // Always release the processing lock
+//       this.duplicateManager.releaseProcessingLock(data.pageId, data.senderId)
+//     }
+//   }
+
+//   private static async processWithVoiceflow(data: WebhookData, automation: any) {
+//     try {
+//       // Create Voiceflow user (non-blocking)
+//       createVoiceflowUser(`${data.pageId}_${data.senderId}`).catch((error) =>
+//         console.warn("Voiceflow user creation failed:", error),
+//       )
+
+//       // Get conversation context
+//       const conversationHistory = await buildConversationContext(data.pageId, data.senderId, automation.id).catch(
+//         () => [],
+//       )
+
+//       // Build business variables
+//       const businessVariables = await fetchEnhancedBusinessVariables(automation.User?.id || "", automation.id, {
+//         pageId: data.pageId,
+//         senderId: data.senderId,
+//         userMessage: data.userMessage,
+//         isNewUser: conversationHistory.length === 0,
+//         customerType: conversationHistory.length >= 10 ? "VIP" : conversationHistory.length > 0 ? "RETURNING" : "NEW",
+//         messageHistory: conversationHistory,
+//       }).catch(() => ({}))
+
+//       // Try Voiceflow
+//       const voiceflowResult = await getEnhancedVoiceflowResponse(
+//         data.userMessage,
+//         `${data.pageId}_${data.senderId}`,
+//         businessVariables,
+//         { maxRetries: 2, timeoutMs: 12000 },
+//       )
+
+//       if (voiceflowResult.success && voiceflowResult.response?.text) {
+//         console.log("✅ VOICEFLOW SUCCESS")
+//         return {
+//           text: voiceflowResult.response.text,
+//           buttons: voiceflowResult.response.buttons,
+//         }
+//       }
+
+//       // Fallback to Gemini Pro
+//       console.log("🔄 VOICEFLOW FAILED, USING GEMINI PRO FALLBACK")
+//       return await this.processWithGemini(data, automation, true)
+//     } catch (error) {
+//       console.error("❌ VOICEFLOW PROCESSING ERROR:", error)
+//       return await this.processWithGemini(data, automation, true)
+//     }
+//   }
+
+//   private static async processWithGemini(data: WebhookData, automation: any, isPROFallback = false) {
+//     try {
+//       // Get business profile
+//       const profile = await getBusinessProfileForAutomation(automation.id).catch(() => ({
+//         profileContent: "",
+//         businessContext: {},
+//       }))
+
+//       // Get conversation history
+//       const conversationHistory = await buildConversationContext(data.pageId, data.senderId, automation.id).catch(
+//         () => [],
+//       )
+
+//       // Generate response
+//       const geminiResponse = await generateGeminiResponse({
+//         userMessage: data.userMessage,
+//         businessProfile: profile.profileContent,
+//         conversationHistory,
+//         businessContext: profile.businessContext,
+//         isPROUser: isPROFallback,
+//         isVoiceflowFallback: isPROFallback,
+//       })
+
+//       const responseText =
+//         typeof geminiResponse === "string"
+//           ? geminiResponse
+//           : isPROFallback
+//             ? "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you with detailed information shortly. 🌟"
+//             : "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊"
+
+//       console.log(`✅ GEMINI ${isPROFallback ? "PRO " : ""}SUCCESS`)
+//       return { text: responseText, buttons: undefined }
+//     } catch (error) {
+//       console.error("❌ GEMINI PROCESSING ERROR:", error)
+//       return {
+//         text: isPROFallback
+//           ? "Thank you for your message! I'm experiencing some technical difficulties, but our team will ensure you get the assistance you need. 🌟"
+//           : "Thanks for your message! I'm having some technical difficulties, but I'll get back to you shortly! 😊",
+//         buttons: undefined,
+//       }
+//     }
+//   }
+
+//   private static async sendResponse(data: WebhookData, text: string, buttons: any[] | undefined, automation: any) {
+//     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     // Format buttons
+//     const formattedButtons = buttons?.slice(0, 11).map((button) => ({
+//       name: String(button.name || "").substring(0, 20),
+//       payload: String(button.payload || button.name || "").substring(0, 1000),
+//     }))
+
+//     console.log(`📤 SENDING RESPONSE: "${text.substring(0, 100)}..."`)
+
+//     if (data.messageType === "DM") {
+//       await sendDM(data.pageId, data.senderId, text, token, formattedButtons)
+//     } else if (data.messageType === "COMMENT" && data.commentId) {
+//       await sendPrivateMessage(data.pageId, data.commentId, text, token, formattedButtons)
+//     }
+
+//     console.log("✅ RESPONSE SENT SUCCESSFULLY")
+//   }
+
+//   private static async performBackgroundTasks(data: WebhookData, responseText: string, automation: any) {
+//     // Store conversation messages
+//     await Promise.allSettled([
+//       storeConversationMessage(data.pageId, data.senderId, data.userMessage, false, automation?.id || null),
+//       storeConversationMessage(data.pageId, "bot", responseText, true, automation?.id || null),
+//       createChatHistory(automation?.id || "default", data.pageId, data.senderId, data.userMessage),
+//       createChatHistory(automation?.id || "default", data.pageId, data.senderId, responseText),
+//       trackResponses(automation?.id || "default", data.messageType),
+//       automation?.id
+//         ? trackMessageForSentiment(automation.id, data.pageId, data.senderId, data.userMessage)
+//         : Promise.resolve(),
+//     ])
+
+//     console.log("✅ BACKGROUND TASKS COMPLETED")
+//   }
+// }
+
+// // ============================================================================
+// // ROUTE HANDLERS
+// // ============================================================================
+
+// export async function GET(req: NextRequest) {
+//   const hub = req.nextUrl.searchParams.get("hub.challenge")
+//   console.log(`📞 WEBHOOK VERIFICATION: ${hub}`)
+//   return new NextResponse(hub)
+// }
+
+// export async function POST(req: NextRequest) {
+//   const startTime = Date.now()
+//   console.log("🚀 === WEBHOOK REQUEST RECEIVED ===")
+
+//   try {
+//     const payload = await req.json()
+//     console.log("📥 WEBHOOK PAYLOAD RECEIVED")
+
+//     // Handle special webhooks
+//     const specialType = WebhookValidator.isSpecialWebhook(payload)
+//     if (specialType) {
+//       console.log(`🔧 SPECIAL WEBHOOK: ${specialType}`)
+//       return NextResponse.json({ message: `${specialType} processed` }, { status: 200 })
+//     }
+
+//     // Extract webhook data
+//     const data = WebhookValidator.extractData(payload)
+//     if (!data) {
+//       console.log("⚠️ UNSUPPORTED WEBHOOK PAYLOAD")
+//       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 200 })
+//     }
+
+//     // Process message immediately
+//     await MessageProcessor.processMessage(data)
+
+//     console.log(`✅ WEBHOOK PROCESSED (${Date.now() - startTime}ms)`)
+
+//     // Log stats for debugging
+//     const stats = InMemoryDuplicateManager.getInstance().getStats()
+//     console.log(`📊 STATS: ${JSON.stringify(stats)}`)
+
+//     return NextResponse.json({ message: "Message processed successfully" }, { status: 200 })
+//   } catch (error) {
+//     console.error("💥 WEBHOOK ERROR:", error)
+//     return NextResponse.json(
+//       {
+//         message: "Error processing request",
+//         error: error instanceof Error ? error.message : String(error),
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
+
+
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createChatHistory,
@@ -10037,16 +10680,20 @@ import { storeConversationMessage } from "@/actions/chats/queries"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
 
 // ============================================================================
-// IN-MEMORY DUPLICATE PREVENTION - NO DATABASE NEEDED
+// GLOBAL DUPLICATE PREVENTION WITH EXTERNAL STORAGE
 // ============================================================================
 
-class InMemoryDuplicateManager {
-  private static instance: InMemoryDuplicateManager
+class GlobalDuplicateManager {
+  private static instance: GlobalDuplicateManager
   private processedMessages = new Map<string, number>()
   private recentResponses = new Map<string, { text: string; timestamp: number }>()
   private processingLocks = new Set<string>()
   private globalLocks = new Map<string, number>()
   private cleanupInterval: NodeJS.Timeout
+
+  // Use Vercel KV or external storage for cross-instance deduplication
+  private static STORAGE_KEY_PREFIX = "webhook_dedup_"
+  private static LOCK_KEY_PREFIX = "webhook_lock_"
 
   private constructor() {
     // Clean up old entries every 2 minutes
@@ -10055,17 +10702,23 @@ class InMemoryDuplicateManager {
     }, 120000)
   }
 
-  static getInstance(): InMemoryDuplicateManager {
-    if (!InMemoryDuplicateManager.instance) {
-      InMemoryDuplicateManager.instance = new InMemoryDuplicateManager()
+  static getInstance(): GlobalDuplicateManager {
+    if (!GlobalDuplicateManager.instance) {
+      GlobalDuplicateManager.instance = new GlobalDuplicateManager()
     }
-    return InMemoryDuplicateManager.instance
+    return GlobalDuplicateManager.instance
   }
 
-  // Generate unique message key
+  // Generate unique message key with Instagram message ID
   private generateMessageKey(data: WebhookData): string {
+    // Use Instagram's message ID if available for true uniqueness
+    if (data.messageId) {
+      return `msg_${data.messageId}`
+    }
+
+    // Fallback to content-based key
     const content = data.userMessage.substring(0, 100).replace(/\s+/g, "_")
-    const timestamp = Math.floor(Date.now() / 10000) // 10-second window
+    const timestamp = Math.floor(Date.now() / 30000) // 30-second window
     return `${data.pageId}_${data.senderId}_${content}_${timestamp}`
   }
 
@@ -10075,25 +10728,88 @@ class InMemoryDuplicateManager {
     return `${pageId}_${senderId}_${textHash}`
   }
 
-  // Check if message was already processed
-  isMessageProcessed(data: WebhookData): boolean {
-    const key = this.generateMessageKey(data)
-    const lastProcessed = this.processedMessages.get(key)
+  // Global lock using environment variable as simple storage
+  private async acquireGlobalLock(key: string): Promise<boolean> {
+    try {
+      // Use a simple file-based lock or environment check
+      const lockKey = `${GlobalDuplicateManager.LOCK_KEY_PREFIX}${key}`
+      const now = Date.now()
 
-    if (lastProcessed && Date.now() - lastProcessed < 30000) {
-      // 30 second window
-      console.log(`🚫 DUPLICATE MESSAGE BLOCKED: ${key}`)
+      // Check if lock exists and is recent (within 30 seconds)
+      const existingLock = process.env[lockKey]
+      if (existingLock) {
+        const lockTime = Number.parseInt(existingLock)
+        if (now - lockTime < 30000) {
+          console.log(`🔒 GLOBAL LOCK EXISTS: ${key}`)
+          return false
+        }
+      }
+
+      // Set the lock
+      process.env[lockKey] = now.toString()
+      console.log(`🔓 GLOBAL LOCK ACQUIRED: ${key}`)
       return true
+    } catch (error) {
+      console.error("Global lock error:", error)
+      return true // Fail open
+    }
+  }
+
+  private async releaseGlobalLock(key: string): Promise<void> {
+    try {
+      const lockKey = `${GlobalDuplicateManager.LOCK_KEY_PREFIX}${key}`
+      delete process.env[lockKey]
+      console.log(`🔓 GLOBAL LOCK RELEASED: ${key}`)
+    } catch (error) {
+      console.error("Global lock release error:", error)
+    }
+  }
+
+  // Check if message was already processed globally
+  async isMessageProcessed(data: WebhookData): Promise<boolean> {
+    const key = this.generateMessageKey(data)
+
+    // Check local memory first
+    const lastProcessed = this.processedMessages.get(key)
+    if (lastProcessed && Date.now() - lastProcessed < 60000) {
+      console.log(`🚫 LOCAL DUPLICATE BLOCKED: ${key}`)
+      return true
+    }
+
+    // Check global storage (environment variables as simple storage)
+    try {
+      const globalKey = `${GlobalDuplicateManager.STORAGE_KEY_PREFIX}${key}`
+      const globalProcessed = process.env[globalKey]
+      if (globalProcessed) {
+        const processedTime = Number.parseInt(globalProcessed)
+        if (Date.now() - processedTime < 60000) {
+          console.log(`🚫 GLOBAL DUPLICATE BLOCKED: ${key}`)
+          return true
+        }
+      }
+    } catch (error) {
+      console.error("Global storage check error:", error)
     }
 
     return false
   }
 
-  // Mark message as processed
-  markMessageProcessed(data: WebhookData): void {
+  // Mark message as processed globally
+  async markMessageProcessed(data: WebhookData): Promise<void> {
     const key = this.generateMessageKey(data)
-    this.processedMessages.set(key, Date.now())
-    console.log(`✅ MESSAGE MARKED PROCESSED: ${key}`)
+    const now = Date.now()
+
+    // Mark in local memory
+    this.processedMessages.set(key, now)
+
+    // Mark in global storage
+    try {
+      const globalKey = `${GlobalDuplicateManager.STORAGE_KEY_PREFIX}${key}`
+      process.env[globalKey] = now.toString()
+      console.log(`✅ MESSAGE MARKED PROCESSED GLOBALLY: ${key}`)
+    } catch (error) {
+      console.error("Global storage mark error:", error)
+    }
   }
 
   // Check if we recently sent the same response
@@ -10101,8 +10817,8 @@ class InMemoryDuplicateManager {
     const key = this.generateResponseKey(pageId, senderId, text)
     const lastResponse = this.recentResponses.get(key)
 
-    if (lastResponse && Date.now() - lastResponse.timestamp < 60000) {
-      // 1 minute window
+    if (lastResponse && Date.now() - lastResponse.timestamp < 120000) {
+      // 2 minute window for responses
       console.log(`🚫 DUPLICATE RESPONSE BLOCKED: ${key}`)
       return true
     }
@@ -10117,15 +10833,23 @@ class InMemoryDuplicateManager {
     console.log(`✅ RESPONSE MARKED SENT: ${key}`)
   }
 
-  // Global processing lock to prevent race conditions
-  acquireProcessingLock(pageId: string, senderId: string): boolean {
+  // Global processing lock to prevent race conditions across instances
+  async acquireProcessingLock(pageId: string, senderId: string): Promise<boolean> {
     const lockKey = `${pageId}_${senderId}`
 
+    // Check local lock first
     if (this.processingLocks.has(lockKey)) {
-      console.log(`🔒 PROCESSING LOCK BLOCKED: ${lockKey}`)
+      console.log(`🔒 LOCAL PROCESSING LOCK BLOCKED: ${lockKey}`)
       return false
     }
 
+    // Check global lock
+    const globalLockAcquired = await this.acquireGlobalLock(lockKey)
+    if (!globalLockAcquired) {
+      return false
+    }
+
+    // Set local lock
     this.processingLocks.add(lockKey)
     this.globalLocks.set(lockKey, Date.now())
     console.log(`🔓 PROCESSING LOCK ACQUIRED: ${lockKey}`)
@@ -10133,10 +10857,15 @@ class InMemoryDuplicateManager {
   }
 
   // Release processing lock
-  releaseProcessingLock(pageId: string, senderId: string): void {
+  async releaseProcessingLock(pageId: string, senderId: string): Promise<void> {
     const lockKey = `${pageId}_${senderId}`
+
+    // Release local lock
     this.processingLocks.delete(lockKey)
     this.globalLocks.delete(lockKey)
+
+    // Release global lock
+    await this.releaseGlobalLock(lockKey)
     console.log(`🔓 PROCESSING LOCK RELEASED: ${lockKey}`)
   }
 
@@ -10167,9 +10896,28 @@ class InMemoryDuplicateManager {
       if (timestamp < lockCutoff) {
         this.processingLocks.delete(key)
         this.globalLocks.delete(key)
+        this.releaseGlobalLock(key)
         cleaned++
       }
     })
+
+    // Clean global environment variables
+    try {
+      Object.keys(process.env).forEach((key) => {
+        if (
+          key.startsWith(GlobalDuplicateManager.STORAGE_KEY_PREFIX) ||
+          key.startsWith(GlobalDuplicateManager.LOCK_KEY_PREFIX)
+        ) {
+          const timestamp = Number.parseInt(process.env[key] || "0")
+          if (timestamp && timestamp < cutoff) {
+            delete process.env[key]
+            cleaned++
+          }
+        }
+      })
+    } catch (error) {
+      console.error("Global cleanup error:", error)
+    }
 
     if (cleaned > 0) {
       console.log(`🧹 CLEANUP: Removed ${cleaned} old entries`)
@@ -10182,6 +10930,7 @@ class InMemoryDuplicateManager {
       processedMessages: this.processedMessages.size,
       recentResponses: this.recentResponses.size,
       activeLocks: this.processingLocks.size,
+      instanceId: process.env.VERCEL_REGION || "unknown",
     }
   }
 }
@@ -10217,6 +10966,10 @@ class EchoDetector {
     "Welcome to our business",
     "How can I help you",
     "I'm here to help",
+    "Thanks for reaching out",
+    "I'm dealing with some technical",
+    "As a valued customer",
+    "Our premium support team",
   ]
 
   static isEchoMessage(data: WebhookData): boolean {
@@ -10277,7 +11030,7 @@ class WebhookValidator {
             senderId: messaging.sender.id,
             recipientId: messaging.recipient.id,
             userMessage: messaging.message.text,
-            messageId: messaging.message.mid,
+            messageId: messaging.message.mid, // This is crucial for deduplication!
             messageType: "DM",
             isEcho: messaging.message?.is_echo === true,
           }
@@ -10378,13 +11131,16 @@ class RateLimiter {
 // ============================================================================
 
 class MessageProcessor {
-  private static duplicateManager = InMemoryDuplicateManager.getInstance()
+  private static duplicateManager = GlobalDuplicateManager.getInstance()
   private static rateLimiter = RateLimiter.getInstance()
 
   static async processMessage(data: WebhookData): Promise<void> {
     const startTime = Date.now()
-    console.log(`🚀 PROCESSING MESSAGE: ${data.messageType} from ${data.senderId}`)
+    const instanceId = process.env.VERCEL_REGION || "unknown"
+
+    console.log(`🚀 PROCESSING MESSAGE [${instanceId}]: ${data.messageType} from ${data.senderId}`)
     console.log(`📝 MESSAGE: "${data.userMessage.substring(0, 100)}..."`)
+    console.log(`🆔 MESSAGE ID: ${data.messageId || "none"}`)
 
     // Step 1: Echo detection
     if (EchoDetector.isEchoMessage(data)) {
@@ -10392,9 +11148,9 @@ class MessageProcessor {
       return
     }
 
-    // Step 2: Duplicate message detection
-    if (this.duplicateManager.isMessageProcessed(data)) {
-      console.log("🚫 DUPLICATE MESSAGE IGNORED")
+    // Step 2: Global duplicate message detection
+    if (await this.duplicateManager.isMessageProcessed(data)) {
+      console.log("🚫 DUPLICATE MESSAGE IGNORED (GLOBAL)")
       return
     }
 
@@ -10404,15 +11160,15 @@ class MessageProcessor {
       return
     }
 
-    // Step 4: Acquire processing lock
-    if (!this.duplicateManager.acquireProcessingLock(data.pageId, data.senderId)) {
-      console.log("🔒 PROCESSING LOCK FAILED - IGNORED")
+    // Step 4: Acquire global processing lock
+    if (!(await this.duplicateManager.acquireProcessingLock(data.pageId, data.senderId))) {
+      console.log("🔒 GLOBAL PROCESSING LOCK FAILED - IGNORED")
       return
     }
 
     try {
-      // Step 5: Mark message as processed immediately
-      this.duplicateManager.markMessageProcessed(data)
+      // Step 5: Mark message as processed globally
+      await this.duplicateManager.markMessageProcessed(data)
 
       // Step 6: Get automation and trigger decision
       const triggerDecision = await decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType)
@@ -10464,7 +11220,7 @@ class MessageProcessor {
         console.error("⚠️ Background task error:", error),
       )
 
-      console.log(`✅ MESSAGE PROCESSED SUCCESSFULLY (${Date.now() - startTime}ms)`)
+      console.log(`✅ MESSAGE PROCESSED SUCCESSFULLY [${instanceId}] (${Date.now() - startTime}ms)`)
     } catch (error) {
       console.error("❌ MESSAGE PROCESSING ERROR:", error)
 
@@ -10479,7 +11235,7 @@ class MessageProcessor {
       }
     } finally {
       // Always release the processing lock
-      this.duplicateManager.releaseProcessingLock(data.pageId, data.senderId)
+      await this.duplicateManager.releaseProcessingLock(data.pageId, data.senderId)
     }
   }
 
@@ -10622,7 +11378,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 === WEBHOOK REQUEST RECEIVED ===")
+  const instanceId = process.env.VERCEL_REGION || "unknown"
+
+  console.log(`🚀 === WEBHOOK REQUEST RECEIVED [${instanceId}] ===`)
 
   try {
     const payload = await req.json()
@@ -10645,15 +11403,15 @@ export async function POST(req: NextRequest) {
     // Process message immediately
     await MessageProcessor.processMessage(data)
 
-    console.log(`✅ WEBHOOK PROCESSED (${Date.now() - startTime}ms)`)
+    console.log(`✅ WEBHOOK PROCESSED [${instanceId}] (${Date.now() - startTime}ms)`)
 
     // Log stats for debugging
-    const stats = InMemoryDuplicateManager.getInstance().getStats()
-    console.log(`📊 STATS: ${JSON.stringify(stats)}`)
+    const stats = GlobalDuplicateManager.getInstance().getStats()
+    console.log(`📊 STATS [${instanceId}]: ${JSON.stringify(stats)}`)
 
     return NextResponse.json({ message: "Message processed successfully" }, { status: 200 })
   } catch (error) {
-    console.error("💥 WEBHOOK ERROR:", error)
+    console.error(`💥 WEBHOOK ERROR [${instanceId}]:`, error)
     return NextResponse.json(
       {
         message: "Error processing request",
