@@ -3679,7 +3679,7 @@ interface BusinessVariables {
 
 const BOT_NAME = "AiAssist"
 const BOT_AVATAR = "/fancy-profile-pic.svg"
-const EXCLUDED_CHAT_ID = "17841444435951291"
+const EXCLUDED_CHAT_ID = "17841471075473962"
 
 const gradientBorder = "bg-gradient-to-r from-primary via-purple-500 to-secondary p-[2px] rounded-lg"
 const fancyBackground = "bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1d1d1d]"
