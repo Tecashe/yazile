@@ -9074,1117 +9074,24 @@
 
 
 
-// import { type NextRequest, NextResponse } from "next/server"
-// import {
-//   createChatHistory,
-//   trackResponses,
-//   checkProcessedMessage,
-//   markMessageAsProcessed,
-//   decideTriggerAction,
-//   getAutomationWithTriggers,
-//   checkDuplicateResponse,
-//   getRecentResponseCount,
-//   markResponseAsSent,
-// } from "@/actions/webhook/queries"
-// import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
-// import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
-// import { createVoiceflowUser, getEnhancedVoiceflowResponse } from "@/lib/voiceflow"
-// import { sendDM, sendPrivateMessage } from "@/lib/fetch"
-// import { storeConversationMessage } from "@/actions/chats/queries"
-// import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
-
-// // ============================================================================
-// // TYPES & INTERFACES
-// // ============================================================================
-
-// interface WebhookData {
-//   pageId: string
-//   senderId: string
-//   recipientId?: string
-//   userMessage: string
-//   messageId?: string
-//   commentId?: string
-//   messageType: "DM" | "COMMENT"
-//   isEcho?: boolean
-// }
-
-// interface VoiceflowResponse {
-//   success: boolean
-//   response?: {
-//     text: string
-//     buttons?: any[]
-//   }
-//   variables?: Record<string, any>
-//   error?: string
-// }
-
-// interface BusinessProfile {
-//   profileContent: string
-//   businessContext: {
-//     businessName?: string
-//     industry?: string
-//     welcomeMessage?: string
-//     responseLanguage?: string
-//     businessDescription?: string
-//     targetAudience?: string
-//     promotionMessage?: string
-//   }
-// }
-
-// interface ProcessingContext {
-//   data: WebhookData
-//   automation: any
-//   conversationUserId: string
-//   userMessage: string
-//   triggerDecision: any
-//   startTime: number
-//   messageKey: string
-// }
-
-// interface ProcessingResult {
-//   success: boolean
-//   responseText?: string
-//   buttons?: any[]
-//   variables?: Record<string, any>
-//   aiSystem: string
-//   error?: string
-// }
-
-// // ============================================================================
-// // CONFIGURATION & CONSTANTS
-// // ============================================================================
-
-// const CONFIG = {
-//   TIMEOUTS: {
-//     VOICEFLOW: 12000, // 12 seconds
-//     GEMINI: 10000, // 10 seconds
-//     PROFILE: 5000, // 5 seconds
-//     BUSINESS_VARS: 5000, // 5 seconds
-//     TOTAL_PROCESSING: 25000, // 25 seconds max total
-//   },
-//   RATE_LIMITS: {
-//     MAX_RESPONSES_PER_2MIN: 3,
-//     DUPLICATE_WINDOW: 8000, // 8 seconds
-//   },
-//   CLEANUP_INTERVAL: 5 * 60 * 1000, // 5 minutes
-//   FALLBACK_RESPONSES: {
-//     PRO: "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you with detailed information shortly. 🌟",
-//     STANDARD: "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊",
-//     EMERGENCY: "Hi! Thanks for reaching out. I'm here to help! 😊",
-//     SIMPLE: "Hello! 👋",
-//   },
-// } as const
-
-// // ============================================================================
-// // MEMORY MANAGEMENT
-// // ============================================================================
-
-// class MemoryManager {
-//   private static instance: MemoryManager
-//   private recentMessages = new Map<string, number>()
-//   private processingMessages = new Set<string>()
-//   private cleanupInterval: NodeJS.Timeout
-
-//   private constructor() {
-//     this.cleanupInterval = setInterval(() => {
-//       this.cleanup()
-//     }, CONFIG.CLEANUP_INTERVAL)
-//   }
-
-//   static getInstance(): MemoryManager {
-//     if (!MemoryManager.instance) {
-//       MemoryManager.instance = new MemoryManager()
-//     }
-//     return MemoryManager.instance
-//   }
-
-//   isDuplicate(key: string, timestamp: number): boolean {
-//     const lastTime = this.recentMessages.get(key)
-//     return lastTime ? timestamp - lastTime < CONFIG.RATE_LIMITS.DUPLICATE_WINDOW : false
-//   }
-
-//   isProcessing(key: string): boolean {
-//     return this.processingMessages.has(key)
-//   }
-
-//   markMessage(key: string, timestamp: number): void {
-//     this.recentMessages.set(key, timestamp)
-//   }
-
-//   startProcessing(key: string): void {
-//     this.processingMessages.add(key)
-//   }
-
-//   finishProcessing(key: string): void {
-//     this.processingMessages.delete(key)
-//   }
-
-//   private cleanup(): void {
-//     const cutoff = Date.now() - CONFIG.CLEANUP_INTERVAL
-//     const keysToDelete: string[] = []
-
-//     this.recentMessages.forEach((timestamp, key) => {
-//       if (timestamp < cutoff) {
-//         keysToDelete.push(key)
-//       }
-//     })
-
-//     keysToDelete.forEach((key) => {
-//       this.recentMessages.delete(key)
-//     })
-
-//     // Clear old processing entries (safety cleanup)
-//     this.processingMessages.clear()
-
-//     console.log(`🧹 Memory cleanup: removed ${keysToDelete.length} old entries`)
-//   }
-// }
-
-// // ============================================================================
-// // UTILITIES
-// // ============================================================================
-
-// class Logger {
-//   static info(message: string, data?: any): void {
-//     const timestamp = new Date().toISOString()
-//     console.log(`[${timestamp}] ℹ️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
-//   }
-
-//   static success(message: string, data?: any): void {
-//     const timestamp = new Date().toISOString()
-//     console.log(`[${timestamp}] ✅ ${message}`, data ? JSON.stringify(data, null, 2) : "")
-//   }
-
-//   static warning(message: string, data?: any): void {
-//     const timestamp = new Date().toISOString()
-//     console.log(`[${timestamp}] ⚠️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
-//   }
-
-//   static error(message: string, error?: any): void {
-//     const timestamp = new Date().toISOString()
-//     console.error(`[${timestamp}] ❌ ${message}`, error)
-//   }
-
-//   static debug(message: string, data?: any): void {
-//     const timestamp = new Date().toISOString()
-//     console.log(`[${timestamp}] 🔍 ${message}`, data ? JSON.stringify(data, null, 2) : "")
-//   }
-
-//   static performance(message: string, startTime: number): void {
-//     const duration = Date.now() - startTime
-//     const timestamp = new Date().toISOString()
-//     console.log(`[${timestamp}] ⚡ ${message} (${duration}ms)`)
-//   }
-// }
-
-// class TimeoutManager {
-//   static async withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
-//     const timeoutPromise = new Promise<never>((_, reject) => {
-//       setTimeout(() => reject(new Error(`${operation} timeout after ${timeoutMs}ms`)), timeoutMs)
-//     })
-
-//     return Promise.race([promise, timeoutPromise])
-//   }
-// }
-
-// // ============================================================================
-// // WEBHOOK PROCESSORS
-// // ============================================================================
-
-// class WebhookValidator {
-//   static extractData(payload: any): WebhookData | null {
-//     try {
-//       if (payload?.entry?.[0]?.messaging) {
-//         const messaging = payload.entry[0].messaging[0]
-
-//         if (messaging.read || messaging.delivery) {
-//           Logger.debug("Ignoring read receipt or delivery confirmation")
-//           return null
-//         }
-
-//         if (messaging.message) {
-//           const isEcho = messaging.message?.is_echo === true
-
-//           if (!messaging.message.text) {
-//             Logger.debug("Ignoring non-text message")
-//             return null
-//           }
-
-//           return {
-//             pageId: payload.entry[0].id,
-//             senderId: messaging.sender.id,
-//             recipientId: messaging.recipient.id,
-//             userMessage: messaging.message.text,
-//             messageId: messaging.message.mid,
-//             messageType: "DM",
-//             isEcho,
-//           }
-//         }
-
-//         if (messaging.postback) {
-//           return {
-//             pageId: payload.entry[0].id,
-//             senderId: messaging.sender.id,
-//             recipientId: messaging.recipient.id,
-//             userMessage: messaging.postback.payload || messaging.postback.title || "Button clicked",
-//             messageId: `postback_${Date.now()}`,
-//             messageType: "DM",
-//             isEcho: false,
-//           }
-//         }
-//       } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
-//         const changeValue = payload.entry[0].changes[0].value
-
-//         if (!changeValue.text) {
-//           Logger.debug("Ignoring comment without text")
-//           return null
-//         }
-
-//         return {
-//           pageId: payload.entry[0].id,
-//           senderId: changeValue.from.id,
-//           userMessage: changeValue.text,
-//           commentId: changeValue.id,
-//           messageType: "COMMENT",
-//           isEcho: false,
-//         }
-//       }
-//     } catch (error) {
-//       Logger.error("Failed to extract webhook data", error)
-//     }
-
-//     return null
-//   }
-
-//   static isSpecialWebhook(payload: any): string | null {
-//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "deauthorizations") {
-//       return "deauth"
-//     }
-//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion") {
-//       return "data_deletion"
-//     }
-//     if (payload?.entry?.[0]?.messaging?.[0]?.read || payload?.entry?.[0]?.messaging?.[0]?.delivery) {
-//       return "receipt"
-//     }
-//     return null
-//   }
-// }
-
-// class MessageProcessor {
-//   private static generateKey(data: WebhookData, timestamp: number): string {
-//     const baseId = data.messageId || data.commentId || `${timestamp}_${Math.random().toString(36).substr(2, 9)}`
-//     const messageContent = data.userMessage.substring(0, 50)
-//     const messageLength = data.userMessage.length
-//     return `${data.pageId}_${data.senderId}_${baseId}_${messageLength}_${messageContent.replace(/\s+/g, "_")}`
-//   }
-
-//   static async processImmediate(data: WebhookData, startTime: number): Promise<void> {
-//     const messageKey = this.generateKey(data, startTime)
-//     const duplicateKey = `${data.pageId}_${data.senderId}_${data.userMessage}_${data.messageType}`
-
-//     Logger.info(`🚀 IMMEDIATE PROCESSING: ${data.messageType} from ${data.senderId}`)
-//     Logger.debug(`Message: "${data.userMessage.substring(0, 100)}..."`)
-
-//     const memoryManager = MemoryManager.getInstance()
-
-//     // Check for duplicates
-//     if (memoryManager.isDuplicate(duplicateKey, startTime)) {
-//       Logger.warning(`Duplicate message blocked: ${duplicateKey}`)
-//       return
-//     }
-
-//     // Check if currently processing
-//     if (memoryManager.isProcessing(duplicateKey)) {
-//       Logger.warning(`Message already being processed: ${duplicateKey}`)
-//       return
-//     }
-
-//     // Check database processing status
-//     const isProcessed = await checkProcessedMessage(messageKey)
-//     if (isProcessed) {
-//       Logger.warning(`Message already processed in DB: ${messageKey.substring(0, 50)}...`)
-//       return
-//     }
-
-//     // Mark as processing
-//     memoryManager.startProcessing(duplicateKey)
-//     memoryManager.markMessage(duplicateKey, startTime)
-
-//     try {
-//       // Mark as processed in database
-//       await markMessageAsProcessed(messageKey)
-//       Logger.success(`Message marked for processing: ${messageKey.substring(0, 50)}...`)
-
-//       // Process immediately with timeout protection
-//       await TimeoutManager.withTimeout(
-//         this.processMessage(data, messageKey, startTime),
-//         CONFIG.TIMEOUTS.TOTAL_PROCESSING,
-//         "Total message processing",
-//       )
-
-//       Logger.performance("Message processing completed", startTime)
-//     } catch (error) {
-//       Logger.error("Message processing failed", error)
-//       await this.handleProcessingFailure(data, error)
-//     } finally {
-//       memoryManager.finishProcessing(duplicateKey)
-//     }
-//   }
-
-//   private static async processMessage(data: WebhookData, messageKey: string, startTime: number): Promise<void> {
-//     Logger.info(`🎯 Processing message: ${messageKey.substring(0, 50)}...`)
-
-//     // Build processing context
-//     const context = await this.buildProcessingContext(data, messageKey, startTime)
-//     if (!context) {
-//       throw new Error("Failed to build processing context")
-//     }
-
-//     // Route to appropriate handler
-//     const isPROUser = context.automation.User?.subscription?.plan === "PRO"
-//     Logger.info(`Routing to ${isPROUser ? "PRO Voiceflow" : "Standard Gemini"} handler`)
-
-//     let result: ProcessingResult
-
-//     if (isPROUser) {
-//       result = await VoiceflowHandler.handle(context)
-//     } else {
-//       result = await GeminiHandler.handle(context)
-//     }
-
-//     if (!result.success) {
-//       throw new Error(`AI processing failed: ${result.error}`)
-//     }
-
-//     // Send response
-//     await ResponseSender.send(context, result.responseText!, result.buttons)
-
-//     // Background tasks (non-blocking)
-//     BackgroundProcessor.process(context, result.responseText!)
-
-//     Logger.success(`✨ Message successfully processed with ${result.aiSystem}`)
-//   }
-
-//   private static async buildProcessingContext(
-//     data: WebhookData,
-//     messageKey: string,
-//     startTime: number,
-//   ): Promise<ProcessingContext | null> {
-//     try {
-//       Logger.debug("Building processing context...")
-
-//       const triggerDecision = await TimeoutManager.withTimeout(
-//         decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType),
-//         5000,
-//         "Trigger decision",
-//       )
-
-//       Logger.debug("Trigger decision completed", triggerDecision)
-
-//       const automation = await TimeoutManager.withTimeout(
-//         getAutomationWithTriggers(triggerDecision.automationId!, data.messageType),
-//         5000,
-//         "Automation lookup",
-//       )
-
-//       if (!automation) {
-//         Logger.error(`Automation not found: ${triggerDecision.automationId}`)
-//         return null
-//       }
-
-//       Logger.success(`Context built - Automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
-
-//       return {
-//         data,
-//         automation,
-//         conversationUserId: `${data.pageId}_${data.senderId}`,
-//         userMessage: data.userMessage,
-//         triggerDecision,
-//         startTime,
-//         messageKey,
-//       }
-//     } catch (error) {
-//       Logger.error("Failed to build processing context", error)
-//       return null
-//     }
-//   }
-
-//   private static async handleProcessingFailure(data: WebhookData, error: any): Promise<void> {
-//     Logger.error("Handling processing failure", error)
-
-//     try {
-//       const emergencyResponse = CONFIG.FALLBACK_RESPONSES.EMERGENCY
-//       const token = process.env.DEFAULT_PAGE_TOKEN!
-
-//       if (data.messageType === "DM") {
-//         await sendDM(data.pageId, data.senderId, emergencyResponse, token)
-//       } else if (data.messageType === "COMMENT" && data.commentId) {
-//         await sendPrivateMessage(data.pageId, data.commentId, emergencyResponse, token)
-//       }
-
-//       Logger.success("Emergency response sent successfully")
-//     } catch (emergencyError) {
-//       Logger.error("Emergency response also failed", emergencyError)
-//     }
-//   }
-// }
-
-// // ============================================================================
-// // AI HANDLERS
-// // ============================================================================
-
-// class VoiceflowHandler {
-//   static async handle(context: ProcessingContext): Promise<ProcessingResult> {
-//     Logger.info("🎙️ === VOICEFLOW HANDLER INITIATED ===")
-
-//     try {
-//       // Rate limiting check
-//       if (await this.isRateLimited(context)) {
-//         return {
-//           success: false,
-//           aiSystem: "voiceflow_rate_limited",
-//           error: "Rate limit exceeded",
-//         }
-//       }
-
-//       // Gather context data
-//       const contextData = await this.gatherContext(context)
-
-//       // Process with Voiceflow
-//       const response = await this.processVoiceflow(context, contextData)
-
-//       return {
-//         success: true,
-//         responseText: response.text,
-//         buttons: response.buttons,
-//         variables: response.variables,
-//         aiSystem: response.aiSystem,
-//       }
-//     } catch (error) {
-//       Logger.error("Voiceflow handler failed", error)
-//       return {
-//         success: false,
-//         aiSystem: "voiceflow_failed",
-//         error: error instanceof Error ? error.message : String(error),
-//       }
-//     }
-//   }
-
-//   private static async isRateLimited(context: ProcessingContext): Promise<boolean> {
-//     const count = await getRecentResponseCount(context.data.pageId, context.data.senderId, context.data.messageType, 2)
-//     if (count >= CONFIG.RATE_LIMITS.MAX_RESPONSES_PER_2MIN) {
-//       Logger.warning(`Rate limit exceeded: ${count} responses in 2 minutes`)
-//       return true
-//     }
-//     return false
-//   }
-
-//   private static async gatherContext(context: ProcessingContext) {
-//     Logger.debug("Gathering Voiceflow context...")
-
-//     const [historyResult, profileResult] = await Promise.allSettled([
-//       TimeoutManager.withTimeout(
-//         buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
-//         CONFIG.TIMEOUTS.PROFILE,
-//         "Conversation history",
-//       ),
-//       TimeoutManager.withTimeout(
-//         getBusinessProfileForAutomation(context.automation.id),
-//         CONFIG.TIMEOUTS.PROFILE,
-//         "Business profile",
-//       ),
-//     ])
-
-//     const conversationHistory =
-//       historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : []
-
-//     const profile =
-//       profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
-//         ? profileResult.value
-//         : { profileContent: "", businessContext: {} }
-
-//     Logger.success(`Context gathered - History: ${conversationHistory.length} messages`)
-
-//     return { conversationHistory, profile }
-//   }
-
-//   private static async processVoiceflow(context: ProcessingContext, contextData: any) {
-//     Logger.debug("Processing with Voiceflow...")
-
-//     // Create Voiceflow user (non-blocking)
-//     createVoiceflowUser(context.conversationUserId).catch((error) =>
-//       Logger.warning("Voiceflow user creation failed", error),
-//     )
-
-//     // Build business variables
-//     const businessVariables = this.buildBusinessVariables(context, contextData)
-
-//     // Try Voiceflow first
-//     try {
-//       const voiceflowResult = await TimeoutManager.withTimeout(
-//         getEnhancedVoiceflowResponse(context.userMessage, context.conversationUserId, businessVariables),
-//         CONFIG.TIMEOUTS.VOICEFLOW,
-//         "Voiceflow response",
-//       )
-
-//       if (this.isVoiceflowResponse(voiceflowResult) && voiceflowResult.success && voiceflowResult.response?.text) {
-//         Logger.success("✨ Voiceflow response successful")
-//         return {
-//           text: voiceflowResult.response.text,
-//           buttons: voiceflowResult.response.buttons,
-//           variables: voiceflowResult.variables,
-//           aiSystem: "enhanced_voiceflow",
-//         }
-//       }
-//     } catch (error) {
-//       Logger.warning("Voiceflow failed, falling back to Gemini", error)
-//     }
-
-//     // Fallback to Gemini Pro
-//     Logger.info("🔄 Using Gemini Pro fallback...")
-//     try {
-//       const geminiResponse = await TimeoutManager.withTimeout(
-//         generateGeminiResponse({
-//           userMessage: context.userMessage,
-//           businessProfile: contextData.profile.profileContent,
-//           conversationHistory: contextData.conversationHistory,
-//           businessContext: contextData.profile.businessContext,
-//           isPROUser: true,
-//           isVoiceflowFallback: true,
-//         }),
-//         CONFIG.TIMEOUTS.GEMINI,
-//         "Gemini Pro fallback",
-//       )
-
-//       const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.PRO
-
-//       Logger.success("✨ Gemini Pro fallback successful")
-//       return {
-//         text: responseText,
-//         buttons: undefined,
-//         variables: undefined,
-//         aiSystem: "gemini_pro_fallback",
-//       }
-//     } catch (error) {
-//       Logger.warning("Gemini Pro fallback also failed", error)
-//       return {
-//         text: CONFIG.FALLBACK_RESPONSES.PRO,
-//         buttons: undefined,
-//         variables: undefined,
-//         aiSystem: "static_pro_fallback",
-//       }
-//     }
-//   }
-
-//   private static buildBusinessVariables(context: ProcessingContext, contextData: any) {
-//     const isNewUser = contextData.conversationHistory.length === 0
-//     const customerType =
-//       contextData.conversationHistory.length >= 10
-//         ? "VIP"
-//         : contextData.conversationHistory.length > 0
-//           ? "RETURNING"
-//           : "NEW"
-
-//     return {
-//       business_name: contextData.profile.businessContext.businessName || "Our Business",
-//       welcome_message: contextData.profile.businessContext.welcomeMessage || "Hello! How can I help you today?",
-//       business_industry: contextData.profile.businessContext.industry || "",
-//       business_description: contextData.profile.businessContext.businessDescription || "",
-//       target_audience: contextData.profile.businessContext.targetAudience || "",
-//       response_language: contextData.profile.businessContext.responseLanguage || "English",
-//       customer_type: customerType,
-//       is_new_user: isNewUser.toString(),
-//       conversation_length: contextData.conversationHistory.length.toString(),
-//       trigger_type: context.triggerDecision.triggerType,
-//       trigger_reason: context.triggerDecision.reason,
-//     }
-//   }
-
-//   private static isVoiceflowResponse(value: unknown): value is VoiceflowResponse {
-//     return (
-//       typeof value === "object" && value !== null && "success" in value && typeof (value as any).success === "boolean"
-//     )
-//   }
-
-//   private static isBusinessProfile(value: unknown): value is BusinessProfile {
-//     return typeof value === "object" && value !== null && "profileContent" in value && "businessContext" in value
-//   }
-// }
-
-// class GeminiHandler {
-//   static async handle(context: ProcessingContext): Promise<ProcessingResult> {
-//     Logger.info("🔮 === GEMINI HANDLER INITIATED ===")
-
-//     try {
-//       // Rate limiting check
-//       const count = await getRecentResponseCount(
-//         context.data.pageId,
-//         context.data.senderId,
-//         context.data.messageType,
-//         2,
-//       )
-//       if (count >= CONFIG.RATE_LIMITS.MAX_RESPONSES_PER_2MIN) {
-//         Logger.warning(`Rate limit exceeded: ${count} responses`)
-//         return {
-//           success: false,
-//           aiSystem: "gemini_rate_limited",
-//           error: "Rate limit exceeded",
-//         }
-//       }
-
-//       // Get context with timeout protection
-//       const [profileResult, historyResult] = await Promise.allSettled([
-//         TimeoutManager.withTimeout(
-//           getBusinessProfileForAutomation(context.automation.id),
-//           CONFIG.TIMEOUTS.PROFILE,
-//           "Business profile",
-//         ),
-//         TimeoutManager.withTimeout(
-//           buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
-//           CONFIG.TIMEOUTS.PROFILE,
-//           "Conversation history",
-//         ),
-//       ])
-
-//       const profile =
-//         profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
-//           ? profileResult.value
-//           : { profileContent: "", businessContext: {} }
-
-//       const history =
-//         historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : []
-
-//       Logger.success(`Gemini context gathered - History: ${history.length} messages`)
-
-//       // Generate response with timeout
-//       const geminiResponse = await TimeoutManager.withTimeout(
-//         generateGeminiResponse({
-//           userMessage: context.userMessage,
-//           businessProfile: profile.profileContent,
-//           conversationHistory: history,
-//           businessContext: profile.businessContext,
-//           isPROUser: false,
-//         }),
-//         CONFIG.TIMEOUTS.GEMINI,
-//         "Gemini response",
-//       )
-
-//       const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.STANDARD
-
-//       Logger.success("✨ Gemini response successful")
-
-//       return {
-//         success: true,
-//         responseText,
-//         buttons: undefined,
-//         variables: undefined,
-//         aiSystem: "enhanced_gemini",
-//       }
-//     } catch (error) {
-//       Logger.error("Gemini handler failed", error)
-//       return {
-//         success: false,
-//         responseText: CONFIG.FALLBACK_RESPONSES.STANDARD,
-//         aiSystem: "gemini_failed_fallback",
-//         error: error instanceof Error ? error.message : String(error),
-//       }
-//     }
-//   }
-
-//   private static isBusinessProfile(value: unknown): value is BusinessProfile {
-//     return typeof value === "object" && value !== null && "profileContent" in value && "businessContext" in value
-//   }
-// }
-
-// // ============================================================================
-// // RESPONSE SENDER
-// // ============================================================================
-
-// class ResponseSender {
-//   static async send(context: ProcessingContext, text: string, buttons?: any[]): Promise<void> {
-//     Logger.info(`📤 Sending response: "${text.substring(0, 100)}..."`)
-
-//     // Check for duplicates
-//     const isDuplicate = await checkDuplicateResponse(
-//       context.data.pageId,
-//       context.data.senderId,
-//       text,
-//       context.data.messageType,
-//     )
-
-//     if (isDuplicate) {
-//       Logger.warning("Duplicate response detected, skipping")
-//       return
-//     }
-
-//     // Transform buttons to the new format
-//     const formattedButtons = this.formatButtons(buttons)
-//     const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
-
-//     // Multiple fallback responses for guaranteed delivery
-//     const fallbackResponses = [
-//       text,
-//       CONFIG.FALLBACK_RESPONSES.STANDARD,
-//       CONFIG.FALLBACK_RESPONSES.EMERGENCY,
-//       CONFIG.FALLBACK_RESPONSES.SIMPLE,
-//     ]
-
-//     for (let i = 0; i < fallbackResponses.length; i++) {
-//       try {
-//         const currentResponse = fallbackResponses[i]
-//         let result
-
-//         Logger.debug(`Attempt ${i + 1}: Sending "${currentResponse.substring(0, 50)}..."`)
-
-//         if (context.data.messageType === "DM") {
-//           result = await TimeoutManager.withTimeout(
-//             sendDM(
-//               context.data.pageId,
-//               context.data.senderId,
-//               currentResponse,
-//               token,
-//               i === 0 ? formattedButtons : undefined,
-//             ),
-//             10000,
-//             `DM send attempt ${i + 1}`,
-//           )
-//         } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
-//           result = await TimeoutManager.withTimeout(
-//             sendPrivateMessage(
-//               context.data.pageId,
-//               context.data.commentId,
-//               currentResponse,
-//               token,
-//               i === 0 ? formattedButtons : undefined,
-//             ),
-//             10000,
-//             `Comment send attempt ${i + 1}`,
-//           )
-//         }
-
-//         if (result?.status === 200) {
-//           Logger.success(`✅ Response sent successfully (attempt ${i + 1})`)
-
-//           // Track the successful response
-//           await Promise.allSettled([
-//             markResponseAsSent(
-//               context.data.pageId,
-//               context.data.senderId,
-//               currentResponse,
-//               context.data.messageType,
-//               context.automation.id,
-//             ),
-//             trackResponses(context.automation.id, context.data.messageType),
-//           ])
-
-//           return
-//         } else {
-//           Logger.warning(`Attempt ${i + 1} returned status: ${result?.status}`)
-//         }
-//       } catch (error) {
-//         Logger.error(`Send attempt ${i + 1} failed`, error)
-//         if (i === fallbackResponses.length - 1) {
-//           throw new Error(`All ${fallbackResponses.length} send attempts failed`)
-//         }
-//       }
-//     }
-//   }
-
-//   private static formatButtons(
-//     buttons?: { name: string; payload: string | object | any }[],
-//   ): { name: string; payload: string }[] | undefined {
-//     if (!buttons || buttons.length === 0) return undefined
-
-//     return buttons.slice(0, 11).map((button) => {
-//       const buttonName = String(button.name || "").substring(0, 20)
-//       let buttonPayload: string
-
-//       if (typeof button.payload === "string") {
-//         buttonPayload = button.payload.substring(0, 1000)
-//       } else if (button.payload === null || button.payload === undefined) {
-//         buttonPayload = buttonName
-//       } else {
-//         try {
-//           buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
-//         } catch (e) {
-//           buttonPayload = String(button.payload).substring(0, 1000)
-//         }
-//       }
-
-//       return {
-//         name: buttonName,
-//         payload: buttonPayload,
-//       }
-//     })
-//   }
-// }
-
-// // ============================================================================
-// // BACKGROUND PROCESSOR
-// // ============================================================================
-
-// class BackgroundProcessor {
-//   static process(context: ProcessingContext, responseText: string): void {
-//     Logger.debug("🔄 Starting background tasks...")
-
-//     // Store conversation messages (non-blocking)
-//     Promise.allSettled([
-//       storeConversationMessage(
-//         context.data.pageId,
-//         context.data.senderId,
-//         context.userMessage,
-//         false,
-//         context.automation?.id || null,
-//       ),
-//       storeConversationMessage(context.data.pageId, "bot", responseText, true, context.automation?.id || null),
-//       context.automation?.id
-//         ? trackMessageForSentiment(
-//             context.automation.id,
-//             context.data.pageId,
-//             context.data.senderId,
-//             context.userMessage,
-//           )
-//         : Promise.resolve(),
-//       createChatHistory(
-//         context.automation?.id || "default",
-//         context.data.pageId,
-//         context.data.senderId,
-//         context.userMessage,
-//       ),
-//       createChatHistory(context.automation?.id || "default", context.data.pageId, context.data.senderId, responseText),
-//     ])
-//       .then((results) => {
-//         const failures = results.filter((r) => r.status === "rejected").length
-//         if (failures === 0) {
-//           Logger.success("✅ All background tasks completed successfully")
-//         } else {
-//           Logger.warning(`⚠️ ${failures} background tasks failed`)
-//         }
-//       })
-//       .catch((error) => Logger.warning("Background tasks failed", error))
-//   }
-// }
-
-// // ============================================================================
-// // MAIN ROUTE HANDLERS
-// // ============================================================================
-
-// export async function GET(req: NextRequest) {
-//   const hub = req.nextUrl.searchParams.get("hub.challenge")
-//   Logger.info(`📞 Webhook verification: ${hub}`)
-//   return new NextResponse(hub)
-// }
-
-// export async function POST(req: NextRequest) {
-//   const startTime = Date.now()
-//   Logger.info("🚀 === WEBHOOK REQUEST RECEIVED ===")
-
-//   try {
-//     const payload = await req.json()
-//     Logger.debug("📥 Webhook payload received")
-
-//     // Handle special webhooks
-//     const specialType = WebhookValidator.isSpecialWebhook(payload)
-//     if (specialType) {
-//       Logger.info(`🔧 Special webhook handled: ${specialType}`)
-//       return NextResponse.json({ message: `${specialType} processed` }, { status: 200 })
-//     }
-
-//     // Extract and validate data
-//     const data = WebhookValidator.extractData(payload)
-//     if (!data) {
-//       Logger.warning("⚠️ Unsupported webhook payload or non-text message")
-//       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 200 })
-//     }
-
-//     // Skip echo messages
-//     if (data.isEcho) {
-//       Logger.debug("🔄 Echo message ignored")
-//       return NextResponse.json({ message: "Echo message ignored" }, { status: 200 })
-//     }
-
-//     // Process immediately (no delays)
-//     await MessageProcessor.processImmediate(data, startTime)
-
-//     Logger.performance("Total webhook processing time", startTime)
-
-//     // Return success to Instagram
-//     return NextResponse.json({ message: "Message processed successfully" }, { status: 200 })
-//   } catch (error) {
-//     Logger.error("💥 Unhandled webhook error", error)
-//     return NextResponse.json(
-//       {
-//         message: "Error processing request",
-//         error: error instanceof Error ? error.message : String(error),
-//       },
-//       { status: 500 },
-//     )
-//   }
-// }
-
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createChatHistory,
   trackResponses,
+  checkProcessedMessage,
+  markMessageAsProcessed,
   decideTriggerAction,
   getAutomationWithTriggers,
+  checkDuplicateResponse,
+  getRecentResponseCount,
+  markResponseAsSent,
 } from "@/actions/webhook/queries"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
-import { getEnhancedVoiceflowResponse, createVoiceflowUser, fetchEnhancedBusinessVariables } from "@/lib/voiceflow"
+import { createVoiceflowUser, getEnhancedVoiceflowResponse } from "@/lib/voiceflow"
 import { sendDM, sendPrivateMessage } from "@/lib/fetch"
 import { storeConversationMessage } from "@/actions/chats/queries"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
-
-// ============================================================================
-// IN-MEMORY DUPLICATE PREVENTION - NO DATABASE NEEDED
-// ============================================================================
-
-class InMemoryDuplicateManager {
-  private static instance: InMemoryDuplicateManager
-  private processedMessages = new Map<string, number>()
-  private recentResponses = new Map<string, { text: string; timestamp: number }>()
-  private processingLocks = new Set<string>()
-  private globalLocks = new Map<string, number>()
-  private cleanupInterval: NodeJS.Timeout
-
-  private constructor() {
-    // Clean up old entries every 2 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup()
-    }, 120000)
-  }
-
-  static getInstance(): InMemoryDuplicateManager {
-    if (!InMemoryDuplicateManager.instance) {
-      InMemoryDuplicateManager.instance = new InMemoryDuplicateManager()
-    }
-    return InMemoryDuplicateManager.instance
-  }
-
-  // Generate unique message key
-  private generateMessageKey(data: WebhookData): string {
-    const content = data.userMessage.substring(0, 100).replace(/\s+/g, "_")
-    const timestamp = Math.floor(Date.now() / 10000) // 10-second window
-    return `${data.pageId}_${data.senderId}_${content}_${timestamp}`
-  }
-
-  // Generate response key for duplicate response detection
-  private generateResponseKey(pageId: string, senderId: string, text: string): string {
-    const textHash = text.substring(0, 50).replace(/\s+/g, "_")
-    return `${pageId}_${senderId}_${textHash}`
-  }
-
-  // Check if message was already processed
-  isMessageProcessed(data: WebhookData): boolean {
-    const key = this.generateMessageKey(data)
-    const lastProcessed = this.processedMessages.get(key)
-
-    if (lastProcessed && Date.now() - lastProcessed < 30000) {
-      // 30 second window
-      console.log(`🚫 DUPLICATE MESSAGE BLOCKED: ${key}`)
-      return true
-    }
-
-    return false
-  }
-
-  // Mark message as processed
-  markMessageProcessed(data: WebhookData): void {
-    const key = this.generateMessageKey(data)
-    this.processedMessages.set(key, Date.now())
-    console.log(`✅ MESSAGE MARKED PROCESSED: ${key}`)
-  }
-
-  // Check if we recently sent the same response
-  isDuplicateResponse(pageId: string, senderId: string, text: string): boolean {
-    const key = this.generateResponseKey(pageId, senderId, text)
-    const lastResponse = this.recentResponses.get(key)
-
-    if (lastResponse && Date.now() - lastResponse.timestamp < 60000) {
-      // 1 minute window
-      console.log(`🚫 DUPLICATE RESPONSE BLOCKED: ${key}`)
-      return true
-    }
-
-    return false
-  }
-
-  // Mark response as sent
-  markResponseSent(pageId: string, senderId: string, text: string): void {
-    const key = this.generateResponseKey(pageId, senderId, text)
-    this.recentResponses.set(key, { text, timestamp: Date.now() })
-    console.log(`✅ RESPONSE MARKED SENT: ${key}`)
-  }
-
-  // Global processing lock to prevent race conditions
-  acquireProcessingLock(pageId: string, senderId: string): boolean {
-    const lockKey = `${pageId}_${senderId}`
-
-    if (this.processingLocks.has(lockKey)) {
-      console.log(`🔒 PROCESSING LOCK BLOCKED: ${lockKey}`)
-      return false
-    }
-
-    this.processingLocks.add(lockKey)
-    this.globalLocks.set(lockKey, Date.now())
-    console.log(`🔓 PROCESSING LOCK ACQUIRED: ${lockKey}`)
-    return true
-  }
-
-  // Release processing lock
-  releaseProcessingLock(pageId: string, senderId: string): void {
-    const lockKey = `${pageId}_${senderId}`
-    this.processingLocks.delete(lockKey)
-    this.globalLocks.delete(lockKey)
-    console.log(`🔓 PROCESSING LOCK RELEASED: ${lockKey}`)
-  }
-
-  // Cleanup old entries
-  private cleanup(): void {
-    const cutoff = Date.now() - 300000 // 5 minutes
-    let cleaned = 0
-
-    // Clean processed messages
-    this.processedMessages.forEach((timestamp, key) => {
-      if (timestamp < cutoff) {
-        this.processedMessages.delete(key)
-        cleaned++
-      }
-    })
-
-    // Clean recent responses
-    this.recentResponses.forEach((data, key) => {
-      if (data.timestamp < cutoff) {
-        this.recentResponses.delete(key)
-        cleaned++
-      }
-    })
-
-    // Clean stuck locks (older than 2 minutes)
-    const lockCutoff = Date.now() - 120000
-    this.globalLocks.forEach((timestamp, key) => {
-      if (timestamp < lockCutoff) {
-        this.processingLocks.delete(key)
-        this.globalLocks.delete(key)
-        cleaned++
-      }
-    })
-
-    if (cleaned > 0) {
-      console.log(`🧹 CLEANUP: Removed ${cleaned} old entries`)
-    }
-  }
-
-  // Get stats for debugging
-  getStats() {
-    return {
-      processedMessages: this.processedMessages.size,
-      recentResponses: this.recentResponses.size,
-      activeLocks: this.processingLocks.size,
-    }
-  }
-}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -10201,56 +9108,187 @@ interface WebhookData {
   isEcho?: boolean
 }
 
+interface VoiceflowResponse {
+  success: boolean
+  response?: {
+    text: string
+    buttons?: any[]
+  }
+  variables?: Record<string, any>
+  error?: string
+}
+
+interface BusinessProfile {
+  profileContent: string
+  businessContext: {
+    businessName?: string
+    industry?: string
+    welcomeMessage?: string
+    responseLanguage?: string
+    businessDescription?: string
+    targetAudience?: string
+    promotionMessage?: string
+  }
+}
+
+interface ProcessingContext {
+  data: WebhookData
+  automation: any
+  conversationUserId: string
+  userMessage: string
+  triggerDecision: any
+  startTime: number
+  messageKey: string
+}
+
+interface ProcessingResult {
+  success: boolean
+  responseText?: string
+  buttons?: any[]
+  variables?: Record<string, any>
+  aiSystem: string
+  error?: string
+}
+
 // ============================================================================
-// ENHANCED ECHO DETECTION
+// CONFIGURATION & CONSTANTS
 // ============================================================================
 
-class EchoDetector {
-  private static botResponsePatterns = [
-    "Hi! I'm Lady Luck",
-    "Thank you for your message",
-    "Thanks for your message",
-    "Hi! Thanks for reaching out",
-    "Hello! 👋",
-    "Thanks for contacting",
-    "I appreciate you reaching out",
-    "Welcome to our business",
-    "How can I help you",
-    "I'm here to help",
-  ]
+const CONFIG = {
+  TIMEOUTS: {
+    VOICEFLOW: 12000, // 12 seconds
+    GEMINI: 10000, // 10 seconds
+    PROFILE: 5000, // 5 seconds
+    BUSINESS_VARS: 5000, // 5 seconds
+    TOTAL_PROCESSING: 25000, // 25 seconds max total
+  },
+  RATE_LIMITS: {
+    MAX_RESPONSES_PER_2MIN: 3,
+    DUPLICATE_WINDOW: 8000, // 8 seconds
+  },
+  CLEANUP_INTERVAL: 5 * 60 * 1000, // 5 minutes
+  FALLBACK_RESPONSES: {
+    PRO: "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you with detailed information shortly. 🌟",
+    STANDARD: "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊",
+    EMERGENCY: "Hi! Thanks for reaching out. I'm here to help! 😊",
+    SIMPLE: "Hello! 👋",
+  },
+} as const
 
-  static isEchoMessage(data: WebhookData): boolean {
-    // Check explicit echo flag
-    if (data.isEcho) {
-      console.log(`🔄 EXPLICIT ECHO DETECTED: ${data.messageId}`)
-      return true
+// ============================================================================
+// MEMORY MANAGEMENT
+// ============================================================================
+
+class MemoryManager {
+  private static instance: MemoryManager
+  private recentMessages = new Map<string, number>()
+  private processingMessages = new Set<string>()
+  private cleanupInterval: NodeJS.Timeout
+
+  private constructor() {
+    this.cleanupInterval = setInterval(() => {
+      this.cleanup()
+    }, CONFIG.CLEANUP_INTERVAL)
+  }
+
+  static getInstance(): MemoryManager {
+    if (!MemoryManager.instance) {
+      MemoryManager.instance = new MemoryManager()
     }
+    return MemoryManager.instance
+  }
 
-    // Check for bot response patterns
-    const message = data.userMessage.toLowerCase()
-    const isPatternMatch = this.botResponsePatterns.some((pattern) => message.includes(pattern.toLowerCase()))
+  isDuplicate(key: string, timestamp: number): boolean {
+    const lastTime = this.recentMessages.get(key)
+    return lastTime ? timestamp - lastTime < CONFIG.RATE_LIMITS.DUPLICATE_WINDOW : false
+  }
 
-    if (isPatternMatch) {
-      console.log(`🔄 PATTERN ECHO DETECTED: "${data.userMessage.substring(0, 50)}..."`)
-      return true
-    }
+  isProcessing(key: string): boolean {
+    return this.processingMessages.has(key)
+  }
 
-    // Check for very generic responses that might be echoes
-    const genericPhrases = ["hello", "hi", "hey", "thanks", "thank you"]
-    const isVeryShort = data.userMessage.length < 10
-    const isGeneric = genericPhrases.includes(message.trim())
+  markMessage(key: string, timestamp: number): void {
+    this.recentMessages.set(key, timestamp)
+  }
 
-    if (isVeryShort && isGeneric) {
-      console.log(`🔄 GENERIC ECHO SUSPECTED: "${data.userMessage}"`)
-      return true
-    }
+  startProcessing(key: string): void {
+    this.processingMessages.add(key)
+  }
 
-    return false
+  finishProcessing(key: string): void {
+    this.processingMessages.delete(key)
+  }
+
+  private cleanup(): void {
+    const cutoff = Date.now() - CONFIG.CLEANUP_INTERVAL
+    const keysToDelete: string[] = []
+
+    this.recentMessages.forEach((timestamp, key) => {
+      if (timestamp < cutoff) {
+        keysToDelete.push(key)
+      }
+    })
+
+    keysToDelete.forEach((key) => {
+      this.recentMessages.delete(key)
+    })
+
+    // Clear old processing entries (safety cleanup)
+    this.processingMessages.clear()
+
+    console.log(`🧹 Memory cleanup: removed ${keysToDelete.length} old entries`)
   }
 }
 
 // ============================================================================
-// WEBHOOK VALIDATOR
+// UTILITIES
+// ============================================================================
+
+class Logger {
+  static info(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ℹ️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static success(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ✅ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static warning(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ⚠️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static error(message: string, error?: any): void {
+    const timestamp = new Date().toISOString()
+    console.error(`[${timestamp}] ❌ ${message}`, error)
+  }
+
+  static debug(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] 🔍 ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static performance(message: string, startTime: number): void {
+    const duration = Date.now() - startTime
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ⚡ ${message} (${duration}ms)`)
+  }
+}
+
+class TimeoutManager {
+  static async withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(`${operation} timeout after ${timeoutMs}ms`)), timeoutMs)
+    })
+
+    return Promise.race([promise, timeoutPromise])
+  }
+}
+
+// ============================================================================
+// WEBHOOK PROCESSORS
 // ============================================================================
 
 class WebhookValidator {
@@ -10259,16 +9297,16 @@ class WebhookValidator {
       if (payload?.entry?.[0]?.messaging) {
         const messaging = payload.entry[0].messaging[0]
 
-        // Skip read receipts and delivery confirmations
         if (messaging.read || messaging.delivery) {
-          console.log("📖 SKIPPING: Read receipt or delivery confirmation")
+          Logger.debug("Ignoring read receipt or delivery confirmation")
           return null
         }
 
         if (messaging.message) {
-          // Skip non-text messages
+          const isEcho = messaging.message?.is_echo === true
+
           if (!messaging.message.text) {
-            console.log("📷 SKIPPING: Non-text message (image/video/etc)")
+            Logger.debug("Ignoring non-text message")
             return null
           }
 
@@ -10279,7 +9317,7 @@ class WebhookValidator {
             userMessage: messaging.message.text,
             messageId: messaging.message.mid,
             messageType: "DM",
-            isEcho: messaging.message?.is_echo === true,
+            isEcho,
           }
         }
 
@@ -10298,7 +9336,7 @@ class WebhookValidator {
         const changeValue = payload.entry[0].changes[0].value
 
         if (!changeValue.text) {
-          console.log("💬 SKIPPING: Comment without text")
+          Logger.debug("Ignoring comment without text")
           return null
         }
 
@@ -10312,7 +9350,7 @@ class WebhookValidator {
         }
       }
     } catch (error) {
-      console.error("❌ WEBHOOK EXTRACTION ERROR:", error)
+      Logger.error("Failed to extract webhook data", error)
     }
 
     return null
@@ -10332,328 +9370,648 @@ class WebhookValidator {
   }
 }
 
-// ============================================================================
-// RATE LIMITER
-// ============================================================================
-
-class RateLimiter {
-  private static instance: RateLimiter
-  private userRequests = new Map<string, number[]>()
-
-  static getInstance(): RateLimiter {
-    if (!RateLimiter.instance) {
-      RateLimiter.instance = new RateLimiter()
-    }
-    return RateLimiter.instance
+class MessageProcessor {
+  private static generateKey(data: WebhookData, timestamp: number): string {
+    const baseId = data.messageId || data.commentId || `${timestamp}_${Math.random().toString(36).substr(2, 9)}`
+    const messageContent = data.userMessage.substring(0, 50)
+    const messageLength = data.userMessage.length
+    return `${data.pageId}_${data.senderId}_${baseId}_${messageLength}_${messageContent.replace(/\s+/g, "_")}`
   }
 
-  isRateLimited(pageId: string, senderId: string): boolean {
-    const key = `${pageId}_${senderId}`
-    const now = Date.now()
-    const windowMs = 120000 // 2 minutes
-    const maxRequests = 5
+  static async processImmediate(data: WebhookData, startTime: number): Promise<void> {
+    const messageKey = this.generateKey(data, startTime)
+    const duplicateKey = `${data.pageId}_${data.senderId}_${data.userMessage}_${data.messageType}`
 
-    // Get existing requests for this user
-    const requests = this.userRequests.get(key) || []
+    Logger.info(`🚀 IMMEDIATE PROCESSING: ${data.messageType} from ${data.senderId}`)
+    Logger.debug(`Message: "${data.userMessage.substring(0, 100)}..."`)
 
-    // Filter out old requests
-    const recentRequests = requests.filter((timestamp) => now - timestamp < windowMs)
+    const memoryManager = MemoryManager.getInstance()
 
-    // Check if rate limited
-    if (recentRequests.length >= maxRequests) {
-      console.log(`🚫 RATE LIMITED: ${key} (${recentRequests.length} requests in 2 minutes)`)
-      return true
+    // Check for duplicates
+    if (memoryManager.isDuplicate(duplicateKey, startTime)) {
+      Logger.warning(`Duplicate message blocked: ${duplicateKey}`)
+      return
     }
 
-    // Add current request
-    recentRequests.push(now)
-    this.userRequests.set(key, recentRequests)
+    // Check if currently processing
+    if (memoryManager.isProcessing(duplicateKey)) {
+      Logger.warning(`Message already being processed: ${duplicateKey}`)
+      return
+    }
 
-    return false
+    // Check database processing status
+    const isProcessed = await checkProcessedMessage(messageKey)
+    if (isProcessed) {
+      Logger.warning(`Message already processed in DB: ${messageKey.substring(0, 50)}...`)
+      return
+    }
+
+    // Mark as processing
+    memoryManager.startProcessing(duplicateKey)
+    memoryManager.markMessage(duplicateKey, startTime)
+
+    try {
+      // Mark as processed in database
+      await markMessageAsProcessed(messageKey)
+      Logger.success(`Message marked for processing: ${messageKey.substring(0, 50)}...`)
+
+      // Process immediately with timeout protection
+      await TimeoutManager.withTimeout(
+        this.processMessage(data, messageKey, startTime),
+        CONFIG.TIMEOUTS.TOTAL_PROCESSING,
+        "Total message processing",
+      )
+
+      Logger.performance("Message processing completed", startTime)
+    } catch (error) {
+      Logger.error("Message processing failed", error)
+      await this.handleProcessingFailure(data, error)
+    } finally {
+      memoryManager.finishProcessing(duplicateKey)
+    }
+  }
+
+  private static async processMessage(data: WebhookData, messageKey: string, startTime: number): Promise<void> {
+    Logger.info(`🎯 Processing message: ${messageKey.substring(0, 50)}...`)
+
+    // Build processing context
+    const context = await this.buildProcessingContext(data, messageKey, startTime)
+    if (!context) {
+      throw new Error("Failed to build processing context")
+    }
+
+    // Route to appropriate handler
+    const isPROUser = context.automation.User?.subscription?.plan === "PRO"
+    Logger.info(`Routing to ${isPROUser ? "PRO Voiceflow" : "Standard Gemini"} handler`)
+
+    let result: ProcessingResult
+
+    if (isPROUser) {
+      result = await VoiceflowHandler.handle(context)
+    } else {
+      result = await GeminiHandler.handle(context)
+    }
+
+    if (!result.success) {
+      throw new Error(`AI processing failed: ${result.error}`)
+    }
+
+    // Send response
+    await ResponseSender.send(context, result.responseText!, result.buttons)
+
+    // Background tasks (non-blocking)
+    BackgroundProcessor.process(context, result.responseText!)
+
+    Logger.success(`✨ Message successfully processed with ${result.aiSystem}`)
+  }
+
+  private static async buildProcessingContext(
+    data: WebhookData,
+    messageKey: string,
+    startTime: number,
+  ): Promise<ProcessingContext | null> {
+    try {
+      Logger.debug("Building processing context...")
+
+      const triggerDecision = await TimeoutManager.withTimeout(
+        decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType),
+        5000,
+        "Trigger decision",
+      )
+
+      Logger.debug("Trigger decision completed", triggerDecision)
+
+      const automation = await TimeoutManager.withTimeout(
+        getAutomationWithTriggers(triggerDecision.automationId!, data.messageType),
+        5000,
+        "Automation lookup",
+      )
+
+      if (!automation) {
+        Logger.error(`Automation not found: ${triggerDecision.automationId}`)
+        return null
+      }
+
+      Logger.success(`Context built - Automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
+
+      return {
+        data,
+        automation,
+        conversationUserId: `${data.pageId}_${data.senderId}`,
+        userMessage: data.userMessage,
+        triggerDecision,
+        startTime,
+        messageKey,
+      }
+    } catch (error) {
+      Logger.error("Failed to build processing context", error)
+      return null
+    }
+  }
+
+  private static async handleProcessingFailure(data: WebhookData, error: any): Promise<void> {
+    Logger.error("Handling processing failure", error)
+
+    try {
+      const emergencyResponse = CONFIG.FALLBACK_RESPONSES.EMERGENCY
+      const token = process.env.DEFAULT_PAGE_TOKEN!
+
+      if (data.messageType === "DM") {
+        await sendDM(data.pageId, data.senderId, emergencyResponse, token)
+      } else if (data.messageType === "COMMENT" && data.commentId) {
+        await sendPrivateMessage(data.pageId, data.commentId, emergencyResponse, token)
+      }
+
+      Logger.success("Emergency response sent successfully")
+    } catch (emergencyError) {
+      Logger.error("Emergency response also failed", emergencyError)
+    }
   }
 }
 
 // ============================================================================
-// MAIN MESSAGE PROCESSOR
+// AI HANDLERS
 // ============================================================================
 
-class MessageProcessor {
-  private static duplicateManager = InMemoryDuplicateManager.getInstance()
-  private static rateLimiter = RateLimiter.getInstance()
-
-  static async processMessage(data: WebhookData): Promise<void> {
-    const startTime = Date.now()
-    console.log(`🚀 PROCESSING MESSAGE: ${data.messageType} from ${data.senderId}`)
-    console.log(`📝 MESSAGE: "${data.userMessage.substring(0, 100)}..."`)
-
-    // Step 1: Echo detection
-    if (EchoDetector.isEchoMessage(data)) {
-      console.log("🔄 ECHO MESSAGE IGNORED")
-      return
-    }
-
-    // Step 2: Duplicate message detection
-    if (this.duplicateManager.isMessageProcessed(data)) {
-      console.log("🚫 DUPLICATE MESSAGE IGNORED")
-      return
-    }
-
-    // Step 3: Rate limiting
-    if (this.rateLimiter.isRateLimited(data.pageId, data.senderId)) {
-      console.log("🚫 RATE LIMITED - IGNORED")
-      return
-    }
-
-    // Step 4: Acquire processing lock
-    if (!this.duplicateManager.acquireProcessingLock(data.pageId, data.senderId)) {
-      console.log("🔒 PROCESSING LOCK FAILED - IGNORED")
-      return
-    }
+class VoiceflowHandler {
+  static async handle(context: ProcessingContext): Promise<ProcessingResult> {
+    Logger.info("🎙️ === VOICEFLOW HANDLER INITIATED ===")
 
     try {
-      // Step 5: Mark message as processed immediately
-      this.duplicateManager.markMessageProcessed(data)
-
-      // Step 6: Get automation and trigger decision
-      const triggerDecision = await decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType)
-
-      if (!triggerDecision.automationId) {
-        console.log("❌ NO AUTOMATION FOUND")
-        return
-      }
-
-      const automation = await getAutomationWithTriggers(triggerDecision.automationId, data.messageType)
-      if (!automation) {
-        console.log("❌ AUTOMATION NOT FOUND")
-        return
-      }
-
-      console.log(`✅ AUTOMATION FOUND: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
-
-      // Step 7: Process with appropriate AI system
-      const isPROUser = automation.User?.subscription?.plan === "PRO"
-      let responseText: string
-      let buttons: any[] | undefined
-
-      if (isPROUser) {
-        console.log("🎙️ PROCESSING WITH VOICEFLOW (PRO)")
-        const result = await this.processWithVoiceflow(data, automation)
-        responseText = result.text
-        buttons = result.buttons
-      } else {
-        console.log("🔮 PROCESSING WITH GEMINI (FREE)")
-        const result = await this.processWithGemini(data, automation)
-        responseText = result.text
-        buttons = result.buttons
-      }
-
-      // Step 8: Check for duplicate response
-      if (this.duplicateManager.isDuplicateResponse(data.pageId, data.senderId, responseText)) {
-        console.log("🚫 DUPLICATE RESPONSE BLOCKED")
-        return
-      }
-
-      // Step 9: Send response
-      await this.sendResponse(data, responseText, buttons, automation)
-
-      // Step 10: Mark response as sent
-      this.duplicateManager.markResponseSent(data.pageId, data.senderId, responseText)
-
-      // Step 11: Background tasks (non-blocking)
-      this.performBackgroundTasks(data, responseText, automation).catch((error) =>
-        console.error("⚠️ Background task error:", error),
-      )
-
-      console.log(`✅ MESSAGE PROCESSED SUCCESSFULLY (${Date.now() - startTime}ms)`)
-    } catch (error) {
-      console.error("❌ MESSAGE PROCESSING ERROR:", error)
-
-      // Emergency fallback response
-      try {
-        const emergencyResponse =
-          "Hi! Thanks for your message. I'm experiencing some technical difficulties right now, but I'll get back to you shortly! 😊"
-        await this.sendResponse(data, emergencyResponse, undefined, null)
-        console.log("🆘 EMERGENCY RESPONSE SENT")
-      } catch (emergencyError) {
-        console.error("💥 EMERGENCY RESPONSE FAILED:", emergencyError)
-      }
-    } finally {
-      // Always release the processing lock
-      this.duplicateManager.releaseProcessingLock(data.pageId, data.senderId)
-    }
-  }
-
-  private static async processWithVoiceflow(data: WebhookData, automation: any) {
-    try {
-      // Create Voiceflow user (non-blocking)
-      createVoiceflowUser(`${data.pageId}_${data.senderId}`).catch((error) =>
-        console.warn("Voiceflow user creation failed:", error),
-      )
-
-      // Get conversation context
-      const conversationHistory = await buildConversationContext(data.pageId, data.senderId, automation.id).catch(
-        () => [],
-      )
-
-      // Build business variables
-      const businessVariables = await fetchEnhancedBusinessVariables(automation.User?.id || "", automation.id, {
-        pageId: data.pageId,
-        senderId: data.senderId,
-        userMessage: data.userMessage,
-        isNewUser: conversationHistory.length === 0,
-        customerType: conversationHistory.length >= 10 ? "VIP" : conversationHistory.length > 0 ? "RETURNING" : "NEW",
-        messageHistory: conversationHistory,
-      }).catch(() => ({}))
-
-      // Try Voiceflow
-      const voiceflowResult = await getEnhancedVoiceflowResponse(
-        data.userMessage,
-        `${data.pageId}_${data.senderId}`,
-        businessVariables,
-        { maxRetries: 2, timeoutMs: 12000 },
-      )
-
-      if (voiceflowResult.success && voiceflowResult.response?.text) {
-        console.log("✅ VOICEFLOW SUCCESS")
+      // Rate limiting check
+      if (await this.isRateLimited(context)) {
         return {
-          text: voiceflowResult.response.text,
-          buttons: voiceflowResult.response.buttons,
+          success: false,
+          aiSystem: "voiceflow_rate_limited",
+          error: "Rate limit exceeded",
         }
       }
 
-      // Fallback to Gemini Pro
-      console.log("🔄 VOICEFLOW FAILED, USING GEMINI PRO FALLBACK")
-      return await this.processWithGemini(data, automation, true)
-    } catch (error) {
-      console.error("❌ VOICEFLOW PROCESSING ERROR:", error)
-      return await this.processWithGemini(data, automation, true)
-    }
-  }
+      // Gather context data
+      const contextData = await this.gatherContext(context)
 
-  private static async processWithGemini(data: WebhookData, automation: any, isPROFallback = false) {
-    try {
-      // Get business profile
-      const profile = await getBusinessProfileForAutomation(automation.id).catch(() => ({
-        profileContent: "",
-        businessContext: {},
-      }))
+      // Process with Voiceflow
+      const response = await this.processVoiceflow(context, contextData)
 
-      // Get conversation history
-      const conversationHistory = await buildConversationContext(data.pageId, data.senderId, automation.id).catch(
-        () => [],
-      )
-
-      // Generate response
-      const geminiResponse = await generateGeminiResponse({
-        userMessage: data.userMessage,
-        businessProfile: profile.profileContent,
-        conversationHistory,
-        businessContext: profile.businessContext,
-        isPROUser: isPROFallback,
-        isVoiceflowFallback: isPROFallback,
-      })
-
-      const responseText =
-        typeof geminiResponse === "string"
-          ? geminiResponse
-          : isPROFallback
-            ? "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you with detailed information shortly. 🌟"
-            : "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊"
-
-      console.log(`✅ GEMINI ${isPROFallback ? "PRO " : ""}SUCCESS`)
-      return { text: responseText, buttons: undefined }
-    } catch (error) {
-      console.error("❌ GEMINI PROCESSING ERROR:", error)
       return {
-        text: isPROFallback
-          ? "Thank you for your message! I'm experiencing some technical difficulties, but our team will ensure you get the assistance you need. 🌟"
-          : "Thanks for your message! I'm having some technical difficulties, but I'll get back to you shortly! 😊",
-        buttons: undefined,
+        success: true,
+        responseText: response.text,
+        buttons: response.buttons,
+        variables: response.variables,
+        aiSystem: response.aiSystem,
+      }
+    } catch (error) {
+      Logger.error("Voiceflow handler failed", error)
+      return {
+        success: false,
+        aiSystem: "voiceflow_failed",
+        error: error instanceof Error ? error.message : String(error),
       }
     }
   }
 
-  private static async sendResponse(data: WebhookData, text: string, buttons: any[] | undefined, automation: any) {
-    const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
-
-    // Format buttons
-    const formattedButtons = buttons?.slice(0, 11).map((button) => ({
-      name: String(button.name || "").substring(0, 20),
-      payload: String(button.payload || button.name || "").substring(0, 1000),
-    }))
-
-    console.log(`📤 SENDING RESPONSE: "${text.substring(0, 100)}..."`)
-
-    if (data.messageType === "DM") {
-      await sendDM(data.pageId, data.senderId, text, token, formattedButtons)
-    } else if (data.messageType === "COMMENT" && data.commentId) {
-      await sendPrivateMessage(data.pageId, data.commentId, text, token, formattedButtons)
+  private static async isRateLimited(context: ProcessingContext): Promise<boolean> {
+    const count = await getRecentResponseCount(context.data.pageId, context.data.senderId, context.data.messageType, 2)
+    if (count >= CONFIG.RATE_LIMITS.MAX_RESPONSES_PER_2MIN) {
+      Logger.warning(`Rate limit exceeded: ${count} responses in 2 minutes`)
+      return true
     }
-
-    console.log("✅ RESPONSE SENT SUCCESSFULLY")
+    return false
   }
 
-  private static async performBackgroundTasks(data: WebhookData, responseText: string, automation: any) {
-    // Store conversation messages
-    await Promise.allSettled([
-      storeConversationMessage(data.pageId, data.senderId, data.userMessage, false, automation?.id || null),
-      storeConversationMessage(data.pageId, "bot", responseText, true, automation?.id || null),
-      createChatHistory(automation?.id || "default", data.pageId, data.senderId, data.userMessage),
-      createChatHistory(automation?.id || "default", data.pageId, data.senderId, responseText),
-      trackResponses(automation?.id || "default", data.messageType),
-      automation?.id
-        ? trackMessageForSentiment(automation.id, data.pageId, data.senderId, data.userMessage)
-        : Promise.resolve(),
+  private static async gatherContext(context: ProcessingContext) {
+    Logger.debug("Gathering Voiceflow context...")
+
+    const [historyResult, profileResult] = await Promise.allSettled([
+      TimeoutManager.withTimeout(
+        buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
+        CONFIG.TIMEOUTS.PROFILE,
+        "Conversation history",
+      ),
+      TimeoutManager.withTimeout(
+        getBusinessProfileForAutomation(context.automation.id),
+        CONFIG.TIMEOUTS.PROFILE,
+        "Business profile",
+      ),
     ])
 
-    console.log("✅ BACKGROUND TASKS COMPLETED")
+    const conversationHistory =
+      historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : []
+
+    const profile =
+      profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
+        ? profileResult.value
+        : { profileContent: "", businessContext: {} }
+
+    Logger.success(`Context gathered - History: ${conversationHistory.length} messages`)
+
+    return { conversationHistory, profile }
+  }
+
+  private static async processVoiceflow(context: ProcessingContext, contextData: any) {
+    Logger.debug("Processing with Voiceflow...")
+
+    // Create Voiceflow user (non-blocking)
+    createVoiceflowUser(context.conversationUserId).catch((error) =>
+      Logger.warning("Voiceflow user creation failed", error),
+    )
+
+    // Build business variables
+    const businessVariables = this.buildBusinessVariables(context, contextData)
+
+    // Try Voiceflow first
+    try {
+      const voiceflowResult = await TimeoutManager.withTimeout(
+        getEnhancedVoiceflowResponse(context.userMessage, context.conversationUserId, businessVariables),
+        CONFIG.TIMEOUTS.VOICEFLOW,
+        "Voiceflow response",
+      )
+
+      if (this.isVoiceflowResponse(voiceflowResult) && voiceflowResult.success && voiceflowResult.response?.text) {
+        Logger.success("✨ Voiceflow response successful")
+        return {
+          text: voiceflowResult.response.text,
+          buttons: voiceflowResult.response.buttons,
+          variables: voiceflowResult.variables,
+          aiSystem: "enhanced_voiceflow",
+        }
+      }
+    } catch (error) {
+      Logger.warning("Voiceflow failed, falling back to Gemini", error)
+    }
+
+    // Fallback to Gemini Pro
+    Logger.info("🔄 Using Gemini Pro fallback...")
+    try {
+      const geminiResponse = await TimeoutManager.withTimeout(
+        generateGeminiResponse({
+          userMessage: context.userMessage,
+          businessProfile: contextData.profile.profileContent,
+          conversationHistory: contextData.conversationHistory,
+          businessContext: contextData.profile.businessContext,
+          isPROUser: true,
+          isVoiceflowFallback: true,
+        }),
+        CONFIG.TIMEOUTS.GEMINI,
+        "Gemini Pro fallback",
+      )
+
+      const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.PRO
+
+      Logger.success("✨ Gemini Pro fallback successful")
+      return {
+        text: responseText,
+        buttons: undefined,
+        variables: undefined,
+        aiSystem: "gemini_pro_fallback",
+      }
+    } catch (error) {
+      Logger.warning("Gemini Pro fallback also failed", error)
+      return {
+        text: CONFIG.FALLBACK_RESPONSES.PRO,
+        buttons: undefined,
+        variables: undefined,
+        aiSystem: "static_pro_fallback",
+      }
+    }
+  }
+
+  private static buildBusinessVariables(context: ProcessingContext, contextData: any) {
+    const isNewUser = contextData.conversationHistory.length === 0
+    const customerType =
+      contextData.conversationHistory.length >= 10
+        ? "VIP"
+        : contextData.conversationHistory.length > 0
+          ? "RETURNING"
+          : "NEW"
+
+    return {
+      business_name: contextData.profile.businessContext.businessName || "Our Business",
+      welcome_message: contextData.profile.businessContext.welcomeMessage || "Hello! How can I help you today?",
+      business_industry: contextData.profile.businessContext.industry || "",
+      business_description: contextData.profile.businessContext.businessDescription || "",
+      target_audience: contextData.profile.businessContext.targetAudience || "",
+      response_language: contextData.profile.businessContext.responseLanguage || "English",
+      customer_type: customerType,
+      is_new_user: isNewUser.toString(),
+      conversation_length: contextData.conversationHistory.length.toString(),
+      trigger_type: context.triggerDecision.triggerType,
+      trigger_reason: context.triggerDecision.reason,
+    }
+  }
+
+  private static isVoiceflowResponse(value: unknown): value is VoiceflowResponse {
+    return (
+      typeof value === "object" && value !== null && "success" in value && typeof (value as any).success === "boolean"
+    )
+  }
+
+  private static isBusinessProfile(value: unknown): value is BusinessProfile {
+    return typeof value === "object" && value !== null && "profileContent" in value && "businessContext" in value
+  }
+}
+
+class GeminiHandler {
+  static async handle(context: ProcessingContext): Promise<ProcessingResult> {
+    Logger.info("🔮 === GEMINI HANDLER INITIATED ===")
+
+    try {
+      // Rate limiting check
+      const count = await getRecentResponseCount(
+        context.data.pageId,
+        context.data.senderId,
+        context.data.messageType,
+        2,
+      )
+      if (count >= CONFIG.RATE_LIMITS.MAX_RESPONSES_PER_2MIN) {
+        Logger.warning(`Rate limit exceeded: ${count} responses`)
+        return {
+          success: false,
+          aiSystem: "gemini_rate_limited",
+          error: "Rate limit exceeded",
+        }
+      }
+
+      // Get context with timeout protection
+      const [profileResult, historyResult] = await Promise.allSettled([
+        TimeoutManager.withTimeout(
+          getBusinessProfileForAutomation(context.automation.id),
+          CONFIG.TIMEOUTS.PROFILE,
+          "Business profile",
+        ),
+        TimeoutManager.withTimeout(
+          buildConversationContext(context.data.pageId, context.data.senderId, context.automation.id),
+          CONFIG.TIMEOUTS.PROFILE,
+          "Conversation history",
+        ),
+      ])
+
+      const profile =
+        profileResult.status === "fulfilled" && this.isBusinessProfile(profileResult.value)
+          ? profileResult.value
+          : { profileContent: "", businessContext: {} }
+
+      const history =
+        historyResult.status === "fulfilled" && Array.isArray(historyResult.value) ? historyResult.value : []
+
+      Logger.success(`Gemini context gathered - History: ${history.length} messages`)
+
+      // Generate response with timeout
+      const geminiResponse = await TimeoutManager.withTimeout(
+        generateGeminiResponse({
+          userMessage: context.userMessage,
+          businessProfile: profile.profileContent,
+          conversationHistory: history,
+          businessContext: profile.businessContext,
+          isPROUser: false,
+        }),
+        CONFIG.TIMEOUTS.GEMINI,
+        "Gemini response",
+      )
+
+      const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.STANDARD
+
+      Logger.success("✨ Gemini response successful")
+
+      return {
+        success: true,
+        responseText,
+        buttons: undefined,
+        variables: undefined,
+        aiSystem: "enhanced_gemini",
+      }
+    } catch (error) {
+      Logger.error("Gemini handler failed", error)
+      return {
+        success: false,
+        responseText: CONFIG.FALLBACK_RESPONSES.STANDARD,
+        aiSystem: "gemini_failed_fallback",
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  }
+
+  private static isBusinessProfile(value: unknown): value is BusinessProfile {
+    return typeof value === "object" && value !== null && "profileContent" in value && "businessContext" in value
   }
 }
 
 // ============================================================================
-// ROUTE HANDLERS
+// RESPONSE SENDER
+// ============================================================================
+
+class ResponseSender {
+  static async send(context: ProcessingContext, text: string, buttons?: any[]): Promise<void> {
+    Logger.info(`📤 Sending response: "${text.substring(0, 100)}..."`)
+
+    // Check for duplicates
+    const isDuplicate = await checkDuplicateResponse(
+      context.data.pageId,
+      context.data.senderId,
+      text,
+      context.data.messageType,
+    )
+
+    if (isDuplicate) {
+      Logger.warning("Duplicate response detected, skipping")
+      return
+    }
+
+    // Transform buttons to the new format
+    const formattedButtons = this.formatButtons(buttons)
+    const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+    // Multiple fallback responses for guaranteed delivery
+    const fallbackResponses = [
+      text,
+      CONFIG.FALLBACK_RESPONSES.STANDARD,
+      CONFIG.FALLBACK_RESPONSES.EMERGENCY,
+      CONFIG.FALLBACK_RESPONSES.SIMPLE,
+    ]
+
+    for (let i = 0; i < fallbackResponses.length; i++) {
+      try {
+        const currentResponse = fallbackResponses[i]
+        let result
+
+        Logger.debug(`Attempt ${i + 1}: Sending "${currentResponse.substring(0, 50)}..."`)
+
+        if (context.data.messageType === "DM") {
+          result = await TimeoutManager.withTimeout(
+            sendDM(
+              context.data.pageId,
+              context.data.senderId,
+              currentResponse,
+              token,
+              i === 0 ? formattedButtons : undefined,
+            ),
+            10000,
+            `DM send attempt ${i + 1}`,
+          )
+        } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
+          result = await TimeoutManager.withTimeout(
+            sendPrivateMessage(
+              context.data.pageId,
+              context.data.commentId,
+              currentResponse,
+              token,
+              i === 0 ? formattedButtons : undefined,
+            ),
+            10000,
+            `Comment send attempt ${i + 1}`,
+          )
+        }
+
+        if (result?.status === 200) {
+          Logger.success(`✅ Response sent successfully (attempt ${i + 1})`)
+
+          // Track the successful response
+          await Promise.allSettled([
+            markResponseAsSent(
+              context.data.pageId,
+              context.data.senderId,
+              currentResponse,
+              context.data.messageType,
+              context.automation.id,
+            ),
+            trackResponses(context.automation.id, context.data.messageType),
+          ])
+
+          return
+        } else {
+          Logger.warning(`Attempt ${i + 1} returned status: ${result?.status}`)
+        }
+      } catch (error) {
+        Logger.error(`Send attempt ${i + 1} failed`, error)
+        if (i === fallbackResponses.length - 1) {
+          throw new Error(`All ${fallbackResponses.length} send attempts failed`)
+        }
+      }
+    }
+  }
+
+  private static formatButtons(
+    buttons?: { name: string; payload: string | object | any }[],
+  ): { name: string; payload: string }[] | undefined {
+    if (!buttons || buttons.length === 0) return undefined
+
+    return buttons.slice(0, 11).map((button) => {
+      const buttonName = String(button.name || "").substring(0, 20)
+      let buttonPayload: string
+
+      if (typeof button.payload === "string") {
+        buttonPayload = button.payload.substring(0, 1000)
+      } else if (button.payload === null || button.payload === undefined) {
+        buttonPayload = buttonName
+      } else {
+        try {
+          buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
+        } catch (e) {
+          buttonPayload = String(button.payload).substring(0, 1000)
+        }
+      }
+
+      return {
+        name: buttonName,
+        payload: buttonPayload,
+      }
+    })
+  }
+}
+
+// ============================================================================
+// BACKGROUND PROCESSOR
+// ============================================================================
+
+class BackgroundProcessor {
+  static process(context: ProcessingContext, responseText: string): void {
+    Logger.debug("🔄 Starting background tasks...")
+
+    // Store conversation messages (non-blocking)
+    Promise.allSettled([
+      storeConversationMessage(
+        context.data.pageId,
+        context.data.senderId,
+        context.userMessage,
+        false,
+        context.automation?.id || null,
+      ),
+      storeConversationMessage(context.data.pageId, "bot", responseText, true, context.automation?.id || null),
+      context.automation?.id
+        ? trackMessageForSentiment(
+            context.automation.id,
+            context.data.pageId,
+            context.data.senderId,
+            context.userMessage,
+          )
+        : Promise.resolve(),
+      createChatHistory(
+        context.automation?.id || "default",
+        context.data.pageId,
+        context.data.senderId,
+        context.userMessage,
+      ),
+      createChatHistory(context.automation?.id || "default", context.data.pageId, context.data.senderId, responseText),
+    ])
+      .then((results) => {
+        const failures = results.filter((r) => r.status === "rejected").length
+        if (failures === 0) {
+          Logger.success("✅ All background tasks completed successfully")
+        } else {
+          Logger.warning(`⚠️ ${failures} background tasks failed`)
+        }
+      })
+      .catch((error) => Logger.warning("Background tasks failed", error))
+  }
+}
+
+// ============================================================================
+// MAIN ROUTE HANDLERS
 // ============================================================================
 
 export async function GET(req: NextRequest) {
   const hub = req.nextUrl.searchParams.get("hub.challenge")
-  console.log(`📞 WEBHOOK VERIFICATION: ${hub}`)
+  Logger.info(`📞 Webhook verification: ${hub}`)
   return new NextResponse(hub)
 }
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now()
-  console.log("🚀 === WEBHOOK REQUEST RECEIVED ===")
+  Logger.info("🚀 === WEBHOOK REQUEST RECEIVED ===")
 
   try {
     const payload = await req.json()
-    console.log("📥 WEBHOOK PAYLOAD RECEIVED")
+    Logger.debug("📥 Webhook payload received")
 
     // Handle special webhooks
     const specialType = WebhookValidator.isSpecialWebhook(payload)
     if (specialType) {
-      console.log(`🔧 SPECIAL WEBHOOK: ${specialType}`)
+      Logger.info(`🔧 Special webhook handled: ${specialType}`)
       return NextResponse.json({ message: `${specialType} processed` }, { status: 200 })
     }
 
-    // Extract webhook data
+    // Extract and validate data
     const data = WebhookValidator.extractData(payload)
     if (!data) {
-      console.log("⚠️ UNSUPPORTED WEBHOOK PAYLOAD")
+      Logger.warning("⚠️ Unsupported webhook payload or non-text message")
       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 200 })
     }
 
-    // Process message immediately
-    await MessageProcessor.processMessage(data)
+    // Skip echo messages
+    if (data.isEcho) {
+      Logger.debug("🔄 Echo message ignored")
+      return NextResponse.json({ message: "Echo message ignored" }, { status: 200 })
+    }
 
-    console.log(`✅ WEBHOOK PROCESSED (${Date.now() - startTime}ms)`)
+    // Process immediately (no delays)
+    await MessageProcessor.processImmediate(data, startTime)
 
-    // Log stats for debugging
-    const stats = InMemoryDuplicateManager.getInstance().getStats()
-    console.log(`📊 STATS: ${JSON.stringify(stats)}`)
+    Logger.performance("Total webhook processing time", startTime)
 
+    // Return success to Instagram
     return NextResponse.json({ message: "Message processed successfully" }, { status: 200 })
   } catch (error) {
-    console.error("💥 WEBHOOK ERROR:", error)
+    Logger.error("💥 Unhandled webhook error", error)
     return NextResponse.json(
       {
         message: "Error processing request",
@@ -10663,3 +10021,653 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+
+
+
+
+
+
+
+
+// import { type NextRequest, NextResponse } from "next/server"
+// import {
+//   createChatHistory,
+//   trackResponses,
+//   decideTriggerAction,
+//   getAutomationWithTriggers,
+// } from "@/actions/webhook/queries"
+// import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
+// import { generateGeminiResponse, buildConversationContext } from "@/lib/gemini"
+// import { getEnhancedVoiceflowResponse, createVoiceflowUser, fetchEnhancedBusinessVariables } from "@/lib/voiceflow"
+// import { sendDM, sendPrivateMessage } from "@/lib/fetch"
+// import { storeConversationMessage } from "@/actions/chats/queries"
+// import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+
+// // ============================================================================
+// // IN-MEMORY DUPLICATE PREVENTION - NO DATABASE NEEDED
+// // ============================================================================
+
+// class InMemoryDuplicateManager {
+//   private static instance: InMemoryDuplicateManager
+//   private processedMessages = new Map<string, number>()
+//   private recentResponses = new Map<string, { text: string; timestamp: number }>()
+//   private processingLocks = new Set<string>()
+//   private globalLocks = new Map<string, number>()
+//   private cleanupInterval: NodeJS.Timeout
+
+//   private constructor() {
+//     // Clean up old entries every 2 minutes
+//     this.cleanupInterval = setInterval(() => {
+//       this.cleanup()
+//     }, 120000)
+//   }
+
+//   static getInstance(): InMemoryDuplicateManager {
+//     if (!InMemoryDuplicateManager.instance) {
+//       InMemoryDuplicateManager.instance = new InMemoryDuplicateManager()
+//     }
+//     return InMemoryDuplicateManager.instance
+//   }
+
+//   // Generate unique message key
+//   private generateMessageKey(data: WebhookData): string {
+//     const content = data.userMessage.substring(0, 100).replace(/\s+/g, "_")
+//     const timestamp = Math.floor(Date.now() / 10000) // 10-second window
+//     return `${data.pageId}_${data.senderId}_${content}_${timestamp}`
+//   }
+
+//   // Generate response key for duplicate response detection
+//   private generateResponseKey(pageId: string, senderId: string, text: string): string {
+//     const textHash = text.substring(0, 50).replace(/\s+/g, "_")
+//     return `${pageId}_${senderId}_${textHash}`
+//   }
+
+//   // Check if message was already processed
+//   isMessageProcessed(data: WebhookData): boolean {
+//     const key = this.generateMessageKey(data)
+//     const lastProcessed = this.processedMessages.get(key)
+
+//     if (lastProcessed && Date.now() - lastProcessed < 30000) {
+//       // 30 second window
+//       console.log(`🚫 DUPLICATE MESSAGE BLOCKED: ${key}`)
+//       return true
+//     }
+
+//     return false
+//   }
+
+//   // Mark message as processed
+//   markMessageProcessed(data: WebhookData): void {
+//     const key = this.generateMessageKey(data)
+//     this.processedMessages.set(key, Date.now())
+//     console.log(`✅ MESSAGE MARKED PROCESSED: ${key}`)
+//   }
+
+//   // Check if we recently sent the same response
+//   isDuplicateResponse(pageId: string, senderId: string, text: string): boolean {
+//     const key = this.generateResponseKey(pageId, senderId, text)
+//     const lastResponse = this.recentResponses.get(key)
+
+//     if (lastResponse && Date.now() - lastResponse.timestamp < 60000) {
+//       // 1 minute window
+//       console.log(`🚫 DUPLICATE RESPONSE BLOCKED: ${key}`)
+//       return true
+//     }
+
+//     return false
+//   }
+
+//   // Mark response as sent
+//   markResponseSent(pageId: string, senderId: string, text: string): void {
+//     const key = this.generateResponseKey(pageId, senderId, text)
+//     this.recentResponses.set(key, { text, timestamp: Date.now() })
+//     console.log(`✅ RESPONSE MARKED SENT: ${key}`)
+//   }
+
+//   // Global processing lock to prevent race conditions
+//   acquireProcessingLock(pageId: string, senderId: string): boolean {
+//     const lockKey = `${pageId}_${senderId}`
+
+//     if (this.processingLocks.has(lockKey)) {
+//       console.log(`🔒 PROCESSING LOCK BLOCKED: ${lockKey}`)
+//       return false
+//     }
+
+//     this.processingLocks.add(lockKey)
+//     this.globalLocks.set(lockKey, Date.now())
+//     console.log(`🔓 PROCESSING LOCK ACQUIRED: ${lockKey}`)
+//     return true
+//   }
+
+//   // Release processing lock
+//   releaseProcessingLock(pageId: string, senderId: string): void {
+//     const lockKey = `${pageId}_${senderId}`
+//     this.processingLocks.delete(lockKey)
+//     this.globalLocks.delete(lockKey)
+//     console.log(`🔓 PROCESSING LOCK RELEASED: ${lockKey}`)
+//   }
+
+//   // Cleanup old entries
+//   private cleanup(): void {
+//     const cutoff = Date.now() - 300000 // 5 minutes
+//     let cleaned = 0
+
+//     // Clean processed messages
+//     this.processedMessages.forEach((timestamp, key) => {
+//       if (timestamp < cutoff) {
+//         this.processedMessages.delete(key)
+//         cleaned++
+//       }
+//     })
+
+//     // Clean recent responses
+//     this.recentResponses.forEach((data, key) => {
+//       if (data.timestamp < cutoff) {
+//         this.recentResponses.delete(key)
+//         cleaned++
+//       }
+//     })
+
+//     // Clean stuck locks (older than 2 minutes)
+//     const lockCutoff = Date.now() - 120000
+//     this.globalLocks.forEach((timestamp, key) => {
+//       if (timestamp < lockCutoff) {
+//         this.processingLocks.delete(key)
+//         this.globalLocks.delete(key)
+//         cleaned++
+//       }
+//     })
+
+//     if (cleaned > 0) {
+//       console.log(`🧹 CLEANUP: Removed ${cleaned} old entries`)
+//     }
+//   }
+
+//   // Get stats for debugging
+//   getStats() {
+//     return {
+//       processedMessages: this.processedMessages.size,
+//       recentResponses: this.recentResponses.size,
+//       activeLocks: this.processingLocks.size,
+//     }
+//   }
+// }
+
+// // ============================================================================
+// // TYPES & INTERFACES
+// // ============================================================================
+
+// interface WebhookData {
+//   pageId: string
+//   senderId: string
+//   recipientId?: string
+//   userMessage: string
+//   messageId?: string
+//   commentId?: string
+//   messageType: "DM" | "COMMENT"
+//   isEcho?: boolean
+// }
+
+// // ============================================================================
+// // ENHANCED ECHO DETECTION
+// // ============================================================================
+
+// class EchoDetector {
+//   private static botResponsePatterns = [
+//     "Hi! I'm Lady Luck",
+//     "Thank you for your message",
+//     "Thanks for your message",
+//     "Hi! Thanks for reaching out",
+//     "Hello! 👋",
+//     "Thanks for contacting",
+//     "I appreciate you reaching out",
+//     "Welcome to our business",
+//     "How can I help you",
+//     "I'm here to help",
+//   ]
+
+//   static isEchoMessage(data: WebhookData): boolean {
+//     // Check explicit echo flag
+//     if (data.isEcho) {
+//       console.log(`🔄 EXPLICIT ECHO DETECTED: ${data.messageId}`)
+//       return true
+//     }
+
+//     // Check for bot response patterns
+//     const message = data.userMessage.toLowerCase()
+//     const isPatternMatch = this.botResponsePatterns.some((pattern) => message.includes(pattern.toLowerCase()))
+
+//     if (isPatternMatch) {
+//       console.log(`🔄 PATTERN ECHO DETECTED: "${data.userMessage.substring(0, 50)}..."`)
+//       return true
+//     }
+
+//     // Check for very generic responses that might be echoes
+//     const genericPhrases = ["hello", "hi", "hey", "thanks", "thank you"]
+//     const isVeryShort = data.userMessage.length < 10
+//     const isGeneric = genericPhrases.includes(message.trim())
+
+//     if (isVeryShort && isGeneric) {
+//       console.log(`🔄 GENERIC ECHO SUSPECTED: "${data.userMessage}"`)
+//       return true
+//     }
+
+//     return false
+//   }
+// }
+
+// // ============================================================================
+// // WEBHOOK VALIDATOR
+// // ============================================================================
+
+// class WebhookValidator {
+//   static extractData(payload: any): WebhookData | null {
+//     try {
+//       if (payload?.entry?.[0]?.messaging) {
+//         const messaging = payload.entry[0].messaging[0]
+
+//         // Skip read receipts and delivery confirmations
+//         if (messaging.read || messaging.delivery) {
+//           console.log("📖 SKIPPING: Read receipt or delivery confirmation")
+//           return null
+//         }
+
+//         if (messaging.message) {
+//           // Skip non-text messages
+//           if (!messaging.message.text) {
+//             console.log("📷 SKIPPING: Non-text message (image/video/etc)")
+//             return null
+//           }
+
+//           return {
+//             pageId: payload.entry[0].id,
+//             senderId: messaging.sender.id,
+//             recipientId: messaging.recipient.id,
+//             userMessage: messaging.message.text,
+//             messageId: messaging.message.mid,
+//             messageType: "DM",
+//             isEcho: messaging.message?.is_echo === true,
+//           }
+//         }
+
+//         if (messaging.postback) {
+//           return {
+//             pageId: payload.entry[0].id,
+//             senderId: messaging.sender.id,
+//             recipientId: messaging.recipient.id,
+//             userMessage: messaging.postback.payload || messaging.postback.title || "Button clicked",
+//             messageId: `postback_${Date.now()}`,
+//             messageType: "DM",
+//             isEcho: false,
+//           }
+//         }
+//       } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+//         const changeValue = payload.entry[0].changes[0].value
+
+//         if (!changeValue.text) {
+//           console.log("💬 SKIPPING: Comment without text")
+//           return null
+//         }
+
+//         return {
+//           pageId: payload.entry[0].id,
+//           senderId: changeValue.from.id,
+//           userMessage: changeValue.text,
+//           commentId: changeValue.id,
+//           messageType: "COMMENT",
+//           isEcho: false,
+//         }
+//       }
+//     } catch (error) {
+//       console.error("❌ WEBHOOK EXTRACTION ERROR:", error)
+//     }
+
+//     return null
+//   }
+
+//   static isSpecialWebhook(payload: any): string | null {
+//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "deauthorizations") {
+//       return "deauth"
+//     }
+//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion") {
+//       return "data_deletion"
+//     }
+//     if (payload?.entry?.[0]?.messaging?.[0]?.read || payload?.entry?.[0]?.messaging?.[0]?.delivery) {
+//       return "receipt"
+//     }
+//     return null
+//   }
+// }
+
+// // ============================================================================
+// // RATE LIMITER
+// // ============================================================================
+
+// class RateLimiter {
+//   private static instance: RateLimiter
+//   private userRequests = new Map<string, number[]>()
+
+//   static getInstance(): RateLimiter {
+//     if (!RateLimiter.instance) {
+//       RateLimiter.instance = new RateLimiter()
+//     }
+//     return RateLimiter.instance
+//   }
+
+//   isRateLimited(pageId: string, senderId: string): boolean {
+//     const key = `${pageId}_${senderId}`
+//     const now = Date.now()
+//     const windowMs = 120000 // 2 minutes
+//     const maxRequests = 5
+
+//     // Get existing requests for this user
+//     const requests = this.userRequests.get(key) || []
+
+//     // Filter out old requests
+//     const recentRequests = requests.filter((timestamp) => now - timestamp < windowMs)
+
+//     // Check if rate limited
+//     if (recentRequests.length >= maxRequests) {
+//       console.log(`🚫 RATE LIMITED: ${key} (${recentRequests.length} requests in 2 minutes)`)
+//       return true
+//     }
+
+//     // Add current request
+//     recentRequests.push(now)
+//     this.userRequests.set(key, recentRequests)
+
+//     return false
+//   }
+// }
+
+// // ============================================================================
+// // MAIN MESSAGE PROCESSOR
+// // ============================================================================
+
+// class MessageProcessor {
+//   private static duplicateManager = InMemoryDuplicateManager.getInstance()
+//   private static rateLimiter = RateLimiter.getInstance()
+
+//   static async processMessage(data: WebhookData): Promise<void> {
+//     const startTime = Date.now()
+//     console.log(`🚀 PROCESSING MESSAGE: ${data.messageType} from ${data.senderId}`)
+//     console.log(`📝 MESSAGE: "${data.userMessage.substring(0, 100)}..."`)
+
+//     // Step 1: Echo detection
+//     if (EchoDetector.isEchoMessage(data)) {
+//       console.log("🔄 ECHO MESSAGE IGNORED")
+//       return
+//     }
+
+//     // Step 2: Duplicate message detection
+//     if (this.duplicateManager.isMessageProcessed(data)) {
+//       console.log("🚫 DUPLICATE MESSAGE IGNORED")
+//       return
+//     }
+
+//     // Step 3: Rate limiting
+//     if (this.rateLimiter.isRateLimited(data.pageId, data.senderId)) {
+//       console.log("🚫 RATE LIMITED - IGNORED")
+//       return
+//     }
+
+//     // Step 4: Acquire processing lock
+//     if (!this.duplicateManager.acquireProcessingLock(data.pageId, data.senderId)) {
+//       console.log("🔒 PROCESSING LOCK FAILED - IGNORED")
+//       return
+//     }
+
+//     try {
+//       // Step 5: Mark message as processed immediately
+//       this.duplicateManager.markMessageProcessed(data)
+
+//       // Step 6: Get automation and trigger decision
+//       const triggerDecision = await decideTriggerAction(data.pageId, data.senderId, data.userMessage, data.messageType)
+
+//       if (!triggerDecision.automationId) {
+//         console.log("❌ NO AUTOMATION FOUND")
+//         return
+//       }
+
+//       const automation = await getAutomationWithTriggers(triggerDecision.automationId, data.messageType)
+//       if (!automation) {
+//         console.log("❌ AUTOMATION NOT FOUND")
+//         return
+//       }
+
+//       console.log(`✅ AUTOMATION FOUND: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
+
+//       // Step 7: Process with appropriate AI system
+//       const isPROUser = automation.User?.subscription?.plan === "PRO"
+//       let responseText: string
+//       let buttons: any[] | undefined
+
+//       if (isPROUser) {
+//         console.log("🎙️ PROCESSING WITH VOICEFLOW (PRO)")
+//         const result = await this.processWithVoiceflow(data, automation)
+//         responseText = result.text
+//         buttons = result.buttons
+//       } else {
+//         console.log("🔮 PROCESSING WITH GEMINI (FREE)")
+//         const result = await this.processWithGemini(data, automation)
+//         responseText = result.text
+//         buttons = result.buttons
+//       }
+
+//       // Step 8: Check for duplicate response
+//       if (this.duplicateManager.isDuplicateResponse(data.pageId, data.senderId, responseText)) {
+//         console.log("🚫 DUPLICATE RESPONSE BLOCKED")
+//         return
+//       }
+
+//       // Step 9: Send response
+//       await this.sendResponse(data, responseText, buttons, automation)
+
+//       // Step 10: Mark response as sent
+//       this.duplicateManager.markResponseSent(data.pageId, data.senderId, responseText)
+
+//       // Step 11: Background tasks (non-blocking)
+//       this.performBackgroundTasks(data, responseText, automation).catch((error) =>
+//         console.error("⚠️ Background task error:", error),
+//       )
+
+//       console.log(`✅ MESSAGE PROCESSED SUCCESSFULLY (${Date.now() - startTime}ms)`)
+//     } catch (error) {
+//       console.error("❌ MESSAGE PROCESSING ERROR:", error)
+
+//       // Emergency fallback response
+//       try {
+//         const emergencyResponse =
+//           "Hi! Thanks for your message. I'm experiencing some technical difficulties right now, but I'll get back to you shortly! 😊"
+//         await this.sendResponse(data, emergencyResponse, undefined, null)
+//         console.log("🆘 EMERGENCY RESPONSE SENT")
+//       } catch (emergencyError) {
+//         console.error("💥 EMERGENCY RESPONSE FAILED:", emergencyError)
+//       }
+//     } finally {
+//       // Always release the processing lock
+//       this.duplicateManager.releaseProcessingLock(data.pageId, data.senderId)
+//     }
+//   }
+
+//   private static async processWithVoiceflow(data: WebhookData, automation: any) {
+//     try {
+//       // Create Voiceflow user (non-blocking)
+//       createVoiceflowUser(`${data.pageId}_${data.senderId}`).catch((error) =>
+//         console.warn("Voiceflow user creation failed:", error),
+//       )
+
+//       // Get conversation context
+//       const conversationHistory = await buildConversationContext(data.pageId, data.senderId, automation.id).catch(
+//         () => [],
+//       )
+
+//       // Build business variables
+//       const businessVariables = await fetchEnhancedBusinessVariables(automation.User?.id || "", automation.id, {
+//         pageId: data.pageId,
+//         senderId: data.senderId,
+//         userMessage: data.userMessage,
+//         isNewUser: conversationHistory.length === 0,
+//         customerType: conversationHistory.length >= 10 ? "VIP" : conversationHistory.length > 0 ? "RETURNING" : "NEW",
+//         messageHistory: conversationHistory,
+//       }).catch(() => ({}))
+
+//       // Try Voiceflow
+//       const voiceflowResult = await getEnhancedVoiceflowResponse(
+//         data.userMessage,
+//         `${data.pageId}_${data.senderId}`,
+//         businessVariables,
+//         { maxRetries: 2, timeoutMs: 12000 },
+//       )
+
+//       if (voiceflowResult.success && voiceflowResult.response?.text) {
+//         console.log("✅ VOICEFLOW SUCCESS")
+//         return {
+//           text: voiceflowResult.response.text,
+//           buttons: voiceflowResult.response.buttons,
+//         }
+//       }
+
+//       // Fallback to Gemini Pro
+//       console.log("🔄 VOICEFLOW FAILED, USING GEMINI PRO FALLBACK")
+//       return await this.processWithGemini(data, automation, true)
+//     } catch (error) {
+//       console.error("❌ VOICEFLOW PROCESSING ERROR:", error)
+//       return await this.processWithGemini(data, automation, true)
+//     }
+//   }
+
+//   private static async processWithGemini(data: WebhookData, automation: any, isPROFallback = false) {
+//     try {
+//       // Get business profile
+//       const profile = await getBusinessProfileForAutomation(automation.id).catch(() => ({
+//         profileContent: "",
+//         businessContext: {},
+//       }))
+
+//       // Get conversation history
+//       const conversationHistory = await buildConversationContext(data.pageId, data.senderId, automation.id).catch(
+//         () => [],
+//       )
+
+//       // Generate response
+//       const geminiResponse = await generateGeminiResponse({
+//         userMessage: data.userMessage,
+//         businessProfile: profile.profileContent,
+//         conversationHistory,
+//         businessContext: profile.businessContext,
+//         isPROUser: isPROFallback,
+//         isVoiceflowFallback: isPROFallback,
+//       })
+
+//       const responseText =
+//         typeof geminiResponse === "string"
+//           ? geminiResponse
+//           : isPROFallback
+//             ? "Thank you for your message! As a valued customer, I want to ensure you get the best possible assistance. Let me get back to you with detailed information shortly. 🌟"
+//             : "Thanks for your message! I'm here to help. Let me get back to you with the information you need. 😊"
+
+//       console.log(`✅ GEMINI ${isPROFallback ? "PRO " : ""}SUCCESS`)
+//       return { text: responseText, buttons: undefined }
+//     } catch (error) {
+//       console.error("❌ GEMINI PROCESSING ERROR:", error)
+//       return {
+//         text: isPROFallback
+//           ? "Thank you for your message! I'm experiencing some technical difficulties, but our team will ensure you get the assistance you need. 🌟"
+//           : "Thanks for your message! I'm having some technical difficulties, but I'll get back to you shortly! 😊",
+//         buttons: undefined,
+//       }
+//     }
+//   }
+
+//   private static async sendResponse(data: WebhookData, text: string, buttons: any[] | undefined, automation: any) {
+//     const token = automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     // Format buttons
+//     const formattedButtons = buttons?.slice(0, 11).map((button) => ({
+//       name: String(button.name || "").substring(0, 20),
+//       payload: String(button.payload || button.name || "").substring(0, 1000),
+//     }))
+
+//     console.log(`📤 SENDING RESPONSE: "${text.substring(0, 100)}..."`)
+
+//     if (data.messageType === "DM") {
+//       await sendDM(data.pageId, data.senderId, text, token, formattedButtons)
+//     } else if (data.messageType === "COMMENT" && data.commentId) {
+//       await sendPrivateMessage(data.pageId, data.commentId, text, token, formattedButtons)
+//     }
+
+//     console.log("✅ RESPONSE SENT SUCCESSFULLY")
+//   }
+
+//   private static async performBackgroundTasks(data: WebhookData, responseText: string, automation: any) {
+//     // Store conversation messages
+//     await Promise.allSettled([
+//       storeConversationMessage(data.pageId, data.senderId, data.userMessage, false, automation?.id || null),
+//       storeConversationMessage(data.pageId, "bot", responseText, true, automation?.id || null),
+//       createChatHistory(automation?.id || "default", data.pageId, data.senderId, data.userMessage),
+//       createChatHistory(automation?.id || "default", data.pageId, data.senderId, responseText),
+//       trackResponses(automation?.id || "default", data.messageType),
+//       automation?.id
+//         ? trackMessageForSentiment(automation.id, data.pageId, data.senderId, data.userMessage)
+//         : Promise.resolve(),
+//     ])
+
+//     console.log("✅ BACKGROUND TASKS COMPLETED")
+//   }
+// }
+
+// // ============================================================================
+// // ROUTE HANDLERS
+// // ============================================================================
+
+// export async function GET(req: NextRequest) {
+//   const hub = req.nextUrl.searchParams.get("hub.challenge")
+//   console.log(`📞 WEBHOOK VERIFICATION: ${hub}`)
+//   return new NextResponse(hub)
+// }
+
+// export async function POST(req: NextRequest) {
+//   const startTime = Date.now()
+//   console.log("🚀 === WEBHOOK REQUEST RECEIVED ===")
+
+//   try {
+//     const payload = await req.json()
+//     console.log("📥 WEBHOOK PAYLOAD RECEIVED")
+
+//     // Handle special webhooks
+//     const specialType = WebhookValidator.isSpecialWebhook(payload)
+//     if (specialType) {
+//       console.log(`🔧 SPECIAL WEBHOOK: ${specialType}`)
+//       return NextResponse.json({ message: `${specialType} processed` }, { status: 200 })
+//     }
+
+//     // Extract webhook data
+//     const data = WebhookValidator.extractData(payload)
+//     if (!data) {
+//       console.log("⚠️ UNSUPPORTED WEBHOOK PAYLOAD")
+//       return NextResponse.json({ message: "Unsupported webhook payload" }, { status: 200 })
+//     }
+
+//     // Process message immediately
+//     await MessageProcessor.processMessage(data)
+
+//     console.log(`✅ WEBHOOK PROCESSED (${Date.now() - startTime}ms)`)
+
+//     // Log stats for debugging
+//     const stats = InMemoryDuplicateManager.getInstance().getStats()
+//     console.log(`📊 STATS: ${JSON.stringify(stats)}`)
+
+//     return NextResponse.json({ message: "Message processed successfully" }, { status: 200 })
+//   } catch (error) {
+//     console.error("💥 WEBHOOK ERROR:", error)
+//     return NextResponse.json(
+//       {
+//         message: "Error processing request",
+//         error: error instanceof Error ? error.message : String(error),
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
