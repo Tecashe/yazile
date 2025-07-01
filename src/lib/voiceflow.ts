@@ -2645,6 +2645,15 @@ const API_KEY = process.env.VOICEFLOW_API_KEY
 const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
 const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
 
+// Updated session management - track if user needs launch request
+const userSessionCache = new Map<string, { hasLaunched: boolean; timestamp: number }>()
+const SESSION_CACHE_TTL = 1800000 // 30 minutes
+
+// Instagram message formatting constants
+const INSTAGRAM_MESSAGE_LIMIT = 1000
+const INSTAGRAM_QUICK_REPLY_LIMIT = 13
+const INSTAGRAM_QUICK_REPLY_TITLE_LIMIT = 20
+
 interface VoiceflowResponse {
   type: string
   payload: any
@@ -2928,7 +2937,7 @@ export async function fetchEnhancedBusinessVariables(
 }
 
 // Enhanced Voiceflow response with intelligent retry and fallback detection
-export async function getEnhancedVoiceflowResponse(
+export async function getEnhancedVoiceflowResponseE(
   userInput: string,
   userId: string,
   businessVariables: Record<string, string>,
@@ -3087,7 +3096,7 @@ function detectFallbackConditions(
 }
 
 // Enhanced response processing with intelligence
-export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+export function processEnhancedVoiceflowResponseE(traces: VoiceflowTrace[]): {
   text: string
   buttons?: { name: string; payload: string }[]
   requiresHumanHandoff?: boolean
@@ -3201,7 +3210,7 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
 }
 
 // Enhanced Voiceflow variables fetching
-async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
+async function fetchVoiceflowVariablesE(userId: string): Promise<VoiceflowVariables> {
   const maxRetries = 2
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -3232,7 +3241,7 @@ async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariabl
 }
 
 // Enhanced user creation with cache management
-export async function createVoiceflowUser(userId: string): Promise<boolean> {
+export async function createVoiceflowUserE(userId: string): Promise<boolean> {
   // Clean expired cache entries
   const now = Date.now()
   userCreationCache.forEach((value, key) => {
@@ -3298,7 +3307,7 @@ async function createVoiceflowUserInternal(userId: string): Promise<boolean> {
 }
 
 // Enhanced user reset
-export async function resetVoiceflowUser(userId: string): Promise<boolean> {
+export async function resetVoiceflowUserE(userId: string): Promise<boolean> {
   try {
     const response = await axios.post(
       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
@@ -3322,7 +3331,7 @@ export async function resetVoiceflowUser(userId: string): Promise<boolean> {
 }
 
 // Health monitoring
-export function getVoiceflowHealth(): {
+export function getVoiceflowHealthE(): {
   healthScore: number
   circuitBreakerState: string
   cacheSize: number
@@ -3331,5 +3340,479 @@ export function getVoiceflowHealth(): {
     healthScore: voiceflowCircuitBreaker.getHealthScore(),
     circuitBreakerState: voiceflowCircuitBreaker.getState(),
     cacheSize: userCreationCache.size,
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Enhanced Voiceflow response with proper launch handling and Instagram formatting
+export async function getEnhancedVoiceflowResponse(
+  userInput: string,
+  userId: string,
+  businessVariables: Record<string, string>,
+  options?: {
+    maxRetries?: number
+    timeoutMs?: number
+    enableFallbackDetection?: boolean
+    isFirstMessage?: boolean
+  },
+): Promise<{
+  success: boolean
+  response?: {
+    text: string
+    quickReplies?: Array<{ title: string; payload: string }>
+    requiresHumanHandoff?: boolean
+    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+    sentiment?: "positive" | "neutral" | "negative"
+    complexity?: "simple" | "medium" | "complex"
+  }
+  variables?: VoiceflowVariables
+  error?: string
+  isEmpty?: boolean
+  healthScore?: number
+  fallbackReason?: string
+}> {
+  const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true, isFirstMessage = false } = options || {}
+
+  try {
+    const result = await voiceflowCircuitBreaker.execute(async () => {
+      let lastError: Error | null = null
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+
+          // Clean expired session cache
+          const now = Date.now()
+          userSessionCache.forEach((value, key) => {
+            if (now - value.timestamp > SESSION_CACHE_TTL) {
+              userSessionCache.delete(key)
+            }
+          })
+
+          // Check if user needs launch request
+          const sessionData = userSessionCache.get(userId)
+          const needsLaunch = isFirstMessage || !sessionData?.hasLaunched
+
+          let requestPayload: any
+          if (needsLaunch) {
+            // Send launch request first
+            console.log(`🚀 Sending launch request for user ${userId}`)
+            requestPayload = {
+              action: { type: "launch" },
+              config: {
+                tts: false,
+                stripSSML: true,
+                stopAll: true,
+                excludeTypes: ["block", "debug", "flow"]
+              }
+            }
+          } else {
+            // Send text request
+            requestPayload = {
+              action: { type: "text", payload: userInput },
+              config: {
+                tts: false,
+                stripSSML: true,
+                stopAll: true,
+                excludeTypes: ["block", "debug", "flow"]
+              }
+            }
+          }
+
+          // Add business variables to state
+          if (Object.keys(businessVariables).length > 0) {
+            requestPayload.state = { variables: businessVariables }
+          }
+
+          const response = await axios.post<VoiceflowTrace[]>(
+            `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+            requestPayload,
+            {
+              headers: {
+                Authorization: API_KEY,
+                versionID: VERSION_ID,
+                accept: "application/json",
+                "content-type": "application/json",
+              },
+              timeout: timeoutMs,
+            },
+          )
+
+          // If this was a launch request and we have user input, send the text request
+          if (needsLaunch && userInput.trim().length > 0) {
+            console.log(`📝 Following up with text request for user ${userId}`)
+            const textResponse = await axios.post<VoiceflowTrace[]>(
+              `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+              {
+                action: { type: "text", payload: userInput },
+                config: {
+                  tts: false,
+                  stripSSML: true,
+                  stopAll: true,
+                  excludeTypes: ["block", "debug", "flow"]
+                }
+              },
+              {
+                headers: {
+                  Authorization: API_KEY,
+                  versionID: VERSION_ID,
+                  accept: "application/json",
+                  "content-type": "application/json",
+                },
+                timeout: timeoutMs,
+              },
+            )
+            
+            // Use the text response instead
+            response.data = textResponse.data
+          }
+
+          // Mark user as launched
+          userSessionCache.set(userId, { hasLaunched: true, timestamp: now })
+
+          const processedResponse = processEnhancedVoiceflowResponse(response.data)
+          const updatedVariables = await fetchVoiceflowVariables(userId)
+
+          // Enhanced fallback detection
+          if (enableFallbackDetection) {
+            const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
+            if (fallbackCheck.shouldFallback) {
+              console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
+              return {
+                success: false,
+                error: fallbackCheck.reason,
+                isEmpty: fallbackCheck.isEmpty,
+                fallbackReason: fallbackCheck.reason,
+                healthScore: voiceflowCircuitBreaker.getHealthScore(),
+              }
+            }
+          }
+
+          console.log(`✅ Voiceflow API success on attempt ${attempt}`)
+          return {
+            success: true,
+            response: processedResponse,
+            variables: updatedVariables,
+            healthScore: voiceflowCircuitBreaker.getHealthScore(),
+          }
+        } catch (error) {
+          lastError = error as Error
+          console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
+
+          if (attempt < maxRetries) {
+            const baseDelay = Math.pow(2, attempt) * 1000
+            const jitter = Math.random() * 1000
+            const delay = baseDelay + jitter
+
+            console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, delay))
+          }
+        }
+      }
+
+      throw lastError || new Error("Failed to get Voiceflow response after all retries")
+    })
+
+    return result
+  } catch (error) {
+    console.error("💥 Voiceflow circuit breaker or final error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      healthScore: voiceflowCircuitBreaker.getHealthScore(),
+      fallbackReason: "Circuit breaker open or API failure",
+    }
+  }
+}
+
+// Enhanced response processing with Instagram DM formatting
+export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+  text: string
+  quickReplies?: { title: string; payload: string }[]
+  requiresHumanHandoff?: boolean
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+  sentiment?: "positive" | "neutral" | "negative"
+  complexity?: "simple" | "medium" | "complex"
+} {
+  let result = ""
+  const quickReplies: { title: string; payload: string }[] = []
+  let requiresHumanHandoff = false
+  let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+  let sentiment: "positive" | "neutral" | "negative" = "neutral"
+  let complexity: "simple" | "medium" | "complex" = "medium"
+
+  for (const trace of traces) {
+    switch (trace.type) {
+      case "speak":
+        if ("message" in trace.payload) {
+          const message = (trace.payload as VoiceflowTextPayload).message
+          result += message + "\n"
+
+          // Analyze message complexity
+          if (message.length > 200 || message.split(".").length > 3) {
+            complexity = "complex"
+          } else if (message.length < 50) {
+            complexity = "simple"
+          }
+        }
+        break
+
+      case "text":
+        if ("message" in trace.payload) {
+          const message = (trace.payload as VoiceflowTextPayload).message
+          result += message + "\n"
+        }
+        break
+
+      case "choice":
+        if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+          trace.payload.buttons.forEach((button: VoiceflowButton) => {
+            // Format for Instagram quick replies
+            const title = button.name.length <= INSTAGRAM_QUICK_REPLY_TITLE_LIMIT 
+              ? button.name 
+              : button.name.substring(0, INSTAGRAM_QUICK_REPLY_TITLE_LIMIT - 3) + "..."
+            
+            quickReplies.push({
+              title: title,
+              payload: button.request?.payload || button.name,
+            })
+          })
+        }
+        break
+
+      case "visual":
+        if ("image" in trace.payload) {
+          // Instagram supports images, but we'll note it in text for now
+          result += `📷 Image: ${trace.payload.image}\n`
+        }
+        break
+
+      case "end":
+        result += "\n[Conversation ended]"
+        break
+
+      case "handoff":
+        requiresHumanHandoff = true
+        priority = "HIGH"
+        if ("reason" in trace.payload) {
+          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+        }
+        break
+
+      case "priority":
+        if ("level" in trace.payload) {
+          priority = trace.payload.level
+        }
+        break
+
+      case "sentiment":
+        if ("value" in trace.payload) {
+          sentiment = trace.payload.value
+        }
+        break
+
+      case "debug":
+        console.log("🔍 Voiceflow debug:", trace.payload)
+        break
+
+      // Handle card traces (common in Voiceflow)
+      case "card":
+        if (trace.payload) {
+          if ("title" in trace.payload) {
+            result += `*${trace.payload.title}*\n`
+          }
+          if ("description" in trace.payload) {
+            result += `${trace.payload.description}\n`
+          }
+        }
+        break
+
+      default:
+        console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
+        break
+    }
+  }
+
+  // Auto-detect sentiment if not explicitly set
+  if (sentiment === "neutral") {
+    const text = result.toLowerCase()
+    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+      sentiment = "negative"
+    } else if (
+      text.includes("great") ||
+      text.includes("excellent") ||
+      text.includes("wonderful") ||
+      text.includes("thank")
+    ) {
+      sentiment = "positive"
+    }
+  }
+
+  // Trim response to Instagram limits
+  let finalText = result.trim()
+  if (finalText.length > INSTAGRAM_MESSAGE_LIMIT) {
+    finalText = finalText.substring(0, INSTAGRAM_MESSAGE_LIMIT - 3) + "..."
+  }
+
+  // Limit quick replies for Instagram
+  const limitedQuickReplies = quickReplies.slice(0, INSTAGRAM_QUICK_REPLY_LIMIT)
+
+  return {
+    text: finalText,
+    quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
+    requiresHumanHandoff,
+    priority,
+    sentiment,
+    complexity,
+  }
+}
+
+// Updated Voiceflow variables fetching with proper error handling
+async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
+  const maxRetries = 2
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await axios.get<{ variables: VoiceflowVariables }>(
+        `https://general-runtime.voiceflow.com/state/user/${userId}`,
+        {
+          headers: {
+            Authorization: API_KEY,
+            versionID: VERSION_ID,
+            accept: "application/json",
+          },
+          timeout: 8000,
+        },
+      )
+      return response.data.variables || {}
+    } catch (error) {
+      console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
+
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      }
+    }
+  }
+
+  console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
+  return {}
+}
+
+// Simplified user creation - Voiceflow auto-creates users on first interaction
+export async function createVoiceflowUser(userId: string): Promise<boolean> {
+  // Clean expired cache entries
+  const now = Date.now()
+  userCreationCache.forEach((value, key) => {
+    if (now - value.timestamp > USER_CACHE_TTL) {
+      userCreationCache.delete(key)
+    }
+  })
+
+  if (userCreationCache.has(userId)) {
+    console.log(`👤 User creation already in progress for ${userId}`)
+    return await userCreationCache.get(userId)!.promise
+  }
+
+  // Since Voiceflow auto-creates users, we just need to mark them as created
+  const creationPromise = Promise.resolve(true)
+  userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
+
+  console.log(`✅ Voiceflow user will be auto-created on first interaction: ${userId}`)
+  return true
+}
+
+// Enhanced user reset with proper request format
+export async function resetVoiceflowUser(userId: string): Promise<boolean> {
+  try {
+    const response = await axios.post(
+      `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+      { 
+        action: { type: "reset" },
+        config: {
+          tts: false,
+          stripSSML: true,
+          stopAll: true,
+          excludeTypes: ["block", "debug", "flow"]
+        }
+      },
+      {
+        headers: {
+          Authorization: API_KEY,
+          versionID: VERSION_ID,
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        timeout: 10000,
+      },
+    )
+    
+    // Clear session cache for this user
+    userSessionCache.delete(userId)
+    
+    console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
+    return response.status === 200
+  } catch (error) {
+    console.error("❌ Error resetting Voiceflow user:", error)
+    return false
+  }
+}
+
+// Helper function to format response for Instagram Graph API
+export function formatForInstagramDM(response: {
+  text: string
+  quickReplies?: { title: string; payload: string }[]
+}): {
+  text: string
+  quick_replies?: Array<{
+    content_type: "text"
+    title: string
+    payload: string
+  }>
+} {
+  const result: any = {
+    text: response.text
+  }
+
+  if (response.quickReplies && response.quickReplies.length > 0) {
+    result.quick_replies = response.quickReplies.map(reply => ({
+      content_type: "text",
+      title: reply.title,
+      payload: reply.payload
+    }))
+  }
+
+  return result
+}
+
+// Enhanced health monitoring with session cache info
+export function getVoiceflowHealth(): {
+  healthScore: number
+  circuitBreakerState: string
+  cacheSize: number
+  sessionCacheSize: number
+} {
+  return {
+    healthScore: voiceflowCircuitBreaker.getHealthScore(),
+    circuitBreakerState: voiceflowCircuitBreaker.getState(),
+    cacheSize: userCreationCache.size,
+    sessionCacheSize: userSessionCache.size,
   }
 }
