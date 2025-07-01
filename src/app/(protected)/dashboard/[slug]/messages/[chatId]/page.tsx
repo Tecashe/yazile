@@ -34,9 +34,7 @@ import { MessageTemplates } from "@/components/global/templates/message-template
 import { ScheduleMeeting } from "@/components/global/templates/schedule-meeting"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
-// Add this import at the top of the file
 import { MeetingInvitation } from "@/components/global/templates/meeting-invitation"
-// Add this import at the top of the file
 import { CollaborativeWhiteboard } from "@/components/global/templates/collaborative-whiteboard"
 import { WhiteboardMessage } from "@/components/global/templates/whiteboard-message"
 import { MessageReaction } from "@/components/global/templates/message-reaction"
@@ -56,9 +54,8 @@ export default function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [messageStatus, setMessageStatus] = useState<Record<string, "sending" | "sent" | "delivered" | "read">>({})
   const [optimisticMessages, setOptimisticMessages] = useState<any[]>([])
-  const [refreshKey, setRefreshKey] = useState(0) // Add this for forcing re-renders
-  const [isRefreshing, setIsRefreshing] = useState(false) // Add this for refresh indicator
-  // Add this state variable in the component
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false) 
   const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false)
   const [messageReactions, setMessageReactions] = useState<Record<string, any[]>>({})
   const pathname = usePathname()
