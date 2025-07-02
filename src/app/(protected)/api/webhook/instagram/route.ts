@@ -10532,7 +10532,12 @@ class MessageProcessor {
 
     try {
       const emergencyResponse = CONFIG.FALLBACK_RESPONSES.EMERGENCY
-      const token = process.env.DEFAULT_PAGE_TOKEN || "12345" // Fallback token
+      const token = process.env.DEFAULT_PAGE_TOKEN
+
+      if (!token) {
+        Logger.error("DEFAULT_PAGE_TOKEN is not set in environment variables!")
+        return // Stop if token is missing
+      }
 
       if (data.messageType === "DM") {
         await sendDM(data.pageId, data.senderId, emergencyResponse, token)
@@ -10674,7 +10679,7 @@ class VoiceflowHandler {
           isVoiceflowFallback: true,
         }),
         CONFIG.TIMEOUTS.GEMINI,
-        "Gemini Pro fallback",
+        "Gemini response",
       )
 
       const responseText = typeof geminiResponse === "string" ? geminiResponse : CONFIG.FALLBACK_RESPONSES.PRO
@@ -10973,12 +10978,12 @@ class BackgroundProcessor {
           )
         : Promise.resolve(),
       createChatHistory(
-        context.automation?.id || "default",
+        context.automation?.id || null,
         context.data.pageId,
         context.data.senderId,
         context.userMessage,
       ),
-      createChatHistory(context.automation?.id || "default", context.data.pageId, context.data.senderId, responseText),
+      createChatHistory(context.automation?.id || null, context.data.pageId, context.data.senderId, responseText),
     ])
       .then((results) => {
         const failures = results.filter((r) => r.status === "rejected").length

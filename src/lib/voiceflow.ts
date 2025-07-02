@@ -4335,12 +4335,6 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
         Logger.debug("Voiceflow debug:", trace.payload)
         break
 
-      case "knowledgeBase":
-        if ("query" in trace.payload && "output" in trace.payload.query) {
-          result += trace.payload.query.output + "\n"
-        }
-        break
-
       default:
         Logger.warning(`Unhandled trace type: ${trace.type}`, trace)
         break
