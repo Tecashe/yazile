@@ -10069,6 +10069,7 @@ import { createVoiceflowUser, getEnhancedVoiceflowResponse, fetchEnhancedBusines
 import { sendDM, sendPrivateMessage } from "@/lib/fetch"
 import { storeConversationMessage } from "@/actions/chats/queries"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+import axios from "axios"
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -10104,6 +10105,38 @@ interface ProcessingResult {
   error?: string
 }
 
+interface BusinessData {
+  businessName: string
+  welcomeMessage: string
+  industry: string
+  businessType: string
+  businessDescription: string
+  instagramHandle: string
+  responseLanguage: string
+  businessHours: string
+  autoReplyEnabled: boolean
+  promotionMessage: string
+  targetAudience: string
+  website: string
+  automationGoals: string
+  customerJourney: string
+  features: string
+  businessTypeData: any
+  websiteAnalysis: any
+  automationSetupComplete: boolean
+  automationSetupDate: Date
+  automationAdditionalNotes: string
+}
+
+interface ConversationContext {
+  pageId: string
+  senderId: string
+  userMessage: string
+  isNewUser: boolean
+  customerType: string
+  messageHistory: { role: string; content: string }[]
+}
+
 // ============================================================================
 // CONFIGURATION & CONSTANTS
 // ============================================================================
@@ -10127,6 +10160,22 @@ const CONFIG = {
     SIMPLE: "Hello! 👋",
   },
 } as const
+
+// Add this near the top of the file after the imports
+async function validateInstagramToken(token: string, pageId: string): Promise<boolean> {
+  try {
+    const response = await axios.get(`https://graph.instagram.com/v21.0/${pageId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      timeout: 5000,
+    })
+    return response.status === 200
+  } catch (error) {
+    Logger.error("Token validation failed:", error)
+    return false
+  }
+}
 
 // ============================================================================
 // ENHANCED MEMORY MANAGEMENT
@@ -10787,6 +10836,13 @@ class ResponseSender {
     const formattedButtons = this.formatButtons(buttons)
     const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
 
+    // Validate token before attempting to send
+    const isValidToken = await validateInstagramToken(token, context.data.pageId)
+    if (!isValidToken) {
+      Logger.error("Invalid Instagram token detected")
+      throw new Error("Invalid Instagram token - please reconnect your Instagram account")
+    }
+
     // Enhanced fallback responses with better error handling
     const fallbackResponses = [
       text,
@@ -10861,7 +10917,14 @@ class ResponseSender {
     if (!buttons || buttons.length === 0) return undefined
 
     return buttons.slice(0, 11).map((button) => {
-      const buttonName = String(button.name || "").substring(0, 20)
+      // Ensure button name is never empty
+      let buttonName = String(button.name || "").trim()
+      if (buttonName.length === 0) {
+        buttonName = "Option"
+      }
+
+      buttonName = buttonName.substring(0, 20)
+
       let buttonPayload: string
 
       if (typeof button.payload === "string") {

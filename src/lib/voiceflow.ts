@@ -3819,7 +3819,6 @@
 
 
 
-
 import axios from "axios"
 import { getBusinessForWebhook } from "@/actions/businfo"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
@@ -4260,14 +4259,22 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
       case "choice":
         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
           trace.payload.buttons.forEach((button: VoiceflowButton) => {
-            const title =
-              button.name.length <= CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT
-                ? button.name
-                : button.name.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
+            // Ensure we always have a valid title
+            let title = button.name || "Option"
+
+            // Trim to Instagram limits and ensure it's not empty
+            title = title.trim()
+            if (title.length === 0) {
+              title = "Select"
+            }
+
+            if (title.length > CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT) {
+              title = title.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
+            }
 
             quickReplies.push({
               title,
-              payload: button.request?.payload || button.name,
+              payload: button.request?.payload || button.name || title,
             })
           })
         }
@@ -4326,6 +4333,12 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
 
       case "debug":
         Logger.debug("Voiceflow debug:", trace.payload)
+        break
+
+      case "knowledgeBase":
+        if ("query" in trace.payload && "output" in trace.payload.query) {
+          result += trace.payload.query.output + "\n"
+        }
         break
 
       default:
