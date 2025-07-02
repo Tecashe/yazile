@@ -2635,26 +2635,1231 @@
 // }
 
 
+// import axios from "axios"
+// import { getBusinessForWebhook } from "@/actions/businfo"
+// import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
+// import type { VoiceflowVariables } from "@/types/voiceflow"
+// import type { JsonValue } from "@prisma/client/runtime/library"
+
+// const API_KEY = process.env.VOICEFLOW_API_KEY
+// const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
+// const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
+
+// // Updated session management - track if user needs launch request
+// const userSessionCache = new Map<string, { hasLaunched: boolean; timestamp: number }>()
+// const SESSION_CACHE_TTL = 1800000 // 30 minutes
+
+// // Instagram message formatting constants
+// const INSTAGRAM_MESSAGE_LIMIT = 1000
+// const INSTAGRAM_QUICK_REPLY_LIMIT = 13
+// const INSTAGRAM_QUICK_REPLY_TITLE_LIMIT = 20
+
+// interface VoiceflowResponse {
+//   type: string
+//   payload: any
+// }
+
+// interface VoiceflowButton {
+//   name: string
+//   request?: {
+//     payload?: string
+//     type?: string
+//   }
+// }
+
+// interface VoiceflowChoicePayload {
+//   buttons?: VoiceflowButton[]
+// }
+
+// interface VoiceflowTextPayload {
+//   message: string
+// }
+
+// interface VoiceflowTrace {
+//   type: string
+//   payload: VoiceflowChoicePayload | VoiceflowTextPayload | any
+// }
+
+// interface BusinessData {
+//   id: string
+//   name: string | null
+//   businessName: string
+//   businessType: string
+//   businessDescription: string
+//   industry: string
+//   automationSetupComplete: boolean
+//   automationSetupDate: Date | null
+//   automationAdditionalNotes: string | null
+//   automationGoals: JsonValue | null
+//   customerJourney: JsonValue | null
+//   features: JsonValue | null
+//   businessTypeData: JsonValue | null
+//   websiteAnalysis: JsonValue | null
+//   targetAudience: string
+//   website: string
+//   instagramHandle: string
+//   welcomeMessage: string
+//   responseLanguage: string
+//   businessHours: string
+//   autoReplyEnabled: boolean
+//   promotionMessage: string
+//   createdAt: Date
+//   updatedAt: Date
+//   userId: string | null
+// }
+
+// // Enhanced circuit breaker with health monitoring
+// class EnhancedCircuitBreaker {
+//   private failures = 0
+//   private successes = 0
+//   private lastFailureTime = 0
+//   private lastSuccessTime = 0
+//   private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED"
+//   private healthScore = 1.0
+
+//   constructor(
+//     private maxFailures = 5,
+//     private resetTimeout = 60000,
+//     private healthThreshold = 0.7,
+//   ) {}
+
+//   async execute<T>(operation: () => Promise<T>): Promise<T> {
+//     if (this.state === "OPEN") {
+//       if (Date.now() - this.lastFailureTime > this.resetTimeout) {
+//         this.state = "HALF_OPEN"
+//         console.log("🔄 Circuit breaker moving to HALF_OPEN state")
+//       } else {
+//         throw new Error(`Circuit breaker is OPEN. Health score: ${this.healthScore.toFixed(2)}`)
+//       }
+//     }
+
+//     try {
+//       const result = await operation()
+//       this.onSuccess()
+//       return result
+//     } catch (error) {
+//       this.onFailure()
+//       throw error
+//     }
+//   }
+
+//   private onSuccess() {
+//     this.successes++
+//     this.lastSuccessTime = Date.now()
+//     this.state = "CLOSED"
+
+//     // Update health score
+//     const totalOperations = this.successes + this.failures
+//     this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 1.0
+
+//     // Reset failure count on sustained success
+//     if (this.successes >= 10) {
+//       this.failures = Math.max(0, this.failures - 1)
+//     }
+
+//     console.log(`✅ Voiceflow operation successful. Health score: ${this.healthScore.toFixed(2)}`)
+//   }
+
+//   private onFailure() {
+//     this.failures++
+//     this.lastFailureTime = Date.now()
+
+//     // Update health score
+//     const totalOperations = this.successes + this.failures
+//     this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 0.0
+
+//     if (this.failures >= this.maxFailures || this.healthScore < this.healthThreshold) {
+//       this.state = "OPEN"
+//       console.log(`❌ Circuit breaker OPEN. Failures: ${this.failures}, Health: ${this.healthScore.toFixed(2)}`)
+//     }
+//   }
+
+//   getHealthScore(): number {
+//     return this.healthScore
+//   }
+
+//   getState(): string {
+//     return this.state
+//   }
+// }
+
+// const voiceflowCircuitBreaker = new EnhancedCircuitBreaker()
+
+// // Enhanced user creation cache with TTL
+// const userCreationCache = new Map<string, { promise: Promise<boolean>; timestamp: number }>()
+// const USER_CACHE_TTL = 300000 // 5 minutes
+
+// // Simple customer data extraction from Voiceflow variables
+// export function extractBasicCustomerData(variables: Record<string, any>) {
+//   return {
+//     name: variables.customer_name || variables.clientname || variables.name || null,
+//     email: variables.customer_email || variables.clientemail || variables.email || null,
+//     phone: variables.customer_phone || variables.clientphone || variables.phone || null,
+//   }
+// }
+
+// // Enhanced business variables with conversation context
+// export async function fetchEnhancedBusinessVariables(
+//   businessId: string,
+//   automationId: string,
+//   conversationContext?: {
+//     pageId: string
+//     senderId: string
+//     userMessage: string
+//     isNewUser: boolean
+//     customerType: string
+//     messageHistory: Array<{ role: "user" | "assistant"; content: string }>
+//   },
+// ): Promise<Record<string, string>> {
+//   console.log("🔍 Fetching enhanced business variables...")
+
+//   try {
+//     // Get business profile description
+//     const { profileContent, businessContext } = await getBusinessProfileForAutomation(automationId)
+
+//     // Get traditional business data
+//     const businessResponse = await getBusinessForWebhook(businessId)
+
+//     if (businessResponse.status !== 200 || !businessResponse.data.business) {
+//       throw new Error(`Failed to fetch business data. Status: ${businessResponse.status}`)
+//     }
+
+//     const businessData: BusinessData = businessResponse.data.business
+
+//     const result: Record<string, string> = {
+//       // Enhanced business profile integration
+//       business_profile: profileContent,
+//       business_name: businessContext.businessName || businessData.businessName || "Default Business Name",
+//       welcome_message: businessContext.welcomeMessage || businessData.welcomeMessage || "Welcome!",
+//       business_industry: businessContext.industry || businessData.industry || "General",
+//       business_type: businessData.businessType || "General",
+//       business_description:
+//         businessContext.businessDescription || businessData.businessDescription || "No description provided",
+//       instagram_handle: businessData.instagramHandle || "",
+//       response_language: businessContext.responseLanguage || businessData.responseLanguage || "English",
+//       business_hours: businessData.businessHours || "Not specified",
+//       auto_reply_enabled: businessData.autoReplyEnabled ? "Yes" : "No",
+//       promotion_message: businessContext.promotionMessage || businessData.promotionMessage || "",
+//       target_audience: businessContext.targetAudience || businessData.targetAudience || "",
+//       website: businessData.website || "",
+//       // Add basic data collection variables for Voiceflow
+//       customer_name: "",
+//       customer_email: "",
+//       customer_phone: "",
+//     }
+
+//     // Add conversation context if available
+//     if (conversationContext) {
+//       result.customer_type = conversationContext.customerType
+//       result.is_new_user = conversationContext.isNewUser.toString()
+//       result.current_message = conversationContext.userMessage
+//       result.conversation_history = conversationContext.messageHistory
+//         .slice(-5)
+//         .map((msg) => `${msg.role}: ${msg.content}`)
+//         .join(" | ")
+//       result.conversation_length = conversationContext.messageHistory.length.toString()
+
+//       // Add conversation insights
+//       const hasQuestions = conversationContext.userMessage.includes("?")
+//       const hasUrgentWords = /urgent|asap|immediately|emergency|help/i.test(conversationContext.userMessage)
+//       const hasPurchaseIntent = /buy|purchase|order|price|cost|payment/i.test(conversationContext.userMessage)
+
+//       result.has_questions = hasQuestions.toString()
+//       result.is_urgent = hasUrgentWords.toString()
+//       result.has_purchase_intent = hasPurchaseIntent.toString()
+//     }
+
+//     // Parse JSON fields safely with enhanced error handling
+//     if (businessData.automationGoals) {
+//       try {
+//         const automationGoals =
+//           typeof businessData.automationGoals === "string"
+//             ? JSON.parse(businessData.automationGoals)
+//             : (businessData.automationGoals as Record<string, any>)
+//         result.primary_goal = automationGoals.primaryGoal || ""
+//         result.response_time = automationGoals.responseTime?.toString() || ""
+//         result.custom_goals = automationGoals.customGoals || ""
+//       } catch (e) {
+//         console.error("❌ Error parsing automationGoals:", e)
+//       }
+//     }
+
+//     if (businessData.customerJourney) {
+//       try {
+//         const customerJourney =
+//           typeof businessData.customerJourney === "string"
+//             ? JSON.parse(businessData.customerJourney)
+//             : (businessData.customerJourney as Record<string, any>)
+//         result.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
+//       } catch (e) {
+//         console.error("❌ Error parsing customerJourney:", e)
+//       }
+//     }
+
+//     if (businessData.features) {
+//       try {
+//         const features =
+//           typeof businessData.features === "string"
+//             ? JSON.parse(businessData.features)
+//             : (businessData.features as Record<string, any>)
+//         result.enabled_features =
+//           features.features
+//             ?.filter((f: any) => f.enabled)
+//             .map((f: any) => f.name)
+//             .join(", ") || ""
+//       } catch (e) {
+//         console.error("❌ Error parsing features:", e)
+//       }
+//     }
+
+//     if (businessData.businessTypeData) {
+//       result.business_type_data = JSON.stringify(businessData.businessTypeData)
+//     }
+
+//     if (businessData.websiteAnalysis) {
+//       result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
+//     }
+
+//     result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
+//     result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
+//     result.automation_additional_notes = businessData.automationAdditionalNotes || ""
+
+//     // Add system context
+//     result.system_timestamp = new Date().toISOString()
+//     result.voiceflow_health_score = voiceflowCircuitBreaker.getHealthScore().toFixed(2)
+
+//     console.log("✅ Enhanced business variables prepared")
+//     return result
+//   } catch (error) {
+//     console.error("❌ Error in fetchEnhancedBusinessVariables:", error)
+//     throw error
+//   }
+// }
+
+// // Enhanced Voiceflow response with intelligent retry and fallback detection
+// export async function getEnhancedVoiceflowResponseE(
+//   userInput: string,
+//   userId: string,
+//   businessVariables: Record<string, string>,
+//   options?: {
+//     maxRetries?: number
+//     timeoutMs?: number
+//     enableFallbackDetection?: boolean
+//   },
+// ): Promise<{
+//   success: boolean
+//   response?: {
+//     text: string
+//     buttons?: Array<{ name: string; payload: string }>
+//     requiresHumanHandoff?: boolean
+//     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//     sentiment?: "positive" | "neutral" | "negative"
+//     complexity?: "simple" | "medium" | "complex"
+//   }
+//   variables?: VoiceflowVariables
+//   error?: string
+//   isEmpty?: boolean
+//   healthScore?: number
+//   fallbackReason?: string
+// }> {
+//   const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true } = options || {}
+
+//   try {
+//     const result = await voiceflowCircuitBreaker.execute(async () => {
+//       let lastError: Error | null = null
+
+//       for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//         try {
+//           console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+
+//           const response = await axios.post<VoiceflowResponse[]>(
+//             `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//             {
+//               request: { type: "text", payload: userInput },
+//               state: { variables: businessVariables },
+//             },
+//             {
+//               headers: {
+//                 Authorization: API_KEY,
+//                 versionID: VERSION_ID,
+//                 accept: "application/json",
+//                 "content-type": "application/json",
+//               },
+//               timeout: timeoutMs,
+//             },
+//           )
+
+//           const processedResponse = processEnhancedVoiceflowResponse(response.data)
+//           const updatedVariables = await fetchVoiceflowVariables(userId)
+
+//           // Enhanced fallback detection
+//           if (enableFallbackDetection) {
+//             const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
+//             if (fallbackCheck.shouldFallback) {
+//               console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
+//               return {
+//                 success: false,
+//                 error: fallbackCheck.reason,
+//                 isEmpty: fallbackCheck.isEmpty,
+//                 fallbackReason: fallbackCheck.reason,
+//                 healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//               }
+//             }
+//           }
+
+//           console.log(`✅ Voiceflow API success on attempt ${attempt}`)
+//           return {
+//             success: true,
+//             response: processedResponse,
+//             variables: updatedVariables,
+//             healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//           }
+//         } catch (error) {
+//           lastError = error as Error
+//           console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
+
+//           if (attempt < maxRetries) {
+//             const baseDelay = Math.pow(2, attempt) * 1000
+//             const jitter = Math.random() * 1000
+//             const delay = baseDelay + jitter
+
+//             console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
+//             await new Promise((resolve) => setTimeout(resolve, delay))
+//           }
+//         }
+//       }
+
+//       throw lastError || new Error("Failed to get Voiceflow response after all retries")
+//     })
+
+//     return result
+//   } catch (error) {
+//     console.error("💥 Voiceflow circuit breaker or final error:", error)
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : String(error),
+//       healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//       fallbackReason: "Circuit breaker open or API failure",
+//     }
+//   }
+// }
+
+// // Enhanced fallback detection
+// function detectFallbackConditions(
+//   response: any,
+//   userInput: string,
+// ): { shouldFallback: boolean; reason: string; isEmpty: boolean } {
+//   // Check for empty response
+//   if (!response.text || response.text.trim().length === 0) {
+//     return { shouldFallback: true, reason: "Empty response from Voiceflow", isEmpty: true }
+//   }
+
+//   // Check for generic error responses
+//   const genericResponses = [
+//     "i don't understand",
+//     "sorry, i didn't get that",
+//     "can you repeat that",
+//     "i'm not sure what you mean",
+//     "error",
+//     "something went wrong",
+//     "please try again",
+//     "system error",
+//     "unable to process",
+//   ]
+
+//   const responseText = response.text.toLowerCase()
+//   const isGeneric = genericResponses.some((generic) => responseText.includes(generic))
+
+//   if (isGeneric) {
+//     return { shouldFallback: true, reason: `Generic response detected: "${response.text}"`, isEmpty: false }
+//   }
+
+//   // Check for very short responses that might indicate issues
+//   if (response.text.length < 10 && !response.buttons?.length) {
+//     return { shouldFallback: true, reason: "Response too short without buttons", isEmpty: false }
+//   }
+
+//   // Check for responses that don't seem to address the user input
+//   const userWords = userInput.toLowerCase().split(/\s+/)
+//   const responseWords = response.text.toLowerCase().split(/\s+/)
+//   const commonWords = userWords.filter((word) => responseWords.includes(word) && word.length > 3)
+
+//   if (userInput.length > 20 && commonWords.length === 0 && !response.buttons?.length) {
+//     return {
+//       shouldFallback: true,
+//       reason: "Response doesn't seem to address user input",
+//       isEmpty: false,
+//     }
+//   }
+
+//   return { shouldFallback: false, reason: "", isEmpty: false }
+// }
+
+// // Enhanced response processing with intelligence
+// export function processEnhancedVoiceflowResponseE(traces: VoiceflowTrace[]): {
+//   text: string
+//   buttons?: { name: string; payload: string }[]
+//   requiresHumanHandoff?: boolean
+//   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   sentiment?: "positive" | "neutral" | "negative"
+//   complexity?: "simple" | "medium" | "complex"
+// } {
+//   let result = ""
+//   const buttons: { name: string; payload: string }[] = []
+//   let requiresHumanHandoff = false
+//   let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+//   let sentiment: "positive" | "neutral" | "negative" = "neutral"
+//   let complexity: "simple" | "medium" | "complex" = "medium"
+
+//   for (const trace of traces) {
+//     switch (trace.type) {
+//       case "text":
+//         if ("message" in trace.payload) {
+//           const message = (trace.payload as VoiceflowTextPayload).message
+//           result += message + "\n"
+
+//           // Analyze message complexity
+//           if (message.length > 200 || message.split(".").length > 3) {
+//             complexity = "complex"
+//           } else if (message.length < 50) {
+//             complexity = "simple"
+//           }
+//         }
+//         break
+
+//       case "choice":
+//         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+//           trace.payload.buttons.forEach((button: VoiceflowButton) => {
+//             buttons.push({
+//               name: button.name,
+//               payload: button.request?.payload || button.name,
+//             })
+//           })
+//         }
+//         break
+
+//       case "visual":
+//         if ("image" in trace.payload) {
+//           result += `[Image: ${trace.payload.image}]\n`
+//         }
+//         break
+
+//       case "speak":
+//         if ("message" in trace.payload) {
+//           result += (trace.payload as VoiceflowTextPayload).message + "\n"
+//         }
+//         break
+
+//       case "end":
+//         result += "\n[Conversation ended]"
+//         break
+
+//       case "handoff":
+//         requiresHumanHandoff = true
+//         priority = "HIGH"
+//         if ("reason" in trace.payload) {
+//           result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+//         }
+//         break
+
+//       case "priority":
+//         if ("level" in trace.payload) {
+//           priority = trace.payload.level
+//         }
+//         break
+
+//       case "sentiment":
+//         if ("value" in trace.payload) {
+//           sentiment = trace.payload.value
+//         }
+//         break
+
+//       case "debug":
+//         console.log("🔍 Voiceflow debug:", trace.payload)
+//         break
+
+//       default:
+//         console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
+//         break
+//     }
+//   }
+
+//   // Auto-detect sentiment if not explicitly set
+//   if (sentiment === "neutral") {
+//     const text = result.toLowerCase()
+//     if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+//       sentiment = "negative"
+//     } else if (
+//       text.includes("great") ||
+//       text.includes("excellent") ||
+//       text.includes("wonderful") ||
+//       text.includes("thank")
+//     ) {
+//       sentiment = "positive"
+//     }
+//   }
+
+//   return {
+//     text: result.trim(),
+//     buttons: buttons.length > 0 ? buttons : undefined,
+//     requiresHumanHandoff,
+//     priority,
+//     sentiment,
+//     complexity,
+//   }
+// }
+
+// // Enhanced Voiceflow variables fetching
+// async function fetchVoiceflowVariablesE(userId: string): Promise<VoiceflowVariables> {
+//   const maxRetries = 2
+
+//   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//     try {
+//       const response = await axios.get<{ variables: VoiceflowVariables }>(
+//         `https://general-runtime.voiceflow.com/state/user/${userId}`,
+//         {
+//           headers: {
+//             Authorization: API_KEY,
+//             versionID: VERSION_ID,
+//             accept: "application/json",
+//           },
+//           timeout: 8000,
+//         },
+//       )
+//       return response.data.variables || {}
+//     } catch (error) {
+//       console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
+
+//       if (attempt < maxRetries) {
+//         await new Promise((resolve) => setTimeout(resolve, 2000))
+//       }
+//     }
+//   }
+
+//   console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
+//   return {}
+// }
+
+// // Enhanced user creation with cache management
+// export async function createVoiceflowUserE(userId: string): Promise<boolean> {
+//   // Clean expired cache entries
+//   const now = Date.now()
+//   userCreationCache.forEach((value, key) => {
+//     if (now - value.timestamp > USER_CACHE_TTL) {
+//       userCreationCache.delete(key)
+//     }
+//   })
+
+//   if (userCreationCache.has(userId)) {
+//     console.log(`👤 User creation already in progress for ${userId}`)
+//     return await userCreationCache.get(userId)!.promise
+//   }
+
+//   const creationPromise = createVoiceflowUserInternal(userId)
+//   userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
+
+//   try {
+//     const result = await creationPromise
+//     return result
+//   } finally {
+//     // Clean up cache after completion
+//     setTimeout(() => {
+//       userCreationCache.delete(userId)
+//     }, 10000) // Keep in cache for 10 seconds after completion
+//   }
+// }
+
+// async function createVoiceflowUserInternal(userId: string): Promise<boolean> {
+//   const maxRetries = 3
+
+//   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//     try {
+//       const response = await axios.put(
+//         "https://api.voiceflow.com/v2/transcripts",
+//         {
+//           projectID: PROJECT_ID,
+//           versionID: VERSION_ID,
+//           sessionID: userId,
+//         },
+//         {
+//           headers: {
+//             accept: "application/json",
+//             "content-type": "application/json",
+//             Authorization: API_KEY,
+//           },
+//           timeout: 12000,
+//         },
+//       )
+//       console.log(`✅ Voiceflow user created successfully: ${userId}`)
+//       return response.status === 200 || response.status === 201
+//     } catch (error) {
+//       console.error(`❌ Error creating Voiceflow user (attempt ${attempt}):`, error)
+
+//       if (attempt < maxRetries) {
+//         const delay = Math.pow(2, attempt - 1) * 1000
+//         await new Promise((resolve) => setTimeout(resolve, delay))
+//       }
+//     }
+//   }
+
+//   console.error(`💥 Failed to create Voiceflow user after ${maxRetries} attempts`)
+//   return false
+// }
+
+// // Enhanced user reset
+// export async function resetVoiceflowUserE(userId: string): Promise<boolean> {
+//   try {
+//     const response = await axios.post(
+//       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//       { request: { type: "reset" } },
+//       {
+//         headers: {
+//           Authorization: API_KEY,
+//           versionID: VERSION_ID,
+//           accept: "application/json",
+//           "content-type": "application/json",
+//         },
+//         timeout: 10000,
+//       },
+//     )
+//     console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
+//     return response.status === 200
+//   } catch (error) {
+//     console.error("❌ Error resetting Voiceflow user:", error)
+//     return false
+//   }
+// }
+
+// // Health monitoring
+// export function getVoiceflowHealthE(): {
+//   healthScore: number
+//   circuitBreakerState: string
+//   cacheSize: number
+// } {
+//   return {
+//     healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//     circuitBreakerState: voiceflowCircuitBreaker.getState(),
+//     cacheSize: userCreationCache.size,
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // Enhanced Voiceflow response with proper launch handling and Instagram formatting
+// export async function getEnhancedVoiceflowResponse(
+//   userInput: string,
+//   userId: string,
+//   businessVariables: Record<string, string>,
+//   options?: {
+//     maxRetries?: number
+//     timeoutMs?: number
+//     enableFallbackDetection?: boolean
+//     isFirstMessage?: boolean
+//   },
+// ): Promise<{
+//   success: boolean
+//   response?: {
+//     text: string
+//     quickReplies?: Array<{ title: string; payload: string }>
+//     requiresHumanHandoff?: boolean
+//     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//     sentiment?: "positive" | "neutral" | "negative"
+//     complexity?: "simple" | "medium" | "complex"
+//   }
+//   variables?: VoiceflowVariables
+//   error?: string
+//   isEmpty?: boolean
+//   healthScore?: number
+//   fallbackReason?: string
+// }> {
+//   const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true, isFirstMessage = false } = options || {}
+
+//   try {
+//     const result = await voiceflowCircuitBreaker.execute(async () => {
+//       let lastError: Error | null = null
+
+//       for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//         try {
+//           console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+
+//           // Clean expired session cache
+//           const now = Date.now()
+//           userSessionCache.forEach((value, key) => {
+//             if (now - value.timestamp > SESSION_CACHE_TTL) {
+//               userSessionCache.delete(key)
+//             }
+//           })
+
+//           // Check if user needs launch request
+//           const sessionData = userSessionCache.get(userId)
+//           const needsLaunch = isFirstMessage || !sessionData?.hasLaunched
+
+//           let requestPayload: any
+//           if (needsLaunch) {
+//             // Send launch request first
+//             console.log(`🚀 Sending launch request for user ${userId}`)
+//             requestPayload = {
+//               action: { type: "launch" },
+//               config: {
+//                 tts: false,
+//                 stripSSML: true,
+//                 stopAll: true,
+//                 excludeTypes: ["block", "debug", "flow"]
+//               }
+//             }
+//           } else {
+//             // Send text request
+//             requestPayload = {
+//               action: { type: "text", payload: userInput },
+//               config: {
+//                 tts: false,
+//                 stripSSML: true,
+//                 stopAll: true,
+//                 excludeTypes: ["block", "debug", "flow"]
+//               }
+//             }
+//           }
+
+//           // Add business variables to state
+//           if (Object.keys(businessVariables).length > 0) {
+//             requestPayload.state = { variables: businessVariables }
+//           }
+
+//           const response = await axios.post<VoiceflowTrace[]>(
+//             `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//             requestPayload,
+//             {
+//               headers: {
+//                 Authorization: API_KEY,
+//                 versionID: VERSION_ID,
+//                 accept: "application/json",
+//                 "content-type": "application/json",
+//               },
+//               timeout: timeoutMs,
+//             },
+//           )
+
+//           // If this was a launch request and we have user input, send the text request
+//           if (needsLaunch && userInput.trim().length > 0) {
+//             console.log(`📝 Following up with text request for user ${userId}`)
+//             const textResponse = await axios.post<VoiceflowTrace[]>(
+//               `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//               {
+//                 action: { type: "text", payload: userInput },
+//                 config: {
+//                   tts: false,
+//                   stripSSML: true,
+//                   stopAll: true,
+//                   excludeTypes: ["block", "debug", "flow"]
+//                 }
+//               },
+//               {
+//                 headers: {
+//                   Authorization: API_KEY,
+//                   versionID: VERSION_ID,
+//                   accept: "application/json",
+//                   "content-type": "application/json",
+//                 },
+//                 timeout: timeoutMs,
+//               },
+//             )
+            
+//             // Use the text response instead
+//             response.data = textResponse.data
+//           }
+
+//           // Mark user as launched
+//           userSessionCache.set(userId, { hasLaunched: true, timestamp: now })
+
+//           const processedResponse = processEnhancedVoiceflowResponse(response.data)
+//           const updatedVariables = await fetchVoiceflowVariables(userId)
+
+//           // Enhanced fallback detection
+//           if (enableFallbackDetection) {
+//             const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
+//             if (fallbackCheck.shouldFallback) {
+//               console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
+//               return {
+//                 success: false,
+//                 error: fallbackCheck.reason,
+//                 isEmpty: fallbackCheck.isEmpty,
+//                 fallbackReason: fallbackCheck.reason,
+//                 healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//               }
+//             }
+//           }
+
+//           console.log(`✅ Voiceflow API success on attempt ${attempt}`)
+//           return {
+//             success: true,
+//             response: processedResponse,
+//             variables: updatedVariables,
+//             healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//           }
+//         } catch (error) {
+//           lastError = error as Error
+//           console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
+
+//           if (attempt < maxRetries) {
+//             const baseDelay = Math.pow(2, attempt) * 1000
+//             const jitter = Math.random() * 1000
+//             const delay = baseDelay + jitter
+
+//             console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
+//             await new Promise((resolve) => setTimeout(resolve, delay))
+//           }
+//         }
+//       }
+
+//       throw lastError || new Error("Failed to get Voiceflow response after all retries")
+//     })
+
+//     return result
+//   } catch (error) {
+//     console.error("💥 Voiceflow circuit breaker or final error:", error)
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : String(error),
+//       healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//       fallbackReason: "Circuit breaker open or API failure",
+//     }
+//   }
+// }
+
+// // Enhanced response processing with Instagram DM formatting
+// export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+//   text: string
+//   quickReplies?: { title: string; payload: string }[]
+//   requiresHumanHandoff?: boolean
+//   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   sentiment?: "positive" | "neutral" | "negative"
+//   complexity?: "simple" | "medium" | "complex"
+// } {
+//   let result = ""
+//   const quickReplies: { title: string; payload: string }[] = []
+//   let requiresHumanHandoff = false
+//   let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+//   let sentiment: "positive" | "neutral" | "negative" = "neutral"
+//   let complexity: "simple" | "medium" | "complex" = "medium"
+
+//   for (const trace of traces) {
+//     switch (trace.type) {
+//       case "speak":
+//         if ("message" in trace.payload) {
+//           const message = (trace.payload as VoiceflowTextPayload).message
+//           result += message + "\n"
+
+//           // Analyze message complexity
+//           if (message.length > 200 || message.split(".").length > 3) {
+//             complexity = "complex"
+//           } else if (message.length < 50) {
+//             complexity = "simple"
+//           }
+//         }
+//         break
+
+//       case "text":
+//         if ("message" in trace.payload) {
+//           const message = (trace.payload as VoiceflowTextPayload).message
+//           result += message + "\n"
+//         }
+//         break
+
+//       case "choice":
+//         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+//           trace.payload.buttons.forEach((button: VoiceflowButton) => {
+//             // Format for Instagram quick replies
+//             const title = button.name.length <= INSTAGRAM_QUICK_REPLY_TITLE_LIMIT 
+//               ? button.name 
+//               : button.name.substring(0, INSTAGRAM_QUICK_REPLY_TITLE_LIMIT - 3) + "..."
+            
+//             quickReplies.push({
+//               title: title,
+//               payload: button.request?.payload || button.name,
+//             })
+//           })
+//         }
+//         break
+
+//       case "visual":
+//         if ("image" in trace.payload) {
+//           // Instagram supports images, but we'll note it in text for now
+//           result += `📷 Image: ${trace.payload.image}\n`
+//         }
+//         break
+
+//       case "end":
+//         result += "\n[Conversation ended]"
+//         break
+
+//       case "handoff":
+//         requiresHumanHandoff = true
+//         priority = "HIGH"
+//         if ("reason" in trace.payload) {
+//           result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+//         }
+//         break
+
+//       case "priority":
+//         if ("level" in trace.payload) {
+//           priority = trace.payload.level
+//         }
+//         break
+
+//       case "sentiment":
+//         if ("value" in trace.payload) {
+//           sentiment = trace.payload.value
+//         }
+//         break
+
+//       case "debug":
+//         console.log("🔍 Voiceflow debug:", trace.payload)
+//         break
+
+//       // Handle card traces (common in Voiceflow)
+//       case "card":
+//         if (trace.payload) {
+//           if ("title" in trace.payload) {
+//             result += `*${trace.payload.title}*\n`
+//           }
+//           if ("description" in trace.payload) {
+//             result += `${trace.payload.description}\n`
+//           }
+//         }
+//         break
+
+//       default:
+//         console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
+//         break
+//     }
+//   }
+
+//   // Auto-detect sentiment if not explicitly set
+//   if (sentiment === "neutral") {
+//     const text = result.toLowerCase()
+//     if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+//       sentiment = "negative"
+//     } else if (
+//       text.includes("great") ||
+//       text.includes("excellent") ||
+//       text.includes("wonderful") ||
+//       text.includes("thank")
+//     ) {
+//       sentiment = "positive"
+//     }
+//   }
+
+//   // Trim response to Instagram limits
+//   let finalText = result.trim()
+//   if (finalText.length > INSTAGRAM_MESSAGE_LIMIT) {
+//     finalText = finalText.substring(0, INSTAGRAM_MESSAGE_LIMIT - 3) + "..."
+//   }
+
+//   // Limit quick replies for Instagram
+//   const limitedQuickReplies = quickReplies.slice(0, INSTAGRAM_QUICK_REPLY_LIMIT)
+
+//   return {
+//     text: finalText,
+//     quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
+//     requiresHumanHandoff,
+//     priority,
+//     sentiment,
+//     complexity,
+//   }
+// }
+
+// // Updated Voiceflow variables fetching with proper error handling
+// async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
+//   const maxRetries = 2
+
+//   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//     try {
+//       const response = await axios.get<{ variables: VoiceflowVariables }>(
+//         `https://general-runtime.voiceflow.com/state/user/${userId}`,
+//         {
+//           headers: {
+//             Authorization: API_KEY,
+//             versionID: VERSION_ID,
+//             accept: "application/json",
+//           },
+//           timeout: 8000,
+//         },
+//       )
+//       return response.data.variables || {}
+//     } catch (error) {
+//       console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
+
+//       if (attempt < maxRetries) {
+//         await new Promise((resolve) => setTimeout(resolve, 2000))
+//       }
+//     }
+//   }
+
+//   console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
+//   return {}
+// }
+
+// // Simplified user creation - Voiceflow auto-creates users on first interaction
+// export async function createVoiceflowUser(userId: string): Promise<boolean> {
+//   // Clean expired cache entries
+//   const now = Date.now()
+//   userCreationCache.forEach((value, key) => {
+//     if (now - value.timestamp > USER_CACHE_TTL) {
+//       userCreationCache.delete(key)
+//     }
+//   })
+
+//   if (userCreationCache.has(userId)) {
+//     console.log(`👤 User creation already in progress for ${userId}`)
+//     return await userCreationCache.get(userId)!.promise
+//   }
+
+//   // Since Voiceflow auto-creates users, we just need to mark them as created
+//   const creationPromise = Promise.resolve(true)
+//   userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
+
+//   console.log(`✅ Voiceflow user will be auto-created on first interaction: ${userId}`)
+//   return true
+// }
+
+// // Enhanced user reset with proper request format
+// export async function resetVoiceflowUser(userId: string): Promise<boolean> {
+//   try {
+//     const response = await axios.post(
+//       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+//       { 
+//         action: { type: "reset" },
+//         config: {
+//           tts: false,
+//           stripSSML: true,
+//           stopAll: true,
+//           excludeTypes: ["block", "debug", "flow"]
+//         }
+//       },
+//       {
+//         headers: {
+//           Authorization: API_KEY,
+//           versionID: VERSION_ID,
+//           accept: "application/json",
+//           "content-type": "application/json",
+//         },
+//         timeout: 10000,
+//       },
+//     )
+    
+//     // Clear session cache for this user
+//     userSessionCache.delete(userId)
+    
+//     console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
+//     return response.status === 200
+//   } catch (error) {
+//     console.error("❌ Error resetting Voiceflow user:", error)
+//     return false
+//   }
+// }
+
+// // Helper function to format response for Instagram Graph API
+// export function formatForInstagramDM(response: {
+//   text: string
+//   quickReplies?: { title: string; payload: string }[]
+// }): {
+//   text: string
+//   quick_replies?: Array<{
+//     content_type: "text"
+//     title: string
+//     payload: string
+//   }>
+// } {
+//   const result: any = {
+//     text: response.text
+//   }
+
+//   if (response.quickReplies && response.quickReplies.length > 0) {
+//     result.quick_replies = response.quickReplies.map(reply => ({
+//       content_type: "text",
+//       title: reply.title,
+//       payload: reply.payload
+//     }))
+//   }
+
+//   return result
+// }
+
+// // Enhanced health monitoring with session cache info
+// export function getVoiceflowHealth(): {
+//   healthScore: number
+//   circuitBreakerState: string
+//   cacheSize: number
+//   sessionCacheSize: number
+// } {
+//   return {
+//     healthScore: voiceflowCircuitBreaker.getHealthScore(),
+//     circuitBreakerState: voiceflowCircuitBreaker.getState(),
+//     cacheSize: userCreationCache.size,
+//     sessionCacheSize: userSessionCache.size,
+//   }
+// }
+
+
+
+
 import axios from "axios"
 import { getBusinessForWebhook } from "@/actions/businfo"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
 import type { JsonValue } from "@prisma/client/runtime/library"
 
-const API_KEY = process.env.VOICEFLOW_API_KEY
-const PROJECT_ID = process.env.VOICEFLOW_PROJECT_ID
-const VERSION_ID = process.env.VOICEFLOW_VERSION_ID
+// ============================================================================
+// CONFIGURATION & CONSTANTS
+// ============================================================================
 
-// Updated session management - track if user needs launch request
-const userSessionCache = new Map<string, { hasLaunched: boolean; timestamp: number }>()
-const SESSION_CACHE_TTL = 1800000 // 30 minutes
+const CONFIG = {
+  API_KEY: process.env.VOICEFLOW_API_KEY!,
+  PROJECT_ID: process.env.VOICEFLOW_PROJECT_ID!,
+  VERSION_ID: process.env.VOICEFLOW_VERSION_ID!,
+  TIMEOUTS: {
+    INTERACTION: 15000,
+    VARIABLES: 8000,
+    USER_CREATION: 12000,
+  },
+  RETRY: {
+    MAX_ATTEMPTS: 3,
+    BASE_DELAY: 1000,
+    MAX_JITTER: 1000,
+  },
+  CACHE_TTL: {
+    USER_CREATION: 300000, // 5 minutes
+    SESSION: 1800000, // 30 minutes
+  },
+  INSTAGRAM: {
+    MESSAGE_LIMIT: 1000,
+    QUICK_REPLY_LIMIT: 13,
+    QUICK_REPLY_TITLE_LIMIT: 20,
+  },
+} as const
 
-// Instagram message formatting constants
-const INSTAGRAM_MESSAGE_LIMIT = 1000
-const INSTAGRAM_QUICK_REPLY_LIMIT = 13
-const INSTAGRAM_QUICK_REPLY_TITLE_LIMIT = 20
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
 
-interface VoiceflowResponse {
+interface VoiceflowTrace {
   type: string
   payload: any
 }
@@ -2665,19 +3870,6 @@ interface VoiceflowButton {
     payload?: string
     type?: string
   }
-}
-
-interface VoiceflowChoicePayload {
-  buttons?: VoiceflowButton[]
-}
-
-interface VoiceflowTextPayload {
-  message: string
-}
-
-interface VoiceflowTrace {
-  type: string
-  payload: VoiceflowChoicePayload | VoiceflowTextPayload | any
 }
 
 interface BusinessData {
@@ -2708,12 +3900,40 @@ interface BusinessData {
   userId: string | null
 }
 
-// Enhanced circuit breaker with health monitoring
-class EnhancedCircuitBreaker {
+interface ConversationContext {
+  pageId: string
+  senderId: string
+  userMessage: string
+  isNewUser: boolean
+  customerType: string
+  messageHistory: Array<{ role: "user" | "assistant"; content: string }>
+}
+
+interface VoiceflowResponse {
+  success: boolean
+  response?: {
+    text: string
+    quickReplies?: Array<{ title: string; payload: string }>
+    requiresHumanHandoff?: boolean
+    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+    sentiment?: "positive" | "neutral" | "negative"
+    complexity?: "simple" | "medium" | "complex"
+  }
+  variables?: VoiceflowVariables
+  error?: string
+  isEmpty?: boolean
+  healthScore?: number
+  fallbackReason?: string
+}
+
+// ============================================================================
+// ENHANCED CIRCUIT BREAKER
+// ============================================================================
+
+class VoiceflowCircuitBreaker {
   private failures = 0
   private successes = 0
   private lastFailureTime = 0
-  private lastSuccessTime = 0
   private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED"
   private healthScore = 1.0
 
@@ -2727,7 +3947,7 @@ class EnhancedCircuitBreaker {
     if (this.state === "OPEN") {
       if (Date.now() - this.lastFailureTime > this.resetTimeout) {
         this.state = "HALF_OPEN"
-        console.log("🔄 Circuit breaker moving to HALF_OPEN state")
+        Logger.info("🔄 Circuit breaker moving to HALF_OPEN state")
       } else {
         throw new Error(`Circuit breaker is OPEN. Health score: ${this.healthScore.toFixed(2)}`)
       }
@@ -2743,34 +3963,28 @@ class EnhancedCircuitBreaker {
     }
   }
 
-  private onSuccess() {
+  private onSuccess(): void {
     this.successes++
-    this.lastSuccessTime = Date.now()
     this.state = "CLOSED"
-
-    // Update health score
     const totalOperations = this.successes + this.failures
     this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 1.0
 
-    // Reset failure count on sustained success
     if (this.successes >= 10) {
       this.failures = Math.max(0, this.failures - 1)
     }
 
-    console.log(`✅ Voiceflow operation successful. Health score: ${this.healthScore.toFixed(2)}`)
+    Logger.success(`Voiceflow operation successful. Health score: ${this.healthScore.toFixed(2)}`)
   }
 
-  private onFailure() {
+  private onFailure(): void {
     this.failures++
     this.lastFailureTime = Date.now()
-
-    // Update health score
     const totalOperations = this.successes + this.failures
     this.healthScore = totalOperations > 0 ? this.successes / totalOperations : 0.0
 
     if (this.failures >= this.maxFailures || this.healthScore < this.healthThreshold) {
       this.state = "OPEN"
-      console.log(`❌ Circuit breaker OPEN. Failures: ${this.failures}, Health: ${this.healthScore.toFixed(2)}`)
+      Logger.error(`Circuit breaker OPEN. Failures: ${this.failures}, Health: ${this.healthScore.toFixed(2)}`)
     }
   }
 
@@ -2783,58 +3997,143 @@ class EnhancedCircuitBreaker {
   }
 }
 
-const voiceflowCircuitBreaker = new EnhancedCircuitBreaker()
+// ============================================================================
+// CACHE MANAGEMENT
+// ============================================================================
 
-// Enhanced user creation cache with TTL
-const userCreationCache = new Map<string, { promise: Promise<boolean>; timestamp: number }>()
-const USER_CACHE_TTL = 300000 // 5 minutes
+class VoiceflowCacheManager {
+  private userCreationCache = new Map<string, { promise: Promise<boolean>; timestamp: number }>()
+  private sessionCache = new Map<string, { hasLaunched: boolean; timestamp: number }>()
 
-// Simple customer data extraction from Voiceflow variables
-export function extractBasicCustomerData(variables: Record<string, any>) {
-  return {
-    name: variables.customer_name || variables.clientname || variables.name || null,
-    email: variables.customer_email || variables.clientemail || variables.email || null,
-    phone: variables.customer_phone || variables.clientphone || variables.phone || null,
+  cleanExpiredEntries(): void {
+    const now = Date.now()
+
+    // Clean user creation cache
+    this.userCreationCache.forEach((value, key) => {
+      if (now - value.timestamp > CONFIG.CACHE_TTL.USER_CREATION) {
+        this.userCreationCache.delete(key)
+      }
+    })
+
+    // Clean session cache
+    this.sessionCache.forEach((value, key) => {
+      if (now - value.timestamp > CONFIG.CACHE_TTL.SESSION) {
+        this.sessionCache.delete(key)
+      }
+    })
+  }
+
+  getUserCreation(userId: string): Promise<boolean> | undefined {
+    return this.userCreationCache.get(userId)?.promise
+  }
+
+  setUserCreation(userId: string, promise: Promise<boolean>): void {
+    this.userCreationCache.set(userId, { promise, timestamp: Date.now() })
+  }
+
+  removeUserCreation(userId: string): void {
+    this.userCreationCache.delete(userId)
+  }
+
+  getSession(userId: string): { hasLaunched: boolean; timestamp: number } | undefined {
+    return this.sessionCache.get(userId)
+  }
+
+  setSession(userId: string, hasLaunched: boolean): void {
+    this.sessionCache.set(userId, { hasLaunched, timestamp: Date.now() })
+  }
+
+  removeSession(userId: string): void {
+    this.sessionCache.delete(userId)
+  }
+
+  getCacheStats(): { userCreationSize: number; sessionSize: number } {
+    return {
+      userCreationSize: this.userCreationCache.size,
+      sessionSize: this.sessionCache.size,
+    }
   }
 }
 
-// Enhanced business variables with conversation context
+// ============================================================================
+// LOGGER UTILITY
+// ============================================================================
+
+class Logger {
+  static info(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ℹ️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static success(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ✅ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static warning(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] ⚠️ ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+
+  static error(message: string, error?: any): void {
+    const timestamp = new Date().toISOString()
+    console.error(`[${timestamp}] ❌ ${message}`, error)
+  }
+
+  static debug(message: string, data?: any): void {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] 🔍 ${message}`, data ? JSON.stringify(data, null, 2) : "")
+  }
+}
+
+// ============================================================================
+// GLOBAL INSTANCES
+// ============================================================================
+
+const circuitBreaker = new VoiceflowCircuitBreaker()
+const cacheManager = new VoiceflowCacheManager()
+
+// ============================================================================
+// BUSINESS VARIABLES FETCHER
+// ============================================================================
+
 export async function fetchEnhancedBusinessVariables(
   businessId: string,
   automationId: string,
-  conversationContext?: {
-    pageId: string
-    senderId: string
-    userMessage: string
-    isNewUser: boolean
-    customerType: string
-    messageHistory: Array<{ role: "user" | "assistant"; content: string }>
-  },
+  conversationContext?: ConversationContext,
 ): Promise<Record<string, string>> {
-  console.log("🔍 Fetching enhanced business variables...")
+  Logger.info("🔍 Fetching enhanced business variables...")
 
   try {
-    // Get business profile description
-    const { profileContent, businessContext } = await getBusinessProfileForAutomation(automationId)
+    // Get business profile and traditional business data in parallel
+    const [profileResult, businessResult] = await Promise.allSettled([
+      getBusinessProfileForAutomation(automationId),
+      getBusinessForWebhook(businessId),
+    ])
 
-    // Get traditional business data
-    const businessResponse = await getBusinessForWebhook(businessId)
+    // Handle business profile
+    const { profileContent, businessContext } =
+      profileResult.status === "fulfilled" ? profileResult.value : { profileContent: "", businessContext: {} }
 
-    if (businessResponse.status !== 200 || !businessResponse.data.business) {
-      throw new Error(`Failed to fetch business data. Status: ${businessResponse.status}`)
+    // Handle business data
+    if (
+      businessResult.status === "rejected" ||
+      businessResult.value.status !== 200 ||
+      !businessResult.value.data.business
+    ) {
+      throw new Error(`Failed to fetch business data`)
     }
 
-    const businessData: BusinessData = businessResponse.data.business
+    const businessData: BusinessData = businessResult.value.data.business
 
     const result: Record<string, string> = {
-      // Enhanced business profile integration
+      // Core business information
       business_profile: profileContent,
       business_name: businessContext.businessName || businessData.businessName || "Default Business Name",
       welcome_message: businessContext.welcomeMessage || businessData.welcomeMessage || "Welcome!",
       business_industry: businessContext.industry || businessData.industry || "General",
       business_type: businessData.businessType || "General",
-      business_description:
-        businessContext.businessDescription || businessData.businessDescription || "No description provided",
+      business_description: businessContext.businessDescription || businessData.businessDescription || "",
       instagram_handle: businessData.instagramHandle || "",
       response_language: businessContext.responseLanguage || businessData.responseLanguage || "English",
       business_hours: businessData.businessHours || "Not specified",
@@ -2842,13 +4141,14 @@ export async function fetchEnhancedBusinessVariables(
       promotion_message: businessContext.promotionMessage || businessData.promotionMessage || "",
       target_audience: businessContext.targetAudience || businessData.targetAudience || "",
       website: businessData.website || "",
-      // Add basic data collection variables for Voiceflow
+
+      // Customer data placeholders
       customer_name: "",
       customer_email: "",
       customer_phone: "",
     }
 
-    // Add conversation context if available
+    // Add conversation context
     if (conversationContext) {
       result.customer_type = conversationContext.customerType
       result.is_new_user = conversationContext.isNewUser.toString()
@@ -2859,7 +4159,7 @@ export async function fetchEnhancedBusinessVariables(
         .join(" | ")
       result.conversation_length = conversationContext.messageHistory.length.toString()
 
-      // Add conversation insights
+      // Conversation insights
       const hasQuestions = conversationContext.userMessage.includes("?")
       const hasUrgentWords = /urgent|asap|immediately|emergency|help/i.test(conversationContext.userMessage)
       const hasPurchaseIntent = /buy|purchase|order|price|cost|payment/i.test(conversationContext.userMessage)
@@ -2869,53 +4169,40 @@ export async function fetchEnhancedBusinessVariables(
       result.has_purchase_intent = hasPurchaseIntent.toString()
     }
 
-    // Parse JSON fields safely with enhanced error handling
-    if (businessData.automationGoals) {
-      try {
-        const automationGoals =
-          typeof businessData.automationGoals === "string"
-            ? JSON.parse(businessData.automationGoals)
-            : (businessData.automationGoals as Record<string, any>)
-        result.primary_goal = automationGoals.primaryGoal || ""
-        result.response_time = automationGoals.responseTime?.toString() || ""
-        result.custom_goals = automationGoals.customGoals || ""
-      } catch (e) {
-        console.error("❌ Error parsing automationGoals:", e)
-      }
-    }
+    // Parse JSON fields safely
+    const jsonFields = [
+      { field: businessData.automationGoals, keys: ["primary_goal", "response_time", "custom_goals"] },
+      { field: businessData.customerJourney, keys: ["journey_steps"] },
+      { field: businessData.features, keys: ["enabled_features"] },
+    ]
 
-    if (businessData.customerJourney) {
-      try {
-        const customerJourney =
-          typeof businessData.customerJourney === "string"
-            ? JSON.parse(businessData.customerJourney)
-            : (businessData.customerJourney as Record<string, any>)
-        result.journey_steps = JSON.stringify(customerJourney.journeySteps || [])
-      } catch (e) {
-        console.error("❌ Error parsing customerJourney:", e)
+    jsonFields.forEach(({ field, keys }) => {
+      if (field) {
+        try {
+          const parsed = typeof field === "string" ? JSON.parse(field) : (field as Record<string, any>)
+          keys.forEach((key) => {
+            if (key === "journey_steps") {
+              result[key] = JSON.stringify(parsed.journeySteps || [])
+            } else if (key === "enabled_features") {
+              result[key] =
+                parsed.features
+                  ?.filter((f: any) => f.enabled)
+                  .map((f: any) => f.name)
+                  .join(", ") || ""
+            } else {
+              result[key] = parsed[key.replace("_", "")] || ""
+            }
+          })
+        } catch (e) {
+          Logger.error(`Error parsing ${keys[0]}:`, e)
+        }
       }
-    }
+    })
 
-    if (businessData.features) {
-      try {
-        const features =
-          typeof businessData.features === "string"
-            ? JSON.parse(businessData.features)
-            : (businessData.features as Record<string, any>)
-        result.enabled_features =
-          features.features
-            ?.filter((f: any) => f.enabled)
-            .map((f: any) => f.name)
-            .join(", ") || ""
-      } catch (e) {
-        console.error("❌ Error parsing features:", e)
-      }
-    }
-
+    // Add remaining fields
     if (businessData.businessTypeData) {
       result.business_type_data = JSON.stringify(businessData.businessTypeData)
     }
-
     if (businessData.websiteAnalysis) {
       result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
     }
@@ -2923,138 +4210,175 @@ export async function fetchEnhancedBusinessVariables(
     result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
     result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
     result.automation_additional_notes = businessData.automationAdditionalNotes || ""
-
-    // Add system context
     result.system_timestamp = new Date().toISOString()
-    result.voiceflow_health_score = voiceflowCircuitBreaker.getHealthScore().toFixed(2)
+    result.voiceflow_health_score = circuitBreaker.getHealthScore().toFixed(2)
 
-    console.log("✅ Enhanced business variables prepared")
+    Logger.success("✅ Enhanced business variables prepared")
     return result
   } catch (error) {
-    console.error("❌ Error in fetchEnhancedBusinessVariables:", error)
+    Logger.error("❌ Error in fetchEnhancedBusinessVariables:", error)
     throw error
   }
 }
 
-// Enhanced Voiceflow response with intelligent retry and fallback detection
-export async function getEnhancedVoiceflowResponseE(
-  userInput: string,
-  userId: string,
-  businessVariables: Record<string, string>,
-  options?: {
-    maxRetries?: number
-    timeoutMs?: number
-    enableFallbackDetection?: boolean
-  },
-): Promise<{
-  success: boolean
-  response?: {
-    text: string
-    buttons?: Array<{ name: string; payload: string }>
-    requiresHumanHandoff?: boolean
-    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-    sentiment?: "positive" | "neutral" | "negative"
-    complexity?: "simple" | "medium" | "complex"
-  }
-  variables?: VoiceflowVariables
-  error?: string
-  isEmpty?: boolean
-  healthScore?: number
-  fallbackReason?: string
-}> {
-  const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true } = options || {}
+// ============================================================================
+// VOICEFLOW RESPONSE PROCESSOR
+// ============================================================================
 
-  try {
-    const result = await voiceflowCircuitBreaker.execute(async () => {
-      let lastError: Error | null = null
+export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+  text: string
+  quickReplies?: { title: string; payload: string }[]
+  requiresHumanHandoff?: boolean
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+  sentiment?: "positive" | "neutral" | "negative"
+  complexity?: "simple" | "medium" | "complex"
+} {
+  let result = ""
+  const quickReplies: { title: string; payload: string }[] = []
+  let requiresHumanHandoff = false
+  let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+  let sentiment: "positive" | "neutral" | "negative" = "neutral"
+  let complexity: "simple" | "medium" | "complex" = "medium"
 
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+  for (const trace of traces) {
+    switch (trace.type) {
+      case "speak":
+      case "text":
+        if ("message" in trace.payload) {
+          const message = trace.payload.message
+          result += message + "\n"
 
-          const response = await axios.post<VoiceflowResponse[]>(
-            `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-            {
-              request: { type: "text", payload: userInput },
-              state: { variables: businessVariables },
-            },
-            {
-              headers: {
-                Authorization: API_KEY,
-                versionID: VERSION_ID,
-                accept: "application/json",
-                "content-type": "application/json",
-              },
-              timeout: timeoutMs,
-            },
-          )
-
-          const processedResponse = processEnhancedVoiceflowResponse(response.data)
-          const updatedVariables = await fetchVoiceflowVariables(userId)
-
-          // Enhanced fallback detection
-          if (enableFallbackDetection) {
-            const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
-            if (fallbackCheck.shouldFallback) {
-              console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
-              return {
-                success: false,
-                error: fallbackCheck.reason,
-                isEmpty: fallbackCheck.isEmpty,
-                fallbackReason: fallbackCheck.reason,
-                healthScore: voiceflowCircuitBreaker.getHealthScore(),
-              }
-            }
-          }
-
-          console.log(`✅ Voiceflow API success on attempt ${attempt}`)
-          return {
-            success: true,
-            response: processedResponse,
-            variables: updatedVariables,
-            healthScore: voiceflowCircuitBreaker.getHealthScore(),
-          }
-        } catch (error) {
-          lastError = error as Error
-          console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
-
-          if (attempt < maxRetries) {
-            const baseDelay = Math.pow(2, attempt) * 1000
-            const jitter = Math.random() * 1000
-            const delay = baseDelay + jitter
-
-            console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
-            await new Promise((resolve) => setTimeout(resolve, delay))
+          // Analyze complexity
+          if (message.length > 200 || message.split(".").length > 3) {
+            complexity = "complex"
+          } else if (message.length < 50) {
+            complexity = "simple"
           }
         }
-      }
+        break
 
-      throw lastError || new Error("Failed to get Voiceflow response after all retries")
-    })
+      case "choice":
+        if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+          trace.payload.buttons.forEach((button: VoiceflowButton) => {
+            const title =
+              button.name.length <= CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT
+                ? button.name
+                : button.name.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
 
-    return result
-  } catch (error) {
-    console.error("💥 Voiceflow circuit breaker or final error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      healthScore: voiceflowCircuitBreaker.getHealthScore(),
-      fallbackReason: "Circuit breaker open or API failure",
+            quickReplies.push({
+              title,
+              payload: button.request?.payload || button.name,
+            })
+          })
+        }
+        break
+
+      case "visual":
+        if ("image" in trace.payload) {
+          result += `📷 Image: ${trace.payload.image}\n`
+        }
+        break
+
+      case "card":
+        if (trace.payload) {
+          if ("title" in trace.payload) {
+            result += `*${trace.payload.title}*\n`
+          }
+          if ("description" in trace.payload) {
+            result += `${trace.payload.description}\n`
+          }
+        }
+        break
+
+      case "end":
+        result += "\n[Conversation ended]"
+        break
+
+      case "handoff":
+        requiresHumanHandoff = true
+        priority = "HIGH"
+        if ("reason" in trace.payload) {
+          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+        }
+        break
+
+      case "priority":
+        if ("level" in trace.payload) {
+          priority = trace.payload.level
+        }
+        break
+
+      case "sentiment":
+        if ("value" in trace.payload) {
+          sentiment = trace.payload.value
+        }
+        break
+
+      case "path":
+        // Handle the path trace type that was causing issues
+        if ("path" in trace.payload) {
+          Logger.debug(`Path trace detected: ${trace.payload.path}`)
+          if (trace.payload.path === "reprompt") {
+            result += "Could you please provide more details about what you're looking for?\n"
+          }
+        }
+        break
+
+      case "debug":
+        Logger.debug("Voiceflow debug:", trace.payload)
+        break
+
+      default:
+        Logger.warning(`Unhandled trace type: ${trace.type}`, trace)
+        break
     }
+  }
+
+  // Auto-detect sentiment
+  if (sentiment === "neutral") {
+    const text = result.toLowerCase()
+    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+      sentiment = "negative"
+    } else if (
+      text.includes("great") ||
+      text.includes("excellent") ||
+      text.includes("wonderful") ||
+      text.includes("thank")
+    ) {
+      sentiment = "positive"
+    }
+  }
+
+  // Trim to Instagram limits
+  let finalText = result.trim()
+  if (finalText.length > CONFIG.INSTAGRAM.MESSAGE_LIMIT) {
+    finalText = finalText.substring(0, CONFIG.INSTAGRAM.MESSAGE_LIMIT - 3) + "..."
+  }
+
+  const limitedQuickReplies = quickReplies.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
+
+  return {
+    text: finalText,
+    quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
+    requiresHumanHandoff,
+    priority,
+    sentiment,
+    complexity,
   }
 }
 
-// Enhanced fallback detection
+// ============================================================================
+// FALLBACK DETECTION
+// ============================================================================
+
 function detectFallbackConditions(
   response: any,
   userInput: string,
 ): { shouldFallback: boolean; reason: string; isEmpty: boolean } {
-  // Check for empty response
   if (!response.text || response.text.trim().length === 0) {
     return { shouldFallback: true, reason: "Empty response from Voiceflow", isEmpty: true }
   }
 
-  // Check for generic error responses
   const genericResponses = [
     "i don't understand",
     "sorry, i didn't get that",
@@ -3074,295 +4398,17 @@ function detectFallbackConditions(
     return { shouldFallback: true, reason: `Generic response detected: "${response.text}"`, isEmpty: false }
   }
 
-  // Check for very short responses that might indicate issues
-  if (response.text.length < 10 && !response.buttons?.length) {
+  if (response.text.length < 10 && !response.quickReplies?.length) {
     return { shouldFallback: true, reason: "Response too short without buttons", isEmpty: false }
-  }
-
-  // Check for responses that don't seem to address the user input
-  const userWords = userInput.toLowerCase().split(/\s+/)
-  const responseWords = response.text.toLowerCase().split(/\s+/)
-  const commonWords = userWords.filter((word) => responseWords.includes(word) && word.length > 3)
-
-  if (userInput.length > 20 && commonWords.length === 0 && !response.buttons?.length) {
-    return {
-      shouldFallback: true,
-      reason: "Response doesn't seem to address user input",
-      isEmpty: false,
-    }
   }
 
   return { shouldFallback: false, reason: "", isEmpty: false }
 }
 
-// Enhanced response processing with intelligence
-export function processEnhancedVoiceflowResponseE(traces: VoiceflowTrace[]): {
-  text: string
-  buttons?: { name: string; payload: string }[]
-  requiresHumanHandoff?: boolean
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-  sentiment?: "positive" | "neutral" | "negative"
-  complexity?: "simple" | "medium" | "complex"
-} {
-  let result = ""
-  const buttons: { name: string; payload: string }[] = []
-  let requiresHumanHandoff = false
-  let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
-  let sentiment: "positive" | "neutral" | "negative" = "neutral"
-  let complexity: "simple" | "medium" | "complex" = "medium"
+// ============================================================================
+// MAIN VOICEFLOW HANDLER
+// ============================================================================
 
-  for (const trace of traces) {
-    switch (trace.type) {
-      case "text":
-        if ("message" in trace.payload) {
-          const message = (trace.payload as VoiceflowTextPayload).message
-          result += message + "\n"
-
-          // Analyze message complexity
-          if (message.length > 200 || message.split(".").length > 3) {
-            complexity = "complex"
-          } else if (message.length < 50) {
-            complexity = "simple"
-          }
-        }
-        break
-
-      case "choice":
-        if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
-          trace.payload.buttons.forEach((button: VoiceflowButton) => {
-            buttons.push({
-              name: button.name,
-              payload: button.request?.payload || button.name,
-            })
-          })
-        }
-        break
-
-      case "visual":
-        if ("image" in trace.payload) {
-          result += `[Image: ${trace.payload.image}]\n`
-        }
-        break
-
-      case "speak":
-        if ("message" in trace.payload) {
-          result += (trace.payload as VoiceflowTextPayload).message + "\n"
-        }
-        break
-
-      case "end":
-        result += "\n[Conversation ended]"
-        break
-
-      case "handoff":
-        requiresHumanHandoff = true
-        priority = "HIGH"
-        if ("reason" in trace.payload) {
-          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
-        }
-        break
-
-      case "priority":
-        if ("level" in trace.payload) {
-          priority = trace.payload.level
-        }
-        break
-
-      case "sentiment":
-        if ("value" in trace.payload) {
-          sentiment = trace.payload.value
-        }
-        break
-
-      case "debug":
-        console.log("🔍 Voiceflow debug:", trace.payload)
-        break
-
-      default:
-        console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
-        break
-    }
-  }
-
-  // Auto-detect sentiment if not explicitly set
-  if (sentiment === "neutral") {
-    const text = result.toLowerCase()
-    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
-      sentiment = "negative"
-    } else if (
-      text.includes("great") ||
-      text.includes("excellent") ||
-      text.includes("wonderful") ||
-      text.includes("thank")
-    ) {
-      sentiment = "positive"
-    }
-  }
-
-  return {
-    text: result.trim(),
-    buttons: buttons.length > 0 ? buttons : undefined,
-    requiresHumanHandoff,
-    priority,
-    sentiment,
-    complexity,
-  }
-}
-
-// Enhanced Voiceflow variables fetching
-async function fetchVoiceflowVariablesE(userId: string): Promise<VoiceflowVariables> {
-  const maxRetries = 2
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await axios.get<{ variables: VoiceflowVariables }>(
-        `https://general-runtime.voiceflow.com/state/user/${userId}`,
-        {
-          headers: {
-            Authorization: API_KEY,
-            versionID: VERSION_ID,
-            accept: "application/json",
-          },
-          timeout: 8000,
-        },
-      )
-      return response.data.variables || {}
-    } catch (error) {
-      console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
-
-      if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      }
-    }
-  }
-
-  console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
-  return {}
-}
-
-// Enhanced user creation with cache management
-export async function createVoiceflowUserE(userId: string): Promise<boolean> {
-  // Clean expired cache entries
-  const now = Date.now()
-  userCreationCache.forEach((value, key) => {
-    if (now - value.timestamp > USER_CACHE_TTL) {
-      userCreationCache.delete(key)
-    }
-  })
-
-  if (userCreationCache.has(userId)) {
-    console.log(`👤 User creation already in progress for ${userId}`)
-    return await userCreationCache.get(userId)!.promise
-  }
-
-  const creationPromise = createVoiceflowUserInternal(userId)
-  userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
-
-  try {
-    const result = await creationPromise
-    return result
-  } finally {
-    // Clean up cache after completion
-    setTimeout(() => {
-      userCreationCache.delete(userId)
-    }, 10000) // Keep in cache for 10 seconds after completion
-  }
-}
-
-async function createVoiceflowUserInternal(userId: string): Promise<boolean> {
-  const maxRetries = 3
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await axios.put(
-        "https://api.voiceflow.com/v2/transcripts",
-        {
-          projectID: PROJECT_ID,
-          versionID: VERSION_ID,
-          sessionID: userId,
-        },
-        {
-          headers: {
-            accept: "application/json",
-            "content-type": "application/json",
-            Authorization: API_KEY,
-          },
-          timeout: 12000,
-        },
-      )
-      console.log(`✅ Voiceflow user created successfully: ${userId}`)
-      return response.status === 200 || response.status === 201
-    } catch (error) {
-      console.error(`❌ Error creating Voiceflow user (attempt ${attempt}):`, error)
-
-      if (attempt < maxRetries) {
-        const delay = Math.pow(2, attempt - 1) * 1000
-        await new Promise((resolve) => setTimeout(resolve, delay))
-      }
-    }
-  }
-
-  console.error(`💥 Failed to create Voiceflow user after ${maxRetries} attempts`)
-  return false
-}
-
-// Enhanced user reset
-export async function resetVoiceflowUserE(userId: string): Promise<boolean> {
-  try {
-    const response = await axios.post(
-      `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-      { request: { type: "reset" } },
-      {
-        headers: {
-          Authorization: API_KEY,
-          versionID: VERSION_ID,
-          accept: "application/json",
-          "content-type": "application/json",
-        },
-        timeout: 10000,
-      },
-    )
-    console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
-    return response.status === 200
-  } catch (error) {
-    console.error("❌ Error resetting Voiceflow user:", error)
-    return false
-  }
-}
-
-// Health monitoring
-export function getVoiceflowHealthE(): {
-  healthScore: number
-  circuitBreakerState: string
-  cacheSize: number
-} {
-  return {
-    healthScore: voiceflowCircuitBreaker.getHealthScore(),
-    circuitBreakerState: voiceflowCircuitBreaker.getState(),
-    cacheSize: userCreationCache.size,
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Enhanced Voiceflow response with proper launch handling and Instagram formatting
 export async function getEnhancedVoiceflowResponse(
   userInput: string,
   userId: string,
@@ -3373,82 +4419,67 @@ export async function getEnhancedVoiceflowResponse(
     enableFallbackDetection?: boolean
     isFirstMessage?: boolean
   },
-): Promise<{
-  success: boolean
-  response?: {
-    text: string
-    quickReplies?: Array<{ title: string; payload: string }>
-    requiresHumanHandoff?: boolean
-    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-    sentiment?: "positive" | "neutral" | "negative"
-    complexity?: "simple" | "medium" | "complex"
-  }
-  variables?: VoiceflowVariables
-  error?: string
-  isEmpty?: boolean
-  healthScore?: number
-  fallbackReason?: string
-}> {
-  const { maxRetries = 3, timeoutMs = 15000, enableFallbackDetection = true, isFirstMessage = false } = options || {}
+): Promise<VoiceflowResponse> {
+  const {
+    maxRetries = CONFIG.RETRY.MAX_ATTEMPTS,
+    timeoutMs = CONFIG.TIMEOUTS.INTERACTION,
+    enableFallbackDetection = true,
+    isFirstMessage = false,
+  } = options || {}
 
   try {
-    const result = await voiceflowCircuitBreaker.execute(async () => {
+    const result = await circuitBreaker.execute(async () => {
       let lastError: Error | null = null
+
+      // Clean expired cache entries
+      cacheManager.cleanExpiredEntries()
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          console.log(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+          Logger.info(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
 
-          // Clean expired session cache
-          const now = Date.now()
-          userSessionCache.forEach((value, key) => {
-            if (now - value.timestamp > SESSION_CACHE_TTL) {
-              userSessionCache.delete(key)
-            }
-          })
-
-          // Check if user needs launch request
-          const sessionData = userSessionCache.get(userId)
+          // Check session state
+          const sessionData = cacheManager.getSession(userId)
           const needsLaunch = isFirstMessage || !sessionData?.hasLaunched
 
+          // Prepare request payload
           let requestPayload: any
           if (needsLaunch) {
-            // Send launch request first
-            console.log(`🚀 Sending launch request for user ${userId}`)
+            Logger.info(`🚀 Sending launch request for user ${userId}`)
             requestPayload = {
               action: { type: "launch" },
               config: {
                 tts: false,
                 stripSSML: true,
                 stopAll: true,
-                excludeTypes: ["block", "debug", "flow"]
-              }
+                excludeTypes: ["block", "debug", "flow"],
+              },
             }
           } else {
-            // Send text request
             requestPayload = {
               action: { type: "text", payload: userInput },
               config: {
                 tts: false,
                 stripSSML: true,
                 stopAll: true,
-                excludeTypes: ["block", "debug", "flow"]
-              }
+                excludeTypes: ["block", "debug", "flow"],
+              },
             }
           }
 
-          // Add business variables to state
+          // Add business variables
           if (Object.keys(businessVariables).length > 0) {
             requestPayload.state = { variables: businessVariables }
           }
 
+          // Make API call
           const response = await axios.post<VoiceflowTrace[]>(
             `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
             requestPayload,
             {
               headers: {
-                Authorization: API_KEY,
-                versionID: VERSION_ID,
+                Authorization: CONFIG.API_KEY,
+                versionID: CONFIG.VERSION_ID,
                 accept: "application/json",
                 "content-type": "application/json",
               },
@@ -3456,9 +4487,9 @@ export async function getEnhancedVoiceflowResponse(
             },
           )
 
-          // If this was a launch request and we have user input, send the text request
+          // Handle launch + text sequence
           if (needsLaunch && userInput.trim().length > 0) {
-            console.log(`📝 Following up with text request for user ${userId}`)
+            Logger.info(`📝 Following up with text request for user ${userId}`)
             const textResponse = await axios.post<VoiceflowTrace[]>(
               `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
               {
@@ -3467,62 +4498,61 @@ export async function getEnhancedVoiceflowResponse(
                   tts: false,
                   stripSSML: true,
                   stopAll: true,
-                  excludeTypes: ["block", "debug", "flow"]
-                }
+                  excludeTypes: ["block", "debug", "flow"],
+                },
               },
               {
                 headers: {
-                  Authorization: API_KEY,
-                  versionID: VERSION_ID,
+                  Authorization: CONFIG.API_KEY,
+                  versionID: CONFIG.VERSION_ID,
                   accept: "application/json",
                   "content-type": "application/json",
                 },
                 timeout: timeoutMs,
               },
             )
-            
-            // Use the text response instead
             response.data = textResponse.data
           }
 
-          // Mark user as launched
-          userSessionCache.set(userId, { hasLaunched: true, timestamp: now })
+          // Mark session as launched
+          cacheManager.setSession(userId, true)
 
+          // Process response
           const processedResponse = processEnhancedVoiceflowResponse(response.data)
           const updatedVariables = await fetchVoiceflowVariables(userId)
 
-          // Enhanced fallback detection
+          // Fallback detection
           if (enableFallbackDetection) {
             const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
             if (fallbackCheck.shouldFallback) {
-              console.log(`⚠️ Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
+              Logger.warning(`Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
               return {
                 success: false,
                 error: fallbackCheck.reason,
                 isEmpty: fallbackCheck.isEmpty,
                 fallbackReason: fallbackCheck.reason,
-                healthScore: voiceflowCircuitBreaker.getHealthScore(),
+                healthScore: circuitBreaker.getHealthScore(),
               }
             }
           }
 
-          console.log(`✅ Voiceflow API success on attempt ${attempt}`)
+          Logger.success(`Voiceflow API success on attempt ${attempt}`)
           return {
             success: true,
             response: processedResponse,
             variables: updatedVariables,
-            healthScore: voiceflowCircuitBreaker.getHealthScore(),
+            healthScore: circuitBreaker.getHealthScore(),
           }
         } catch (error) {
           lastError = error as Error
-          console.error(`❌ Voiceflow API attempt ${attempt} failed:`, error)
+          Logger.error(`Voiceflow API attempt ${attempt} failed:`, error)
 
           if (attempt < maxRetries) {
-            const baseDelay = Math.pow(2, attempt) * 1000
-            const jitter = Math.random() * 1000
+            const baseDelay = Math.pow(2, attempt) * CONFIG.RETRY.BASE_DELAY
+            const jitter = Math.random() * CONFIG.RETRY.MAX_JITTER
             const delay = baseDelay + jitter
 
-            console.log(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
+            Logger.info(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
             await new Promise((resolve) => setTimeout(resolve, delay))
           }
         }
@@ -3533,159 +4563,20 @@ export async function getEnhancedVoiceflowResponse(
 
     return result
   } catch (error) {
-    console.error("💥 Voiceflow circuit breaker or final error:", error)
+    Logger.error("💥 Voiceflow circuit breaker or final error:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error),
-      healthScore: voiceflowCircuitBreaker.getHealthScore(),
+      healthScore: circuitBreaker.getHealthScore(),
       fallbackReason: "Circuit breaker open or API failure",
     }
   }
 }
 
-// Enhanced response processing with Instagram DM formatting
-export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
-  text: string
-  quickReplies?: { title: string; payload: string }[]
-  requiresHumanHandoff?: boolean
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-  sentiment?: "positive" | "neutral" | "negative"
-  complexity?: "simple" | "medium" | "complex"
-} {
-  let result = ""
-  const quickReplies: { title: string; payload: string }[] = []
-  let requiresHumanHandoff = false
-  let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
-  let sentiment: "positive" | "neutral" | "negative" = "neutral"
-  let complexity: "simple" | "medium" | "complex" = "medium"
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
 
-  for (const trace of traces) {
-    switch (trace.type) {
-      case "speak":
-        if ("message" in trace.payload) {
-          const message = (trace.payload as VoiceflowTextPayload).message
-          result += message + "\n"
-
-          // Analyze message complexity
-          if (message.length > 200 || message.split(".").length > 3) {
-            complexity = "complex"
-          } else if (message.length < 50) {
-            complexity = "simple"
-          }
-        }
-        break
-
-      case "text":
-        if ("message" in trace.payload) {
-          const message = (trace.payload as VoiceflowTextPayload).message
-          result += message + "\n"
-        }
-        break
-
-      case "choice":
-        if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
-          trace.payload.buttons.forEach((button: VoiceflowButton) => {
-            // Format for Instagram quick replies
-            const title = button.name.length <= INSTAGRAM_QUICK_REPLY_TITLE_LIMIT 
-              ? button.name 
-              : button.name.substring(0, INSTAGRAM_QUICK_REPLY_TITLE_LIMIT - 3) + "..."
-            
-            quickReplies.push({
-              title: title,
-              payload: button.request?.payload || button.name,
-            })
-          })
-        }
-        break
-
-      case "visual":
-        if ("image" in trace.payload) {
-          // Instagram supports images, but we'll note it in text for now
-          result += `📷 Image: ${trace.payload.image}\n`
-        }
-        break
-
-      case "end":
-        result += "\n[Conversation ended]"
-        break
-
-      case "handoff":
-        requiresHumanHandoff = true
-        priority = "HIGH"
-        if ("reason" in trace.payload) {
-          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
-        }
-        break
-
-      case "priority":
-        if ("level" in trace.payload) {
-          priority = trace.payload.level
-        }
-        break
-
-      case "sentiment":
-        if ("value" in trace.payload) {
-          sentiment = trace.payload.value
-        }
-        break
-
-      case "debug":
-        console.log("🔍 Voiceflow debug:", trace.payload)
-        break
-
-      // Handle card traces (common in Voiceflow)
-      case "card":
-        if (trace.payload) {
-          if ("title" in trace.payload) {
-            result += `*${trace.payload.title}*\n`
-          }
-          if ("description" in trace.payload) {
-            result += `${trace.payload.description}\n`
-          }
-        }
-        break
-
-      default:
-        console.warn(`⚠️ Unhandled trace type: ${trace.type}`, trace)
-        break
-    }
-  }
-
-  // Auto-detect sentiment if not explicitly set
-  if (sentiment === "neutral") {
-    const text = result.toLowerCase()
-    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
-      sentiment = "negative"
-    } else if (
-      text.includes("great") ||
-      text.includes("excellent") ||
-      text.includes("wonderful") ||
-      text.includes("thank")
-    ) {
-      sentiment = "positive"
-    }
-  }
-
-  // Trim response to Instagram limits
-  let finalText = result.trim()
-  if (finalText.length > INSTAGRAM_MESSAGE_LIMIT) {
-    finalText = finalText.substring(0, INSTAGRAM_MESSAGE_LIMIT - 3) + "..."
-  }
-
-  // Limit quick replies for Instagram
-  const limitedQuickReplies = quickReplies.slice(0, INSTAGRAM_QUICK_REPLY_LIMIT)
-
-  return {
-    text: finalText,
-    quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
-    requiresHumanHandoff,
-    priority,
-    sentiment,
-    complexity,
-  }
-}
-
-// Updated Voiceflow variables fetching with proper error handling
 async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
   const maxRetries = 2
 
@@ -3695,87 +4586,88 @@ async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariabl
         `https://general-runtime.voiceflow.com/state/user/${userId}`,
         {
           headers: {
-            Authorization: API_KEY,
-            versionID: VERSION_ID,
+            Authorization: CONFIG.API_KEY,
+            versionID: CONFIG.VERSION_ID,
             accept: "application/json",
           },
-          timeout: 8000,
+          timeout: CONFIG.TIMEOUTS.VARIABLES,
         },
       )
       return response.data.variables || {}
     } catch (error) {
-      console.error(`❌ Error fetching Voiceflow variables (attempt ${attempt}):`, error)
-
+      Logger.error(`Error fetching Voiceflow variables (attempt ${attempt}):`, error)
       if (attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, 2000))
       }
     }
   }
 
-  console.warn("⚠️ Failed to fetch Voiceflow variables, returning empty object")
+  Logger.warning("Failed to fetch Voiceflow variables, returning empty object")
   return {}
 }
 
-// Simplified user creation - Voiceflow auto-creates users on first interaction
 export async function createVoiceflowUser(userId: string): Promise<boolean> {
-  // Clean expired cache entries
-  const now = Date.now()
-  userCreationCache.forEach((value, key) => {
-    if (now - value.timestamp > USER_CACHE_TTL) {
-      userCreationCache.delete(key)
-    }
-  })
+  cacheManager.cleanExpiredEntries()
 
-  if (userCreationCache.has(userId)) {
-    console.log(`👤 User creation already in progress for ${userId}`)
-    return await userCreationCache.get(userId)!.promise
+  const existingPromise = cacheManager.getUserCreation(userId)
+  if (existingPromise) {
+    Logger.info(`User creation already in progress for ${userId}`)
+    return await existingPromise
   }
 
-  // Since Voiceflow auto-creates users, we just need to mark them as created
-  const creationPromise = Promise.resolve(true)
-  userCreationCache.set(userId, { promise: creationPromise, timestamp: now })
+  const creationPromise = Promise.resolve(true) // Voiceflow auto-creates users
+  cacheManager.setUserCreation(userId, creationPromise)
 
-  console.log(`✅ Voiceflow user will be auto-created on first interaction: ${userId}`)
+  Logger.success(`✅ Voiceflow user will be auto-created on first interaction: ${userId}`)
+
+  setTimeout(() => {
+    cacheManager.removeUserCreation(userId)
+  }, 10000)
+
   return true
 }
 
-// Enhanced user reset with proper request format
 export async function resetVoiceflowUser(userId: string): Promise<boolean> {
   try {
     const response = await axios.post(
       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
-      { 
+      {
         action: { type: "reset" },
         config: {
           tts: false,
           stripSSML: true,
           stopAll: true,
-          excludeTypes: ["block", "debug", "flow"]
-        }
+          excludeTypes: ["block", "debug", "flow"],
+        },
       },
       {
         headers: {
-          Authorization: API_KEY,
-          versionID: VERSION_ID,
+          Authorization: CONFIG.API_KEY,
+          versionID: CONFIG.VERSION_ID,
           accept: "application/json",
           "content-type": "application/json",
         },
-        timeout: 10000,
+        timeout: CONFIG.TIMEOUTS.USER_CREATION,
       },
     )
-    
-    // Clear session cache for this user
-    userSessionCache.delete(userId)
-    
-    console.log(`🔄 Voiceflow user reset successfully: ${userId}`)
+
+    cacheManager.removeSession(userId)
+    Logger.success(`🔄 Voiceflow user reset successfully: ${userId}`)
     return response.status === 200
   } catch (error) {
-    console.error("❌ Error resetting Voiceflow user:", error)
+    Logger.error("Error resetting Voiceflow user:", error)
     return false
   }
 }
 
-// Helper function to format response for Instagram Graph API
+export function extractBasicCustomerData(variables: Record<string, any>) {
+  return {
+    name: variables.customer_name || variables.clientname || variables.name || null,
+    email: variables.customer_email || variables.clientemail || variables.email || null,
+    phone: variables.customer_phone || variables.clientphone || variables.phone || null,
+  }
+}
+
 export function formatForInstagramDM(response: {
   text: string
   quickReplies?: { title: string; payload: string }[]
@@ -3787,32 +4679,27 @@ export function formatForInstagramDM(response: {
     payload: string
   }>
 } {
-  const result: any = {
-    text: response.text
-  }
+  const result: any = { text: response.text }
 
   if (response.quickReplies && response.quickReplies.length > 0) {
-    result.quick_replies = response.quickReplies.map(reply => ({
+    result.quick_replies = response.quickReplies.map((reply) => ({
       content_type: "text",
       title: reply.title,
-      payload: reply.payload
+      payload: reply.payload,
     }))
   }
 
   return result
 }
 
-// Enhanced health monitoring with session cache info
 export function getVoiceflowHealth(): {
   healthScore: number
   circuitBreakerState: string
-  cacheSize: number
-  sessionCacheSize: number
+  cacheStats: { userCreationSize: number; sessionSize: number }
 } {
   return {
-    healthScore: voiceflowCircuitBreaker.getHealthScore(),
-    circuitBreakerState: voiceflowCircuitBreaker.getState(),
-    cacheSize: userCreationCache.size,
-    sessionCacheSize: userSessionCache.size,
+    healthScore: circuitBreaker.getHealthScore(),
+    circuitBreakerState: circuitBreaker.getState(),
+    cacheStats: cacheManager.getCacheStats(),
   }
 }
