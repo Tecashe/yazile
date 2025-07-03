@@ -4263,7 +4263,7 @@ function copyToClipboard(text: string, label: string) {
 
 // Enhanced Lead Details Modal Component
 function LeadDetailsModal({ lead, isOpen, onClose }: { lead: any; isOpen: boolean; onClose: () => void }) {
-  if (!lead) return null
+ 
 
   const lastAnalysis = lead.metadata?.lastAnalysis
   const marketingCompleteness = lead.metadata?.marketingCompleteness || 0
@@ -4275,6 +4275,7 @@ function LeadDetailsModal({ lead, isOpen, onClose }: { lead: any; isOpen: boolea
     "email" | "call" | "note" | "status" | "campaign" | "followup" | null
   >(null)
 
+   if (!lead) return null
   // Update the action handlers:
   const handleViewInCRM = (lead: any) => {
     if (lead.crmId) {
@@ -4802,6 +4803,8 @@ function PremiumAnalyticsCards({ analytics }: { analytics: any }) {
 
 // UNIFIED CRM Integration Component - Professional Implementation
 function UnifiedCRMIntegration({ userId, analytics }: { userId: string; analytics: any }) {
+
+  
   const [currentConfig, setCurrentConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isConnecting, setIsConnecting] = useState(false)
