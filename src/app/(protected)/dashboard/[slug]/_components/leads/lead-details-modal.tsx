@@ -501,7 +501,7 @@ export function LeadDetailsModal({ lead, isOpen, onClose, onEdit, onSync }: Lead
                   <CardContent className="text-center py-12">
                     <Brain className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
                     <h3 className="text-lg font-semibold mb-2">No AI Analysis Available</h3>
-                    <p className="text-muted-foreground mb-4">This lead hasn't been analyzed by our AI system yet.</p>
+                    <p className="text-muted-foreground mb-4">This lead hasn&apos;t been analyzed by our AI system yet.</p>
                     <Button>
                       <Brain className="h-4 w-4 mr-2" />
                       Run AI Analysis
