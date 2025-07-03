@@ -638,7 +638,7 @@ import type {
 } from "@/types/n8n"
 
 // N8n API configuration
-const N8N_API_URL = process.env.N8N_API_URL || "http://localhost:5678/api/v1"
+const N8N_API_URL = process.env.N8N_API_URL || "http://yazzil.com/api/v1"
 const N8N_API_KEY = process.env.N8N_API_KEY
 
 if (!N8N_API_KEY) {
