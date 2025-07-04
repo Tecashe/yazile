@@ -8661,24 +8661,6 @@ export function PremiumLeadsDashboard({
             Integrations
           </TabsTrigger>
         </TabsList>
-
-        {/* <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-            <div className="col-span-4">
-              <EnhancedLeadsTable
-                leads={recentLeads}
-                onExport={handleExport}
-                onBulkAction={handleBulkAction}
-                selectedLeads={selectedLeads}
-                onLeadSelection={setSelectedLeads}
-              />
-            </div>
-            <div className="col-span-3 space-y-6">
-              <TopRevenueLeadsCard leads={topLeads} />
-              <LeadTierDistribution analytics={analytics} />
-            </div>
-          </div>
-        </TabsContent> */}
         <TabsContent value="overview" className="space-y-8">
             {/* Hero Stats Section */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
