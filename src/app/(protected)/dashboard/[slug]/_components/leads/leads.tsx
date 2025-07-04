@@ -8681,33 +8681,14 @@ export function PremiumLeadsDashboard({
         </TabsContent> */}
         <TabsContent value="overview" className="space-y-8">
             {/* Hero Stats Section */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
               <div className="lg:col-span-2">
                 <TopRevenueLeadsCard leads={topLeads} />
               </div>
               <div className="lg:col-span-1">
                 <LeadTierDistribution analytics={analytics} />
               </div>
-              <div className="hidden xl:block">
-                {/* Optional: Add another quick stat card here */}
-                <div className="h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Quick Actions</h3>
-                  <div className="space-y-3">
-                    <button className="w-full text-left px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-md transition-colors">
-                      Import Leads
-                    </button>
-                    <button className="w-full text-left px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-md transition-colors">
-                      Export Report
-                    </button>
-                    <button className="w-full text-left px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-md transition-colors">
-                      Bulk Update
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
-
-            {/* Full-Width Enhanced Leads Table */}
             <div className="w-full">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -8735,25 +8716,6 @@ export function PremiumLeadsDashboard({
                   selectedLeads={selectedLeads}
                   onLeadSelection={setSelectedLeads}
                 />
-              </div>
-            </div>
-
-            {/* Optional: Bottom insights row */}
-            <div className="grid gap-6 md:grid-cols-3">
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Conversion Trend</h3>
-                <p className="text-2xl font-bold text-green-600">+12.5%</p>
-                <p className="text-sm text-gray-600">vs last month</p>
-              </div>
-              <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6 border border-purple-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Avg. Deal Size</h3>
-                <p className="text-2xl font-bold text-purple-600">$4,250</p>
-                <p className="text-sm text-gray-600">+8.2% from last month</p>
-              </div>
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 border border-orange-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Response Rate</h3>
-                <p className="text-2xl font-bold text-orange-600">68%</p>
-                <p className="text-sm text-gray-600">within 24 hours</p>
               </div>
             </div>
           </TabsContent>
