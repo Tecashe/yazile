@@ -2751,6 +2751,8 @@ model SentimentAnalysis {
 
 
   automation     Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  alerts         SentimentAlert[]
+
 
   @@index([automationId])
   @@index([analyzedAt])
@@ -2903,6 +2905,49 @@ model SentResponse {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+model SentimentAlert {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId      String   
+  senderId          String
+  alertType         String   // e.g., "high_risk_customer", "churn_warning", etc.
+  sentiment         String   // "positive", "negative", "neutral"
+  confidence        Float
+  riskLevel         String   // "low", "medium", "high"
+  urgencyLevel      String   // "low", "medium", "high"
+  satisfactionLevel String   // "very_dissatisfied", "dissatisfied", "neutral", "satisfied", "very_satisfied"
+  insights          String?  // JSON string containing detailed insights
+  triggeredAt       DateTime @default(now())
+  resolved          Boolean  @default(false)
+  resolvedAt        DateTime?
+  resolvedBy        String?  // User ID who resolved the alert
+  notes             String?  // Resolution notes
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  sentimentAnalysis   SentimentAnalysis? @relation(fields: [sentimentAnalysisId], references: [id])
+  sentimentAnalysisId String?  @db.Uuid
+
+  @@index([automationId])
+  @@index([senderId])
+  @@index([riskLevel])
+  @@index([resolved])
+  @@index([triggeredAt])
+  @@map("SentimentAlert")
+}
 
 
 
