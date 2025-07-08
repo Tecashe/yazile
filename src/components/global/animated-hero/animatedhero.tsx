@@ -46,7 +46,7 @@ export const AnimatedHero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Chatal revolutionizes how you connect with your audience on Instagram.
+          Yazzil revolutionizes how you connect with your audience on Instagram.
           Automate responses and boost engagement effortlessly.
         </motion.p>
         <motion.div

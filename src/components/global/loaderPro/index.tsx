@@ -389,7 +389,7 @@ export default function ChatalMindBlowingLoader({ state, className, color = "blu
               animate={{ y: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 10 }}
             >
-              Chatal
+              Yazzil
             </motion.h2>
             <motion.p
               key={message}

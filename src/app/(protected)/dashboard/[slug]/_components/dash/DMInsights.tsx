@@ -13,16 +13,26 @@ interface DMInsightsProps {
 
 const DMInsights: React.FC<DMInsightsProps> = ({ data }) => {
   const insights = useMemo(() => {
-    const totalDMs = data.reduce((sum, day) => sum + day.dms, 0) / 2
-    const avgDMs = totalDMs / data.length
-    const maxDMs = Math.max(...data.map((d) => d.dms))
-    const minDMs = Math.min(...data.map((d) => d.dms))
+  const totalDMs = Math.round(data.reduce((sum, day) => sum + day.dms, 0) / 2)
+  const avgDMs = Math.round(totalDMs / data.length)
+  const maxDMs = Math.max(...data.map((d) => d.dms))
+  const minDMs = Math.min(...data.map((d) => d.dms))
 
-    const lastWeekData = data.slice(-7)
-    const lastWeekDMs = lastWeekData.reduce((sum, day) => sum + day.dms, 0)
-    const lastWeekAvgDMs = lastWeekDMs / 7
+  const lastWeekData = data.slice(-7)
+  const lastWeekDMs = lastWeekData.reduce((sum, day) => sum + day.dms, 0)
+  const lastWeekAvgDMs = Math.round(lastWeekDMs / 7)
 
-    const weeklyTrend = ((lastWeekAvgDMs - avgDMs) / avgDMs) * 100
+  const weeklyTrend = Math.round(((lastWeekAvgDMs - avgDMs) / avgDMs) * 100)
+    // const totalDMs = data.reduce((sum, day) => sum + day.dms, 0) / 2
+    // const avgDMs = totalDMs / data.length
+    // const maxDMs = Math.max(...data.map((d) => d.dms))
+    // const minDMs = Math.min(...data.map((d) => d.dms))
+
+    // const lastWeekData = data.slice(-7)
+    // const lastWeekDMs = lastWeekData.reduce((sum, day) => sum + day.dms, 0)
+    // const lastWeekAvgDMs = lastWeekDMs / 7
+
+    // const weeklyTrend = ((lastWeekAvgDMs - avgDMs) / avgDMs) * 100
 
     return [
       {

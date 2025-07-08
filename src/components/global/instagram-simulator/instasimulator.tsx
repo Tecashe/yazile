@@ -8,7 +8,7 @@ import Image from 'next/image'
 const comments = [
   "Love this! 😍",
   "Great content! 👏",
-  "Can't wait to try Chatal!",
+  "Can't wait to try Yazzil!",
   "This is amazing!",
   "How do I sign up?",
   "Awesome features!",
@@ -34,7 +34,7 @@ export const InstagramSimulator = () => {
         <div className="flex items-center">
           <Image
             src="/fancy-profile-pic.svg"
-            alt="Chatal"
+            alt="Yazzil"
             width={40}
             height={40}
             className="rounded-full"
@@ -44,7 +44,7 @@ export const InstagramSimulator = () => {
       </div>
       <Image
         src="/fancy-post-image.svg"
-        alt="Chatal Demo"
+        alt="Yazzil Demo"
         width={400}
         height={400}
         className="w-full h-auto"
