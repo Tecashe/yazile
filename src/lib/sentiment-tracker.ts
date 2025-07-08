@@ -71,7 +71,7 @@ async function triggerSentimentAnalysis(
   messages: string[],
 ): Promise<void> {
   try {
-    // Call n8n webhook for sentiment analysis
+    // Call n8n webhook for sentiment analysi
     const n8nWebhookUrl = process.env.N8N_SENTIMENT_WEBHOOK_URL
     if (!n8nWebhookUrl) {
       console.error("N8N_SENTIMENT_WEBHOOK_URL not configured")
