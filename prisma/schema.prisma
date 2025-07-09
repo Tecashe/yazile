@@ -91,6 +91,11 @@ model User {
   revenueMetrics     RevenueMetrics[]
   revenueOpportunities RevenueOpportunity[]
 
+
+  webhookNotifications    Notification[]
+  alerts           Alert[]
+
+
   
 }
 
@@ -404,13 +409,28 @@ enum LISTENERS {
 
 model Notification {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  type      String   // email_sent, high_value_lead, lead_qualified, crm_sync, etc.
   title     String
-  message   String
-  type      String   // "user", "subscription", "automation", "system", etc.
+  message   String   @db.Text
+  priority  String   @default("medium") // low, medium, high, urgent
+  data      Json?    // Additional notification data
+  leadId    String?  @db.Uuid
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+ 
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+ 
+  @@index([userId])
+  @@index([type])
+  @@index([priority])
+  @@index([read])
+  @@index([createdAt])
 }
+
 
 
 model AuditLog {
@@ -1681,6 +1701,9 @@ model Lead {
   revenueOpportunities RevenueOpportunity[]
   scheduledActions     ScheduledAction[]
   qualificationData LeadQualificationData?
+
+  notifications    Notification[]
+  alerts           Alert[]
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
@@ -1838,6 +1861,9 @@ model CrmIntegration {
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   mappings          CrmFieldMapping[]
+  accessToken      String?  // For OAuth integrations
+  refreshToken     String?  // For OAuth token refresh
+  tokenExpiresAt   DateTime? // Token expiration
   metadata          Json?
 
   @@index([userId])
@@ -2849,6 +2875,7 @@ model ScheduledAction {
   status       String    @default("PENDING") // PENDING, EXECUTED, CANCELLED
   executedAt   DateTime?
   result       String?   // Result of the action execution
+  metadata  Json? 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -2950,4 +2977,32 @@ model SentimentAlert {
 }
 
 
+
+
+
+model Alert {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  type      String   // PLATINUM_LEAD, HIGH_VALUE_OPPORTUNITY, etc.
+  title     String
+  message   String   @db.Text
+  priority  String   // LOW, MEDIUM, HIGH, URGENT
+  leadId    String?  @db.Uuid
+  metadata  Json?    // Additional alert data
+  resolved  Boolean  @default(false)
+  resolvedAt DateTime?
+  resolvedBy String? @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+ 
+  @@index([userId])
+  @@index([type])
+  @@index([priority])
+  @@index([resolved])
+  @@index([createdAt])
+}
 
