@@ -139,11 +139,11 @@ export async function POST(request: NextRequest) {
 }
 
 // CRM sync functions (simplified versions)
-async function syncToHubSpot(crmData: any, crmIntegration: any) {
+async function syncToHubSpotE(crmData: any, crmIntegration: any) {
   const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${crmIntegration.accessToken}`,
+      Authorization: `Bearer ${crmIntegration.accessToke}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -214,4 +214,226 @@ async function syncToPipedrive(crmData: any, crmIntegration: any) {
 
   const person = await response.json()
   return { crmId: person.data.id, provider: "PIPEDRIVE" }
+}
+
+
+
+
+async function syncToHubSpotEE(crmData: any, crmIntegration: any) {
+  // Validate required data
+  if (!crmIntegration.accessToken) {
+    throw new Error("HubSpot access token is missing")
+  }
+
+  // Prepare properties with validation
+  const properties: any = {
+    lifecyclestage: "lead",
+  }
+
+  // Only add properties if they exist and are valid
+  if (crmData.name) {
+    const nameParts = crmData.name.split(" ")
+    properties.firstname = nameParts[0] || ""
+    properties.lastname = nameParts.slice(1).join(" ") || ""
+  }
+
+  if (crmData.email) {
+    properties.email = crmData.email
+  }
+
+  if (crmData.phone) {
+    properties.phone = crmData.phone
+  }
+
+  if (crmData.status) {
+    properties.lead_status = crmData.status
+  }
+
+  if (crmData.leadTier) {
+    properties.hs_lead_status = crmData.leadTier
+  }
+
+  if (crmData.score) {
+    properties.lead_score = crmData.score.toString()
+  }
+
+  if (crmData.estimatedValue) {
+    properties.estimated_value = crmData.estimatedValue.toString()
+  }
+
+  console.log("📤 Sending to HubSpot:", { properties })
+
+  const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${crmIntegration.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      properties,
+    }),
+  })
+
+  // Enhanced error handling
+  if (!response.ok) {
+    let errorMessage = `HubSpot sync failed: ${response.status} ${response.statusText}`
+    
+    try {
+      const errorBody = await response.json()
+      console.error("🔴 HubSpot error details:", errorBody)
+      
+      if (errorBody.message) {
+        errorMessage = `HubSpot sync failed: ${errorBody.message}`
+      }
+      
+      // Handle specific HubSpot error cases
+      if (errorBody.category === "VALIDATION_ERROR") {
+        errorMessage = `HubSpot validation error: ${errorBody.message}`
+      }
+      
+      if (response.status === 401) {
+        errorMessage = "HubSpot authentication failed. Please check your access token."
+      }
+      
+    } catch (parseError) {
+      console.error("🔴 Could not parse HubSpot error response:", parseError)
+    }
+    
+    throw new Error(errorMessage)
+  }
+
+  const contact = await response.json()
+  console.log("✅ HubSpot contact created:", contact.id)
+  
+  return { crmId: contact.id, provider: "HUBSPOT" }
+}
+
+
+
+
+async function syncToHubSpot(crmData: any, crmIntegration: any) {
+  let accessToken = crmIntegration.accessToken;
+  
+  // If no access token but have apiKey/apiSecret, this is OAuth flow
+  if (!accessToken && crmIntegration.apiKey && crmIntegration.apiSecret) {
+    // For OAuth, you need to exchange refresh token for access token
+    // This requires a refresh token stored in your database
+    if (!crmIntegration.refreshToken) {
+      throw new Error("HubSpot OAuth refresh token is missing. Please re-authenticate.");
+    }
+    
+    try {
+      const tokenResponse = await fetch("https://api.hubapi.com/oauth/v1/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          client_id: crmIntegration.apiKey,
+          client_secret: crmIntegration.apiSecret,
+          refresh_token: crmIntegration.refreshToken,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const errorBody = await tokenResponse.json();
+        throw new Error(`OAuth token refresh failed: ${errorBody.message}`);
+      }
+
+      const tokenData = await tokenResponse.json();
+      accessToken = tokenData.access_token;
+      
+      // Update the access token in database for future use
+      await client.crmIntegration.update({
+        where: { id: crmIntegration.id },
+        data: { 
+          accessToken: accessToken,
+          refreshToken: tokenData.refresh_token, // Update refresh token if provided
+        },
+      });
+      
+    } catch (error) {
+      throw new Error(`Failed to refresh HubSpot token:`);
+    }
+  }
+
+  if (!accessToken) {
+    throw new Error("HubSpot access token is missing. Please check your integration setup.");
+  }
+
+  // Rest of your sync logic remains the same...
+  const properties: any = {
+    lifecyclestage: "lead",
+  };
+
+  if (crmData.name) {
+    const nameParts = crmData.name.split(" ");
+    properties.firstname = nameParts[0] || "";
+    properties.lastname = nameParts.slice(1).join(" ") || "";
+  }
+
+  if (crmData.email) {
+    properties.email = crmData.email;
+  }
+
+  if (crmData.phone) {
+    properties.phone = crmData.phone;
+  }
+
+  if (crmData.status) {
+    properties.lead_status = crmData.status;
+  }
+
+  if (crmData.leadTier) {
+    properties.hs_lead_status = crmData.leadTier;
+  }
+
+  if (crmData.score) {
+    properties.lead_score = crmData.score.toString();
+  }
+
+  if (crmData.estimatedValue) {
+    properties.estimated_value = crmData.estimatedValue.toString();
+  }
+
+  console.log("📤 Sending to HubSpot:", { properties });
+
+  const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      properties,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HubSpot sync failed: ${response.status} ${response.statusText}`;
+    
+    try {
+      const errorBody = await response.json();
+      console.error("🔴 HubSpot error details:", errorBody);
+      
+      if (errorBody.message) {
+        errorMessage = `HubSpot sync failed: ${errorBody.message}`;
+      }
+      
+      if (response.status === 401) {
+        errorMessage = "HubSpot authentication failed. Please re-authenticate your HubSpot integration.";
+      }
+      
+    } catch (parseError) {
+      console.error("🔴 Could not parse HubSpot error response:", parseError);
+    }
+    
+    throw new Error(errorMessage);
+  }
+
+  const contact = await response.json();
+  console.log("✅ HubSpot contact created:", contact.id);
+  
+  return { crmId: contact.id, provider: "HUBSPOT" };
 }
