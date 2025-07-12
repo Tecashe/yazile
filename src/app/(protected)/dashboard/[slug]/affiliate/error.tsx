@@ -29,7 +29,7 @@ export default function Error({ error, reset }: ErrorProps) {
               Something went wrong
             </h1>
             <p className="text-muted-foreground text-sm">
-              We're having trouble loading this page. Please try refreshing.
+              We&apos;re having trouble loading this page. Please try refreshing.
             </p>
           </div>
 
