@@ -921,7 +921,7 @@ async function syncToHubSpotT(crmData: any, crmIntegration: any) {
 
 
 
-async function syncToHubSpot(crmData: any, crmIntegration: any) {
+async function syncToHubSpotTT(crmData: any, crmIntegration: any) {
   // Handle both OAuth and direct token storage
   let accessToken = crmIntegration.accessToken || crmIntegration.apiKey;
   let refreshToken = crmIntegration.refreshToken || crmIntegration.apiSecret;
@@ -1061,6 +1061,206 @@ async function syncToHubSpot(crmData: any, crmIntegration: any) {
   }
 
   const contact = await response.json();
+  console.log("✅ HubSpot contact created:", contact.id);
+  
+  return { crmId: contact.id, provider: "HUBSPOT" };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function syncToHubSpot(crmData: any, crmIntegration: any) {
+  let accessToken = crmIntegration.accessToken || crmIntegration.apiKey;
+  let refreshToken = crmIntegration.refreshToken || crmIntegration.apiSecret;
+  
+  // Function to refresh the access token
+  const refreshAccessToken = async () => {
+    if (!refreshToken) {
+      throw new Error("HubSpot refresh token is missing. Please re-authenticate your HubSpot integration.");
+    }
+
+    if (!process.env.HUBSPOT_CLIENT_ID || !process.env.HUBSPOT_CLIENT_SECRET) {
+      throw new Error("HubSpot OAuth credentials are not configured. Please check your environment variables.");
+    }
+
+    try {
+      const tokenResponse = await fetch("https://api.hubapi.com/oauth/v1/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          client_id: process.env.HUBSPOT_CLIENT_ID,
+          client_secret: process.env.HUBSPOT_CLIENT_SECRET,
+          refresh_token: refreshToken,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const errorBody = await tokenResponse.json();
+        throw new Error(`OAuth token refresh failed: ${errorBody.message || 'Unknown error'}`);
+      }
+
+      const tokenData = await tokenResponse.json();
+      accessToken = tokenData.access_token;
+      
+      // Update the database with new tokens
+      await client.crmIntegration.update({
+        where: { id: crmIntegration.id },
+        data: { 
+          apiKey: accessToken,
+          apiSecret: tokenData.refresh_token || refreshToken,
+          accessToken: accessToken,
+          refreshToken: tokenData.refresh_token || refreshToken,
+          // Store token expiry for future proactive refresh
+          tokenExpiresAt: new Date(Date.now() + (tokenData.expires_in * 1000)),
+        },
+      });
+      
+      console.log("🔄 HubSpot access token refreshed successfully");
+      return accessToken;
+      
+    } catch (error) {
+      throw new Error(`Failed to refresh HubSpot token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Function to make the API call with retry logic
+  const makeHubSpotRequest = async (token: string, attempt: number = 1): Promise<any> => {
+    const properties: any = {
+      lifecyclestage: "lead",
+    };
+
+    if (crmData.name) {
+      const nameParts = crmData.name.split(" ");
+      properties.firstname = nameParts[0] || "";
+      properties.lastname = nameParts.slice(1).join(" ") || "";
+    }
+
+    if (crmData.email) {
+      properties.email = crmData.email;
+    }
+
+    if (crmData.phone) {
+      properties.phone = crmData.phone;
+    }
+
+    if (crmData.leadTier) {
+      const leadTierToHubSpotStatus: { [key: string]: string } = {
+        'PLATINUM': 'OPEN_DEAL',
+        'GOLD': 'IN_PROGRESS', 
+        'SILVER': 'OPEN',
+        'BRONZE': 'NEW',
+        'HOT': 'OPEN_DEAL',
+        'QUALIFIED': 'IN_PROGRESS',
+        'QUALIFYING': 'OPEN',
+        'NEW': 'NEW',
+        'CONVERTED': 'CONNECTED',
+        'LOST': 'UNQUALIFIED'
+      };
+      
+      properties.hs_lead_status = leadTierToHubSpotStatus[crmData.leadTier as string] || 'NEW';
+    }
+
+    console.log(`📤 Sending to HubSpot (attempt ${attempt}):`, { properties });
+
+    const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        properties,
+      }),
+    });
+
+    // If we get a 401 (unauthorized) and this is our first attempt, try refreshing the token
+    if (response.status === 401 && attempt === 1) {
+      console.log("🔄 Access token expired, attempting to refresh...");
+      const newToken = await refreshAccessToken();
+      return makeHubSpotRequest(newToken, 2); // Retry with new token
+    }
+
+    if (!response.ok) {
+      let errorMessage = `HubSpot sync failed: ${response.status} ${response.statusText}`;
+      
+      try {
+        const errorBody = await response.json();
+        console.error("🔴 HubSpot error details:", errorBody);
+        
+        if (errorBody.message) {
+          errorMessage = `HubSpot sync failed: ${errorBody.message}`;
+        }
+        
+        if (response.status === 401) {
+          errorMessage = "HubSpot authentication failed. Please re-authenticate your HubSpot integration.";
+        }
+        
+      } catch (parseError) {
+        console.error("🔴 Could not parse HubSpot error response:", parseError);
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  };
+
+  // Check if we need to refresh the token proactively
+  if (crmIntegration.tokenExpiresAt && new Date() > new Date(crmIntegration.tokenExpiresAt)) {
+    console.log("🔄 Access token expired, refreshing proactively...");
+    accessToken = await refreshAccessToken();
+  }
+
+  // If we still don't have an access token, try refreshing
+  if (!accessToken && refreshToken) {
+    accessToken = await refreshAccessToken();
+  }
+
+  if (!accessToken) {
+    throw new Error("HubSpot access token is missing. Please re-authenticate your HubSpot integration.");
+  }
+
+  // Make the API request with retry logic
+  const contact = await makeHubSpotRequest(accessToken);
   console.log("✅ HubSpot contact created:", contact.id);
   
   return { crmId: contact.id, provider: "HUBSPOT" };
