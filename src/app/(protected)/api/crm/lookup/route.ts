@@ -4,10 +4,10 @@ import { client } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   try {
     // Verify authorization
-    const authHeader = request.headers.get("authorization")
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    // const authHeader = request.headers.get("authorization")
+    // if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // }
 
     // Extract query parameters
     const searchParams = request.nextUrl.searchParams
