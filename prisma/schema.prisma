@@ -91,6 +91,8 @@ model User {
   revenueMetrics     RevenueMetrics[]
   revenueOpportunities RevenueOpportunity[]
 
+  businessWorkflowConfigs BusinessWorkflowConfig[]
+
 
   webhookNotifications    Notification[]
   alerts           Alert[]
@@ -183,6 +185,8 @@ model Business {
   agentAssignments      AgentBusinessAssignment[]
   handoffSettings       HandoffSettings[]
   agentPerformance      AgentPerformance[]
+
+  workflowConfigs         BusinessWorkflowConfig[]
 }
 
 
@@ -262,6 +266,8 @@ model Automation {
 
   messageTrackers   MessageTracker[]
   sentimentAnalyses SentimentAnalysis[]
+
+  workflowExecutionLogs   WorkflowExecutionLog[]
   
 
 
@@ -3004,4 +3010,128 @@ model Alert {
   @@index([resolved])
   @@index([createdAt])
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////HEREE
+
+
+// Add these models to your existing schema.prisma file
+
+model BusinessWorkflowTemplate {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  category            String   // GROUP_1, GROUP_2, GROUP_3, GROUP_4, GROUP_5
+  description         String   @db.Text
+  complexity          String   @default("MEDIUM") // SIMPLE, MEDIUM, COMPLEX
+  estimatedSetupTime  Int      @default(15) // in minutes
+  operations          String[] // Array of operation steps
+  features            String[] // Array of features
+  integrations        String[] // Array of available integrations
+  voiceflowTemplateId String?  // Reference to Voiceflow template
+  commonUseCase       String?  @db.Text
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  businessConfigs     BusinessWorkflowConfig[]
+  
+  @@index([category])
+  @@index([complexity])
+}
+
+model BusinessWorkflowConfig {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String   @db.Uuid
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId          String   @db.Uuid
+  business            Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workflowTemplateId  String   @db.Uuid
+  workflowTemplate    BusinessWorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Restrict)
+  businessInfo        Json     // Business information for personalization
+  integrationConfigs  Json     @default("[]") // Array of integration configurations
+  voiceflowWorkflowId String?  // ID of created Voiceflow workflow
+  status              String   @default("DRAFT") // DRAFT, CONFIGURING, ACTIVE, INACTIVE
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  credentials         WorkflowIntegrationCredential[]
+  executionLogs       WorkflowExecutionLog[]
+  
+  @@index([userId])
+  @@index([businessId])
+  @@index([status])
+}
+
+model WorkflowIntegrationCredential {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowConfigId      String   @db.Uuid
+  workflowConfig        BusinessWorkflowConfig @relation(fields: [workflowConfigId], references: [id], onDelete: Cascade)
+  integrationName       String
+  integrationType       String   // api_key, oauth, webhook, etc.
+  encryptedCredentials  String   // Encrypted JSON of credentials
+  isActive              Boolean  @default(true)
+  lastVerified          DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([workflowConfigId, integrationName])
+  @@index([workflowConfigId])
+}
+
+model WorkflowExecutionLog {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowConfigId  String   @db.Uuid
+  workflowConfig    BusinessWorkflowConfig @relation(fields: [workflowConfigId], references: [id], onDelete: Cascade)
+  automationId      String?  @db.Uuid
+  automation        Automation? @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  triggerType       String   // dm_received, comment_received, etc.
+  executionStatus   String   // SUCCESS, FAILED, PARTIAL
+  responseTime      Int?     // in milliseconds
+  errorMessage      String?
+  metadata          Json?    // Additional execution data
+  timestamp         DateTime @default(now())
+  
+  @@index([workflowConfigId])
+  @@index([timestamp])
+  @@index([executionStatus])
+}
+
+
+
+
+
+
 
