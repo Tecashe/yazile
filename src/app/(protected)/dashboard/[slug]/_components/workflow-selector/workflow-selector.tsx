@@ -415,7 +415,7 @@ export default function WorkflowSelector() {
                     {selectedWorkflow.icon}
                     Workflow Overview
                   </CardTitle>
-                  <CardDescription>Here's what your {selectedWorkflow.name} workflow will include</CardDescription>
+                  <CardDescription>Here&apos;s what your {selectedWorkflow.name} workflow will include</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-8">
