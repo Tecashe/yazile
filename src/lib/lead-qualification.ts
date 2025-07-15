@@ -5748,11 +5748,7 @@ export async function analyzeEnhancedMessage(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const n8nWebhookUrl =
-        process.env.N8N_ENHANCED_WEBHOOK_URL ||
-        process.env.N8N_WEBHOOK_URL ||
-        "https://yaziln8n.onrender.com/webhook/analyze-message"
-
+      const n8nWebhookUrl = "https://yaziln8n.onrender.com/webhook/analyze-message"
       console.log(
         `🚀 Enhanced N8N Analysis (attempt ${attempt}/${maxRetries}) for lead ${leadData?.leadId || customerId}`,
       )
