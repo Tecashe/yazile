@@ -3049,7 +3049,6 @@ model Alert {
 
 
 
-
 model BusinessWorkflowTemplate {
   id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                String
@@ -3060,7 +3059,6 @@ model BusinessWorkflowTemplate {
   operations          String[] // Array of operation steps
   features            String[] // Array of features
   integrations        String[] // Array of available integrations
-  // voiceflowTemplateId String?  // REMOVED: Voiceflow IDs are now global
   commonUseCase       String?  @db.Text
   isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())
@@ -3083,9 +3081,9 @@ model BusinessWorkflowConfig {
   workflowTemplate    BusinessWorkflowTemplate? @relation(fields: [workflowTemplateId], references: [id], onDelete: Restrict)
   businessInfo        Json     // Business information for personalization
   integrationConfigs  Json     @default("[]") // Array of integration configurations
-  // voiceflowWorkflowId String?  // REMOVED: Voiceflow IDs are now global
   customRequest       String?  @db.Text // NEW: For custom workflow requests
   status              String   @default("DRAFT") // DRAFT, CONFIGURING, ACTIVE, INACTIVE, CUSTOM_REQUEST
+  isActive            Boolean  @default(false) // NEW: Indicates if the workflow is currently active/deployed for use
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -3131,3 +3129,18 @@ model WorkflowExecutionLog {
   @@index([timestamp])
   @@index([executionStatus])
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

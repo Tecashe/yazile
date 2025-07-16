@@ -5706,9 +5706,7 @@ import type { JsonValue } from "@prisma/client/runtime/library"
 // ============================================================================
 
 const CONFIG = {
-  API_KEY: process.env.VOICEFLOW_API_KEY!,
-  PROJECT_ID: process.env.VOICEFLOW_PROJECT_ID!,
-  VERSION_ID: process.env.VOICEFLOW_VERSION_ID!,
+  // API_KEY, PROJECT_ID, VERSION_ID are now passed dynamically
   TIMEOUTS: {
     INTERACTION: 15000,
     VARIABLES: 8000,
@@ -6017,7 +6015,7 @@ export async function fetchEnhancedBusinessVariables(
         businessData?.businessDescription ||
         "We provide excellent customer service",
       instagram_handle: businessData?.instagramHandle || "",
-      response_language: businessContext.responseLanguage || businessData?.responseLanguage || "English",
+      response_language: businessData?.responseLanguage || "English", // Use businessData directly
       business_hours: businessData?.businessHours || "24/7",
       auto_reply_enabled: businessData?.autoReplyEnabled ? "Yes" : "Yes", // Default to Yes
       promotion_message:
@@ -6374,6 +6372,9 @@ export async function getEnhancedVoiceflowResponse(
   userInput: string,
   userId: string,
   businessVariables: Record<string, string>,
+  voiceflowApiKey: string, // Dynamic API Key
+  voiceflowProjectId: string, // Dynamic Project ID
+  voiceflowVersionId?: string, // Dynamic Version ID (optional)
   options?: {
     maxRetries?: number
     timeoutMs?: number
@@ -6387,6 +6388,16 @@ export async function getEnhancedVoiceflowResponse(
     enableFallbackDetection = true,
     isFirstMessage = false,
   } = options || {}
+
+  if (!voiceflowApiKey || !voiceflowProjectId) {
+    Logger.error("Voiceflow API Key or Project ID is missing.")
+    return {
+      success: false,
+      error: "Voiceflow API Key or Project ID is missing.",
+      healthScore: circuitBreaker.getHealthScore(),
+      fallbackReason: "Missing Voiceflow credentials",
+    }
+  }
 
   try {
     const result = await circuitBreaker.execute(async () => {
@@ -6439,9 +6450,9 @@ export async function getEnhancedVoiceflowResponse(
             requestPayload,
             {
               headers: {
-                Authorization: CONFIG.API_KEY,
-                versionID: CONFIG.VERSION_ID,
-                projectID: CONFIG.PROJECT_ID, // Ensure projectID is passed
+                Authorization: voiceflowApiKey,
+                versionID: voiceflowVersionId || undefined,
+                projectID: voiceflowProjectId,
                 accept: "application/json",
                 "content-type": "application/json",
               },
@@ -6465,9 +6476,9 @@ export async function getEnhancedVoiceflowResponse(
               },
               {
                 headers: {
-                  Authorization: CONFIG.API_KEY,
-                  versionID: CONFIG.VERSION_ID,
-                  projectID: CONFIG.PROJECT_ID, // Ensure projectID is passed
+                  Authorization: voiceflowApiKey,
+                  versionID: voiceflowVersionId || undefined,
+                  projectID: voiceflowProjectId,
                   accept: "application/json",
                   "content-type": "application/json",
                 },
@@ -6482,7 +6493,12 @@ export async function getEnhancedVoiceflowResponse(
 
           // Process response
           const processedResponse = processEnhancedVoiceflowResponse(response.data)
-          const updatedVariables = await fetchVoiceflowVariables(userId)
+          const updatedVariables = await fetchVoiceflowVariables(
+            userId,
+            voiceflowApiKey,
+            voiceflowProjectId,
+            voiceflowVersionId,
+          )
 
           // Fallback detection
           if (enableFallbackDetection) {
@@ -6540,7 +6556,12 @@ export async function getEnhancedVoiceflowResponse(
 // UTILITY FUNCTIONS
 // ============================================================================
 
-async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariables> {
+async function fetchVoiceflowVariables(
+  userId: string,
+  voiceflowApiKey: string,
+  voiceflowProjectId: string,
+  voiceflowVersionId?: string,
+): Promise<VoiceflowVariables> {
   const maxRetries = 2
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -6549,9 +6570,9 @@ async function fetchVoiceflowVariables(userId: string): Promise<VoiceflowVariabl
         `https://general-runtime.voiceflow.com/state/user/${userId}`,
         {
           headers: {
-            Authorization: CONFIG.API_KEY,
-            versionID: CONFIG.VERSION_ID,
-            projectID: CONFIG.PROJECT_ID, // Ensure projectID is passed
+            Authorization: voiceflowApiKey,
+            versionID: voiceflowVersionId || undefined,
+            projectID: voiceflowProjectId,
             accept: "application/json",
           },
           timeout: CONFIG.TIMEOUTS.VARIABLES,
@@ -6591,7 +6612,12 @@ export async function createVoiceflowUser(userId: string): Promise<boolean> {
   return true
 }
 
-export async function resetVoiceflowUser(userId: string): Promise<boolean> {
+export async function resetVoiceflowUser(
+  userId: string,
+  voiceflowApiKey: string,
+  voiceflowProjectId: string,
+  voiceflowVersionId?: string,
+): Promise<boolean> {
   try {
     const response = await axios.post(
       `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
@@ -6606,9 +6632,9 @@ export async function resetVoiceflowUser(userId: string): Promise<boolean> {
       },
       {
         headers: {
-          Authorization: CONFIG.API_KEY,
-          versionID: CONFIG.VERSION_ID,
-          projectID: CONFIG.PROJECT_ID, // Ensure projectID is passed
+          Authorization: voiceflowApiKey,
+          versionID: voiceflowVersionId || undefined,
+          projectID: voiceflowProjectId,
           accept: "application/json",
           "content-type": "application/json",
         },
