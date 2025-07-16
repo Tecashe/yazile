@@ -6517,7 +6517,7 @@ const workflowTypes: WorkflowType[] = [
       "Google Drive": {
         purpose: "To store collected documents, photos, or project specifications from clients.",
         setupInstructions:
-          "Go to Google Cloud Console, enable the Google Drive API, and create an OAuth 2.0 Client ID. You&apos;ll need the Client ID and Client Secret.",
+          "Go to Google Cloud Console, enable the Google Drive API, and create an OAuth 2.0 Client ID. You&apos;ll need the Client ID and Client Secret. Ensure your redirect URIs are correctly configured.",
         usageInWorkflow:
           "If the workflow requires clients to upload files (e.g., photos for a photography quote), the bot will provide a link or mechanism to upload directly to a designated Google Drive folder.",
         credentialsFields: [{ id: "apiKey", label: "Google Drive Client ID", type: "password" }],
@@ -6798,7 +6798,7 @@ const workflowTypes: WorkflowType[] = [
     howItWorks:
       "This workflow is designed for businesses that handle quick, high-volume transactions. It allows customers to quickly browse offerings, place orders or make simple bookings, and receive instant confirmations, ideal for fast-paced environments.",
     scenarioExample:
-      "A customer DMs a restaurant asking to order takeout. The bot displays the menu, takes their order, processes payment via Stripe, and sends an order confirmation with an estimated pickup time.",
+      "A customer DMs a restaurant asking to order takeout. The bot displays the menu, takes their order, processes payment via Stripe, and sends an order confirmation with an `estimated pickup time.",
     integrationDetails: {
       Square: {
         purpose: "To process payments and manage orders through Square POS.",
@@ -6899,7 +6899,7 @@ const workflowTypes: WorkflowType[] = [
         setupInstructions:
           "In your Teachable admin, go to Settings > API. Generate a new API key. You&apos;ll also need your Teachable school URL.",
         usageInWorkflow:
-          "Upon successful payment, the bot can automatically enroll the student in the specified Teachable course and provide them with access instructions.",
+          "The bot can automatically enroll students in courses and provide access links after successful registration.",
         credentialsFields: [
           { id: "apiKey", label: "Teachable API Key", type: "password" },
           { id: "additionalSettings.schoolUrl", label: "Teachable School URL", type: "text" },
