@@ -2226,7 +2226,7 @@ export default function WorkflowSelector() {
                 <Sparkles className="h-10 w-10 text-primary mb-4" />
                 <CardTitle className="text-xl mb-2">Request a Custom Workflow</CardTitle>
                 <CardDescription className="text-sm leading-relaxed">
-                  Can't find what you need? Describe your unique requirements, and we'll build it for you.
+                  Can&apos;t find what you need? Describe your unique requirements, and we&apos;ll build it for you.
                 </CardDescription>
                 <Button variant="outline" className="mt-4 bg-transparent">
                   Get Started
@@ -2254,7 +2254,7 @@ export default function WorkflowSelector() {
                   Request a Custom Workflow
                 </h1>
                 <p className="text-muted-foreground text-lg">
-                  Tell us what you need, and we'll create a tailored solution for your business.
+                  Tell us what you need, and we&apos;ll create a tailored solution for your business.
                 </p>
               </div>
             </div>
@@ -2425,7 +2425,7 @@ export default function WorkflowSelector() {
                     {selectedWorkflow.icon}
                     Workflow Overview
                   </CardTitle>
-                  <CardDescription>Here's what your {selectedWorkflow.name} workflow will include</CardDescription>
+                  <CardDescription>Here&apos;s what your {selectedWorkflow.name} workflow will include</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-8">
@@ -2777,7 +2777,7 @@ export default function WorkflowSelector() {
                       </li>
                       <li className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-primary"></div>
-                        You'll receive a confirmation email with setup details
+                        You&apos;ll receive a confirmation email with setup details
                       </li>
                     </>
                   )}
