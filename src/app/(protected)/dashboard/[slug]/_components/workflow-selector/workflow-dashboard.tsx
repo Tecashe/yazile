@@ -135,7 +135,7 @@ export default function WorkflowDashboard({ workflowDetails, onDeactivate, isDea
             </CardHeader>
             <CardContent className="space-y-4 text-left">
               <p className="text-muted-foreground text-center">
-                Detailed insights into your workflow's performance, message volume, and lead qualification will appear
+                Detailed insights into your workflows performance, message volume, and lead qualification will appear
                 here.
               </p>
               <div className="grid grid-cols-2 gap-4">
