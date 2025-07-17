@@ -7,7 +7,7 @@ import crypto from "crypto"
 // For simplicity, we'll use a fixed IV for this example, but for maximum security,
 // generate a unique IV for each encryption and prepend it to the ciphertext.
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY // Must be 32 bytes (256 bits)
+const ENCRYPTION_KEY = process.env.CREDENTIAL_ENCRYPTION_KEY // Must be 32 bytes (256 bits)
 const ENCRYPTION_ALGORITHM = "aes-256-gcm"
 const ENCRYPTION_IV_LENGTH = 16 // AES-256-GCM typically uses 12-byte IV, but 16 is also common and works. Let's use 16 for consistency with some examples.
 const ENCRYPTION_AUTH_TAG_LENGTH = 16 // GCM authentication tag length
