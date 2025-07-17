@@ -5695,18 +5695,31 @@
 //   }
 // }
 
+
+
+
+
+
+
+
+
+
+
+
+
 import axios from "axios"
 import { getBusinessForWebhook } from "@/actions/businfo"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
 import type { JsonValue } from "@prisma/client/runtime/library"
+import { decrypt } from "@/lib/encryption"
+import { client } from "@/lib/prisma"
 
 // ============================================================================
 // CONFIGURATION & CONSTANTS
 // ============================================================================
 
 const CONFIG = {
-  // API_KEY, PROJECT_ID, VERSION_ID are now passed dynamically
   TIMEOUTS: {
     INTERACTION: 15000,
     VARIABLES: 8000,
@@ -5973,6 +5986,7 @@ const cacheManager = new VoiceflowCacheManager()
 export async function fetchEnhancedBusinessVariables(
   businessId: string,
   automationId: string,
+  workflowConfigId: string | null,
   conversationContext?: ConversationContext,
 ): Promise<Record<string, string>> {
   Logger.info("🔍 Fetching enhanced business variables...")
@@ -5988,9 +6002,7 @@ export async function fetchEnhancedBusinessVariables(
     const { profileContent, businessContext } =
       profileResult.status === "fulfilled" ? profileResult.value : { profileContent: "", businessContext: {} }
 
-    // Handle business data with better error handling
     let businessData: BusinessData | null = null
-
     if (
       businessResult.status === "fulfilled" &&
       businessResult.value.status === 200 &&
@@ -5999,6 +6011,24 @@ export async function fetchEnhancedBusinessVariables(
       businessData = businessResult.value.data.business
     } else {
       Logger.warning("Business data fetch failed, using profile data only")
+    }
+
+    // Fetch workflow configuration and credentials if workflowConfigId is provided
+    let workflowConfigWithCredentials: any = null
+    if (workflowConfigId) {
+      try {
+        workflowConfigWithCredentials = await client.businessWorkflowConfig.findUnique({
+          where: { id: workflowConfigId },
+          include: { credentials: true },
+        })
+        if (!workflowConfigWithCredentials) {
+          Logger.warning(`Workflow config with ID ${workflowConfigId} not found.`)
+        }
+      } catch (dbError) {
+        Logger.error(`Error fetching workflow config with credentials for ${workflowConfigId}:`, dbError)
+      }
+    } else {
+      Logger.warning("No workflowConfigId provided to fetch integration credentials.")
     }
 
     // Build robust fallback variables
@@ -6031,6 +6061,7 @@ export async function fetchEnhancedBusinessVariables(
       // System status
       system_status: "operational",
       fallback_mode: businessData ? "false" : "true",
+      workflow_config_id: workflowConfigId || "", // Pass the workflow config ID to Voiceflow
     }
 
     // Add conversation context
@@ -6118,6 +6149,39 @@ export async function fetchEnhancedBusinessVariables(
       result.automation_additional_notes = "Using fallback configuration"
     }
 
+    // NEW: Add decrypted integration credentials to variables
+    if (workflowConfigWithCredentials && workflowConfigWithCredentials.credentials) {
+      workflowConfigWithCredentials.credentials.forEach((cred: any) => {
+        try {
+          const decryptedCredentials = decrypt(cred.encryptedCredentials)
+          const parsedConfig = JSON.parse(decryptedCredentials)
+
+          // Map credentials to Voiceflow variables using a consistent naming convention
+          // Example: integrationName_credentialField
+          // Ensure these variable names are defined in your Voiceflow projects
+          for (const key in parsedConfig) {
+            if (Object.prototype.hasOwnProperty.call(parsedConfig, key)) {
+              const vfVarName = `${cred.integrationName.toLowerCase().replace(/\s/g, "_")}_${key}`
+              result[vfVarName] = parsedConfig[key]
+            }
+          }
+          // Handle additionalSettings separately if they contain nested objects
+          if (parsedConfig.additionalSettings) {
+            for (const subKey in parsedConfig.additionalSettings) {
+              if (Object.prototype.hasOwnProperty.call(parsedConfig.additionalSettings, subKey)) {
+                const vfVarName = `${cred.integrationName.toLowerCase().replace(/\s/g, "_")}_${subKey}`
+                result[vfVarName] = parsedConfig.additionalSettings[subKey]
+              }
+            }
+          }
+
+          Logger.debug(`Decrypted and added variables for ${cred.integrationName}`)
+        } catch (e) {
+          Logger.error(`Failed to decrypt or parse credentials for ${cred.integrationName}:`, e)
+        }
+      })
+    }
+
     result.system_timestamp = new Date().toISOString()
     result.voiceflow_health_score = circuitBreaker.getHealthScore().toFixed(2)
 
@@ -6139,6 +6203,7 @@ export async function fetchEnhancedBusinessVariables(
       fallback_mode: "true",
       system_timestamp: new Date().toISOString(),
       voiceflow_health_score: "0.5",
+      workflow_config_id: workflowConfigId || "",
     }
   }
 }
@@ -6371,10 +6436,10 @@ function detectFallbackConditions(
 export async function getEnhancedVoiceflowResponse(
   userInput: string,
   userId: string,
-  businessVariables: Record<string, string>,
-  voiceflowApiKey: string, // Dynamic API Key
-  voiceflowProjectId: string, // Dynamic Project ID
-  voiceflowVersionId?: string, // Dynamic Version ID (optional)
+  businessVariables: Record<string, string>, // CHANGED: Now explicitly takes businessVariables
+  voiceflowApiKey: string,
+  voiceflowProjectId: string,
+  voiceflowVersionId?: string,
   options?: {
     maxRetries?: number
     timeoutMs?: number
@@ -6405,6 +6470,9 @@ export async function getEnhancedVoiceflowResponse(
 
       // Clean expired cache entries
       cacheManager.cleanExpiredEntries()
+
+      // REMOVED: Logic to fetch activeWorkflowConfigId and businessVariables internally.
+      // These are now passed as arguments to this function.
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -6439,7 +6507,7 @@ export async function getEnhancedVoiceflowResponse(
             }
           }
 
-          // Add business variables
+          // Add business variables (now passed directly)
           if (Object.keys(businessVariables).length > 0) {
             requestPayload.state = { variables: businessVariables }
           }

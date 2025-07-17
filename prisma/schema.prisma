@@ -11,94 +11,88 @@ datasource db {
 }
 
 model User {
-  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerkId          String             @unique
-  email            String             @unique
-  firstname        String?            
-  lastname         String?            
-  phone            String?            @unique
-  phoneVerified    Boolean            @default(false)
-  isAdmin          Boolean            @default(false)
-  isInfluencer     Boolean            @default(false)
-  isABusiness      Boolean            @default(false)
-  createdAt        DateTime           @default(now())
-  subscription     Subscription?
-  integrations     Integrations[]
-  automations      Automation[]
-  businessHours     BusinessHours?
-  businesses       Business[]
-  marketingInfo    MarketingInfo[]
-  scheduledContent ScheduledContent[]
-  auditLogs        AuditLog[]
-  sentMessages     ChatMessage[]      @relation("SentMessages")
-  receivedMessages ChatMessage[]      @relation("ReceivedMessages")
-  notifications    UserNotification[]
-  emails           Email[]
-  uploadedAttachments  ChatAttachment[]   @relation("UploadedAttachments")
-  receivedAttachments  ChatAttachment[]   @relation("ReceivedAttachments")
-  invoices             Invoice[]          @relation("UserInvoices")
-  payments             Payment[]          @relation("UserPayments")
-  referralCodes        ReferralCode[]     @relation("UserReferralCodes")
-  referrals            Referral[]         @relation("UserReferrals")
-  referredBy           Referral[]         @relation("ReferredUsers")
-  commissionPayouts    CommissionPayout[] @relation("UserCommissionPayouts")
-  referredByCode       String?
-  affiliate            AffiliateUser?
-  affiliateReferrals   AffiliateReferral[] @relation("referredUser")
-  whatsAppBusinesses   WhatsAppBusiness[]
-  whatsAppRules        WhatsAppRule[]
-  whatsAppTemplates    WhatsAppTemplate[]
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId             String              @unique
+  email               String              @unique
+  firstname           String?
+  lastname            String?
+  phone               String?             @unique
+  phoneVerified       Boolean             @default(false)
+  isAdmin             Boolean             @default(false)
+  isInfluencer        Boolean             @default(false)
+  isABusiness         Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  subscription        Subscription?
+  integrations        Integrations[]
+  automations         Automation[]
+  businessHours       BusinessHours?
+  businesses          Business[]
+  marketingInfo       MarketingInfo[]
+  scheduledContent    ScheduledContent[]
+  auditLogs           AuditLog[]
+  sentMessages        ChatMessage[]       @relation("SentMessages")
+  receivedMessages    ChatMessage[]       @relation("ReceivedMessages")
+  notifications       UserNotification[]
+  emails              Email[]
+  uploadedAttachments ChatAttachment[]    @relation("UploadedAttachments")
+  receivedAttachments ChatAttachment[]    @relation("ReceivedAttachments")
+  invoices            Invoice[]           @relation("UserInvoices")
+  payments            Payment[]           @relation("UserPayments")
+  referralCodes       ReferralCode[]      @relation("UserReferralCodes")
+  referrals           Referral[]          @relation("UserReferrals")
+  referredBy          Referral[]          @relation("ReferredUsers")
+  commissionPayouts   CommissionPayout[]  @relation("UserCommissionPayouts")
+  referredByCode      String?
+  affiliate           AffiliateUser?
+  affiliateReferrals  AffiliateReferral[] @relation("referredUser")
+  whatsAppBusinesses  WhatsAppBusiness[]
+  whatsAppRules       WhatsAppRule[]
+  whatsAppTemplates   WhatsAppTemplate[]
 
-  leads             Lead[]
-  leadScoringRules  LeadScoringRule[]
+  leads                 Lead[]
+  leadScoringRules      LeadScoringRule[]
   leadQualificationRule LeadQualificationRule[]
   leadNurturingSequence LeadNurturingSequence[]
-  crmIntegration    CrmIntegration[]
-  n8nConnection     N8nConnection[]
-  n8nWorkflows      N8nWorkflow[]
-  leadTag           LeadTag[]
-  userWorkflow      UserWorkflow[]
-  customWorkflowRequest  CustomWorkflowRequest[]
+  crmIntegration        CrmIntegration[]
+  n8nConnection         N8nConnection[]
+  n8nWorkflows          N8nWorkflow[]
+  leadTag               LeadTag[]
+  userWorkflow          UserWorkflow[]
+  customWorkflowRequest CustomWorkflowRequest[]
 
- 
-  influencers       Influencer[]
-  campaigns         Campaign[]
-  influencerLists   InfluencerList[]
-  influencerImports InfluencerImport[]
-  portalSettings    PortalSettings[]
+  influencers         Influencer[]
+  campaigns           Campaign[]
+  influencerLists     InfluencerList[]
+  influencerImports   InfluencerImport[]
+  portalSettings      PortalSettings[]
   aiDiscoverySettings AIDiscoverySettings?
-  dataSourceSettings DataSourceSettings?
+  dataSourceSettings  DataSourceSettings?
 
-  importHistory       ImportHistory[]
+  importHistory        ImportHistory[]
   instagramCredentials InstagramCredentials?
 
-  
-  businessProfile               BusinessProfile?
-  businessProfilesDescription   BusinessProfileDescription[]
-  savedSearches                 SavedSearch[]        // Add this line
-  chatParticipations            CollabChatParticipant[] // Add this line
+  businessProfile             BusinessProfile?
+  businessProfilesDescription BusinessProfileDescription[]
+  savedSearches               SavedSearch[] // Add this line
+  chatParticipations          CollabChatParticipant[] // Add this line
 
-  onboardingProgress  OnboardingProgress?
+  onboardingProgress OnboardingProgress?
 
-  handoffSettings   HandoffSettings?
-  handoffs          HumanHandoff[]
-  responseMetrics   ResponseMetrics[]
+  handoffSettings HandoffSettings?
+  handoffs        HumanHandoff[]
+  responseMetrics ResponseMetrics[]
 
-  preferences           UserPreferences?
-  crmSyncSettings       CrmSyncSettings?
+  preferences     UserPreferences?
+  crmSyncSettings CrmSyncSettings?
 
-  premiumAnalytics   PremiumAnalytics[]
-  revenueMetrics     RevenueMetrics[]
+  premiumAnalytics     PremiumAnalytics[]
+  revenueMetrics       RevenueMetrics[]
   revenueOpportunities RevenueOpportunity[]
 
   businessWorkflowConfigs BusinessWorkflowConfig[]
 
-
-  webhookNotifications    Notification[]
-  alerts           Alert[]
-
-
-  
+  webhookNotifications Notification[]
+  alerts               Alert[]
 }
 
 model ScheduledContent {
@@ -132,8 +126,6 @@ model MarketingInfo {
   userId    String   @db.Uuid
 }
 
-
-
 model Business {
   id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                      String?
@@ -152,12 +144,12 @@ model Business {
   targetAudience            String
   website                   String
   instagramHandle           String
-  whatsappNumber            String?   // Added for WhatsApp
-  pinterestHandle           String?   // Added for Pinterest
-  twitterHandle             String?   // Added for Twitter
-  facebookPageId            String?   // Added for Facebook
-  linkedinProfileId         String?   // Added for LinkedIn
-  tiktokHandle              String?   // Added for TikTok
+  whatsappNumber            String? // Added for WhatsApp
+  pinterestHandle           String? // Added for Pinterest
+  twitterHandle             String? // Added for Twitter
+  facebookPageId            String? // Added for Facebook
+  linkedinProfileId         String? // Added for LinkedIn
+  tiktokHandle              String? // Added for TikTok
   welcomeMessage            String
   responseLanguage          String
   businessHours             String
@@ -168,109 +160,103 @@ model Business {
   User                      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId                    String?   @db.Uuid
 
-  learningTopics            String[]
-  growthChallenges          String[]
-  goalStatement             String?
-  logo                      String?
-  location                  String?
-  size                      String?
-  influencerRatings         InfluencerRating[]
-  campaigns                 Campaign[]
-  opportunities             Opportunity[]
-  savedSearches             SavedSearch[]
-  chatParticipations        CollabChatParticipant[]
-  onboardingCompleted       Boolean @default(false)
+  learningTopics      String[]
+  growthChallenges    String[]
+  goalStatement       String?
+  logo                String?
+  location            String?
+  size                String?
+  influencerRatings   InfluencerRating[]
+  campaigns           Campaign[]
+  opportunities       Opportunity[]
+  savedSearches       SavedSearch[]
+  chatParticipations  CollabChatParticipant[]
+  onboardingCompleted Boolean                 @default(false)
 
-  handoffs              HumanHandoff[]
-  agentAssignments      AgentBusinessAssignment[]
-  handoffSettings       HandoffSettings[]
-  agentPerformance      AgentPerformance[]
+  handoffs         HumanHandoff[]
+  agentAssignments AgentBusinessAssignment[]
+  handoffSettings  HandoffSettings[]
+  agentPerformance AgentPerformance[]
 
-  workflowConfigs         BusinessWorkflowConfig[]
+  workflowConfigs BusinessWorkflowConfig[]
 }
 
-
-
 model Integrations {
-  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           INTEGRATIONS @default(INSTAGRAM)
-  createdAt      DateTime     @default(now())
-  User           User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String?      @db.Uuid
-  token          String       @unique
-  expiresAt      DateTime?    
-  
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      INTEGRATIONS @default(INSTAGRAM)
+  createdAt DateTime     @default(now())
+  User      User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?      @db.Uuid
+  token     String       @unique
+  expiresAt DateTime?
+
   // Instagram-specific fields
-  instagramId    String?      @unique
+  instagramId    String? @unique
   username       String?
   fullName       String?
   profilePicture String?
   followersCount Int?
   followingCount Int?
   postsCount     Int?
-  
+
   // WhatsApp-specific fields
-  phoneNumberId  String?      @unique
-  phoneNumber    String?
-  
+  phoneNumberId String? @unique
+  phoneNumber   String?
+
   // Facebook-specific fields
-  pageId         String?      @unique
-  pageName       String?
-  
+  pageId   String? @unique
+  pageName String?
+
   // Pinterest-specific fields
-  pinterestId    String?      @unique
-  boardCount     Int?
-  
+  pinterestId String? @unique
+  boardCount  Int?
+
   // Twitter-specific fields
-  twitterId      String?      @unique
-  tweetCount     Int?
-  
+  twitterId  String? @unique
+  tweetCount Int?
+
   // LinkedIn-specific fields
-  linkedinId     String?      @unique
-  
+  linkedinId String? @unique
+
   // TikTok-specific fields
-  tiktokId       String?      @unique
-  
-  lastUpdated    DateTime     @default(now())
+  tiktokId String? @unique
+
+  lastUpdated DateTime @default(now())
 }
 
-
-
-
-
 model Automation {
-  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String             @default("New Automation")
-  createdAt      DateTime           @default(now())
-  isFallback     Boolean            @default(false)
-  active         Boolean            @default(false)
-  platform       INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
-  trigger        Trigger[]
+  id                          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                        String                      @default("New Automation")
+  createdAt                   DateTime                    @default(now())
+  isFallback                  Boolean                     @default(false)
+  active                      Boolean                     @default(false)
+  platform                    INTEGRATIONS                @default(INSTAGRAM) // Added to specify which platform this automation is for
+  trigger                     Trigger[]
   businessProfilesDescription BusinessProfileDescription?
-  listenMode     String  @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
-  listener       Listener?
-  posts          Post[]
-  leads          Lead[]
-  dms            Dms[]
-  messages       Message[]
-  conversations  Conversation[]
-  User           User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String?            @db.Uuid
-  keywords       Keyword[]
-  scheduledPosts ScheduledContent[]
-  handoffs          HumanHandoff[]
-  responseMetrics   ResponseMetrics[]
+  listenMode                  String                      @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
+  listener                    Listener?
+  posts                       Post[]
+  leads                       Lead[]
+  dms                         Dms[]
+  messages                    Message[]
+  conversations               Conversation[]
+  User                        User?                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                      String?                     @db.Uuid
+  keywords                    Keyword[]
+  scheduledPosts              ScheduledContent[]
+  handoffs                    HumanHandoff[]
+  responseMetrics             ResponseMetrics[]
 
-  fallbackMessage  String?
-  buttons          Json?          // Store as JSON array
+  fallbackMessage String?
+  buttons         Json? // Store as JSON array
 
   messageTrackers   MessageTracker[]
   sentimentAnalyses SentimentAnalysis[]
 
-  workflowExecutionLogs   WorkflowExecutionLog[]
-  
+  workflowExecutionLogs WorkflowExecutionLog[]
 
-
+  businessWorkflowConfigId String?                 @db.Uuid // NEW: Link to BusinessWorkflowConfig
+  businessWorkflowConfig   BusinessWorkflowConfig? @relation(fields: [businessWorkflowConfigId], references: [id], onDelete: SetNull)
 }
 
 model Message {
@@ -314,38 +300,34 @@ model Post {
   automationId String?     @db.Uuid
 }
 
-
-
 model ConversationState {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String   @unique
-  isActive          Boolean  @default(false)
-  lastTriggerType   String?  // Track what triggered the conversation
-  lastTriggerReason String?  // Why it was triggered
-  triggerHistory    Json?    // History of triggers for this conversation
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String       @unique
+  isActive          Boolean      @default(false)
+  lastTriggerType   String? // Track what triggered the conversation
+  lastTriggerReason String? // Why it was triggered
+  triggerHistory    Json? // History of triggers for this conversation
   customerType      CustomerType @default(NEW) // NEW, RETURNING, VIP
-  interactionCount  Int      @default(0)
-  lastInteractionAt DateTime @default(now())
-  sentiment         Float?   // Overall conversation sentiment (-1 to 1)
-  
-  lastMessageLength     Int?
-  averageResponseTime   Float?
-  isInHandoff           Boolean       @default(false)
-  handoffReason         String?
+  interactionCount  Int          @default(0)
+  lastInteractionAt DateTime     @default(now())
+  sentiment         Float? // Overall conversation sentiment (-1 to 1)
 
-  automationId          String? // Track which automation is handling this conversation
-  listenMode            String? // Track the current listen mode
+  lastMessageLength   Int?
+  averageResponseTime Float?
+  isInHandoff         Boolean @default(false)
+  handoffReason       String?
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  automationId String? // Track which automation is handling this conversation
+  listenMode   String? // Track the current listen mode
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([isActive])
   @@index([customerType])
   @@index([lastInteractionAt])
 }
-
 
 model Listener {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -361,27 +343,28 @@ model Listener {
 }
 
 model Trigger {
-  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type              String      // Keep existing field for backward compatibility
-  triggerMode       TriggerMode @default(KEYWORD) // New field for enhanced triggers
-  configuration     Json?       // Store trigger-specific configuration
-  priority          Int         @default(1) // Higher number = higher priority
-  confidenceThreshold Float     @default(0.5) // Minimum confidence to trigger
-  businessHoursOnly Boolean     @default(false) // Only trigger during business hours
-  isActive          Boolean     @default(true)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  Automation        Automation? @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  automationId      String?     @db.Uuid
-  
+  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type                String // Keep existing field for backward compatibility
+  triggerMode         TriggerMode @default(KEYWORD) // New field for enhanced triggers
+  configuration       Json? // Store trigger-specific configuration
+  priority            Int         @default(1) // Higher number = higher priority
+  confidenceThreshold Float       @default(0.5) // Minimum confidence to trigger
+  businessHoursOnly   Boolean     @default(false) // Only trigger during business hours
+  isActive            Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  Automation          Automation? @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId        String?     @db.Uuid
+
   // Relations
-  executions        TriggerExecution[]
-  analytics         TriggerAnalytics[]
+  executions TriggerExecution[]
+  analytics  TriggerAnalytics[]
 
   @@index([automationId])
   @@index([triggerMode])
   @@index([isActive])
 }
+
 model Keyword {
   id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   word         String
@@ -390,7 +373,6 @@ model Keyword {
 
   @@unique([automationId, word]) //this constraints ensure user cant use the same keyword on multiple automations
 }
-
 
 enum INTEGRATIONS {
   INSTAGRAM
@@ -416,19 +398,19 @@ enum LISTENERS {
 model Notification {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @db.Uuid
-  type      String   // email_sent, high_value_lead, lead_qualified, crm_sync, etc.
+  type      String // email_sent, high_value_lead, lead_qualified, crm_sync, etc.
   title     String
   message   String   @db.Text
   priority  String   @default("medium") // low, medium, high, urgent
-  data      Json?    // Additional notification data
+  data      Json? // Additional notification data
   leadId    String?  @db.Uuid
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-   
-  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
- 
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([type])
   @@index([priority])
@@ -436,31 +418,29 @@ model Notification {
   @@index([createdAt])
 }
 
-
-
 model AuditLog {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String   @db.Uuid
-  user       User     @relation(fields: [userId], references: [id])
-  action     String
-  target     String
-  details    String?
-  entityId  String?   @db.Uuid
-  metadata  Json?    // Store additional data like reason, instagramId
-  ipAddress  String?
-  userAgent  String?
-  timestamp  DateTime @default(now())
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  target    String
+  details   String?
+  entityId  String?  @db.Uuid
+  metadata  Json? // Store additional data like reason, instagramId
+  ipAddress String?
+  userAgent String?
+  timestamp DateTime @default(now())
+
   @@map("audit_logs")
 }
 
 model Incident {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   description String
-  severity    String    // "low", "medium", "high", "critical"
+  severity    String // "low", "medium", "high", "critical"
   createdAt   DateTime  @default(now())
   resolvedAt  DateTime?
 }
-
 
 model ChatMessage {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -476,8 +456,6 @@ model ChatMessage {
   updatedAt   DateTime @updatedAt
 }
 
-
-
 // Enhanced notification system
 model UserNotification {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -485,73 +463,69 @@ model UserNotification {
   user      User     @relation(fields: [userId], references: [id])
   title     String
   message   String
-  type      String   // "chat", "automation", "subscription", etc.
+  type      String // "chat", "automation", "subscription", etc.
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model MessageTemplate {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
-  content     String
-  category    String?
-  tags        String[]
-  usageCount  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  content    String
+  category   String?
+  tags       String[]
+  usageCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
-
-
 model EmailTemplate {
-  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   subject     String
-  content     String         @db.Text
+  content     String          @db.Text
   description String?
-  category    String         @default("general")
-  isDefault   Boolean        @default(false)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  category    String          @default("general")
+  isDefault   Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   emails      Email[]
   campaigns   EmailCampaign[]
 }
 
 model Email {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   subject      String
-  content      String        @db.Text
-  recipientId  String        @db.Uuid
-  recipient    User          @relation(fields: [recipientId], references: [id])
-  templateId   String?       @db.Uuid
+  content      String         @db.Text
+  recipientId  String         @db.Uuid
+  recipient    User           @relation(fields: [recipientId], references: [id])
+  templateId   String?        @db.Uuid
   template     EmailTemplate? @relation(fields: [templateId], references: [id])
-  campaignId   String?       @db.Uuid
+  campaignId   String?        @db.Uuid
   campaign     EmailCampaign? @relation(fields: [campaignId], references: [id])
-  status       EmailStatus   @default(SCHEDULED)
+  status       EmailStatus    @default(SCHEDULED)
   scheduledFor DateTime?
   sentAt       DateTime?
   openedAt     DateTime?
   clickedAt    DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
-
 
 model EmailCampaign {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
-  description String?
-  templateId  String        @db.Uuid
-  template    EmailTemplate @relation(fields: [templateId], references: [id])
-  status      CampaignStatus @default(DRAFT)
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  description  String?
+  templateId   String         @db.Uuid
+  template     EmailTemplate  @relation(fields: [templateId], references: [id])
+  status       CampaignStatus @default(DRAFT)
   scheduledFor DateTime?
-  sentAt      DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  emails      Email[]
+  sentAt       DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  emails       Email[]
 }
-
 
 enum EmailStatus {
   SCHEDULED
@@ -569,68 +543,66 @@ enum CampaignStatus {
   CANCELLED
 }
 
-
 model ChatAttachment {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  filename    String
-  filePath    String
-  fileType    String
-  fileSize    Int
-  uploadedBy  String    @db.Uuid
-  uploader    User      @relation("UploadedAttachments", fields: [uploadedBy], references: [id])
-  receiverId  String?   @db.Uuid
-  receiver    User?     @relation("ReceivedAttachments", fields: [receiverId], references: [id])
-  createdAt   DateTime  @default(now())
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  filename   String
+  filePath   String
+  fileType   String
+  fileSize   Int
+  uploadedBy String   @db.Uuid
+  uploader   User     @relation("UploadedAttachments", fields: [uploadedBy], references: [id])
+  receiverId String?  @db.Uuid
+  receiver   User?    @relation("ReceivedAttachments", fields: [receiverId], references: [id])
+  createdAt  DateTime @default(now())
 }
 
-
 model Invoice {
-  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  invoiceNumber   String          @unique
-  userId          String          @db.Uuid
-  user            User            @relation("UserInvoices", fields: [userId], references: [id])
-  amount          Float
-  tax             Float           @default(0)
-  total           Float
-  currency        String          @default("USD")
-  status          InvoiceStatus   @default(DRAFT)
-  dueDate         DateTime
-  issueDate       DateTime        @default(now())
-  paidDate        DateTime?
-  notes           String?
-  items           InvoiceItem[]
-  payments        Payment[]
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceNumber String        @unique
+  userId        String        @db.Uuid
+  user          User          @relation("UserInvoices", fields: [userId], references: [id])
+  amount        Float
+  tax           Float         @default(0)
+  total         Float
+  currency      String        @default("USD")
+  status        InvoiceStatus @default(DRAFT)
+  dueDate       DateTime
+  issueDate     DateTime      @default(now())
+  paidDate      DateTime?
+  notes         String?
+  items         InvoiceItem[]
+  payments      Payment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model InvoiceItem {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  invoiceId   String    @db.Uuid
-  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceId   String   @db.Uuid
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   description String
   quantity    Int
   unitPrice   Float
   amount      Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Payment {
-  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  invoiceId       String        @db.Uuid
-  invoice         Invoice       @relation(fields: [invoiceId], references: [id])
-  userId          String        @db.Uuid
-  user            User          @relation("UserPayments", fields: [userId], references: [id])
-  amount          Float
-  currency        String        @default("USD")
-  paymentMethod   PaymentMethod
-  transactionId   String?
-  status          PaymentStatus @default(PENDING)
-  paymentDate     DateTime      @default(now())
-  notes           String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceId     String        @db.Uuid
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
+  userId        String        @db.Uuid
+  user          User          @relation("UserPayments", fields: [userId], references: [id])
+  amount        Float
+  currency      String        @default("USD")
+  paymentMethod PaymentMethod
+  transactionId String?
+  status        PaymentStatus @default(PENDING)
+  paymentDate   DateTime      @default(now())
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum InvoiceStatus {
@@ -656,84 +628,83 @@ enum PaymentStatus {
   REFUNDED
 }
 
-
 model ReferralProgram {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name              String
   description       String?
-  commissionType    CommissionType      @default(PERCENTAGE)
-  commissionValue   Float               // Percentage or fixed amount
-  minimumPayout     Float               @default(0)
-  active            Boolean             @default(true)
+  commissionType    CommissionType     @default(PERCENTAGE)
+  commissionValue   Float // Percentage or fixed amount
+  minimumPayout     Float              @default(0)
+  active            Boolean            @default(true)
   referralCodes     ReferralCode[]
   referrals         Referral[]
   commissionPayouts CommissionPayout[]
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model ReferralCode {
-  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code              String          @unique
-  userId            String          @db.Uuid
-  user              User            @relation("UserReferralCodes", fields: [userId], references: [id])
-  programId         String          @db.Uuid
-  program           ReferralProgram @relation(fields: [programId], references: [id])
-  active            Boolean         @default(true)
-  referrals         Referral[]      @relation("ReferralsByCode")
-  clicks            Int             @default(0)
-  conversions       Int             @default(0)
-  conversionRate    Float?          // Calculated field
-  totalCommission   Float           @default(0)
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String          @unique
+  userId          String          @db.Uuid
+  user            User            @relation("UserReferralCodes", fields: [userId], references: [id])
+  programId       String          @db.Uuid
+  program         ReferralProgram @relation(fields: [programId], references: [id])
+  active          Boolean         @default(true)
+  referrals       Referral[]      @relation("ReferralsByCode")
+  clicks          Int             @default(0)
+  conversions     Int             @default(0)
+  conversionRate  Float? // Calculated field
+  totalCommission Float           @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model Referral {
-  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  referrerId        String          @db.Uuid
-  referrer          User            @relation("UserReferrals", fields: [referrerId], references: [id])
-  referredUserId    String?         @db.Uuid
-  referredUser      User?           @relation("ReferredUsers", fields: [referredUserId], references: [id])
-  referralCodeId    String          @db.Uuid
-  referralCode      ReferralCode    @relation("ReferralsByCode", fields: [referralCodeId], references: [id])
-  programId         String          @db.Uuid
-  program           ReferralProgram @relation(fields: [programId], references: [id])
-  status            ReferralStatus  @default(PENDING)
-  commissionAmount  Float?
-  commissionPaid    Boolean         @default(false)
-  commissionPayoutId String?        @db.Uuid
-  commissionPayout  CommissionPayout? @relation(fields: [commissionPayoutId], references: [id])
-  conversionDate    DateTime?
-  ipAddress         String?
-  userAgent         String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  referrerId         String            @db.Uuid
+  referrer           User              @relation("UserReferrals", fields: [referrerId], references: [id])
+  referredUserId     String?           @db.Uuid
+  referredUser       User?             @relation("ReferredUsers", fields: [referredUserId], references: [id])
+  referralCodeId     String            @db.Uuid
+  referralCode       ReferralCode      @relation("ReferralsByCode", fields: [referralCodeId], references: [id])
+  programId          String            @db.Uuid
+  program            ReferralProgram   @relation(fields: [programId], references: [id])
+  status             ReferralStatus    @default(PENDING)
+  commissionAmount   Float?
+  commissionPaid     Boolean           @default(false)
+  commissionPayoutId String?           @db.Uuid
+  commissionPayout   CommissionPayout? @relation(fields: [commissionPayoutId], references: [id])
+  conversionDate     DateTime?
+  ipAddress          String?
+  userAgent          String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 }
 
 model CommissionPayout {
-  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String          @db.Uuid
-  user              User            @relation("UserCommissionPayouts", fields: [userId], references: [id])
-  programId         String          @db.Uuid
-  program           ReferralProgram @relation(fields: [programId], references: [id])
-  amount            Float
-  status            PayoutStatus    @default(PENDING)
-  paymentMethod     PaymentMethod   @default(BANK_TRANSFER)
-  paymentDetails    Json?
-  referrals         Referral[]
-  processedDate     DateTime?
-  notes             String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String          @db.Uuid
+  user           User            @relation("UserCommissionPayouts", fields: [userId], references: [id])
+  programId      String          @db.Uuid
+  program        ReferralProgram @relation(fields: [programId], references: [id])
+  amount         Float
+  status         PayoutStatus    @default(PENDING)
+  paymentMethod  PaymentMethod   @default(BANK_TRANSFER)
+  paymentDetails Json?
+  referrals      Referral[]
+  processedDate  DateTime?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model ReferralClick {
-  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  referralCodeId    String          @db.Uuid
-  ipAddress         String?
-  userAgent         String?
-  createdAt         DateTime        @default(now())
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  referralCodeId String   @db.Uuid
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
 }
 
 enum CommissionType {
@@ -755,123 +726,120 @@ enum PayoutStatus {
   FAILED
 }
 
-
 // New Affiliate Program model
 model AffiliateProgram {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name              String
-  description       String?
-  commissionRate    Float    // Percentage
-  cookieDuration    Int      // Days
-  minimumPayout     Float    @default(50)
-  status            String   @default("active") // active, paused, inactive
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String
+  description        String?
+  commissionRate     Float // Percentage
+  cookieDuration     Int // Days
+  minimumPayout      Float    @default(50)
+  status             String   @default("active") // active, paused, inactive
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
   termsAndConditions String?
-  
+
   // Relations
-  affiliates        AffiliateUser[]
-  referrals         AffiliateReferral[]
-  payouts           AffiliatePayout[]
+  affiliates AffiliateUser[]
+  referrals  AffiliateReferral[]
+  payouts    AffiliatePayout[]
 }
 
 // Model for both registered users and external affiliates
 model AffiliateUser {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String?  @unique @db.Uuid  // Added @unique and @db.Uuid
-  name              String
-  email             String   @unique
-  isApproved        Boolean  @default(false)
-  status            String   @default("pending") // pending, active, suspended
-  commissionRate    Float?   // Custom rate (overrides program default if set)
-  balance           Float    @default(0)
-  totalEarned       Float    @default(0)
-  referralCode      String   @unique
-  bio               String?
-  paymentDetails    Json?    // Payment method details (PayPal email, bank info, etc.)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String?  @unique @db.Uuid // Added @unique and @db.Uuid
+  name           String
+  email          String   @unique
+  isApproved     Boolean  @default(false)
+  status         String   @default("pending") // pending, active, suspended
+  commissionRate Float? // Custom rate (overrides program default if set)
+  balance        Float    @default(0)
+  totalEarned    Float    @default(0)
+  referralCode   String   @unique
+  bio            String?
+  paymentDetails Json? // Payment method details (PayPal email, bank info, etc.)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
   // Relations
-  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  program           AffiliateProgram @relation(fields: [programId], references: [id])
-  programId         String   @db.Uuid  // Added @db.Uuid
-  referrals         AffiliateReferral[]
-  clicks            AffiliateClick[]
-  payouts           AffiliatePayout[]
+  user      User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  program   AffiliateProgram    @relation(fields: [programId], references: [id])
+  programId String              @db.Uuid // Added @db.Uuid
+  referrals AffiliateReferral[]
+  clicks    AffiliateClick[]
+  payouts   AffiliatePayout[]
 }
 
 model AffiliateReferral {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  referredUserId    String?  @db.Uuid  // Added @db.Uuid
-  conversionType    String   // registration, subscription, purchase, etc.
-  amount            Float    // Amount of the transaction that generated the commission
-  commissionAmount  Float    // Actual commission amount
-  status            String   @default("pending") // pending, approved, rejected, paid
-  conversionDate    DateTime @default(now())
-  notes             String?
-  
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  referredUserId   String?  @db.Uuid // Added @db.Uuid
+  conversionType   String // registration, subscription, purchase, etc.
+  amount           Float // Amount of the transaction that generated the commission
+  commissionAmount Float // Actual commission amount
+  status           String   @default("pending") // pending, approved, rejected, paid
+  conversionDate   DateTime @default(now())
+  notes            String?
+
   // Relations
-  referredUser      User?    @relation(name: "referredUser", fields: [referredUserId], references: [id], onDelete: SetNull)
-  affiliate         AffiliateUser @relation(fields: [affiliateId], references: [id])
-  affiliateId       String   @db.Uuid  // Added @db.Uuid
-  program           AffiliateProgram @relation(fields: [programId], references: [id])
-  programId         String   @db.Uuid  // Added @db.Uuid
-  payout            AffiliatePayout? @relation(fields: [payoutId], references: [id])
-  payoutId          String?  @db.Uuid  // Added @db.Uuid
+  referredUser User?            @relation(name: "referredUser", fields: [referredUserId], references: [id], onDelete: SetNull)
+  affiliate    AffiliateUser    @relation(fields: [affiliateId], references: [id])
+  affiliateId  String           @db.Uuid // Added @db.Uuid
+  program      AffiliateProgram @relation(fields: [programId], references: [id])
+  programId    String           @db.Uuid // Added @db.Uuid
+  payout       AffiliatePayout? @relation(fields: [payoutId], references: [id])
+  payoutId     String?          @db.Uuid // Added @db.Uuid
 }
 
 model AffiliateClick {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ipAddress         String?
-  userAgent         String?
-  referrer          String?
-  timestamp         DateTime @default(now())
-  converted         Boolean  @default(false)
-  
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ipAddress String?
+  userAgent String?
+  referrer  String?
+  timestamp DateTime @default(now())
+  converted Boolean  @default(false)
+
   // Relations
-  affiliate         AffiliateUser @relation(fields: [affiliateId], references: [id])
-  affiliateId       String   @db.Uuid  // Added @db.Uuid
+  affiliate   AffiliateUser @relation(fields: [affiliateId], references: [id])
+  affiliateId String        @db.Uuid // Added @db.Uuid
 }
 
 model AffiliatePayout {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  amount            Float
-  status            String   @default("pending") // pending, processing, completed, failed
-  paymentMethod     String   // paypal, bank_transfer, etc.
-  transactionId     String?
-  notes             String?
-  processedAt       DateTime?
-  createdAt         DateTime @default(now())
-  
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  amount        Float
+  status        String    @default("pending") // pending, processing, completed, failed
+  paymentMethod String // paypal, bank_transfer, etc.
+  transactionId String?
+  notes         String?
+  processedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
   // Relations
-  affiliate         AffiliateUser @relation(fields: [affiliateId], references: [id])
-  affiliateId       String   @db.Uuid  // Added @db.Uuid
-  program           AffiliateProgram @relation(fields: [programId], references: [id])
-  programId         String   @db.Uuid  // Added @db.Uuid
-  referrals         AffiliateReferral[]
+  affiliate   AffiliateUser       @relation(fields: [affiliateId], references: [id])
+  affiliateId String              @db.Uuid // Added @db.Uuid
+  program     AffiliateProgram    @relation(fields: [programId], references: [id])
+  programId   String              @db.Uuid // Added @db.Uuid
+  referrals   AffiliateReferral[]
 }
-
-
 
 // WhatsApp-specific models to add to your existing schema
 
 model WhatsAppBusiness {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String   @db.Uuid
-  businessName      String
-  phoneNumber       String
-  phoneNumberId     String   @unique
-  wabaId            String
-  accessToken       String
-  refreshToken      String?
-  tokenExpiresAt    DateTime
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String   @db.Uuid
+  businessName       String
+  phoneNumber        String
+  phoneNumberId      String   @unique
+  wabaId             String
+  accessToken        String
+  refreshToken       String?
+  tokenExpiresAt     DateTime
   verificationStatus String   @default("pending") // pending, verified, failed
-  webhookSecret     String   @default(uuid())
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  webhookSecret      String   @default(uuid())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   whatsAppRules     WhatsAppRule[]
   whatsAppStats     WhatsAppStat[]
   whatsAppTemplates WhatsAppTemplate[]
@@ -882,19 +850,19 @@ model WhatsAppBusiness {
 model WhatsAppRule {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
-  trigger      String   // keyword, new_chat, no_response, button_click, location, media, scheduled
-  triggerValue String?  // comma-separated keywords or other trigger-specific values
-  response     String   // The message to send
+  trigger      String // keyword, new_chat, no_response, button_click, location, media, scheduled
+  triggerValue String? // comma-separated keywords or other trigger-specific values
+  response     String // The message to send
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
-  userId             String   @db.Uuid
-  whatsappBusinessId String?  @db.Uuid
 
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  whatsappBusiness  WhatsAppBusiness? @relation(fields: [whatsappBusinessId], references: [id], onDelete: SetNull)
-  
+  userId             String  @db.Uuid
+  whatsappBusinessId String? @db.Uuid
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  whatsappBusiness WhatsAppBusiness? @relation(fields: [whatsappBusinessId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([whatsappBusinessId])
 }
@@ -902,124 +870,123 @@ model WhatsAppRule {
 model WhatsAppTemplate {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name       String
-  status     String   // approved, pending, rejected
-  category   String   // MARKETING, UTILITY, AUTHENTICATION
-  components Json     // Array of template components
+  status     String // approved, pending, rejected
+  category   String // MARKETING, UTILITY, AUTHENTICATION
+  components Json // Array of template components
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  
-  userId             String   @db.Uuid
-  whatsappBusinessId String?  @db.Uuid
 
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  whatsappBusiness  WhatsAppBusiness? @relation(fields: [whatsappBusinessId], references: [id], onDelete: SetNull)
-  
+  userId             String  @db.Uuid
+  whatsappBusinessId String? @db.Uuid
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  whatsappBusiness WhatsAppBusiness? @relation(fields: [whatsappBusinessId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([whatsappBusinessId])
 }
 
 model WhatsAppStat {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  date              DateTime @default(now())
-  messagesSent      Int      @default(0)
-  messagesReceived  Int      @default(0)
-  automationTriggered Int    @default(0)
-  activeUsers       Int      @default(0)
-  
-  whatsappBusinessId String   @db.Uuid
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date                DateTime @default(now())
+  messagesSent        Int      @default(0)
+  messagesReceived    Int      @default(0)
+  automationTriggered Int      @default(0)
+  activeUsers         Int      @default(0)
+
+  whatsappBusinessId String           @db.Uuid
   whatsappBusiness   WhatsAppBusiness @relation(fields: [whatsappBusinessId], references: [id], onDelete: Cascade)
-  
+
   @@index([whatsappBusinessId])
   @@index([date])
 }
 
-
 model Influencer {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String               @db.Uuid @unique
-  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Profile Information
-  name                String
-  username            String               @unique
-  bio                 String?
-  profilePicture      String?
-  location            String?
-  niche               String?
-  email               String?
-  website             String?
-  contactInfo         Json?
-  notes               String?
-  tags                String[]
-  verified            Boolean             @default(false)
-  isAvailableForHire  Boolean             @default(true)
-  platforms           String[]
+  name               String
+  username           String   @unique
+  bio                String?
+  profilePicture     String?
+  location           String?
+  niche              String?
+  email              String?
+  website            String?
+  contactInfo        Json?
+  notes              String?
+  tags               String[]
+  verified           Boolean  @default(false)
+  isAvailableForHire Boolean  @default(true)
+  platforms          String[]
 
   // Stats
-  followers           Int                 @default(0)
-  following           Int                 @default(0)
-  postsCount          Int                 @default(0)
-  engagementRate      Float               @default(0)
-  averageLikes        Int                 @default(0)
-  averageComments     Int                 @default(0)
-  totalEarnings       Float               @default(0)
-  pendingEarnings     Float               @default(0)
-  currentMonthEarnings Float              @default(0)
-  monthlyEarningsGrowth Float             @default(0)
+  followers             Int   @default(0)
+  following             Int   @default(0)
+  postsCount            Int   @default(0)
+  engagementRate        Float @default(0)
+  averageLikes          Int   @default(0)
+  averageComments       Int   @default(0)
+  totalEarnings         Float @default(0)
+  pendingEarnings       Float @default(0)
+  currentMonthEarnings  Float @default(0)
+  monthlyEarningsGrowth Float @default(0)
 
   // Business Metrics
-  brandFit            Int?
-  audienceMatch       Int?
-  estimatedCost       Float?
+  brandFit             Int?
+  audienceMatch        Int?
+  estimatedCost        Float?
   audienceDemographics Json?
-  authenticity        Int?
-  growthRate          Float?
+  authenticity         Int?
+  growthRate           Float?
 
   // Status
-  statuss             String              @default("ACTIVE")
-  status              InfluencerStatus    @default(DISCOVERED)
-  source              InfluencerSource    @default(INSTAGRAM_API)
-  sourceId            String?
-  portalSignup        Boolean             @default(false)
-  lastActive          DateTime            @default(now())
+  statuss      String           @default("ACTIVE")
+  status       InfluencerStatus @default(DISCOVERED)
+  source       InfluencerSource @default(INSTAGRAM_API)
+  sourceId     String?
+  portalSignup Boolean          @default(false)
+  lastActive   DateTime         @default(now())
 
   // AI/Discovery
-  aiDiscoveryScore    Float?
-  aiDiscoveryData     Json?
+  aiDiscoveryScore Float?
+  aiDiscoveryData  Json?
 
-  rating              Float               @default(0)
-  completedCampaigns  Int                @default(0)
+  rating             Float @default(0)
+  completedCampaigns Int   @default(0)
 
-  rates               InfluencerRates[]
-  
-  application         Application[]
-  ratings             InfluencerRating[]
+  rates InfluencerRates[]
+
+  application Application[]
+  ratings     InfluencerRating[]
 
   // Relations
-  metrics             InfluencerMetrics[]
-  campaigns           CampaignInfluencer[]
-  lists               InfluencerListInfluencer[]
-  list                InfluencerList[]    @relation("InfluencerToList")
-  socialAccounts      SocialAccount[]
-  contentTypes        ContentType[]
-  contentSamples      ContentSample[]
+  metrics            InfluencerMetrics[]
+  campaigns          CampaignInfluencer[]
+  lists              InfluencerListInfluencer[]
+  list               InfluencerList[]           @relation("InfluencerToList")
+  socialAccounts     SocialAccount[]
+  contentTypes       ContentType[]
+  contentSamples     ContentSample[]
   //rate                InfluencerRates?
-  earnings            InfluencerEarnings[]
-  applications        OpportunityApplication[]
-  chatParticipations  CollabChatParticipant[]
+  earnings           InfluencerEarnings[]
+  applications       OpportunityApplication[]
+  chatParticipations CollabChatParticipant[]
 
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Onboarding-specific fields
-  personalityType       String?
-  contentStyle          String?
-  selectedContentDays   Int[]
-  incomeGoal            Float?
-  brandCollabTypes      String[]
-  contentFrequency      String?
-  goalStatement         String?
-  onboardingCompleted   Boolean @default(false)
+  personalityType     String?
+  contentStyle        String?
+  selectedContentDays Int[]
+  incomeGoal          Float?
+  brandCollabTypes    String[]
+  contentFrequency    String?
+  goalStatement       String?
+  onboardingCompleted Boolean  @default(false)
 
   @@index([userId])
   @@index([username])
@@ -1027,53 +994,51 @@ model Influencer {
   @@index([niche])
 }
 
-
 model InfluencerMetrics {
-  id                      String               @id @default(uuid())
-  influencerId            String               @db.Uuid
-  influencer              Influencer           @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  date                    DateTime             @default(now())
-  profileViews            Int                  @default(0)
-  profileViewsGrowth      Float                @default(0)
-  profileViewsPercentile  Float                @default(0)
-  searchAppearances       Int                  @default(0)
-  searchAppearancesPercentile Float            @default(0)
-  campaignInvites         Int                  @default(0)
-  campaignInvitesGrowth   Float                @default(0)
-  brandContacts           Int                  @default(0)
-  brandContactsPercentile Float                @default(0)
-  engagementRate              Float                @default(0)
-  engagementGrowth        Float                @default(0)
-  followers               Int                  @default(0)
-  followersGrowth         Float                @default(0)
-  averageLikes            Int?
-  averageComments         Int?
-  reachEstimate           Int?
-  acceptanceRate          Float                @default(0)
-  acceptanceRateChange    Float                @default(0)
-  completionRate          Float                @default(0)
-  completionRateChange    Float                @default(0)
-  clientSatisfaction      Float                @default(0)
-  reviewCount             Int                  @default(0)
-  createdAt               DateTime             @default(now())
-  impressionsEstimate     Int?
-  impressions             Int
-  impressionsGrowth       Float
-  metricSource            String?
+  id                          String     @id @default(uuid())
+  influencerId                String     @db.Uuid
+  influencer                  Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  date                        DateTime   @default(now())
+  profileViews                Int        @default(0)
+  profileViewsGrowth          Float      @default(0)
+  profileViewsPercentile      Float      @default(0)
+  searchAppearances           Int        @default(0)
+  searchAppearancesPercentile Float      @default(0)
+  campaignInvites             Int        @default(0)
+  campaignInvitesGrowth       Float      @default(0)
+  brandContacts               Int        @default(0)
+  brandContactsPercentile     Float      @default(0)
+  engagementRate              Float      @default(0)
+  engagementGrowth            Float      @default(0)
+  followers                   Int        @default(0)
+  followersGrowth             Float      @default(0)
+  averageLikes                Int?
+  averageComments             Int?
+  reachEstimate               Int?
+  acceptanceRate              Float      @default(0)
+  acceptanceRateChange        Float      @default(0)
+  completionRate              Float      @default(0)
+  completionRateChange        Float      @default(0)
+  clientSatisfaction          Float      @default(0)
+  reviewCount                 Int        @default(0)
+  createdAt                   DateTime   @default(now())
+  impressionsEstimate         Int?
+  impressions                 Int
+  impressionsGrowth           Float
+  metricSource                String?
 
   @@index([influencerId])
   @@index([date])
 }
 
-
 model Campaign {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name              String
   description       String?
   startDate         DateTime?
   endDate           DateTime?
   budget            Float?
-  status            MyCampaignStatus    @default(DRAFT)
+  status            MyCampaignStatus     @default(DRAFT)
   goals             Json?
   brief             String?
   guidelines        String?
@@ -1081,46 +1046,45 @@ model Campaign {
   mentions          String[]
   influencers       CampaignInfluencer[]
   analytics         CampaignAnalytics[]
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  userId            String              @db.Uuid
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessProfileId String?             @db.Uuid
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  userId            String               @db.Uuid
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessProfileId String?              @db.Uuid
   businessProfile   Business?            @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
-  
+
   @@index([userId])
   @@index([status])
   @@index([businessProfileId])
 }
 
 model CampaignInfluencer {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaignId        String     @db.Uuid
-  campaign          Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  influencerId      String     @db.Uuid
-  influencer        Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  status            String     @default("invited")
-  rate              Float?
-  deliverables      Json?
-  contentUrls       String[]
-  notes             String?
-  dueDate           DateTime?
-  progress          Int        @default(0)
-  performance       Json?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId   String     @db.Uuid
+  campaign     Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencerId String     @db.Uuid
+  influencer   Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  status       String     @default("invited")
+  rate         Float?
+  deliverables Json?
+  contentUrls  String[]
+  notes        String?
+  dueDate      DateTime?
+  progress     Int        @default(0)
+  performance  Json?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
   @@unique([campaignId, influencerId])
   @@index([campaignId])
   @@index([influencerId])
 }
 
-
 model CampaignAnalytics {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaignId        String     @db.Uuid
-  campaign          Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  date              DateTime   @default(now())
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId        String   @db.Uuid
+  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  date              DateTime @default(now())
   reach             Int?
   impressions       Int?
   engagement        Int?
@@ -1130,129 +1094,129 @@ model CampaignAnalytics {
   costPerEngagement Float?
   costPerClick      Float?
   costPerConversion Float?
-  metrics           Json?      // Additional metrics
-  
+  metrics           Json? // Additional metrics
+
   @@index([campaignId])
   @@index([date])
 }
 
 model InfluencerList {
-  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name              String
-  description       String?
-  influencer        Influencer[] @relation("InfluencerToList")
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  userId            String       @db.Uuid
-  influencers       InfluencerListInfluencer[]
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id          String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  influencer  Influencer[]               @relation("InfluencerToList")
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  userId      String                     @db.Uuid
+  influencers InfluencerListInfluencer[]
+  user        User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model InfluencerImport {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fileName          String
-  recordCount       Int
-  successCount      Int
-  errorCount        Int
-  status            String     // completed, failed, partial
-  importType        String     // add_new, update_existing, replace_all
-  errors            Json?      // Error details
-  createdAt         DateTime   @default(now())
-  userId            String     @db.Uuid
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fileName     String
+  recordCount  Int
+  successCount Int
+  errorCount   Int
+  status       String // completed, failed, partial
+  importType   String // add_new, update_existing, replace_all
+  errors       Json? // Error details
+  createdAt    DateTime @default(now())
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model PortalSettings {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  portalUrl         String     @unique
-  isActive          Boolean    @default(true)
-  portalAccess      String     @default("public") // public, invite, application
-  title             String     @default("Join Our Influencer Network")
-  description       String?
-  logo              String?
-  primaryColor      String?
-  secondaryColor    String?
-  accentColor       String?
-  textColor         String?
-  customCss         String?
-  customHeader      String?
-  customFooter      String?
-  notificationEmail String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  userId            String     @db.Uuid
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  formFields        PortalFormField[]
+  id                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  portalUrl            String                      @unique
+  isActive             Boolean                     @default(true)
+  portalAccess         String                      @default("public") // public, invite, application
+  title                String                      @default("Join Our Influencer Network")
+  description          String?
+  logo                 String?
+  primaryColor         String?
+  secondaryColor       String?
+  accentColor          String?
+  textColor            String?
+  customCss            String?
+  customHeader         String?
+  customFooter         String?
+  notificationEmail    String?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  userId               String                      @db.Uuid
+  user                 User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formFields           PortalFormField[]
   verificationSettings PortalVerificationSettings?
-  
+
   @@index([userId])
 }
 
 model PortalFormField {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  label             String
-  type              String     // text, email, number, select, etc.
-  isRequired        Boolean    @default(false)
-  options           Json?      // For select fields
-  order             Int
-  portalId          String     @db.Uuid
-  portal            PortalSettings @relation(fields: [portalId], references: [id], onDelete: Cascade)
-  
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  label      String
+  type       String // text, email, number, select, etc.
+  isRequired Boolean        @default(false)
+  options    Json? // For select fields
+  order      Int
+  portalId   String         @db.Uuid
+  portal     PortalSettings @relation(fields: [portalId], references: [id], onDelete: Cascade)
+
   @@index([portalId])
 }
 
 model PortalVerificationSettings {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  emailVerification Boolean    @default(true)
-  instagramAuth     Boolean    @default(true)
-  manualReview      Boolean    @default(true)
-  metricsVerification Boolean  @default(true)
-  minFollowers      Int        @default(1000)
-  minEngagementRate Float      @default(2)
-  minAccountAge     Int        @default(3) // in months
-  autoApprove       Boolean    @default(true)
-  portalId          String     @unique @db.Uuid
-  portal            PortalSettings @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  emailVerification   Boolean        @default(true)
+  instagramAuth       Boolean        @default(true)
+  manualReview        Boolean        @default(true)
+  metricsVerification Boolean        @default(true)
+  minFollowers        Int            @default(1000)
+  minEngagementRate   Float          @default(2)
+  minAccountAge       Int            @default(3) // in months
+  autoApprove         Boolean        @default(true)
+  portalId            String         @unique @db.Uuid
+  portal              PortalSettings @relation(fields: [portalId], references: [id], onDelete: Cascade)
 }
 
 model AIDiscoverySettings {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  contentAnalysis   Boolean    @default(true)
-  audienceOverlap   Boolean    @default(true)
-  engagementPattern Boolean    @default(true)
-  brandAlignment    Boolean    @default(true)
-  growthPrediction  Boolean    @default(true)
-  fraudDetection    Boolean    @default(true)
-  trainingFrequency String     @default("weekly") // daily, weekly, monthly
-  lastTraining      DateTime?
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  contentAnalysis    Boolean   @default(true)
+  audienceOverlap    Boolean   @default(true)
+  engagementPattern  Boolean   @default(true)
+  brandAlignment     Boolean   @default(true)
+  growthPrediction   Boolean   @default(true)
+  fraudDetection     Boolean   @default(true)
+  trainingFrequency  String    @default("weekly") // daily, weekly, monthly
+  lastTraining       DateTime?
   minConfidenceScore Int       @default(75)
-  userId            String     @unique @db.Uuid
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  userId             String    @unique @db.Uuid
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model DataSourceSettings {
-  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  instagramApiActive Boolean   @default(true)
-  thirdPartyActive  Boolean    @default(true)
-  webScrapingActive Boolean    @default(true)
-  portalActive      Boolean    @default(true)
-  aiDiscoveryActive Boolean    @default(true)
-  instagramRefreshRate Int     @default(6) // hours
-  thirdPartyRefreshRate Int    @default(24) // hours
-  webScrapingRateLimit Int     @default(60) // requests per minute
-  webScrapingDailyQuota Int    @default(1000) // profiles per day
-  rawDataRetention  Int        @default(30) // days
-  processedDataRetention Int   @default(365) // days
-  userId            String     @unique @db.Uuid
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instagramApiActive     Boolean  @default(true)
+  thirdPartyActive       Boolean  @default(true)
+  webScrapingActive      Boolean  @default(true)
+  portalActive           Boolean  @default(true)
+  aiDiscoveryActive      Boolean  @default(true)
+  instagramRefreshRate   Int      @default(6) // hours
+  thirdPartyRefreshRate  Int      @default(24) // hours
+  webScrapingRateLimit   Int      @default(60) // requests per minute
+  webScrapingDailyQuota  Int      @default(1000) // profiles per day
+  rawDataRetention       Int      @default(30) // days
+  processedDataRetention Int      @default(365) // days
+  userId                 String   @unique @db.Uuid
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 enum InfluencerStatus {
@@ -1266,7 +1230,6 @@ enum InfluencerStatus {
   IDENTIFIED
 }
 
-
 enum InfluencerSource {
   INSTAGRAM_API
   THIRD_PARTY
@@ -1277,8 +1240,6 @@ enum InfluencerSource {
   IMPORT
 }
 
-
-
 enum MyCampaignStatus {
   DRAFT
   PLANNED
@@ -1288,21 +1249,20 @@ enum MyCampaignStatus {
   CANCELLED
 }
 
-
 model ImportHistory {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String   @unique @db.Uuid
-  fileName     String
-  recordsTotal Int
-  recordsAdded Int
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @unique @db.Uuid
+  fileName       String
+  recordsTotal   Int
+  recordsAdded   Int
   recordsUpdated Int
-  recordsFailed Int
-  errors       String[]
-  importOption String
-  enrichData   Boolean
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordsFailed  Int
+  errors         String[]
+  importOption   String
+  enrichData     Boolean
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model InstagramCredentials {
@@ -1317,7 +1277,6 @@ model InstagramCredentials {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-
 model InfluencerListInfluencer {
   listId       String         @unique @db.Uuid
   influencerId String         @unique @db.Uuid
@@ -1328,100 +1287,92 @@ model InfluencerListInfluencer {
   @@id([listId, influencerId])
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////
-
 
 // New models to add to your existing schema
 
-
 // Business Profile
 model BusinessProfile {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String               @unique @db.Uuid
-  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName         String
-  industry            String?
-  website             String?
-  logo                String?
-  description         String?              @db.Text
-  location            String?
-  size                String?
-  foundedYear         Int?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @unique @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  industry    String?
+  website     String?
+  logo        String?
+  description String?  @db.Text
+  location    String?
+  size        String?
+  foundedYear Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
-
-
 
 // Social Account
 model SocialAccount {
-  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  influencerId        String     @db.Uuid
-  influencer          Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  platform            String
-  username            String
-  handle              String?
-  url                 String?
-  verified            Boolean    @default(false)
-  followers           Int?
-  engagement          Float?
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  influencerId String     @db.Uuid
+  influencer   Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  platform     String
+  username     String
+  handle       String?
+  url          String?
+  verified     Boolean    @default(false)
+  followers    Int?
+  engagement   Float?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@unique([influencerId, platform])
 }
 
 // Content Type
 model ContentType {
-  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  influencerId        String     @db.Uuid
-  influencer          Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  type                String
-  createdAt           DateTime   @default(now())
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  influencerId String     @db.Uuid
+  influencer   Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  type         String
+  createdAt    DateTime   @default(now())
 
   @@unique([influencerId, type])
 }
 
 // Content Sample
 model ContentSample {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  profileId           String               @unique @db.Uuid
-  profile             Influencer           @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  url                 String
-  type                String
-  createdAt           DateTime             @default(now())
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId String     @unique @db.Uuid
+  profile   Influencer @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  url       String
+  type      String
+  createdAt DateTime   @default(now())
 }
-
 
 // Influencer Rates
 model InfluencerRates {
-  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  influencerId        String     @unique @db.Uuid
-  influencer          Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  postRate            Float      @default(0)
-  platform            String?
-  rate                Float?
-  contentType         String?
-  videoRate           Float      @default(0)
-  storyRate           Float      @default(0)
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  influencerId String     @unique @db.Uuid
+  influencer   Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  postRate     Float      @default(0)
+  platform     String?
+  rate         Float?
+  contentType  String?
+  videoRate    Float      @default(0)
+  storyRate    Float      @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
-
 
 // Influencer Earnings
 model InfluencerEarnings {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  influencerId        String               @db.Uuid
-  influencer          Influencer           @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  campaignId          String?              @db.Uuid
-  campaignName        String
-  amount              Float
-  status              String               @default("PENDING") // PENDING, PAID
-  date                DateTime             @default(now())
-  createdAt           DateTime             @default(now())
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  influencerId String     @db.Uuid
+  influencer   Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  campaignId   String?    @db.Uuid
+  campaignName String
+  amount       Float
+  status       String     @default("PENDING") // PENDING, PAID
+  date         DateTime   @default(now())
+  createdAt    DateTime   @default(now())
 
   @@index([influencerId])
   @@index([campaignId])
@@ -1429,51 +1380,50 @@ model InfluencerEarnings {
 
 // Saved Search
 model SavedSearch {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String               @db.Uuid
-  user                User                 @relation(fields: [userId], references: [id])
-  businessId          String?              @db.Uuid
-  business            Business?            @relation(fields: [businessId], references: [id], onDelete: SetNull)
-  name                String
-  filters             Json
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id])
+  businessId String?   @db.Uuid
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  name       String
+  filters    Json
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([userId])
   @@index([businessId])
 }
 
-
 // Opportunity
 model Opportunity {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  businessId          String               @db.Uuid
-  brandName           String               @default("BrandName")
-  title               String
-  requirements        String?              @db.Text
-  platforms           String[]
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessId        String        @db.Uuid
+  brandName         String        @default("BrandName")
+  title             String
+  requirements      String?       @db.Text
+  platforms         String[]
   contentType       String[]
   description       String        @db.Text
   category          String
   budgetMin         Float
   budgetMax         Float
-  budget              Json?
-  deadline            DateTime?
-  deliveryDate        DateTime?
+  budget            Json?
+  deadline          DateTime?
+  deliveryDate      DateTime?
   location          String?
   minFollowers      Int           @default(0)
   maxFollowers      Int?
-  tags                String[]
+  tags              String[]
   minEngagementRate Float         @default(0)
   business          Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   applications      Application[]
-  isPublic            Boolean              @default(true)
-  status              String               @default("OPEN") // OPEN, CLOSED, COMPLETED
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  isPublic          Boolean       @default(true)
+  status            String        @default("OPEN") // OPEN, CLOSED, COMPLETED
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   // Relations
-  application        OpportunityApplication[]
+  application OpportunityApplication[]
 
   @@index([businessId])
   @@index([status])
@@ -1481,16 +1431,16 @@ model Opportunity {
 
 // Opportunity Application
 model OpportunityApplication {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  opportunityId       String               @db.Uuid
-  opportunity         Opportunity          @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-  influencerId        String               @db.Uuid
-  influencer          Influencer           @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  message             String?              @db.Text
-  proposedRate        Float?
-  status              String               @default("PENDING") // PENDING, ACCEPTED, REJECTED
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  opportunityId String      @db.Uuid
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  influencerId  String      @db.Uuid
+  influencer    Influencer  @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  message       String?     @db.Text
+  proposedRate  Float?
+  status        String      @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@unique([opportunityId, influencerId])
   @@index([opportunityId])
@@ -1499,31 +1449,31 @@ model OpportunityApplication {
 
 // CollabChat
 model CollabChat {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title               String?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  participants        CollabChatParticipant[]
-  messages            CollabMessage[]
+  participants CollabChatParticipant[]
+  messages     CollabMessage[]
 }
 
 // CollabChatParticipant
 model CollabChatParticipant {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  chatId              String               @db.Uuid
-  chat                CollabChat           @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  userId              String               @db.Uuid
-  user                User                 @relation(fields: [userId], references: [id])
-  influencerId        String?              @db.Uuid
-  influencer          Influencer?          @relation(fields: [influencerId], references: [id], onDelete: SetNull)
-  businessId          String?              @db.Uuid
-  business            Business?            @relation(fields: [businessId], references: [id], onDelete: SetNull)
-  joinedAt            DateTime             @default(now())
-  
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chatId       String      @db.Uuid
+  chat         CollabChat  @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId       String      @db.Uuid
+  user         User        @relation(fields: [userId], references: [id])
+  influencerId String?     @db.Uuid
+  influencer   Influencer? @relation(fields: [influencerId], references: [id], onDelete: SetNull)
+  businessId   String?     @db.Uuid
+  business     Business?   @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  joinedAt     DateTime    @default(now())
+
   // Relations
-  messages            CollabMessage[]
+  messages CollabMessage[]
 
   @@unique([chatId, userId])
   @@index([chatId])
@@ -1534,61 +1484,60 @@ model CollabChatParticipant {
 
 // CollabMessage
 model CollabMessage {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  chatId              String               @db.Uuid
-  chat                CollabChat           @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  senderId            String               @db.Uuid
-  sender              CollabChatParticipant @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  content             String               @db.Text
-  contentType         String               @default("text") // text, image, file
-  readAt              DateTime?
-  createdAt           DateTime             @default(now())
-  metadata            Json?
+  id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chatId      String                @db.Uuid
+  chat        CollabChat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId    String                @db.Uuid
+  sender      CollabChatParticipant @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content     String                @db.Text
+  contentType String                @default("text") // text, image, file
+  readAt      DateTime?
+  createdAt   DateTime              @default(now())
+  metadata    Json?
 
   @@index([chatId])
   @@index([senderId])
 }
 
-
 // Add this to your schema.prisma file
 
 model OnboardingProgress {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String   @unique @db.Uuid
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userType          String   // "influencer" or "regular"
-  currentStep       Int      @default(0)
-  totalSteps        Int      @default(8)
-  lastActiveAt      DateTime @default(now())
-  completedAt       DateTime?
-  abandonedAt       DateTime?
-  remindersSent     Int      @default(0)
-  lastReminderAt    DateTime?
-  metadata          Json?    // For storing any additional data
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String    @unique @db.Uuid
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userType       String // "influencer" or "regular"
+  currentStep    Int       @default(0)
+  totalSteps     Int       @default(8)
+  lastActiveAt   DateTime  @default(now())
+  completedAt    DateTime?
+  abandonedAt    DateTime?
+  remindersSent  Int       @default(0)
+  lastReminderAt DateTime?
+  metadata       Json? // For storing any additional data
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   // Relations
-  steps             OnboardingStep[]
-  
+  steps OnboardingStep[]
+
   @@index([userType])
   @@index([completedAt])
   @@index([abandonedAt])
 }
 
 model OnboardingStep {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  progressId        String   @db.Uuid
-  progress          OnboardingProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
-  stepNumber        Int
-  stepName          String
-  status            OnboardingStepStatus @default(NOT_STARTED)
-  data              Json?    // Store step-specific data
-  startedAt         DateTime?
-  completedAt       DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  progressId  String               @db.Uuid
+  progress    OnboardingProgress   @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  stepNumber  Int
+  stepName    String
+  status      OnboardingStepStatus @default(NOT_STARTED)
+  data        Json? // Store step-specific data
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
   @@unique([progressId, stepNumber])
   @@index([progressId])
   @@index([status])
@@ -1601,7 +1550,6 @@ enum OnboardingStepStatus {
   SKIPPED
 }
 
-
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -1611,14 +1559,14 @@ model VerificationToken {
 }
 
 model VerificationCode {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   phoneNumber String
   code        String
-  type        String    @default("SMS")  // SMS, EMAIL, etc.
+  type        String   @default("SMS") // SMS, EMAIL, etc.
   expiresAt   DateTime
-  used        Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([phoneNumber])
   @@index([code])
@@ -1631,164 +1579,145 @@ model Application {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   opportunityId String   @db.Uuid
   influencerId  String   @db.Uuid
-  message       String?     @db.Text
-  proposal      Float?      // Proposed rate
-  status        String      @default("PENDING")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  message       String?  @db.Text
+  proposal      Float? // Proposed rate
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-  influencer    Influencer  @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  influencer  Influencer  @relation(fields: [influencerId], references: [id], onDelete: Cascade)
 }
 
 model InfluencerRating {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  businessId    String   @db.Uuid
-  influencerId  String   @db.Uuid
-  rating        Float
-  comment     String?   @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessId   String   @db.Uuid
+  influencerId String   @db.Uuid
+  rating       Float
+  comment      String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  business    Business?  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  influencer  Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  business   Business?  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
 
   @@unique([businessId, influencerId])
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Lead Qualification Models
 model Lead {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  automationId      String?        @db.Uuid
-  automation        Automation?    @relation(fields: [automationId], references: [id], onDelete: SetNull)
-  instagramUserId   String         
-  pageId            String
-  name              String?
-  email             String?
-  phone             String?
-  score             Int            @default(0)
-  status            LeadStatus     @default(NEW)
-  source            String         @default("instagram")
-  firstContactDate  DateTime       @default(now())
-  lastContactDate   DateTime       @default(now())
-  qualifiedDate     DateTime?
-  convertedDate     DateTime?
-  notes             String?
-  tags              String[]
-  metadata          Json?
-  sentToN8n         Boolean        @default(false)
-  n8nWorkflowId     String?
-  n8nExecutionId    String?
-  interactions      LeadInteraction[]
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String                 @db.Uuid
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  automationId         String?                @db.Uuid
+  automation           Automation?            @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  instagramUserId      String
+  pageId               String
+  name                 String?
+  email                String?
+  phone                String?
+  score                Int                    @default(0)
+  status               LeadStatus             @default(NEW)
+  source               String                 @default("instagram")
+  firstContactDate     DateTime               @default(now())
+  lastContactDate      DateTime               @default(now())
+  qualifiedDate        DateTime?
+  convertedDate        DateTime?
+  notes                String?
+  tags                 String[]
+  metadata             Json?
+  sentToN8n            Boolean                @default(false)
+  n8nWorkflowId        String?
+  n8nExecutionId       String?
+  interactions         LeadInteraction[]
   revenueOpportunities RevenueOpportunity[]
   scheduledActions     ScheduledAction[]
-  qualificationData LeadQualificationData?
+  qualificationData    LeadQualificationData?
 
-  notifications    Notification[]
-  alerts           Alert[]
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  notifications Notification[]
+  alerts        Alert[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
+  @@unique([instagramUserId, pageId], name: "instagramUserId_pageId")
   @@index([userId])
   @@index([automationId])
   @@index([status])
   @@index([instagramUserId])
   @@index([sentToN8n])
-  @@unique([instagramUserId, pageId], name: "instagramUserId_pageId")
 }
 
 model LeadInteraction {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  leadId            String         @db.Uuid
-  lead              Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  type              String         // message, comment, reaction
-  content           String?
-  direction         String         // inbound, outbound
-  sentiment         Float?         // -1.0 to 1.0
-  intent            Json?          // Detected intents like purchase_intent, information_request
-  timestamp         DateTime       @default(now())
-  metadata          Json?
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId    String   @db.Uuid
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      String // message, comment, reaction
+  content   String?
+  direction String // inbound, outbound
+  sentiment Float? // -1.0 to 1.0
+  intent    Json? // Detected intents like purchase_intent, information_request
+  timestamp DateTime @default(now())
+  metadata  Json?
 
   @@index([leadId])
   @@index([timestamp])
 }
 
 model LeadQualificationData {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  leadId            String         @unique @db.Uuid
-  lead              Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  engagementScore   Int            @default(0)
-  intentScore       Int            @default(0)
-  sentimentScore    Int            @default(0)
-  demographicScore  Int            @default(0)
-  frequencyScore    Int            @default(0)
-  recencyScore      Int            @default(0)
-  revenueScore     Int?     @default(0)
-  leadTier         String?  // PLATINUM, GOLD, SILVER, BRONZE
-  estimatedValue   Decimal? @db.Decimal(10, 2)
-  roi              Decimal? @db.Decimal(5, 2)
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId            String   @unique @db.Uuid
+  lead              Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  engagementScore   Int      @default(0)
+  intentScore       Int      @default(0)
+  sentimentScore    Int      @default(0)
+  demographicScore  Int      @default(0)
+  frequencyScore    Int      @default(0)
+  recencyScore      Int      @default(0)
+  revenueScore      Int?     @default(0)
+  leadTier          String? // PLATINUM, GOLD, SILVER, BRONZE
+  estimatedValue    Decimal? @db.Decimal(10, 2)
+  roi               Decimal? @db.Decimal(5, 2)
   qualificationData Json?
   aiAnalysis        Json?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model LeadScoringRule {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  description       String?
-  ruleType          String         // keyword, sentiment, frequency, recency, etc.
-  condition         String         // contains, equals, greater_than, etc.
-  value             String         // The value to compare against
-  score             Int            // Points to add/subtract when rule matches
-  isActive          Boolean        @default(true)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  ruleType    String // keyword, sentiment, frequency, recency, etc.
+  condition   String // contains, equals, greater_than, etc.
+  value       String // The value to compare against
+  score       Int // Points to add/subtract when rule matches
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([userId])
   @@index([ruleType])
 }
 
 model N8nWorkflow {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  description       String?
-  workflowId        String         // ID in n8n system
-  triggerUrl        String?        // Webhook URL to trigger this workflow
-  isActive          Boolean        @default(true)
-  lastExecuted      DateTime?
-  executionCount    Int            @default(0)
-  successCount      Int            @default(0)
-  failureCount      Int            @default(0)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String    @db.Uuid
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  workflowId     String // ID in n8n system
+  triggerUrl     String? // Webhook URL to trigger this workflow
+  isActive       Boolean   @default(true)
+  lastExecuted   DateTime?
+  executionCount Int       @default(0)
+  successCount   Int       @default(0)
+  failureCount   Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([userId])
   @@index([workflowId])
@@ -1804,48 +1733,43 @@ enum LeadStatus {
   LOST
 }
 
-
-
 /////////////////////
-
-
-
 
 // n8n Integration Models
 model N8nConnection {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  n8nUrl            String
-  apiKey            String
-  isActive          Boolean        @default(true)
-  lastConnected     DateTime       @default(now())
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  workflows         N8nWorkflowConfig[]
+  id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String              @db.Uuid
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  n8nUrl        String
+  apiKey        String
+  isActive      Boolean             @default(true)
+  lastConnected DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  workflows     N8nWorkflowConfig[]
 
   @@index([userId])
 }
 
 model N8nWorkflowConfig {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  connectionId      String         @db.Uuid
-  connection        N8nConnection  @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-  name              String
-  description       String?
-  workflowId        String         // ID in n8n system
-  workflowType      WorkflowType   @default(LEAD_QUALIFICATION)
-  triggerUrl        String         // Webhook URL to trigger this workflow
-  webhookUrl        String?        // Webhook URL for n8n to call back
-  isActive          Boolean        @default(true)
-  lastExecuted      DateTime?
-  executionCount    Int            @default(0)
-  successCount      Int            @default(0)
-  failureCount      Int            @default(0)
-  configuration     Json?          // Workflow-specific configuration
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  connectionId   String        @db.Uuid
+  connection     N8nConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  workflowId     String // ID in n8n system
+  workflowType   WorkflowType  @default(LEAD_QUALIFICATION)
+  triggerUrl     String // Webhook URL to trigger this workflow
+  webhookUrl     String? // Webhook URL for n8n to call back
+  isActive       Boolean       @default(true)
+  lastExecuted   DateTime?
+  executionCount Int           @default(0)
+  successCount   Int           @default(0)
+  failureCount   Int           @default(0)
+  configuration  Json? // Workflow-specific configuration
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@index([connectionId])
   @@index([workflowType])
@@ -1853,37 +1777,36 @@ model N8nWorkflowConfig {
 
 // CRM Integration Models
 model CrmIntegration {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider          CrmProvider
-  name              String
-  apiKey            String
-  apiSecret         String?
-  baseUrl           String?
-  isActive          Boolean        @default(true)
-  lastSynced        DateTime?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  mappings          CrmFieldMapping[]
-  accessToken      String?  // For OAuth integrations
-  refreshToken     String?  // For OAuth token refresh
-  tokenExpiresAt   DateTime? // Token expiration
-  metadata          Json?
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String            @db.Uuid
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       CrmProvider
+  name           String
+  apiKey         String
+  apiSecret      String?
+  baseUrl        String?
+  isActive       Boolean           @default(true)
+  lastSynced     DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  mappings       CrmFieldMapping[]
+  accessToken    String? // For OAuth integrations
+  refreshToken   String? // For OAuth token refresh
+  tokenExpiresAt DateTime? // Token expiration
+  metadata       Json?
 
   @@index([userId])
   @@index([provider])
 }
 
-
 model CrmFieldMapping {
   id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   integrationId     String         @db.Uuid
   integration       CrmIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  localField        String         // Field in our system
-  remoteField       String         // Field in CRM
+  localField        String // Field in our system
+  remoteField       String // Field in CRM
   isRequired        Boolean        @default(false)
-  transformFunction String?        // Optional JS function to transform data
+  transformFunction String? // Optional JS function to transform data
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
@@ -1892,62 +1815,62 @@ model CrmFieldMapping {
 
 // Enhanced Lead Qualification Models
 model LeadQualificationRule {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  description       String?
-  scoreType         ScoreType      @default(OVERALL)
-  operator          RuleOperator   @default(GREATER_THAN)
-  threshold         Int            // Value to compare against
-  weight            Int            @default(1)  // Importance of this rule
-  isActive          Boolean        @default(true)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String       @db.Uuid
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  scoreType   ScoreType    @default(OVERALL)
+  operator    RuleOperator @default(GREATER_THAN)
+  threshold   Int // Value to compare against
+  weight      Int          @default(1) // Importance of this rule
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([userId])
   @@index([scoreType])
 }
 
 model LeadNurturingSequence {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  description       String?
-  isActive          Boolean        @default(true)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  steps             LeadNurturingStep[]
+  id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String              @db.Uuid
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  steps       LeadNurturingStep[]
 
   @@index([userId])
 }
 
 model LeadNurturingStep {
-  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sequenceId        String               @db.Uuid
-  sequence          LeadNurturingSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
-  stepNumber        Int
-  name              String
-  type              NurturingStepType    @default(MESSAGE)
-  content           String?
-  delayDays         Int                  @default(0)
-  delayHours        Int                  @default(0)
-  conditions        Json?                // Conditions for executing this step
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  id         String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sequenceId String                @db.Uuid
+  sequence   LeadNurturingSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  stepNumber Int
+  name       String
+  type       NurturingStepType     @default(MESSAGE)
+  content    String?
+  delayDays  Int                   @default(0)
+  delayHours Int                   @default(0)
+  conditions Json? // Conditions for executing this step
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
 
   @@index([sequenceId])
   @@index([type])
 }
 
 model LeadActivity {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  leadId            String         @db.Uuid
-  activityType      String         // email_sent, message_sent, viewed_page, etc.
-  description       String?
-  metadata          Json?
-  timestamp         DateTime       @default(now())
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId       String   @db.Uuid
+  activityType String // email_sent, message_sent, viewed_page, etc.
+  description  String?
+  metadata     Json?
+  timestamp    DateTime @default(now())
 
   @@index([leadId])
   @@index([activityType])
@@ -1955,13 +1878,13 @@ model LeadActivity {
 }
 
 model LeadTag {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String         @db.Uuid
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  color             String         @default("#6366F1") // Default indigo color
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  color     String   @default("#6366F1") // Default indigo color
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, name])
   @@index([userId])
@@ -2012,69 +1935,63 @@ enum NurturingStepType {
   CRM_UPDATE
 }
 
-
 //////////////////
 
 ////////////////////////
 
-
 // New models for n8n Integration Platform
 
 model WorkflowTemplate {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name              String
-  description       String              @db.Text
-  category          WorkflowCategory
-  icon              String?
-  featured          Boolean             @default(false)
-  popular           Boolean             @default(false)
-  complexity        WorkflowComplexity  @default(MEDIUM)
-  estimatedSetupTime Int                @default(15) // in minutes
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  description          String             @db.Text
+  category             WorkflowCategory
+  icon                 String?
+  featured             Boolean            @default(false)
+  popular              Boolean            @default(false)
+  complexity           WorkflowComplexity @default(MEDIUM)
+  estimatedSetupTime   Int                @default(15) // in minutes
   requiredIntegrations String[]
-  configurationSchema Json               // JSON schema for configuration form
-  n8nTemplateId     String?             // ID of template in n8n system
-  visualRepresentation Json?            // Simplified visual representation of workflow steps
-  expectedOutcomes  String[]            // Array of expected outcomes
-  useCases          String[]            // Array of use cases
-  createdAt         DateTime            @default(now())
-  isVerified        Boolean?             @default(false)
-  lastVerified      DateTime?           
-  updatedAt         DateTime            @updatedAt
-  isActive          Boolean             @default(true)
-  
+  configurationSchema  Json // JSON schema for configuration form
+  n8nTemplateId        String? // ID of template in n8n system
+  visualRepresentation Json? // Simplified visual representation of workflow steps
+  expectedOutcomes     String[] // Array of expected outcomes
+  useCases             String[] // Array of use cases
+  createdAt            DateTime           @default(now())
+  isVerified           Boolean?           @default(false)
+  lastVerified         DateTime?
+  updatedAt            DateTime           @updatedAt
+  isActive             Boolean            @default(true)
+
   // Relations
-  userWorkflows     UserWorkflow[]
-  customRequests    CustomWorkflowRequest[]
+  userWorkflows  UserWorkflow[]
+  customRequests CustomWorkflowRequest[]
 
   @@index([category])
   @@index([featured])
   @@index([popular])
 }
 
-
-
-
-
 model UserWorkflow {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String              @db.Uuid
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  templateId        String              @db.Uuid
-  template          WorkflowTemplate    @relation(fields: [templateId], references: [id], onDelete: Restrict)
-  name              String              // User-defined name
-  configuration     Json                // User's configuration values
-  n8nWorkflowId     String?             // ID of the actual workflow in n8n
-  webhookUrl        String?             // Webhook URL for this workflow instance
-  status            WorkflowStatus      @default(DRAFT)
-  isActive          Boolean             @default(false)
-  lastActivated     DateTime?
-  lastDeactivated   DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String           @db.Uuid
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId      String           @db.Uuid
+  template        WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  name            String // User-defined name
+  configuration   Json // User's configuration values
+  n8nWorkflowId   String? // ID of the actual workflow in n8n
+  webhookUrl      String? // Webhook URL for this workflow instance
+  status          WorkflowStatus   @default(DRAFT)
+  isActive        Boolean          @default(false)
+  lastActivated   DateTime?
+  lastDeactivated DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
   // Relations
-  executions        WorkflowExecution[]
-  credentials       WorkflowCredential[]
+  executions  WorkflowExecution[]
+  credentials WorkflowCredential[]
 
   @@index([userId])
   @@index([templateId])
@@ -2083,23 +2000,23 @@ model UserWorkflow {
 }
 
 model WorkflowExecution {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  workflowId        String              @db.Uuid
-  workflow          UserWorkflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  n8nExecutionId    String?             // ID of execution in n8n
-  status            ExecutionStatus     @default(PENDING)
-  startedAt         DateTime            @default(now())
-  completedAt       DateTime?
-  duration          Int?                // Duration in milliseconds
-  success           Boolean?
-  errorMessage      String?
-  inputData         Json?               // Input data (sanitized)
-  outputData        Json?               // Output data (sanitized)
-  resourceUsage     Json?               // CPU, memory, etc.
-  businessImpact    Json?               // Business metrics (emails sent, etc.)
-  
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId     String          @db.Uuid
+  workflow       UserWorkflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  n8nExecutionId String? // ID of execution in n8n
+  status         ExecutionStatus @default(PENDING)
+  startedAt      DateTime        @default(now())
+  completedAt    DateTime?
+  duration       Int? // Duration in milliseconds
+  success        Boolean?
+  errorMessage   String?
+  inputData      Json? // Input data (sanitized)
+  outputData     Json? // Output data (sanitized)
+  resourceUsage  Json? // CPU, memory, etc.
+  businessImpact Json? // Business metrics (emails sent, etc.)
+
   // Relations
-  events            ExecutionEvent[]
+  events ExecutionEvent[]
 
   @@index([workflowId])
   @@index([status])
@@ -2107,15 +2024,15 @@ model WorkflowExecution {
 }
 
 model ExecutionEvent {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  executionId       String              @db.Uuid
-  execution         WorkflowExecution   @relation(fields: [executionId], references: [id], onDelete: Cascade)
-  timestamp         DateTime            @default(now())
-  eventType         String              // step_started, step_completed, error, etc.
-  nodeId            String?             // ID of the node in n8n
-  nodeName          String?             // Name of the node in n8n
-  message           String?
-  data              Json?
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  executionId String            @db.Uuid
+  execution   WorkflowExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  timestamp   DateTime          @default(now())
+  eventType   String // step_started, step_completed, error, etc.
+  nodeId      String? // ID of the node in n8n
+  nodeName    String? // Name of the node in n8n
+  message     String?
+  data        Json?
 
   @@index([executionId])
   @@index([timestamp])
@@ -2123,89 +2040,88 @@ model ExecutionEvent {
 }
 
 model WorkflowCredential {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  workflowId        String              @db.Uuid
-  workflow          UserWorkflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  name              String              // Name of the credential
-  type              String              // api_key, oauth, etc.
-  value             String              // Encrypted credential value
-  expiresAt         DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId String       @db.Uuid
+  workflow   UserWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  name       String // Name of the credential
+  type       String // api_key, oauth, etc.
+  value      String // Encrypted credential value
+  expiresAt  DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
   @@index([workflowId])
 }
 
-
 model CustomWorkflowRequest {
-  id                String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String                  @db.Uuid
-  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  templateId        String?                 @db.Uuid
-  template          WorkflowTemplate?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  title             String
-  businessObjective String                  @db.Text
+  id                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String              @db.Uuid
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId           String?             @db.Uuid
+  template             WorkflowTemplate?   @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  title                String
+  businessObjective    String              @db.Text
   requiredIntegrations String[]
-  processDescription String                 @db.Text
-  exampleDataUrl    String?                 // URL to uploaded example data
-  budget            Float?
-  urgency           RequestUrgency          @default(NORMAL)
-  status            CustomRequestStatus     @default(SUBMITTED)
-  aiSuggestions     Json?                   // AI-generated suggestions
-  adminNotes        String?                 @db.Text
-  estimatedDelivery DateTime?
-  actualDelivery    DateTime?
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
-  
+  processDescription   String              @db.Text
+  exampleDataUrl       String? // URL to uploaded example data
+  budget               Float?
+  urgency              RequestUrgency      @default(NORMAL)
+  status               CustomRequestStatus @default(SUBMITTED)
+  aiSuggestions        Json? // AI-generated suggestions
+  adminNotes           String?             @db.Text
+  estimatedDelivery    DateTime?
+  actualDelivery       DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
   // Relations
-  messages          CustomRequestMessage[]
+  messages CustomRequestMessage[]
 
   @@index([userId])
   @@index([status])
 }
 
 model CustomRequestMessage {
-  id                String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  requestId         String                  @db.Uuid
-  request           CustomWorkflowRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  senderId          String                  @db.Uuid
-  isFromAdmin       Boolean                 @default(false)
-  message           String                  @db.Text
-  attachmentUrl     String?
-  createdAt         DateTime                @default(now())
+  id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestId     String                @db.Uuid
+  request       CustomWorkflowRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  senderId      String                @db.Uuid
+  isFromAdmin   Boolean               @default(false)
+  message       String                @db.Text
+  attachmentUrl String?
+  createdAt     DateTime              @default(now())
 
   @@index([requestId])
   @@index([createdAt])
 }
 
 model WorkflowAnalytics {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String              @db.Uuid
-  date              DateTime            @default(now())
-  totalExecutions   Int                 @default(0)
-  successfulExecutions Int              @default(0)
-  failedExecutions  Int                 @default(0)
-  averageDuration   Float?              // Average duration in milliseconds
-  resourceUsage     Json?               // Aggregated resource usage
-  businessImpact    Json?               // Aggregated business metrics
-  
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String   @db.Uuid
+  date                 DateTime @default(now())
+  totalExecutions      Int      @default(0)
+  successfulExecutions Int      @default(0)
+  failedExecutions     Int      @default(0)
+  averageDuration      Float? // Average duration in milliseconds
+  resourceUsage        Json? // Aggregated resource usage
+  businessImpact       Json? // Aggregated business metrics
+
   @@unique([userId, date])
   @@index([userId])
   @@index([date])
 }
 
 model WorkflowNotification {
-  id                String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String                  @db.Uuid
-  workflowId        String?                 @db.Uuid
-  executionId       String?                 @db.Uuid
-  type              NotificationType
-  title             String
-  message           String
-  isRead            Boolean                 @default(false)
-  createdAt         DateTime                @default(now())
-  
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String           @db.Uuid
+  workflowId  String?          @db.Uuid
+  executionId String?          @db.Uuid
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
   @@index([userId])
   @@index([workflowId])
   @@index([isRead])
@@ -2280,29 +2196,21 @@ enum NotificationType {
   SYSTEM_NOTIFICATION
 }
 
-
-
-
-
-
-
 model BusinessProfileDescription {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String    @db.Uuid
-  automationId String   @db.Uuid @unique
-  content     String    @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @db.Uuid
+  automationId String   @unique @db.Uuid
+  content      String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  automation  Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([automationId])
 }
-
-
 
 enum SUBSCRIPTION_PLAN {
   FREE
@@ -2319,63 +2227,54 @@ enum SUBSCRIPTION_STATUS {
   TRIALING
 }
 
-
-
-
-
 model Subscription {
-  id                      String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  User                    User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                  String?             @unique @db.Uuid
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt @default(now())
-  
-  plan                    SUBSCRIPTION_PLAN   @default(FREE)
-  status                  SUBSCRIPTION_STATUS @default(ACTIVE)
-  
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?  @unique @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  plan   SUBSCRIPTION_PLAN   @default(FREE)
+  status SUBSCRIPTION_STATUS @default(ACTIVE)
+
   // Stripe specific fields
-  customerId              String?             @unique
-  stripeSubscriptionId    String?             @unique
-  stripePriceId           String?
+  customerId               String?   @unique
+  stripeSubscriptionId     String?   @unique
+  stripePriceId            String?
   stripeCurrentPeriodStart DateTime?
   stripeCurrentPeriodEnd   DateTime?
-  
+
   // Payment method info
-  paymentMethodId         String?
-  paymentMethodType       String?
-  paymentMethodLast4      String?
-  
+  paymentMethodId    String?
+  paymentMethodType  String?
+  paymentMethodLast4 String?
+
   // Trial information
-  trialStart              DateTime?
-  trialEnd                DateTime?
-  
+  trialStart DateTime?
+  trialEnd   DateTime?
+
   // Cancellation fields
-  cancelAtPeriodEnd       Boolean             @default(false)
-  canceledAt              DateTime?
+  cancelAtPeriodEnd Boolean   @default(false)
+  canceledAt        DateTime?
 }
-
-
-
 
 /////NEWESSST
 
-
-
 model TriggerExecution {
-  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  triggerId         String      @db.Uuid
-  trigger           Trigger     @relation(fields: [triggerId], references: [id], onDelete: Cascade)
-  automationId      String      @db.Uuid
-  userId            String      @db.Uuid
-  messageContent    String      // The message that triggered this
-  triggerType       TriggerMode
-  confidence        Float?      // Confidence score (0-1)
-  reason            String?     // Why this trigger fired
-  success           Boolean     @default(false)
-  responseTime      Int?        // Time to process in milliseconds
-  errorMessage      String?
-  metadata          Json?       // Additional execution data
-  timestamp         DateTime    @default(now())
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  triggerId      String      @db.Uuid
+  trigger        Trigger     @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+  automationId   String      @db.Uuid
+  userId         String      @db.Uuid
+  messageContent String // The message that triggered this
+  triggerType    TriggerMode
+  confidence     Float? // Confidence score (0-1)
+  reason         String? // Why this trigger fired
+  success        Boolean     @default(false)
+  responseTime   Int? // Time to process in milliseconds
+  errorMessage   String?
+  metadata       Json? // Additional execution data
+  timestamp      DateTime    @default(now())
 
   @@index([triggerId])
   @@index([automationId])
@@ -2385,17 +2284,17 @@ model TriggerExecution {
 }
 
 model TriggerAnalytics {
-  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  triggerId         String      @db.Uuid
-  trigger           Trigger     @relation(fields: [triggerId], references: [id], onDelete: Cascade)
-  date              DateTime    @default(now())
-  totalExecutions   Int         @default(0)
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  triggerId            String   @db.Uuid
+  trigger              Trigger  @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+  date                 DateTime @default(now())
+  totalExecutions      Int      @default(0)
   successfulExecutions Int      @default(0)
-  failedExecutions  Int         @default(0)
-  averageConfidence Float?      // Average confidence score
-  averageResponseTime Int?      // Average response time in ms
-  spamFiltered      Int         @default(0) // Messages filtered as spam
-  conversionRate    Float?      // Percentage that led to meaningful conversations
+  failedExecutions     Int      @default(0)
+  averageConfidence    Float? // Average confidence score
+  averageResponseTime  Int? // Average response time in ms
+  spamFiltered         Int      @default(0) // Messages filtered as spam
+  conversionRate       Float? // Percentage that led to meaningful conversations
 
   @@unique([triggerId, date])
   @@index([triggerId])
@@ -2403,16 +2302,16 @@ model TriggerAnalytics {
 }
 
 model AIAnalysisCache {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  messageHash       String   @unique // Hash of the message content
-  analysis          Json     // Cached AI analysis result
-  confidence        Float    // Confidence score from AI
-  intent            String?  // Detected intent
-  sentiment         Float?   // Sentiment score
-  isSpam            Boolean  @default(false)
-  businessRelevant  Boolean  @default(true)
-  expiresAt         DateTime // Cache expiration
-  createdAt         DateTime @default(now())
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageHash      String   @unique // Hash of the message content
+  analysis         Json // Cached AI analysis result
+  confidence       Float // Confidence score from AI
+  intent           String? // Detected intent
+  sentiment        Float? // Sentiment score
+  isSpam           Boolean  @default(false)
+  businessRelevant Boolean  @default(true)
+  expiresAt        DateTime // Cache expiration
+  createdAt        DateTime @default(now())
 
   @@index([messageHash])
   @@index([expiresAt])
@@ -2420,41 +2319,41 @@ model AIAnalysisCache {
 }
 
 model BusinessHours {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String   @unique @db.Uuid
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  timezone          String   @default("UTC")
-  mondayStart       String?  // "09:00"
-  mondayEnd         String?  // "17:00"
-  tuesdayStart      String?
-  tuesdayEnd        String?
-  wednesdayStart    String?
-  wednesdayEnd      String?
-  thursdayStart     String?
-  thursdayEnd       String?
-  fridayStart       String?
-  fridayEnd         String?
-  saturdayStart     String?
-  saturdayEnd       String?
-  sundayStart       String?
-  sundayEnd         String?
-  holidays          Json?    // Array of holiday dates
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @unique @db.Uuid
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timezone       String   @default("UTC")
+  mondayStart    String? // "09:00"
+  mondayEnd      String? // "17:00"
+  tuesdayStart   String?
+  tuesdayEnd     String?
+  wednesdayStart String?
+  wednesdayEnd   String?
+  thursdayStart  String?
+  thursdayEnd    String?
+  fridayStart    String?
+  fridayEnd      String?
+  saturdayStart  String?
+  saturdayEnd    String?
+  sundayStart    String?
+  sundayEnd      String?
+  holidays       Json? // Array of holiday dates
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model WebhookPerformance {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String   @db.Uuid
-  date              DateTime @default(now())
-  totalRequests     Int      @default(0)
-  successfulRequests Int     @default(0)
-  failedRequests    Int      @default(0)
-  averageResponseTime Int?   // Average response time in ms
-  triggerBreakdown  Json?    // Breakdown by trigger type
-  errorBreakdown    Json?    // Breakdown of error types
-  peakHour          Int?     // Hour with most activity (0-23)
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String   @db.Uuid
+  date                DateTime @default(now())
+  totalRequests       Int      @default(0)
+  successfulRequests  Int      @default(0)
+  failedRequests      Int      @default(0)
+  averageResponseTime Int? // Average response time in ms
+  triggerBreakdown    Json? // Breakdown by trigger type
+  errorBreakdown      Json? // Breakdown of error types
+  peakHour            Int? // Hour with most activity (0-23)
 
   @@unique([userId, date])
   @@index([userId])
@@ -2481,50 +2380,42 @@ model ProcessedMessage {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   messageKey   String   @unique
   createdAt    DateTime @default(now())
-  processCount Int      @default(1)  // NEW: Track how many times we've seen this message
-  updatedAt    DateTime @updatedAt   // NEW: Track when it was last updated
+  processCount Int      @default(1) // NEW: Track how many times we've seen this message
+  updatedAt    DateTime @updatedAt // NEW: Track when it was last updated
 
   @@index([messageKey])
   @@index([createdAt])
-  @@index([processCount])  // NEW: Index for analytics queries
+  @@index([processCount]) // NEW: Index for analytics queries
 }
-
-
-
-
-
-
-
-
 
 // Add these NEW models to your existing schema.prisma file
 
 // Multi-tenant Human Handoff Models
 model HumanHandoff {
-  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String            @db.Uuid
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessId        String            @db.Uuid // NEW: Business isolation
-  business          Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  pageId            String            // Instagram page ID
-  senderId          String            // Customer/sender ID
-  automationId      String?           @db.Uuid
-  automation        Automation?       @relation(fields: [automationId], references: [id], onDelete: SetNull)
-  reason            String            // Why handoff was initiated
-  priority          HandoffPriority   @default(MEDIUM)
-  status            HandoffStatus     @default(PENDING)
-  context           String?           @db.Text // Conversation context, customer info, etc.
-  assignedAgentId   String?           @db.Uuid
-  assignedAgent     Agent?            @relation(fields: [assignedAgentId], references: [id], onDelete: SetNull)
-  createdAt         DateTime          @default(now())
-  assignedAt        DateTime?
-  completedAt       DateTime?
-  resolution        String?           @db.Text
-  customerWaitTime  Int?              // Time in seconds customer waited for agent
-  n8nWorkflowId     String?           // ID of n8n workflow that processed this handoff
-  n8nExecutionId    String?           // ID of n8n execution
-  messages          HandoffMessage[]
-  notes             HandoffNote[]
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String           @db.Uuid
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId       String           @db.Uuid // NEW: Business isolation
+  business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  pageId           String // Instagram page ID
+  senderId         String // Customer/sender ID
+  automationId     String?          @db.Uuid
+  automation       Automation?      @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  reason           String // Why handoff was initiated
+  priority         HandoffPriority  @default(MEDIUM)
+  status           HandoffStatus    @default(PENDING)
+  context          String?          @db.Text // Conversation context, customer info, etc.
+  assignedAgentId  String?          @db.Uuid
+  assignedAgent    Agent?           @relation(fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  createdAt        DateTime         @default(now())
+  assignedAt       DateTime?
+  completedAt      DateTime?
+  resolution       String?          @db.Text
+  customerWaitTime Int? // Time in seconds customer waited for agent
+  n8nWorkflowId    String? // ID of n8n workflow that processed this handoff
+  n8nExecutionId   String? // ID of n8n execution
+  messages         HandoffMessage[]
+  notes            HandoffNote[]
 
   @@index([userId])
   @@index([businessId]) // NEW: Index for business isolation
@@ -2536,48 +2427,48 @@ model HumanHandoff {
 }
 
 model HandoffMessage {
-  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  handoffId         String       @db.Uuid
-  handoff           HumanHandoff @relation(fields: [handoffId], references: [id], onDelete: Cascade)
-  content           String       @db.Text
-  isFromCustomer    Boolean      @default(false)
-  isFromAgent       Boolean      @default(false)
-  isSystemMessage   Boolean      @default(false)
-  timestamp         DateTime     @default(now())
-  
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  handoffId       String       @db.Uuid
+  handoff         HumanHandoff @relation(fields: [handoffId], references: [id], onDelete: Cascade)
+  content         String       @db.Text
+  isFromCustomer  Boolean      @default(false)
+  isFromAgent     Boolean      @default(false)
+  isSystemMessage Boolean      @default(false)
+  timestamp       DateTime     @default(now())
+
   @@index([handoffId])
   @@index([timestamp])
 }
 
 model HandoffNote {
-  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  handoffId         String       @db.Uuid
-  handoff           HumanHandoff @relation(fields: [handoffId], references: [id], onDelete: Cascade)
-  content           String       @db.Text
-  createdBy         String       // User ID or system
-  createdAt         DateTime     @default(now())
-  
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  handoffId String       @db.Uuid
+  handoff   HumanHandoff @relation(fields: [handoffId], references: [id], onDelete: Cascade)
+  content   String       @db.Text
+  createdBy String // User ID or system
+  createdAt DateTime     @default(now())
+
   @@index([handoffId])
 }
 
 model Agent {
-  id                    String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                  String
-  email                 String                      @unique
-  slackUserId           String?                     // Slack user ID for notifications
-  isActive              Boolean                     @default(true)
-  isAvailable           Boolean                     @default(true)
-  maxConcurrent         Int                         @default(3) // Maximum concurrent handoffs
-  skills                String[]                    // e.g., ["sales", "support", "technical"]
-  languages             String[]                    // e.g., ["en", "es", "fr"]
-  timezone              String                      @default("UTC")
-  workingHours          Json?                       // Working hours configuration
-  createdAt             DateTime                    @default(now())
-  updatedAt             DateTime                    @updatedAt
-  handoffs              HumanHandoff[]
-  businessAssignments   AgentBusinessAssignment[]   // NEW: Business assignments
-  performance           AgentPerformance[]          // NEW: Performance tracking
-  
+  id                  String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  email               String                    @unique
+  slackUserId         String? // Slack user ID for notifications
+  isActive            Boolean                   @default(true)
+  isAvailable         Boolean                   @default(true)
+  maxConcurrent       Int                       @default(3) // Maximum concurrent handoffs
+  skills              String[] // e.g., ["sales", "support", "technical"]
+  languages           String[] // e.g., ["en", "es", "fr"]
+  timezone            String                    @default("UTC")
+  workingHours        Json? // Working hours configuration
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  handoffs            HumanHandoff[]
+  businessAssignments AgentBusinessAssignment[] // NEW: Business assignments
+  performance         AgentPerformance[] // NEW: Performance tracking
+
   @@index([isActive, isAvailable])
   @@index([skills])
   @@index([languages])
@@ -2585,76 +2476,76 @@ model Agent {
 
 // NEW: Agent-Business assignment model for multi-tenancy
 model AgentBusinessAssignment {
-  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  agentId           String      @db.Uuid
-  agent             Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  businessId        String      @db.Uuid
-  business          Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  isActive          Boolean     @default(true)
-  role              String      @default("agent") // agent, supervisor, manager
-  assignedAt        DateTime    @default(now())
-  assignedBy        String?     @db.Uuid // User who assigned this agent
-  
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agentId    String   @db.Uuid
+  agent      Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  businessId String   @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  isActive   Boolean  @default(true)
+  role       String   @default("agent") // agent, supervisor, manager
+  assignedAt DateTime @default(now())
+  assignedBy String?  @db.Uuid // User who assigned this agent
+
   @@unique([agentId, businessId])
   @@index([businessId, isActive])
   @@index([agentId, isActive])
 }
 
 model HandoffSettings {
-  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String        @unique @db.Uuid
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessId        String        @db.Uuid // NEW: Business reference
-  business          Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  isEnabled         Boolean       @default(true)
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String          @unique @db.Uuid
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId        String          @db.Uuid // NEW: Business reference
+  business          Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  isEnabled         Boolean         @default(true)
   notificationEmail String?
   slackWebhookUrl   String?
-  slackChannel      String?       // Business-specific channel
+  slackChannel      String? // Business-specific channel
   teamsWebhookUrl   String?
-  n8nWorkflowId     String?       // ID of n8n workflow for handoffs
+  n8nWorkflowId     String? // ID of n8n workflow for handoffs
   defaultPriority   HandoffPriority @default(MEDIUM)
-  businessHoursOnly Boolean       @default(false)
-  autoAssign        Boolean       @default(true)
-  maxWaitTime       Int           @default(300) // Max wait time in seconds before escalation
-  routingRules      Json?         // Business-specific routing rules
-  escalationRules   Json?         // Escalation rules for this business
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  
+  businessHoursOnly Boolean         @default(false)
+  autoAssign        Boolean         @default(true)
+  maxWaitTime       Int             @default(300) // Max wait time in seconds before escalation
+  routingRules      Json? // Business-specific routing rules
+  escalationRules   Json? // Escalation rules for this business
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
   @@index([businessId])
 }
 
 model MessageDeliveryLog {
-  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pageId            String
-  recipientId       String
-  message           String        @db.Text
-  type              String        // DM or COMMENT
-  success           Boolean
-  error             String?
-  timestamp         DateTime      @default(now())
-  
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pageId      String
+  recipientId String
+  message     String   @db.Text
+  type        String // DM or COMMENT
+  success     Boolean
+  error       String?
+  timestamp   DateTime @default(now())
+
   @@index([pageId, recipientId])
   @@index([timestamp])
   @@index([success])
 }
 
 model ResponseMetrics {
-  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  automationId      String        @db.Uuid
-  automation        Automation    @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  userId            String        @db.Uuid
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messageLength     Int
-  responseTime      Int           // in milliseconds
-  typingDelay       Int           // in milliseconds
-  wasSuccessful     Boolean
-  messageType       String        // DM or COMMENT
-  hasButtons        Boolean
-  sentiment         String?       // positive, neutral, negative
-  priority          String?       // LOW, MEDIUM, HIGH, URGENT
-  timestamp         DateTime      @default(now())
-  
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId  String     @db.Uuid
+  automation    Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  userId        String     @db.Uuid
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageLength Int
+  responseTime  Int // in milliseconds
+  typingDelay   Int // in milliseconds
+  wasSuccessful Boolean
+  messageType   String // DM or COMMENT
+  hasButtons    Boolean
+  sentiment     String? // positive, neutral, negative
+  priority      String? // LOW, MEDIUM, HIGH, URGENT
+  timestamp     DateTime   @default(now())
+
   @@index([automationId])
   @@index([userId])
   @@index([timestamp])
@@ -2662,17 +2553,17 @@ model ResponseMetrics {
 
 // NEW: Business-specific agent performance tracking
 model AgentPerformance {
-  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  agentId           String      @db.Uuid
-  agent             Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  businessId        String      @db.Uuid
-  business          Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  date              DateTime    @db.Date
-  handoffsHandled   Int         @default(0)
-  avgResponseTime   Int?        // Average response time in seconds
-  avgResolutionTime Int?        // Average resolution time in seconds
-  customerSatisfaction Float?   // Average satisfaction score
-  
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agentId              String   @db.Uuid
+  agent                Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  businessId           String   @db.Uuid
+  business             Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  date                 DateTime @db.Date
+  handoffsHandled      Int      @default(0)
+  avgResponseTime      Int? // Average response time in seconds
+  avgResolutionTime    Int? // Average resolution time in seconds
+  customerSatisfaction Float? // Average satisfaction score
+
   @@unique([agentId, businessId, date])
   @@index([businessId, date])
   @@index([agentId, date])
@@ -2694,69 +2585,34 @@ enum HandoffPriority {
   URGENT
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 model UserPreferences {
-  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId                String   @unique @db.Uuid
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  soundEnabled          Boolean  @default(true)
-  desktopNotifications  Boolean  @default(true)
-  emailNotifications    Boolean  @default(false)
-  autoMarkAsRead        Boolean  @default(false)
-  theme                 String   @default("system")
-  language              String   @default("en")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String   @unique @db.Uuid
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  soundEnabled         Boolean  @default(true)
+  desktopNotifications Boolean  @default(true)
+  emailNotifications   Boolean  @default(false)
+  autoMarkAsRead       Boolean  @default(false)
+  theme                String   @default("system")
+  language             String   @default("en")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@map("user_preferences")
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 model MessageTracker {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  automationId    String   @db.Uuid
-  pageId          String
-  senderId        String
-  messageCount    Int      @default(0)
-  messages        String[]
-  lastMessageAt   DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId  String   @db.Uuid
+  pageId        String
+  senderId      String
+  messageCount  Int      @default(0)
+  messages      String[]
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  automation      Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
 
   // Composite unique constraint
   @@unique([automationId, pageId, senderId])
@@ -2764,61 +2620,46 @@ model MessageTracker {
   @@index([lastMessageAt])
 }
 
-
 model SentimentAnalysis {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   automationId   String   @db.Uuid
   pageId         String
   senderId       String
-  sentiment      String   // "positive", "negative", "neutral"
+  sentiment      String // "positive", "negative", "neutral"
   confidence     Float
   messages       String[] // The 4 messages that were analyzed
-  sentimentScore Float?   // Additional sentiment score
-  metrics        String?  // JSON string of metrics data
-  emotions       String?  // JSON string of emotions data
-  insights       String?  // JSON string of insights data
-  metadata       String?  // JSON string of metadata
+  sentimentScore Float? // Additional sentiment score
+  metrics        String? // JSON string of metrics data
+  emotions       String? // JSON string of emotions data
+  insights       String? // JSON string of insights data
+  metadata       String? // JSON string of metadata
   analyzedAt     DateTime @default(now())
 
-
-  automation     Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  alerts         SentimentAlert[]
-
+  automation Automation       @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  alerts     SentimentAlert[]
 
   @@index([automationId])
   @@index([analyzedAt])
   @@index([sentiment])
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 // Add these new models to your existing schema.prisma file
 
 // Premium Analytics tracking
 model PremiumAnalytics {
-  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId                 String   @db.Uuid
-  date                   DateTime @db.Date
-  totalAnalyses          Int      @default(0)
-  platinumLeads          Int      @default(0)
-  goldLeads              Int      @default(0)
-  silverLeads            Int      @default(0)
-  bronzeLeads            Int      @default(0)
-  totalEstimatedRevenue  Decimal  @default(0) @db.Decimal(10, 2)
-  totalExpectedRevenue   Decimal  @default(0) @db.Decimal(10, 2)
-  averageROI             Decimal  @default(0) @db.Decimal(5, 2)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String   @db.Uuid
+  date                  DateTime @db.Date
+  totalAnalyses         Int      @default(0)
+  platinumLeads         Int      @default(0)
+  goldLeads             Int      @default(0)
+  silverLeads           Int      @default(0)
+  bronzeLeads           Int      @default(0)
+  totalEstimatedRevenue Decimal  @default(0) @db.Decimal(10, 2)
+  totalExpectedRevenue  Decimal  @default(0) @db.Decimal(10, 2)
+  averageROI            Decimal  @default(0) @db.Decimal(5, 2)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   // Relationships
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -2857,7 +2698,7 @@ model RevenueOpportunity {
   expectedRevenue       Decimal  @db.Decimal(10, 2)
   roi                   Decimal  @db.Decimal(5, 2)
   conversionProbability Decimal  @db.Decimal(3, 2)
-  leadTier              String   // PLATINUM, GOLD, SILVER, BRONZE
+  leadTier              String // PLATINUM, GOLD, SILVER, BRONZE
   status                String   @default("ACTIVE") // ACTIVE, CONVERTED, LOST
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -2873,14 +2714,14 @@ model RevenueOpportunity {
 
 // Scheduled follow-up actions
 model ScheduledAction {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  leadId       String   @db.Uuid
-  action       String    // immediate_call, send_proposal, follow_up_call, etc.
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId       String    @db.Uuid
+  action       String // immediate_call, send_proposal, follow_up_call, etc.
   scheduledFor DateTime
   status       String    @default("PENDING") // PENDING, EXECUTED, CANCELLED
   executedAt   DateTime?
-  result       String?   // Result of the action execution
-  metadata  Json? 
+  result       String? // Result of the action execution
+  metadata     Json?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -2891,10 +2732,6 @@ model ScheduledAction {
   @@index([scheduledFor])
   @@index([status])
 }
-
-
-
-
 
 model CrmSyncSettings {
   id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -2912,16 +2749,12 @@ model CrmSyncSettings {
   @@map("CrmSyncSettings")
 }
 
-
-
-
-
 model SentResponse {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  recipientKey    String   // pageId_senderId_messageType
-  responseHash    String   // SHA256 hash of response content
-  responseContent String   // First 1000 chars of response for debugging
-  messageType     String   // "DM" or "COMMENT"
+  recipientKey    String // pageId_senderId_messageType
+  responseHash    String // SHA256 hash of response content
+  responseContent String // First 1000 chars of response for debugging
+  messageType     String // "DM" or "COMMENT"
   automationId    String?
   sentAt          DateTime @default(now())
 
@@ -2931,47 +2764,28 @@ model SentResponse {
   @@index([recipientKey, sentAt])
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 model SentimentAlert {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  automationId      String   
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  automationId      String
   senderId          String
-  alertType         String   // e.g., "high_risk_customer", "churn_warning", etc.
-  sentiment         String   // "positive", "negative", "neutral"
+  alertType         String // e.g., "high_risk_customer", "churn_warning", etc.
+  sentiment         String // "positive", "negative", "neutral"
   confidence        Float
-  riskLevel         String   // "low", "medium", "high"
-  urgencyLevel      String   // "low", "medium", "high"
-  satisfactionLevel String   // "very_dissatisfied", "dissatisfied", "neutral", "satisfied", "very_satisfied"
-  insights          String?  // JSON string containing detailed insights
-  triggeredAt       DateTime @default(now())
-  resolved          Boolean  @default(false)
+  riskLevel         String // "low", "medium", "high"
+  urgencyLevel      String // "low", "medium", "high"
+  satisfactionLevel String // "very_dissatisfied", "dissatisfied", "neutral", "satisfied", "very_satisfied"
+  insights          String? // JSON string containing detailed insights
+  triggeredAt       DateTime  @default(now())
+  resolved          Boolean   @default(false)
   resolvedAt        DateTime?
-  resolvedBy        String?  // User ID who resolved the alert
-  notes             String?  // Resolution notes
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  resolvedBy        String? // User ID who resolved the alert
+  notes             String? // Resolution notes
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   // Relationships
   sentimentAnalysis   SentimentAnalysis? @relation(fields: [sentimentAnalysisId], references: [id])
-  sentimentAnalysisId String?  @db.Uuid
+  sentimentAnalysisId String?            @db.Uuid
 
   @@index([automationId])
   @@index([senderId])
@@ -2981,29 +2795,25 @@ model SentimentAlert {
   @@map("SentimentAlert")
 }
 
-
-
-
-
 model Alert {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @db.Uuid
-  type      String   // PLATINUM_LEAD, HIGH_VALUE_OPPORTUNITY, etc.
-  title     String
-  message   String   @db.Text
-  priority  String   // LOW, MEDIUM, HIGH, URGENT
-  leadId    String?  @db.Uuid
-  metadata  Json?    // Additional alert data
-  resolved  Boolean  @default(false)
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  type       String // PLATINUM_LEAD, HIGH_VALUE_OPPORTUNITY, etc.
+  title      String
+  message    String    @db.Text
+  priority   String // LOW, MEDIUM, HIGH, URGENT
+  leadId     String?   @db.Uuid
+  metadata   Json? // Additional alert data
+  resolved   Boolean   @default(false)
   resolvedAt DateTime?
-  resolvedBy String? @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
+  resolvedBy String?   @db.Uuid
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
   // Relationships
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
- 
+
   @@index([userId])
   @@index([type])
   @@index([priority])
@@ -3011,85 +2821,50 @@ model Alert {
   @@index([createdAt])
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ////////////////////////////HEREE
 
-
-
-
-
 model BusinessWorkflowTemplate {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                String
-  category            String   // GROUP_1, GROUP_2, GROUP_3, GROUP_4, GROUP_5, etc.
-  description         String   @db.Text
-  complexity          String   @default("MEDIUM") // SIMPLE, MEDIUM, COMPLEX
-  estimatedSetupTime  Int      @default(15) // in minutes
-  operations          String[] // Array of operation steps
-  features            String[] // Array of features
-  integrations        String[] // Array of available integrations
-  commonUseCase       String?  @db.Text
-  isActive            Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String
+  category           String // GROUP_1, GROUP_2, GROUP_3, GROUP_4, GROUP_5, etc.
+  description        String   @db.Text
+  complexity         String   @default("MEDIUM") // SIMPLE, MEDIUM, COMPLEX
+  estimatedSetupTime Int      @default(15) // in minutes
+  operations         String[] // Array of operation steps
+  features           String[] // Array of features
+  integrations       String[] // Array of available integrations
+  commonUseCase      String?  @db.Text
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Relations
-  businessConfigs     BusinessWorkflowConfig[]
+  businessConfigs BusinessWorkflowConfig[]
 
   @@index([category])
   @@index([complexity])
 }
 
 model BusinessWorkflowConfig {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String   @db.Uuid
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessId          String   @db.Uuid
-  business            Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  workflowTemplateId  String?  @db.Uuid // MADE NULLABLE for custom requests
-  workflowTemplate    BusinessWorkflowTemplate? @relation(fields: [workflowTemplateId], references: [id], onDelete: Restrict)
-  businessInfo        Json     // Business information for personalization
-  integrationConfigs  Json     @default("[]") // Array of integration configurations
-  customRequest       String?  @db.Text // NEW: For custom workflow requests
-  status              String   @default("DRAFT") // DRAFT, CONFIGURING, ACTIVE, INACTIVE, CUSTOM_REQUEST
-  isActive            Boolean  @default(false) // NEW: Indicates if the workflow is currently active/deployed for use
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String                    @db.Uuid
+  user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId         String                    @db.Uuid
+  business           Business                  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workflowTemplateId String?                   @db.Uuid // MADE NULLABLE for custom requests
+  workflowTemplate   BusinessWorkflowTemplate? @relation(fields: [workflowTemplateId], references: [id], onDelete: Restrict)
+  businessInfo       Json // Business information for personalization
+  integrationConfigs Json                      @default("[]") // Array of integration configurations
+  customRequest      String?                   @db.Text // NEW: For custom workflow requests
+  status             String                    @default("DRAFT") // DRAFT, CONFIGURING, ACTIVE, INACTIVE, CUSTOM_REQUEST
+  isActive           Boolean                   @default(false) // NEW: Indicates if the workflow is currently active/deployed for use
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
 
   // Relations
-  credentials         WorkflowIntegrationCredential[]
-  executionLogs       WorkflowExecutionLog[]
+  credentials   WorkflowIntegrationCredential[]
+  executionLogs WorkflowExecutionLog[]
+  Automation    Automation[]
 
   @@index([userId])
   @@index([businessId])
@@ -3097,50 +2872,35 @@ model BusinessWorkflowConfig {
 }
 
 model WorkflowIntegrationCredential {
-  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  workflowConfigId      String   @db.Uuid
-  workflowConfig        BusinessWorkflowConfig @relation(fields: [workflowConfigId], references: [id], onDelete: Cascade)
-  integrationName       String
-  integrationType       String   // api_key, oauth, webhook, etc.
-  encryptedCredentials  String   // Encrypted JSON of credentials (in production, ensure this is truly encrypted)
-  isActive              Boolean  @default(true)
-  lastVerified          DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowConfigId     String                 @db.Uuid
+  workflowConfig       BusinessWorkflowConfig @relation(fields: [workflowConfigId], references: [id], onDelete: Cascade)
+  integrationName      String
+  integrationType      String // api_key, oauth, webhook, etc.
+  encryptedCredentials String // Encrypted JSON of credentials (in production, ensure this is truly encrypted)
+  isActive             Boolean                @default(true)
+  lastVerified         DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
 
   @@unique([workflowConfigId, integrationName])
   @@index([workflowConfigId])
 }
 
 model WorkflowExecutionLog {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  workflowConfigId  String   @db.Uuid
-  workflowConfig    BusinessWorkflowConfig @relation(fields: [workflowConfigId], references: [id], onDelete: Cascade)
-  automationId      String?  @db.Uuid
-  automation        Automation? @relation(fields: [automationId], references: [id], onDelete: SetNull)
-  triggerType       String   // dm_received, comment_received, etc.
-  executionStatus   String   // SUCCESS, FAILED, PARTIAL
-  responseTime      Int?     // in milliseconds
-  errorMessage      String?
-  metadata          Json?    // Additional execution data
-  timestamp         DateTime @default(now())
+  id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowConfigId String                 @db.Uuid
+  workflowConfig   BusinessWorkflowConfig @relation(fields: [workflowConfigId], references: [id], onDelete: Cascade)
+  automationId     String?                @db.Uuid
+  automation       Automation?            @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  triggerType      String // dm_received, comment_received, etc.
+  executionStatus  String // SUCCESS, FAILED, PARTIAL
+  responseTime     Int? // in milliseconds
+  errorMessage     String?
+  metadata         Json? // Additional execution data
+  timestamp        DateTime               @default(now())
 
   @@index([workflowConfigId])
   @@index([timestamp])
   @@index([executionStatus])
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
