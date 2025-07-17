@@ -11599,6 +11599,7 @@
 
 
 
+
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createChatHistory,
@@ -12057,16 +12058,19 @@ class MessageProcessor {
         // Get the specific automation that was triggered
         try {
           automation = await client.automation.findUnique({
-            // Changed from getAutomationWithTriggers
             where: { id: triggerDecision.automationId! },
             include: {
               User: {
                 include: {
                   subscription: true,
+                  integrations: {
+                    // ADD THIS BLOCK
+                    where: { name: "INSTAGRAM" }, // Filter for Instagram integration
+                    select: { token: true }, // Only select the token
+                  },
                 },
               },
               businessWorkflowConfig: {
-                // NEW: Include the related workflow config
                 select: { id: true },
               },
             },
@@ -12086,7 +12090,7 @@ class MessageProcessor {
         }
       }
 
-       Logger.success(`Context built - Automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
+      Logger.success(`Context built - Automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
 
       return {
         data,
@@ -12293,7 +12297,7 @@ class VoiceflowHandler {
         return this.handleVoiceflowFallback(
           context,
           contextData,
-          voiceflowResult.fallbackReason || voiceflowResult.error ||"Error",
+          voiceflowResult.fallbackReason || voiceflowResult.error ||"We have an error",
         )
       }
     } catch (error) {
