@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    console.log('🚀 Proxying request to N8N:', body)
+    console.log('🚀 Proxying request to N8N:', body) 
 
     const response = await fetch('https://yaziln8n.onrender.com/webhook/voiceflow-workflow-builder', {
       method: 'POST',
