@@ -6125,6 +6125,2058 @@
 
 
 
+// "use client"
+
+// import React, { useState, useCallback, useEffect, useRef } from "react"
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Badge } from "@/components/ui/badge"
+// import { Progress } from "@/components/ui/progress"
+// import {
+//   ArrowLeft,
+//   Sparkles,
+//   Loader2,
+//   CheckCircle,
+//   Send,
+//   Clock,
+//   Settings,
+//   Target,
+//   ThumbsUp,
+//   Bot,
+//   Mic,
+//   Phone,
+//   MessageCircle,
+//   RefreshCw,
+//   MessageSquare,
+//   Zap,
+//   AlertCircle,
+//   FileText,
+//   PlayCircle,
+//   Workflow,
+//   GitBranch,
+//   ChevronDown,
+//   ChevronRight,
+//   Eye,
+//   Database,
+//   Filter,
+//   Mail,
+//   Bell,
+//   BarChart3,
+//   Shield,
+//   Globe,
+//   Star,
+//   TrendingUp,
+//   Cpu,
+//   Code,
+//   Brain,
+//   Lightbulb,
+//   Rocket,
+//   Users,
+//   Timer,
+//   Layers,
+//   Activity,
+//   Wand2,
+//   Plus,
+//   X,
+//   Check,
+//   ExternalLink,
+//   Building,
+//   Cloud,
+//   ShoppingCart,
+//   CreditCard,
+//   Calendar,
+//   Briefcase,
+//   Headphones,
+//   BarChart,
+//   Lock,
+//   Webhook,
+//   Link2,
+//   Puzzle,
+//   Search,
+//   Package,
+//   Gauge
+// } from "lucide-react"
+
+// // TypeScript interfaces
+// interface BusinessInfo {
+//   businessName: string
+//   businessType: string
+//   description?: string
+//   website?: string
+//   phone?: string
+//   email?: string
+// }
+
+// interface VoiceflowWorkflowBuilderProps {
+//   businessInfo?: BusinessInfo
+//   selectedWorkflowId?: string | null
+//   setStep?: (step: "selection" | "dashboard") => void
+//   setActiveWorkflowExists?: (exists: boolean) => void
+//   setActiveWorkflowDetails?: (details: any) => void
+// }
+
+// interface Integration {
+//   id: string
+//   name: string
+//   description: string
+//   category: string
+//   icon: React.ComponentType<{ className?: string }>
+//   pricing: "free" | "freemium" | "paid" | "enterprise"
+//   popularity: number
+//   difficulty: "easy" | "medium" | "hard"
+//   apiAvailable: boolean
+//   webhookSupport: boolean
+//   realTimeSync: boolean
+//   features: string[]
+//   setupTime: string
+//   website?: string
+// }
+
+// interface WorkflowStep {
+//   id: string
+//   stepNumber: number
+//   title: string
+//   description: string
+//   type: string
+//   inputs?: string[]
+//   outputs?: string[]
+//   conditions?: string[]
+//   estimatedTime?: string
+//   icon?: React.ComponentType<{ className?: string }>
+//   color?: string
+//   bgColor?: string
+//   borderColor?: string
+//   details?: string[]
+//   isAnimating?: boolean
+//   suggestedIntegrations?: Integration[]
+//   selectedIntegrations?: Integration[]
+//   aiReasoning?: string
+//   complexity?: "low" | "medium" | "high"
+//   businessImpact?: string
+//   alternatives?: string[]
+// }
+
+// interface StreamingPhase {
+//   id: string
+//   title: string
+//   description: string
+//   icon: React.ComponentType<{ className?: string }>
+//   color: string
+//   duration: number
+// }
+
+// interface ParsedWorkflow {
+//   title: string
+//   description: string
+//   platform: string
+//   estimatedBuildTime: string
+//   complexity: string
+//   steps: WorkflowStep[]
+//   integrations: Integration[]
+//   benefits: string[]
+//   exampleScenario: string
+//   technicalRequirements: string[]
+//   deploymentChannels: string[]
+//   estimatedCost?: string
+//   roi?: string
+//   metrics?: {
+//     automationRate: string
+//     responseTime: string
+//     accuracy: string
+//     scalability: string
+//   }
+// }
+
+// interface ChannelOption {
+//   id: string
+//   label: string
+//   icon: React.ComponentType<{ className?: string }>
+// }
+
+// interface AutomationFeature {
+//   id: string
+//   label: string
+// }
+
+// interface StepTypeConfig {
+//   icon: React.ComponentType<{ className?: string }>
+//   color: string
+//   bgColor: string
+//   borderColor: string
+//   accentColor: string
+//   darkBg: string
+//   darkBorder: string
+// }
+
+// // Comprehensive Integration Database
+// const INTEGRATION_DATABASE: Integration[] = [
+//   // CRM Systems
+//   {
+//     id: "hubspot",
+//     name: "HubSpot",
+//     description: "Comprehensive CRM and marketing automation platform",
+//     category: "crm",
+//     icon: Building,
+//     pricing: "freemium",
+//     popularity: 95,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Contact Management", "Deal Tracking", "Email Marketing", "Analytics"],
+//     setupTime: "15-30 minutes",
+//     website: "https://hubspot.com"
+//   },
+//   {
+//     id: "salesforce",
+//     name: "Salesforce",
+//     description: "World's leading CRM platform for sales and customer service",
+//     category: "crm",
+//     icon: Cloud,
+//     pricing: "paid",
+//     popularity: 90,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Lead Management", "Opportunity Tracking", "Custom Objects", "Automation"],
+//     setupTime: "30-60 minutes",
+//     website: "https://salesforce.com"
+//   },
+//   {
+//     id: "zoho-crm",
+//     name: "Zoho CRM",
+//     description: "Complete CRM solution for businesses of all sizes",
+//     category: "crm",
+//     icon: Briefcase,
+//     pricing: "freemium",
+//     popularity: 75,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Sales Automation", "Contact Management", "Analytics", "Mobile App"],
+//     setupTime: "20-40 minutes",
+//     website: "https://zoho.com/crm"
+//   },
+//   {
+//     id: "pipedrive",
+//     name: "Pipedrive",
+//     description: "Sales-focused CRM designed for small and medium businesses",
+//     category: "crm",
+//     icon: BarChart,
+//     pricing: "paid",
+//     popularity: 80,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Pipeline Management", "Activity Tracking", "Email Integration", "Reports"],
+//     setupTime: "15-25 minutes",
+//     website: "https://pipedrive.com"
+//   },
+
+//   // E-commerce Platforms
+//   {
+//     id: "shopify",
+//     name: "Shopify",
+//     description: "Leading e-commerce platform for online stores",
+//     category: "ecommerce",
+//     icon: ShoppingCart,
+//     pricing: "paid",
+//     popularity: 92,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Product Management", "Order Processing", "Inventory", "Payments"],
+//     setupTime: "20-30 minutes",
+//     website: "https://shopify.com"
+//   },
+//   {
+//     id: "woocommerce",
+//     name: "WooCommerce",
+//     description: "Open-source e-commerce plugin for WordPress",
+//     category: "ecommerce",
+//     icon: Package,
+//     pricing: "free",
+//     popularity: 85,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Product Catalog", "Order Management", "Payment Gateways", "Extensions"],
+//     setupTime: "30-45 minutes",
+//     website: "https://woocommerce.com"
+//   },
+//   {
+//     id: "magento",
+//     name: "Magento",
+//     description: "Flexible e-commerce platform for enterprise businesses",
+//     category: "ecommerce",
+//     icon: Building,
+//     pricing: "freemium",
+//     popularity: 70,
+//     difficulty: "hard",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Multi-store", "B2B Features", "Advanced SEO", "Customization"],
+//     setupTime: "60-120 minutes",
+//     website: "https://magento.com"
+//   },
+
+//   // Email Marketing
+//   {
+//     id: "mailchimp",
+//     name: "Mailchimp",
+//     description: "All-in-one email marketing and automation platform",
+//     category: "email",
+//     icon: Mail,
+//     pricing: "freemium",
+//     popularity: 88,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Email Campaigns", "Automation", "Audience Segmentation", "Analytics"],
+//     setupTime: "10-20 minutes",
+//     website: "https://mailchimp.com"
+//   },
+//   {
+//     id: "sendgrid",
+//     name: "SendGrid",
+//     description: "Cloud-based email delivery service",
+//     category: "email",
+//     icon: Send,
+//     pricing: "freemium",
+//     popularity: 82,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Transactional Email", "Marketing Campaigns", "Analytics", "Templates"],
+//     setupTime: "15-30 minutes",
+//     website: "https://sendgrid.com"
+//   },
+//   {
+//     id: "klaviyo",
+//     name: "Klaviyo",
+//     description: "Advanced email and SMS marketing platform",
+//     category: "email",
+//     icon: MessageSquare,
+//     pricing: "freemium",
+//     popularity: 78,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Email Marketing", "SMS Marketing", "Segmentation", "Automation"],
+//     setupTime: "20-35 minutes",
+//     website: "https://klaviyo.com"
+//   },
+
+//   // Payment Systems
+//   {
+//     id: "stripe",
+//     name: "Stripe",
+//     description: "Complete payment processing platform for businesses",
+//     category: "payment",
+//     icon: CreditCard,
+//     pricing: "paid",
+//     popularity: 95,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Payment Processing", "Subscriptions", "Invoicing", "Marketplace"],
+//     setupTime: "25-40 minutes",
+//     website: "https://stripe.com"
+//   },
+//   {
+//     id: "paypal",
+//     name: "PayPal",
+//     description: "Global payment platform for online transactions",
+//     category: "payment",
+//     icon: CreditCard,
+//     pricing: "paid",
+//     popularity: 90,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Payment Processing", "Express Checkout", "Subscriptions", "Invoicing"],
+//     setupTime: "15-25 minutes",
+//     website: "https://paypal.com"
+//   },
+
+//   // Analytics & Tracking
+//   {
+//     id: "google-analytics",
+//     name: "Google Analytics",
+//     description: "Web analytics service for tracking website traffic",
+//     category: "analytics",
+//     icon: BarChart3,
+//     pricing: "freemium",
+//     popularity: 98,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: false,
+//     realTimeSync: true,
+//     features: ["Traffic Analysis", "Conversion Tracking", "Audience Insights", "Reports"],
+//     setupTime: "20-30 minutes",
+//     website: "https://analytics.google.com"
+//   },
+//   {
+//     id: "mixpanel",
+//     name: "Mixpanel",
+//     description: "Advanced product analytics platform",
+//     category: "analytics",
+//     icon: TrendingUp,
+//     pricing: "freemium",
+//     popularity: 75,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Event Tracking", "Funnel Analysis", "Cohort Analysis", "A/B Testing"],
+//     setupTime: "30-45 minutes",
+//     website: "https://mixpanel.com"
+//   },
+
+//   // Customer Support
+//   {
+//     id: "zendesk",
+//     name: "Zendesk",
+//     description: "Customer service and support ticketing platform",
+//     category: "support",
+//     icon: Headphones,
+//     pricing: "paid",
+//     popularity: 85,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Ticket Management", "Live Chat", "Knowledge Base", "Analytics"],
+//     setupTime: "25-40 minutes",
+//     website: "https://zendesk.com"
+//   },
+//   {
+//     id: "intercom",
+//     name: "Intercom",
+//     description: "Conversational customer engagement platform",
+//     category: "support",
+//     icon: MessageCircle,
+//     pricing: "paid",
+//     popularity: 80,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Live Chat", "Help Desk", "Product Tours", "Automation"],
+//     setupTime: "20-30 minutes",
+//     website: "https://intercom.com"
+//   },
+
+//   // Calendar & Scheduling
+//   {
+//     id: "calendly",
+//     name: "Calendly",
+//     description: "Automated scheduling and calendar management",
+//     category: "scheduling",
+//     icon: Calendar,
+//     pricing: "freemium",
+//     popularity: 88,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Meeting Scheduling", "Calendar Integration", "Automated Reminders", "Analytics"],
+//     setupTime: "10-15 minutes",
+//     website: "https://calendly.com"
+//   },
+//   {
+//     id: "acuity",
+//     name: "Acuity Scheduling",
+//     description: "Advanced appointment scheduling software",
+//     category: "scheduling",
+//     icon: Clock,
+//     pricing: "paid",
+//     popularity: 75,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Online Scheduling", "Payment Processing", "Intake Forms", "Packages"],
+//     setupTime: "20-35 minutes",
+//     website: "https://acuityscheduling.com"
+//   },
+
+//   // Databases & Storage
+//   {
+//     id: "airtable",
+//     name: "Airtable",
+//     description: "Cloud-based database and spreadsheet hybrid",
+//     category: "database",
+//     icon: Database,
+//     pricing: "freemium",
+//     popularity: 85,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Database Management", "Forms", "Views", "Automations"],
+//     setupTime: "15-25 minutes",
+//     website: "https://airtable.com"
+//   },
+//   {
+//     id: "notion",
+//     name: "Notion",
+//     description: "All-in-one workspace for notes, docs, and databases",
+//     category: "database",
+//     icon: FileText,
+//     pricing: "freemium",
+//     popularity: 82,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: false,
+//     realTimeSync: true,
+//     features: ["Databases", "Documents", "Wikis", "Project Management"],
+//     setupTime: "20-30 minutes",
+//     website: "https://notion.so"
+//   },
+
+//   // Communication
+//   {
+//     id: "slack",
+//     name: "Slack",
+//     description: "Business communication and collaboration platform",
+//     category: "communication",
+//     icon: MessageSquare,
+//     pricing: "freemium",
+//     popularity: 92,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Team Chat", "File Sharing", "Integrations", "Workflow Automation"],
+//     setupTime: "10-20 minutes",
+//     website: "https://slack.com"
+//   },
+//   {
+//     id: "discord",
+//     name: "Discord",
+//     description: "Voice, video, and text communication for communities",
+//     category: "communication",
+//     icon: MessageCircle,
+//     pricing: "freemium",
+//     popularity: 75,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Voice Chat", "Text Channels", "Bots", "Screen Sharing"],
+//     setupTime: "15-25 minutes",
+//     website: "https://discord.com"
+//   },
+
+//   // Webhooks & APIs
+//   {
+//     id: "zapier",
+//     name: "Zapier",
+//     description: "Automation platform connecting thousands of apps",
+//     category: "automation",
+//     icon: Zap,
+//     pricing: "freemium",
+//     popularity: 90,
+//     difficulty: "easy",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["App Integrations", "Workflow Automation", "Multi-step Zaps", "Filters"],
+//     setupTime: "5-15 minutes",
+//     website: "https://zapier.com"
+//   },
+//   {
+//     id: "make",
+//     name: "Make (Integromat)",
+//     description: "Advanced automation platform for complex workflows",
+//     category: "automation",
+//     icon: Puzzle,
+//     pricing: "freemium",
+//     popularity: 78,
+//     difficulty: "medium",
+//     apiAvailable: true,
+//     webhookSupport: true,
+//     realTimeSync: true,
+//     features: ["Visual Automation", "Complex Logic", "Error Handling", "Scheduling"],
+//     setupTime: "20-40 minutes",
+//     website: "https://make.com"
+//   }
+// ]
+
+// // Default business info - you can remove this in production
+// const defaultBusinessInfo: BusinessInfo = {
+//   businessName: "Your Business",
+//   businessType: "Technology Company",
+//   description: "We provide innovative solutions for businesses",
+//   website: "https://yourbusiness.com",
+//   phone: "+1-555-0123",
+//   email: "contact@yourbusiness.com",
+// }
+
+// // Step type configurations with unique styling
+// const stepTypeConfigs: Record<string, StepTypeConfig> = {
+//   trigger: {
+//     icon: PlayCircle,
+//     color: "text-emerald-600",
+//     bgColor: "from-emerald-50 to-green-100",
+//     borderColor: "border-emerald-300",
+//     accentColor: "bg-emerald-500",
+//     darkBg: "dark:from-emerald-900/20 dark:to-green-900/30",
+//     darkBorder: "dark:border-emerald-600/50"
+//   },
+//   analysis: {
+//     icon: Brain,
+//     color: "text-purple-600",
+//     bgColor: "from-purple-50 to-violet-100",
+//     borderColor: "border-purple-300",
+//     accentColor: "bg-purple-500",
+//     darkBg: "dark:from-purple-900/20 dark:to-violet-900/30",
+//     darkBorder: "dark:border-purple-600/50"
+//   },
+//   filter: {
+//     icon: Filter,
+//     color: "text-blue-600",
+//     bgColor: "from-blue-50 to-cyan-100",
+//     borderColor: "border-blue-300",
+//     accentColor: "bg-blue-500",
+//     darkBg: "dark:from-blue-900/20 dark:to-cyan-900/30",
+//     darkBorder: "dark:border-blue-600/50"
+//   },
+//   response: {
+//     icon: MessageCircle,
+//     color: "text-orange-600",
+//     bgColor: "from-orange-50 to-amber-100",
+//     borderColor: "border-orange-300",
+//     accentColor: "bg-orange-500",
+//     darkBg: "dark:from-orange-900/20 dark:to-amber-900/30",
+//     darkBorder: "dark:border-orange-600/50"
+//   },
+//   notification: {
+//     icon: Bell,
+//     color: "text-red-600",
+//     bgColor: "from-red-50 to-pink-100",
+//     borderColor: "border-red-300",
+//     accentColor: "bg-red-500",
+//     darkBg: "dark:from-red-900/20 dark:to-pink-900/30",
+//     darkBorder: "dark:border-red-600/50"
+//   },
+//   integration: {
+//     icon: Zap,
+//     color: "text-yellow-600",
+//     bgColor: "from-yellow-50 to-orange-100",
+//     borderColor: "border-yellow-300",
+//     accentColor: "bg-yellow-500",
+//     darkBg: "dark:from-yellow-900/20 dark:to-orange-900/30",
+//     darkBorder: "dark:border-yellow-600/50"
+//   },
+//   storage: {
+//     icon: Database,
+//     color: "text-gray-600",
+//     bgColor: "from-gray-50 to-slate-100",
+//     borderColor: "border-gray-300",
+//     accentColor: "bg-gray-500",
+//     darkBg: "dark:from-gray-900/20 dark:to-slate-900/30",
+//     darkBorder: "dark:border-gray-600/50"
+//   },
+//   routing: {
+//     icon: GitBranch,
+//     color: "text-indigo-600",
+//     bgColor: "from-indigo-50 to-blue-100",
+//     borderColor: "border-indigo-300",
+//     accentColor: "bg-indigo-500",
+//     darkBg: "dark:from-indigo-900/20 dark:to-blue-900/30",
+//     darkBorder: "dark:border-indigo-600/50"
+//   },
+//   validation: {
+//     icon: Shield,
+//     color: "text-cyan-600",
+//     bgColor: "from-cyan-50 to-teal-100",
+//     borderColor: "border-cyan-300",
+//     accentColor: "bg-cyan-500",
+//     darkBg: "dark:from-cyan-900/20 dark:to-teal-900/30",
+//     darkBorder: "dark:border-cyan-600/50"
+//   },
+//   automation: {
+//     icon: Bot,
+//     color: "text-pink-600",
+//     bgColor: "from-pink-50 to-rose-100",
+//     borderColor: "border-pink-300",
+//     accentColor: "bg-pink-500",
+//     darkBg: "dark:from-pink-900/20 dark:to-rose-900/30",
+//     darkBorder: "dark:border-pink-600/50"
+//   },
+//   payment: {
+//     icon: CreditCard,
+//     color: "text-green-600",
+//     bgColor: "from-green-50 to-emerald-100",
+//     borderColor: "border-green-300",
+//     accentColor: "bg-green-500",
+//     darkBg: "dark:from-green-900/20 dark:to-emerald-900/30",
+//     darkBorder: "dark:border-green-600/50"
+//   },
+//   communication: {
+//     icon: MessageSquare,
+//     color: "text-blue-600",
+//     bgColor: "from-blue-50 to-sky-100",
+//     borderColor: "border-blue-300",
+//     accentColor: "bg-blue-500",
+//     darkBg: "dark:from-blue-900/20 dark:to-sky-900/30",
+//     darkBorder: "dark:border-blue-600/50"
+//   },
+// }
+
+// // AI Processing phases
+// const streamingPhases: StreamingPhase[] = [
+//   {
+//     id: "understanding",
+//     title: "Analyzing Requirements",
+//     description: "AI is understanding your business needs and automation goals",
+//     icon: Search,
+//     color: "text-blue-500",
+//     duration: 3000
+//   },
+//   {
+//     id: "designing",
+//     title: "Designing Architecture",
+//     description: "Creating intelligent workflow logic and step sequences",
+//     icon: Wand2,
+//     color: "text-purple-500",
+//     duration: 4000
+//   },
+//   {
+//     id: "integrations",
+//     title: "Matching Integrations",
+//     description: "Finding the best tools and platforms for each step",
+//     icon: Link2,
+//     color: "text-green-500",
+//     duration: 3000
+//   },
+//   {
+//     id: "optimizing",
+//     title: "Optimizing Performance",
+//     description: "Fine-tuning for maximum efficiency and reliability",
+//     icon: Gauge,
+//     color: "text-orange-500",
+//     duration: 2000
+//   }
+// ]
+
+// const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
+//   businessInfo = defaultBusinessInfo,
+//   selectedWorkflowId,
+//   setStep,
+//   setActiveWorkflowExists,
+//   setActiveWorkflowDetails,
+// }) => {
+//   const [workflowRequest, setWorkflowRequest] = useState<string>("")
+//   const [parsedWorkflow, setParsedWorkflow] = useState<ParsedWorkflow | null>(null)
+//   const [refinementInput, setRefinementInput] = useState<string>("")
+//   const [isGenerating, setIsGenerating] = useState<boolean>(false)
+//   const [responseStatus, setResponseStatus] = useState<string | null>(null)
+//   const [currentAction, setCurrentAction] = useState<"initial" | "refine" | "approve">("initial")
+//   const [hasInitialRequest, setHasInitialRequest] = useState<boolean>(false)
+//   const [selectedChannels, setSelectedChannels] = useState<string[]>(["instagram"])
+//   const [automationFeatures, setAutomationFeatures] = useState<string[]>(["auto-reply"])
+//   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set())
+  
+//   // Streaming states
+//   const [streamingSteps, setStreamingSteps] = useState<WorkflowStep[]>([])
+//   const [currentPhase, setCurrentPhase] = useState<number>(0)
+//   const [isStreaming, setIsStreaming] = useState<boolean>(false)
+//   const [streamingProgress, setStreamingProgress] = useState<number>(0)
+//   const [aiThoughts, setAiThoughts] = useState<string[]>([])
+//   const stepContainerRef = useRef<HTMLDivElement>(null)
+
+//   const channelOptions: ChannelOption[] = [
+//     { id: "instagram", label: "Instagram DMs", icon: MessageCircle },
+//     { id: "facebook", label: "Facebook Messenger", icon: MessageSquare },
+//     { id: "whatsapp", label: "WhatsApp Business", icon: Phone },
+//     { id: "telegram", label: "Telegram Bot", icon: Bot },
+//     { id: "web", label: "Website Chat", icon: Mic },
+//     { id: "email", label: "Email Marketing", icon: Mail },
+//     { id: "sms", label: "SMS Marketing", icon: Phone },
+//   ]
+
+//   const automationFeatureOptions: AutomationFeature[] = [
+//     { id: "auto-reply", label: "Automatic Responses" },
+//     { id: "sentiment-analysis", label: "Sentiment Analysis" },
+//     { id: "intent-detection", label: "Intent Recognition" },
+//     { id: "multilingual", label: "Multi-language Support" },
+//     { id: "smart-routing", label: "Smart Agent Routing" },
+//     { id: "lead-scoring", label: "Lead Scoring" },
+//     { id: "personalization", label: "Dynamic Personalization" },
+//     { id: "escalation", label: "Intelligent Escalation" },
+//   ]
+
+//   // Real AI workflow generation with OpenAI/Anthropic
+//   const generateWorkflowWithAI = useCallback(async (
+//     action: "initial" | "refine", 
+//     instructions?: string
+//   ): Promise<void> => {
+//     setIsGenerating(true)
+//     setIsStreaming(true)
+//     setCurrentPhase(0)
+//     setStreamingProgress(0)
+//     setStreamingSteps([])
+//     setAiThoughts([])
+//     setResponseStatus("🤖 Connecting to AI workflow engine...")
+//     setCurrentAction(action)
+//     setHasInitialRequest(true)
+
+//     try {
+//       // Phase progression with realistic timing
+//       for (let phase = 0; phase < streamingPhases.length; phase++) {
+//         setCurrentPhase(phase)
+//         setResponseStatus(`${streamingPhases[phase].description}...`)
+        
+//         // Add AI thoughts during processing
+//         addAiThought(getAiThoughtForPhase(phase))
+        
+//         await new Promise(resolve => setTimeout(resolve, streamingPhases[phase].duration))
+//       }
+
+//       // Generate workflow via AI API
+//       const aiResponse = await callAIWorkflowGeneration(action, instructions)
+      
+//       if (aiResponse.success && aiResponse.workflowData) {
+//         setParsedWorkflow(aiResponse.workflowData)
+//         setStreamingProgress(100)
+//         setResponseStatus("✅ Enterprise AI workflow generated successfully!")
+//         addAiThought("🎉 Workflow generation complete! Ready for designer implementation.")
+//       } else {
+//         throw new Error(aiResponse.error || "AI generation failed")
+//       }
+      
+//     } catch (error) {
+//       console.error("AI generation error:", error)
+//       setResponseStatus(`❌ AI generation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
+//       addAiThought("❌ Generation failed. Please try again with more specific requirements.")
+//     } finally {
+//       setIsStreaming(false)
+//       setTimeout(() => {
+//         setIsGenerating(false)
+//       }, 1000)
+//     }
+//   }, [businessInfo, selectedChannels, automationFeatures, workflowRequest])
+
+//   // Real AI API call (replace with your preferred AI provider)
+//   const callAIWorkflowGeneration = async (
+//     action: "initial" | "refine", 
+//     instructions?: string
+//   ): Promise<{ success: boolean; workflowData?: ParsedWorkflow; error?: string }> => {
+//     try {
+//       const systemPrompt = `You are an expert workflow automation designer. Create detailed social media automation workflows with specific integrations and technical specifications.
+
+// BUSINESS CONTEXT:
+// - Company: ${businessInfo.businessName}
+// - Type: ${businessInfo.businessType}
+// - Description: ${businessInfo.description}
+// - Platforms: ${selectedChannels.join(", ")}
+// - Features needed: ${automationFeatures.join(", ")}
+
+// USER REQUEST: ${workflowRequest}
+// ${instructions ? `REFINEMENT: ${instructions}` : ""}
+
+// Generate a comprehensive workflow with 8-12 steps. For each step, specify:
+// 1. Title and detailed description
+// 2. Step type (trigger, analysis, filter, response, routing, storage, etc.)
+// 3. Estimated execution time
+// 4. Business impact explanation
+// 5. Suggested integrations from categories: CRM, email, ecommerce, payment, analytics, support, etc.
+// 6. AI reasoning for why this step is important
+
+// Return JSON format with complete workflow details, estimated costs, ROI projections, and technical requirements.`
+
+//       const response = await fetch('/api/ai/generate-workflow', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           systemPrompt,
+//           userRequest: workflowRequest,
+//           businessInfo,
+//           selectedChannels,
+//           automationFeatures,
+//           action,
+//           refinementInstructions: instructions
+//         })
+//       })
+
+//       if (!response.ok) {
+//         throw new Error(`AI API failed: ${response.statusText}`)
+//       }
+
+//       const result = await response.json()
+      
+//       // Process the AI response and generate steps
+//       const workflowSteps = await processAIResponseIntoSteps(result.workflowData)
+      
+//       const workflow: ParsedWorkflow = {
+//         title: result.title || `${businessInfo.businessName} Social Media Automation`,
+//         description: result.description || `Intelligent automation workflow for ${selectedChannels.length} platform${selectedChannels.length > 1 ? 's' : ''}`,
+//         platform: "Multi-Platform AI Automation",
+//         estimatedBuildTime: result.estimatedBuildTime || "2-4 weeks",
+//         complexity: result.complexity || "Enterprise",
+//         steps: workflowSteps,
+//         integrations: getUniqueIntegrations(workflowSteps),
+//         benefits: result.benefits || [
+//           "95% reduction in response time",
+//           "24/7 automated customer engagement",
+//           "Intelligent sentiment analysis and routing",
+//           "Seamless human handoff when needed",
+//           "Real-time analytics and insights",
+//           "Scalable across multiple platforms"
+//         ],
+//         exampleScenario: result.exampleScenario || "Customer sends message → AI analyzes intent → Provides personalized response → Updates CRM → Schedules follow-up",
+//         technicalRequirements: result.technicalRequirements || [
+//           "Social media platform API access",
+//           "AI/ML processing pipeline", 
+//           "Customer database integration",
+//           "Real-time webhook handling",
+//           "Analytics dashboard setup"
+//         ],
+//         deploymentChannels: selectedChannels,
+//         estimatedCost: result.estimatedCost || "$500-2000/month",
+//         roi: result.roi || "300-500% within 6 months",
+//         metrics: {
+//           automationRate: result.metrics?.automationRate || "92%",
+//           responseTime: result.metrics?.responseTime || "< 2 seconds",
+//           accuracy: result.metrics?.accuracy || "94%",
+//           scalability: result.metrics?.scalability || "Enterprise"
+//         }
+//       }
+
+//       return { success: true, workflowData: workflow }
+      
+//     } catch (error) {
+//       console.error("AI API call failed:", error)
+//       return { 
+//         success: false, 
+//         error: error instanceof Error ? error.message : "AI generation failed" 
+//       }
+//     }
+//   }
+
+//   // Process AI response into workflow steps with streaming
+//   const processAIResponseIntoSteps = async (workflowData: any): Promise<WorkflowStep[]> => {
+//     const steps: WorkflowStep[] = []
+//     const stepsData = workflowData?.steps || generateFallbackSteps()
+    
+//     for (let i = 0; i < stepsData.length; i++) {
+//       const stepData = stepsData[i]
+//       const config = stepTypeConfigs[stepData.type] || stepTypeConfigs.automation
+      
+//       // Get suggested integrations for this step
+//       const suggestedIntegrations = getSuggestedIntegrationsForStep(stepData.type, stepData.title)
+      
+//       const step: WorkflowStep = {
+//         id: `step-${i + 1}`,
+//         stepNumber: i + 1,
+//         title: stepData.title,
+//         description: stepData.description,
+//         type: stepData.type,
+//         icon: config.icon,
+//         color: config.color,
+//         bgColor: config.bgColor,
+//         borderColor: config.borderColor,
+//         estimatedTime: stepData.estimatedTime || getEstimatedTimeForStep(stepData.type),
+//         inputs: stepData.inputs || (i === 0 ? ["Social Media Message"] : ["Previous Step Output"]),
+//         outputs: stepData.outputs || (i === stepsData.length - 1 ? ["Workflow Completion"] : ["Processed Data"]),
+//         details: stepData.details || [`Processes ${stepData.type} logic automatically`, "Integrates with selected platforms", "Maintains conversation context"],
+//         isAnimating: true,
+//         suggestedIntegrations,
+//         selectedIntegrations: suggestedIntegrations.slice(0, 1), // Auto-select top integration
+//         aiReasoning: stepData.aiReasoning || `This step is crucial for ${stepData.type} processing in your automation workflow.`,
+//         complexity: stepData.complexity || "medium",
+//         businessImpact: stepData.businessImpact || `Improves ${stepData.type} efficiency and customer satisfaction.`,
+//         alternatives: stepData.alternatives || [`Alternative ${stepData.type} approaches`, "Custom implementation options"]
+//       }
+
+//       // Add step with animation
+//       setStreamingSteps(prevSteps => [...prevSteps, step])
+      
+//       // Update progress
+//       const progress = ((i + 1) / stepsData.length) * 70 + 25 // Start at 25%, end at 95%
+//       setStreamingProgress(progress)
+      
+//       // Add AI thought
+//       addAiThought(`🔧 Generated step ${i + 1}: ${step.title}`)
+      
+//       // Scroll to new step
+//       setTimeout(() => {
+//         if (stepContainerRef.current) {
+//           const newStepElement = stepContainerRef.current.querySelector(`[data-step-id="step-${i + 1}"]`)
+//           if (newStepElement) {
+//             newStepElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+//           }
+//         }
+//       }, 100)
+      
+//       // Wait between steps for streaming effect
+//       await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400))
+      
+//       // Remove animation class
+//       setStreamingSteps(prevSteps => 
+//         prevSteps.map(s => s.id === step.id ? { ...s, isAnimating: false } : s)
+//       )
+
+//       steps.push(step)
+//     }
+
+//     return steps
+//   }
+
+//   // Get suggested integrations for a specific step type
+//   const getSuggestedIntegrationsForStep = (stepType: string, stepTitle: string): Integration[] => {
+//     const suggestions: Integration[] = []
+//     const title = stepTitle.toLowerCase()
+    
+//     // Smart integration matching based on step type and content
+//     if (stepType === "trigger" || title.includes("message") || title.includes("reception")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "communication"))
+//     }
+    
+//     if (stepType === "storage" || title.includes("log") || title.includes("store") || title.includes("save")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "database"))
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "crm"))
+//     }
+    
+//     if (stepType === "response" || title.includes("email") || title.includes("message") || title.includes("notification")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "email"))
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "communication"))
+//     }
+    
+//     if (stepType === "payment" || title.includes("payment") || title.includes("billing") || title.includes("checkout")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "payment"))
+//     }
+    
+//     if (stepType === "analysis" || title.includes("track") || title.includes("analyz") || title.includes("metric")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "analytics"))
+//     }
+    
+//     if (title.includes("support") || title.includes("help") || title.includes("ticket")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "support"))
+//     }
+    
+//     if (title.includes("schedule") || title.includes("appointment") || title.includes("calendar")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "scheduling"))
+//     }
+    
+//     if (title.includes("product") || title.includes("order") || title.includes("inventory")) {
+//       suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "ecommerce"))
+//     }
+    
+//     // Always include automation tools as they're universally applicable
+//     suggestions.push(...INTEGRATION_DATABASE.filter(i => i.category === "automation"))
+    
+//     // Remove duplicates and sort by popularity
+//     const uniqueSuggestions = suggestions.filter((integration, index, self) => 
+//       index === self.findIndex(i => i.id === integration.id)
+//     )
+    
+//     return uniqueSuggestions
+//       .sort((a, b) => b.popularity - a.popularity)
+//       .slice(0, 5) // Top 5 suggestions per step
+//   }
+
+//   // Helper functions
+//   const getEstimatedTimeForStep = (stepType: string): string => {
+//     const timeMap: Record<string, string> = {
+//       trigger: "< 1s",
+//       analysis: "2-3s",
+//       filter: "1-2s",
+//       response: "1-2s",
+//       routing: "< 1s",
+//       storage: "2-4s",
+//       validation: "1-3s",
+//       automation: "1-2s",
+//       payment: "3-5s",
+//       communication: "1-2s"
+//     }
+//     return timeMap[stepType] || "1-2s"
+//   }
+
+//   const generateFallbackSteps = () => [
+//     {
+//       title: "Message Reception & Processing",
+//       description: "Capture and process incoming messages from all connected social media platforms",
+//       type: "trigger",
+//       aiReasoning: "Essential entry point for all customer interactions"
+//     },
+//     {
+//       title: "Intent Analysis & Classification",
+//       description: "AI analyzes message content to understand customer intent and urgency",
+//       type: "analysis",
+//       aiReasoning: "Critical for providing relevant and contextual responses"
+//     },
+//     {
+//       title: "Content Filtering & Validation",
+//       description: "Filter spam, inappropriate content, and validate message authenticity",
+//       type: "filter",
+//       aiReasoning: "Protects brand reputation and ensures quality interactions"
+//     },
+//     {
+//       title: "Customer Data Enrichment",
+//       description: "Enhance customer profile with available data from CRM and other sources",
+//       type: "integration",
+//       aiReasoning: "Enables personalized responses and better customer service"
+//     },
+//     {
+//       title: "Intelligent Response Generation",
+//       description: "Generate personalized responses based on customer context and business rules",
+//       type: "response",
+//       aiReasoning: "Provides immediate value to customers while maintaining brand voice"
+//     },
+//     {
+//       title: "Human Escalation Assessment",
+//       description: "Determine if human intervention is needed based on complexity and sentiment",
+//       type: "routing",
+//       aiReasoning: "Ensures complex issues receive appropriate human attention"
+//     },
+//     {
+//       title: "CRM Integration & Updates",
+//       description: "Update customer records and create relevant tasks in CRM system",
+//       type: "storage",
+//       aiReasoning: "Maintains comprehensive customer interaction history"
+//     },
+//     {
+//       title: "Follow-up Sequence Automation",
+//       description: "Schedule and send automated follow-up messages based on customer journey",
+//       type: "automation",
+//       aiReasoning: "Maximizes engagement and conversion opportunities"
+//     },
+//     {
+//       title: "Performance Analytics & Reporting",
+//       description: "Track workflow performance and generate insights for continuous improvement",
+//       type: "validation",
+//       aiReasoning: "Enables data-driven optimization of the automation workflow"
+//     }
+//   ]
+
+//   const getUniqueIntegrations = (steps: WorkflowStep[]): Integration[] => {
+//     const allIntegrations = steps.flatMap(step => step.selectedIntegrations || [])
+//     return allIntegrations.filter((integration, index, self) => 
+//       index === self.findIndex(i => i.id === integration.id)
+//     )
+//   }
+
+//   const addAiThought = (thought: string): void => {
+//     setAiThoughts(prev => {
+//       const newThoughts = [...prev, thought]
+//       return newThoughts.slice(-5) // Keep only last 5 thoughts
+//     })
+//   }
+
+//   const getAiThoughtForPhase = (phase: number): string => {
+//     const thoughts = [
+//       "🔍 Analyzing your business requirements and social media automation needs...",
+//       "🎨 Designing optimal workflow architecture with enterprise-grade components...",
+//       "🔗 Matching your needs with the best available integrations and tools...",
+//       "⚡ Optimizing workflow for maximum performance and reliability..."
+//     ]
+//     return thoughts[phase] || "🤖 Processing your workflow requirements..."
+//   }
+
+//   // Handle approval and send to designers via N8N
+//   const handleApprove = async (): Promise<void> => {
+//     setIsGenerating(true)
+//     setResponseStatus("📧 Sending comprehensive workflow design to development team...")
+
+//     try {
+//       const payload = {
+//         action: "send_to_designers",
+//         businessInfo: businessInfo,
+//         workflowDesign: parsedWorkflow,
+//         selectedChannels: selectedChannels,
+//         automationFeatures: automationFeatures,
+//         approvedAt: new Date().toISOString(),
+//         estimatedCost: parsedWorkflow?.estimatedCost,
+//         roi: parsedWorkflow?.roi,
+//         integrations: parsedWorkflow?.integrations
+//       }
+
+//       const response = await fetch('/api/send-to-designers', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(payload)
+//       })
+
+//       if (!response.ok) {
+//         throw new Error(`Failed to send to designers: ${response.statusText}`)
+//       }
+
+//       const result = await response.json()
+//       setResponseStatus("✅ Enterprise workflow design sent to development team successfully!")
+      
+//       if (setActiveWorkflowExists) setActiveWorkflowExists(true)
+//       if (setActiveWorkflowDetails) {
+//         setActiveWorkflowDetails({
+//           id: `workflow-${Date.now()}`,
+//           workflowTemplate: { name: parsedWorkflow?.title || "AI Social Media Automation" },
+//           businessInfo: businessInfo,
+//           parsedWorkflow: parsedWorkflow,
+//           status: "SENT_TO_DESIGNERS",
+//           platform: "social-media-automation",
+//           channels: selectedChannels,
+//           features: automationFeatures,
+//           approvedAt: new Date().toISOString(),
+//           estimatedCost: parsedWorkflow?.estimatedCost,
+//           roi: parsedWorkflow?.roi
+//         })
+//       }
+
+//       setTimeout(() => {
+//         if (setStep) setStep("dashboard")
+//       }, 2000)
+
+//     } catch (error) {
+//       console.error("Approval error:", error)
+//       setResponseStatus("❌ Failed to send to designers. Please try again.")
+//     } finally {
+//       setIsGenerating(false)
+//     }
+//   }
+
+//   const handleInitialSubmit = (): void => {
+//     if (!workflowRequest.trim()) {
+//       setResponseStatus("❌ Please describe your automation needs")
+//       return
+//     }
+//     if (selectedChannels.length === 0) {
+//       setResponseStatus("❌ Please select at least one platform")
+//       return
+//     }
+//     generateWorkflowWithAI("initial")
+//   }
+
+//   const handleRefine = (): void => {
+//     if (!refinementInput.trim()) {
+//       setResponseStatus("❌ Please provide refinement instructions")
+//       return
+//     }
+//     generateWorkflowWithAI("refine", refinementInput)
+//     setRefinementInput("")
+//   }
+
+//   const toggleStepExpansion = (stepNumber: number): void => {
+//     setExpandedSteps(prev => {
+//       const newSet = new Set(prev)
+//       if (newSet.has(stepNumber)) {
+//         newSet.delete(stepNumber)
+//       } else {
+//         newSet.add(stepNumber)
+//       }
+//       return newSet
+//     })
+//   }
+
+//   const handleChannelToggle = (channelId: string): void => {
+//     const newChannels = selectedChannels.includes(channelId)
+//       ? selectedChannels.filter(c => c !== channelId)
+//       : [...selectedChannels, channelId]
+//     setSelectedChannels(newChannels)
+//   }
+
+//   const handleFeatureToggle = (featureId: string, checked: boolean): void => {
+//     if (checked) {
+//       setAutomationFeatures(prev => [...prev, featureId])
+//     } else {
+//       setAutomationFeatures(prev => prev.filter(f => f !== featureId))
+//     }
+//   }
+
+//   const handleIntegrationToggle = (stepId: string, integration: Integration): void => {
+//     setStreamingSteps(prevSteps => 
+//       prevSteps.map(step => {
+//         if (step.id === stepId) {
+//           const isSelected = step.selectedIntegrations?.some(i => i.id === integration.id)
+//           const newSelected = isSelected
+//             ? step.selectedIntegrations?.filter(i => i.id !== integration.id) || []
+//             : [...(step.selectedIntegrations || []), integration]
+          
+//           return { ...step, selectedIntegrations: newSelected }
+//         }
+//         return step
+//       })
+//     )
+//   }
+
+//   // Enhanced components
+//   const StreamingProgress: React.FC = () => {
+//     if (!isGenerating) return null
+
+//     const currentPhaseData = streamingPhases[currentPhase]
+//     const IconComponent = currentPhaseData?.icon || Brain
+
+//     return (
+//       <div className="mb-8">
+//         <div className="flex items-center justify-center mb-6">
+//           <div className="relative">
+//             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 flex items-center justify-center">
+//               <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-purple-500 animate-spin"></div>
+//               <IconComponent className={`h-10 w-10 ${currentPhaseData?.color || 'text-blue-500'} animate-pulse`} />
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="text-center mb-6">
+//           <h3 className="text-xl font-semibold mb-2">{currentPhaseData?.title || "Processing..."}</h3>
+//           <p className="text-muted-foreground">{currentPhaseData?.description || "Working on your workflow..."}</p>
+//         </div>
+
+//         <div className="mb-6">
+//           <div className="flex justify-between text-sm text-muted-foreground mb-2">
+//             <span>Overall Progress</span>
+//             <span>{Math.round(streamingProgress)}%</span>
+//           </div>
+//           <Progress value={streamingProgress} className="h-3 mb-4" />
+//         </div>
+
+//         <div className="flex justify-center gap-6 mb-6">
+//           {streamingPhases.map((phase, index) => {
+//             const PhaseIcon = phase.icon
+//             return (
+//               <div key={phase.id} className="flex flex-col items-center">
+//                 <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+//                   index < currentPhase ? 'bg-green-500 text-white shadow-lg' :
+//                   index === currentPhase ? 'bg-blue-500 text-white animate-pulse shadow-lg' :
+//                   'bg-gray-200 text-gray-400'
+//                 }`}>
+//                   {index < currentPhase ? <CheckCircle className="h-6 w-6" /> : 
+//                    <PhaseIcon className="h-6 w-6" />}
+//                 </div>
+//                 <span className={`text-xs mt-2 text-center font-medium ${
+//                   index === currentPhase ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
+//                 }`}>
+//                   {phase.title.split(' ')[0]}
+//                 </span>
+//               </div>
+//             )
+//           })}
+//         </div>
+
+//         {/* AI Thoughts */}
+//         {aiThoughts.length > 0 && (
+//           <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+//             <div className="flex items-center gap-2 mb-3">
+//               <Brain className="h-4 w-4 text-blue-500" />
+//               <span className="text-sm font-medium text-blue-700 dark:text-blue-300">AI Insights</span>
+//             </div>
+//             <div className="space-y-2 max-h-24 overflow-hidden">
+//               {aiThoughts.slice(-3).map((thought, index) => (
+//                 <div
+//                   key={index}
+//                   className={`text-xs text-blue-600 dark:text-blue-400 transition-opacity duration-500 ${
+//                     index === aiThoughts.length - 1 ? "opacity-100" : "opacity-70"
+//                   }`}
+//                 >
+//                   {thought}
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     )
+//   }
+
+//   const IntegrationSelector: React.FC<{ step: WorkflowStep }> = ({ step }) => {
+//     if (!step.suggestedIntegrations || step.suggestedIntegrations.length === 0) return null
+
+//     return (
+//       <div className="mt-4 p-4 bg-white/50 dark:bg-black/20 rounded-lg border border-white/20">
+//         <h6 className="font-semibold mb-3 flex items-center gap-2">
+//           <Puzzle className="h-4 w-4 text-purple-500" />
+//           Suggested Integrations
+//           <Badge variant="outline" className="text-xs">
+//             {step.suggestedIntegrations.length} available
+//           </Badge>
+//         </h6>
+        
+//         <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+//           {step.suggestedIntegrations.map((integration) => {
+//             const IconComponent = integration.icon
+//             const isSelected = step.selectedIntegrations?.some(i => i.id === integration.id)
+            
+//             return (
+//               <div
+//                 key={integration.id}
+//                 onClick={() => handleIntegrationToggle(step.id, integration)}
+//                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+//                   isSelected
+//                     ? "bg-blue-500 text-white border-blue-500 shadow-md"
+//                     : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+//                 }`}
+//               >
+//                 <div className="flex items-center gap-3">
+//                   <IconComponent className="h-5 w-5 flex-shrink-0" />
+//                   <div className="flex-grow min-w-0">
+//                     <div className="flex items-center gap-2 mb-1">
+//                       <span className="font-medium text-sm truncate">{integration.name}</span>
+//                       <Badge 
+//                         variant={isSelected ? "secondary" : "outline"} 
+//                         className={`text-xs ${isSelected ? "bg-white/20 text-white" : ""}`}
+//                       >
+//                         {integration.pricing}
+//                       </Badge>
+//                     </div>
+//                     <p className={`text-xs truncate ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
+//                       {integration.description}
+//                     </p>
+//                     <div className="flex items-center gap-2 mt-1">
+//                       <div className={`flex items-center gap-1 text-xs ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
+//                         <Timer className="h-3 w-3" />
+//                         {integration.setupTime}
+//                       </div>
+//                       <div className={`flex items-center gap-1 text-xs ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
+//                         <Star className="h-3 w-3" />
+//                         {integration.popularity}%
+//                       </div>
+//                     </div>
+//                   </div>
+//                   {isSelected ? (
+//                     <Check className="h-4 w-4 text-white" />
+//                   ) : (
+//                     <Plus className="h-4 w-4 text-gray-400" />
+//                   )}
+//                 </div>
+//               </div>
+//             )
+//           })}
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   const StepComponent: React.FC<{ step: WorkflowStep }> = ({ step }) => {
+//     const config = stepTypeConfigs[step.type] || stepTypeConfigs.automation
+//     const IconComponent = step.icon || config.icon
+//     const isExpanded = expandedSteps.has(step.stepNumber)
+
+//     return (
+//       <div 
+//         data-step-id={step.id}
+//         className={`relative transition-all duration-500 ${
+//           step.isAnimating ? 'animate-pulse' : ''
+//         }`}
+//         style={{
+//           animation: step.isAnimating ? 'slideInFromLeft 0.6s ease-out' : 'none'
+//         }}
+//       >
+//         <div className={`rounded-xl border-2 transition-all duration-300 cursor-pointer bg-gradient-to-br ${
+//           config.bgColor} ${config.darkBg} ${config.borderColor} ${config.darkBorder} ${
+//           isExpanded ? 'shadow-xl scale-[1.02] border-opacity-100' : 'hover:shadow-lg hover:scale-[1.01] border-opacity-60'
+//         }`}
+//         onClick={() => toggleStepExpansion(step.stepNumber)}>
+          
+//           {/* Step Header */}
+//           <div className="p-6">
+//             <div className="flex items-center gap-4">
+//               {/* Enhanced Step Number with Icon */}
+//               <div className="relative">
+//                 <div className={`w-16 h-16 ${config.accentColor} rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-xl`}>
+//                   {step.stepNumber}
+//                 </div>
+//                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-white">
+//                   <IconComponent className={`h-4 w-4 ${config.color}`} />
+//                 </div>
+//               </div>
+
+//               {/* Enhanced Step Content */}
+//               <div className="flex-grow">
+//                 <div className="flex items-center gap-3 mb-3">
+//                   <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100">{step.title}</h4>
+//                   <Badge variant="outline" className="text-xs font-medium">
+//                     {step.type}
+//                   </Badge>
+//                   <Badge variant="secondary" className={`text-xs ${
+//                     step.complexity === "high" ? "bg-red-100 text-red-700" :
+//                     step.complexity === "medium" ? "bg-yellow-100 text-yellow-700" :
+//                     "bg-green-100 text-green-700"
+//                   }`}>
+//                     {step.complexity} complexity
+//                   </Badge>
+//                   {step.estimatedTime && (
+//                     <Badge variant="secondary" className="text-xs">
+//                       <Timer className="h-3 w-3 mr-1" />
+//                       {step.estimatedTime}
+//                     </Badge>
+//                   )}
+//                 </div>
+//                 <p className="text-muted-foreground mb-3 leading-relaxed">{step.description}</p>
+                
+//                 {/* Enhanced Input/Output Flow */}
+//                 <div className="flex items-center gap-6 text-sm">
+//                   {step.inputs && (
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+//                       <span className="text-green-700 dark:text-green-300 font-medium">
+//                         Input: {step.inputs.join(", ")}
+//                       </span>
+//                     </div>
+//                   )}
+//                   {step.outputs && (
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+//                       <span className="text-blue-700 dark:text-blue-300 font-medium">
+//                         Output: {step.outputs.join(", ")}
+//                       </span>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 {/* Integration Preview */}
+//                 {step.selectedIntegrations && step.selectedIntegrations.length > 0 && (
+//                   <div className="mt-3 flex items-center gap-2">
+//                     <Zap className="h-4 w-4 text-purple-500" />
+//                     <span className="text-sm text-purple-700 dark:text-purple-300 font-medium">
+//                       Integrations: {step.selectedIntegrations.map(i => i.name).join(", ")}
+//                     </span>
+//                   </div>
+//                 )}
+//               </div>
+
+//               {/* Expand Icon */}
+//               <div className="flex items-center">
+//                 {isExpanded ? (
+//                   <ChevronDown className="h-6 w-6 text-muted-foreground" />
+//                 ) : (
+//                   <ChevronRight className="h-6 w-6 text-muted-foreground" />
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Expanded Details */}
+//           {isExpanded && (
+//             <div className="border-t border-white/50 bg-white/30 dark:bg-black/10 p-6">
+//               {/* AI Reasoning */}
+//               {step.aiReasoning && (
+//                 <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+//                   <h6 className="font-semibold mb-2 flex items-center gap-2 text-purple-700 dark:text-purple-300">
+//                     <Brain className="h-4 w-4" />
+//                     AI Reasoning
+//                   </h6>
+//                   <p className="text-sm text-purple-600 dark:text-purple-400">{step.aiReasoning}</p>
+//                 </div>
+//               )}
+
+//               <div className="grid lg:grid-cols-3 gap-6">
+//                 <div>
+//                   <h5 className="font-semibold mb-3 flex items-center gap-2">
+//                     <Layers className="h-4 w-4 text-blue-500" />
+//                     Implementation Details
+//                   </h5>
+//                   <ul className="space-y-2 text-sm text-muted-foreground">
+//                     {step.details?.map((detail, idx) => (
+//                       <li key={idx} className="flex items-start gap-2">
+//                         <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+//                         <span>{detail}</span>
+//                       </li>
+//                     ))}
+//                   </ul>
+//                 </div>
+
+//                 <div>
+//                   <h5 className="font-semibold mb-3 flex items-center gap-2">
+//                     <Activity className="h-4 w-4 text-green-500" />
+//                     Performance & Impact
+//                   </h5>
+//                   <div className="space-y-3 text-sm">
+//                     <div className="flex justify-between items-center">
+//                       <span className="text-muted-foreground">Execution Time:</span>
+//                       <Badge variant="secondary">{step.estimatedTime}</Badge>
+//                     </div>
+//                     <div className="flex justify-between items-center">
+//                       <span className="text-muted-foreground">Business Impact:</span>
+//                       <Badge variant="secondary" className="text-green-600">High</Badge>
+//                     </div>
+//                     <div className="flex justify-between items-center">
+//                       <span className="text-muted-foreground">Reliability:</span>
+//                       <Badge variant="secondary" className="text-blue-600">99.9%</Badge>
+//                     </div>
+//                     {step.businessImpact && (
+//                       <p className="text-xs text-muted-foreground mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+//                         {step.businessImpact}
+//                       </p>
+//                     )}
+//                   </div>
+//                 </div>
+
+//                 <div>
+//                   <h5 className="font-semibold mb-3 flex items-center gap-2">
+//                     <Settings className="h-4 w-4 text-orange-500" />
+//                     Configuration Options
+//                   </h5>
+//                   <div className="space-y-2 text-sm">
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+//                       <span>Auto-retry enabled</span>
+//                     </div>
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+//                       <span>Real-time monitoring</span>
+//                     </div>
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+//                       <span>Custom error handling</span>
+//                     </div>
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+//                       <span>Performance optimization</span>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Integration Selector */}
+//               <IntegrationSelector step={step} />
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Enhanced Connection Line */}
+//         {step.stepNumber < (streamingSteps.length || 1) && (
+//           <div className="flex justify-center my-6">
+//             <div className="relative">
+//               <div className="w-px h-12 bg-gradient-to-b from-gray-300 via-blue-300 to-gray-100 dark:from-gray-600 dark:via-blue-600 dark:to-gray-800"></div>
+//               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-background p-6">
+//       <style jsx>{`
+//         @keyframes slideInFromLeft {
+//           0% {
+//             opacity: 0;
+//             transform: translateX(-30px);
+//           }
+//           100% {
+//             opacity: 1;
+//             transform: translateX(0);
+//           }
+//         }
+//       `}</style>
+      
+//       <div className="max-w-7xl mx-auto">
+//         {/* Enhanced Header */}
+//         <div className="mb-8">
+//           <Button variant="ghost" className="mb-6 hover:bg-accent" onClick={() => setStep?.("selection")}>
+//             <ArrowLeft className="h-4 w-4 mr-2" />
+//             Back to Selection
+//           </Button>
+//           <div className="text-center mb-8">
+//             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+//               🤖 Enterprise AI Workflow Designer
+//             </h1>
+//             <p className="text-muted-foreground text-xl max-w-3xl mx-auto leading-relaxed">
+//               Watch as our advanced AI creates your personalized social media automation workflow with smart integrations and enterprise-grade architecture.
+//             </p>
+//             <div className="flex items-center justify-center gap-6 mt-4 text-sm text-muted-foreground">
+//               <div className="flex items-center gap-2">
+//                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+//                 <span>Real-time AI Generation</span>
+//               </div>
+//               <div className="flex items-center gap-2">
+//                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+//                 <span>Smart Integration Matching</span>
+//               </div>
+//               <div className="flex items-center gap-2">
+//                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+//                 <span>Enterprise Architecture</span>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="grid gap-8 lg:grid-cols-3">
+//           {/* Enhanced Left Column - Input */}
+//           <div className="lg:col-span-1 space-y-6">
+//             <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10">
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Wand2 className="h-5 w-5 text-blue-500" />
+//                   {!hasInitialRequest ? "Design Your Enterprise Automation" : "Refine Your Workflow"}
+//                 </CardTitle>
+//                 <CardDescription>
+//                   {!hasInitialRequest
+//                     ? "Describe your automation needs and our AI will create the perfect workflow"
+//                     : "Provide feedback to enhance and customize the design"}
+//                 </CardDescription>
+//               </CardHeader>
+//               <CardContent className="space-y-6">
+//                 {!hasInitialRequest && (
+//                   <>
+//                     {/* Enhanced Platform Selection */}
+//                     <div className="space-y-3">
+//                       <Label className="text-base font-semibold">Social Media Platforms</Label>
+//                       <div className="grid grid-cols-1 gap-3">
+//                         {channelOptions.map((channel) => {
+//                           const IconComponent = channel.icon
+//                           return (
+//                             <button
+//                               key={channel.id}
+//                               onClick={() => handleChannelToggle(channel.id)}
+//                               className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+//                                 selectedChannels.includes(channel.id)
+//                                   ? "bg-blue-500 text-white border-blue-500 shadow-lg transform scale-105"
+//                                   : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:transform hover:scale-102"
+//                               }`}
+//                             >
+//                               <div className="flex items-center gap-3">
+//                                 <IconComponent className="h-5 w-5" />
+//                                 <span className="font-medium">{channel.label}</span>
+//                                 {selectedChannels.includes(channel.id) && (
+//                                   <Check className="h-4 w-4 ml-auto" />
+//                                 )}
+//                               </div>
+//                             </button>
+//                           )
+//                         })}
+//                       </div>
+//                     </div>
+
+//                     {/* Enhanced Feature Selection */}
+//                     <div className="space-y-3">
+//                       <Label className="text-base font-semibold">AI Automation Features</Label>
+//                       <div className="space-y-2">
+//                         {automationFeatureOptions.map((feature) => (
+//                           <label key={feature.id} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-accent transition-colors">
+//                             <input
+//                               type="checkbox"
+//                               checked={automationFeatures.includes(feature.id)}
+//                               onChange={(e) => handleFeatureToggle(feature.id, e.target.checked)}
+//                               className="w-4 h-4 rounded border-border"
+//                             />
+//                             <span className="text-sm font-medium">{feature.label}</span>
+//                           </label>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   </>
+//                 )}
+
+//                 {/* Enhanced Request Input */}
+//                 {!hasInitialRequest ? (
+//                   <>
+//                     <div className="space-y-3">
+//                       <Label htmlFor="workflowRequest" className="text-base font-semibold">
+//                         Describe Your Automation Vision
+//                       </Label>
+//                       <Textarea
+//                         id="workflowRequest"
+//                         value={workflowRequest}
+//                         onChange={(e) => setWorkflowRequest(e.target.value)}
+//                         placeholder="e.g., 'I want to create an intelligent Instagram automation that responds to product inquiries, analyzes customer sentiment, integrates with our Shopify store, updates our HubSpot CRM, and escalates complex issues to human agents. Include payment processing for quick purchases and follow-up sequences for abandoned carts.'"
+//                         rows={8}
+//                         className="bg-white/50 border-2 border-blue-200 focus:border-blue-500 resize-none text-sm"
+//                         disabled={isGenerating}
+//                       />
+//                     </div>
+//                     <Button
+//                       onClick={handleInitialSubmit}
+//                       disabled={isGenerating || !workflowRequest.trim()}
+//                       className="w-full flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 text-base"
+//                     >
+//                       {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+//                       Generate Enterprise AI Workflow
+//                     </Button>
+//                   </>
+//                 ) : (
+//                   <>
+//                     <div className="space-y-3">
+//                       <Label htmlFor="refinementInput" className="text-base font-semibold">
+//                         Refine Your Workflow
+//                       </Label>
+//                       <Textarea
+//                         id="refinementInput"
+//                         value={refinementInput}
+//                         onChange={(e) => setRefinementInput(e.target.value)}
+//                         placeholder="e.g., 'Add Salesforce integration instead of HubSpot', 'Include advanced analytics dashboard', 'Add WhatsApp Business API integration', 'Implement multi-language support'"
+//                         rows={5}
+//                         className="bg-white/50 border-2 border-blue-200 focus:border-blue-500 resize-none"
+//                         disabled={isGenerating}
+//                       />
+//                     </div>
+//                     <div className="flex gap-3">
+//                       <Button
+//                         onClick={handleRefine}
+//                         disabled={isGenerating || !refinementInput.trim()}
+//                         className="flex-1 flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium"
+//                       >
+//                         {isGenerating && currentAction === "refine" ? (
+//                           <Loader2 className="h-4 w-4 animate-spin" />
+//                         ) : (
+//                           <RefreshCw className="h-4 w-4" />
+//                         )}
+//                         Refine Design
+//                       </Button>
+//                       <Button
+//                         onClick={handleApprove}
+//                         disabled={isGenerating || !parsedWorkflow}
+//                         className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white flex items-center gap-2 font-medium"
+//                       >
+//                         {isGenerating && currentAction === "approve" ? (
+//                           <Loader2 className="h-4 w-4 animate-spin" />
+//                         ) : (
+//                           <ThumbsUp className="h-4 w-4" />
+//                         )}
+//                         Send to Designers
+//                       </Button>
+//                     </div>
+//                   </>
+//                 )}
+//               </CardContent>
+//             </Card>
+
+//             {/* Enhanced Business Context */}
+//             <Card className="border-2 border-border/50 bg-gradient-to-br from-gray-50/50 to-blue-50/50 dark:from-gray-900/50 dark:to-blue-900/20">
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Building className="h-5 w-5 text-blue-500" />
+//                   Business Context
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent className="space-y-4 text-sm">
+//                 <div className="p-3 bg-white/50 rounded-lg">
+//                   <span className="font-semibold text-blue-600">Business:</span>
+//                   <p className="text-muted-foreground mt-1">{businessInfo.businessName}</p>
+//                 </div>
+//                 <div className="p-3 bg-white/50 rounded-lg">
+//                   <span className="font-semibold text-blue-600">Industry:</span>
+//                   <p className="text-muted-foreground mt-1">{businessInfo.businessType}</p>
+//                 </div>
+//                 {businessInfo.description && (
+//                   <div className="p-3 bg-white/50 rounded-lg">
+//                     <span className="font-semibold text-blue-600">Description:</span>
+//                     <p className="text-muted-foreground mt-1">{businessInfo.description}</p>
+//                   </div>
+//                 )}
+//                 {selectedChannels.length > 0 && (
+//                   <div className="p-3 bg-white/50 rounded-lg">
+//                     <span className="font-semibold text-blue-600">Selected Platforms:</span>
+//                     <div className="flex flex-wrap gap-2 mt-2">
+//                       {selectedChannels.map((channel) => (
+//                         <Badge key={channel} variant="secondary" className="text-xs">
+//                           {channelOptions.find((c) => c.id === channel)?.label}
+//                         </Badge>
+//                       ))}
+//                     </div>
+//                   </div>
+//                 )}
+//                 {automationFeatures.length > 0 && (
+//                   <div className="p-3 bg-white/50 rounded-lg">
+//                     <span className="font-semibold text-blue-600">AI Features:</span>
+//                     <div className="flex flex-wrap gap-2 mt-2">
+//                       {automationFeatures.map((feature) => (
+//                         <Badge key={feature} variant="outline" className="text-xs">
+//                           {automationFeatureOptions.find((f) => f.id === feature)?.label}
+//                         </Badge>
+//                       ))}
+//                     </div>
+//                   </div>
+//                 )}
+//               </CardContent>
+//             </Card>
+//           </div>
+
+//           {/* Enhanced Right Column - AI Generated Workflow */}
+//           <div className="lg:col-span-2">
+//             <Card className="border-2 border-blue-200 dark:border-blue-800 min-h-[700px] bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10">
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Brain className="h-6 w-6 text-blue-500" />
+//                   Enterprise AI Workflow Generation
+//                   {parsedWorkflow && (
+//                     <Badge variant="secondary" className="ml-auto bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+//                       <Star className="h-3 w-3 mr-1" />
+//                       AI Generated
+//                     </Badge>
+//                   )}
+//                 </CardTitle>
+//                 <CardDescription className="text-base">
+//                   Advanced AI creates production-ready workflows with smart integrations in real-time
+//                 </CardDescription>
+//               </CardHeader>
+//               <CardContent>
+//                 {/* Enhanced Status Message */}
+//                 {responseStatus && (
+//                   <div className={`mb-6 p-4 rounded-xl border-2 ${
+//                     responseStatus.includes("✅") ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 text-green-800 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-700 dark:text-green-300" :
+//                     responseStatus.includes("❌") ? "bg-gradient-to-r from-red-50 to-pink-50 border-red-200 text-red-800 dark:from-red-900/20 dark:to-pink-900/20 dark:border-red-700 dark:text-red-300" :
+//                     "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 text-blue-800 dark:from-blue-900/20 dark:to-purple-900/20 dark:border-blue-700 dark:text-blue-300"
+//                   }`}>
+//                     <div className="flex items-center gap-3">
+//                       {responseStatus.includes("✅") ? <CheckCircle className="h-5 w-5" /> :
+//                        responseStatus.includes("❌") ? <AlertCircle className="h-5 w-5" /> :
+//                        <Loader2 className="h-5 w-5 animate-spin" />}
+//                       <span className="font-medium">{responseStatus}</span>
+//                     </div>
+//                   </div>
+//                 )}
+
+//                 {/* Enhanced Streaming Progress */}
+//                 {isGenerating && <StreamingProgress />}
+
+//                 {/* Enhanced Workflow Header */}
+//                 {parsedWorkflow && !isGenerating && (
+//                   <div className="mb-8 p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border-2 border-blue-200 dark:border-blue-700">
+//                     <div className="text-center mb-8">
+//                       <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+//                         {parsedWorkflow.title}
+//                       </h3>
+//                       <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
+//                         {parsedWorkflow.description}
+//                       </p>
+//                     </div>
+                    
+//                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+//                       <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
+//                         <div className="text-2xl font-bold text-blue-600 mb-1">{parsedWorkflow.metrics?.automationRate}</div>
+//                         <div className="text-xs text-muted-foreground font-medium">Automation Rate</div>
+//                       </div>
+//                       <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
+//                         <div className="text-2xl font-bold text-green-600 mb-1">{parsedWorkflow.metrics?.responseTime}</div>
+//                         <div className="text-xs text-muted-foreground font-medium">Response Time</div>
+//                       </div>
+//                       <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
+//                         <div className="text-2xl font-bold text-purple-600 mb-1">{parsedWorkflow.metrics?.accuracy}</div>
+//                         <div className="text-xs text-muted-foreground font-medium">AI Accuracy</div>
+//                       </div>
+//                       <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
+//                         <div className="text-2xl font-bold text-orange-600 mb-1">{parsedWorkflow.estimatedBuildTime}</div>
+//                         <div className="text-xs text-muted-foreground font-medium">Build Time</div>
+//                       </div>
+//                     </div>
+
+//                     {/* Enhanced ROI and Cost Information */}
+//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                       <div className="p-4 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl">
+//                         <div className="flex items-center gap-2 mb-2">
+//                           <TrendingUp className="h-4 w-4 text-green-600" />
+//                           <span className="font-semibold text-green-700 dark:text-green-300">Expected ROI</span>
+//                         </div>
+//                         <div className="text-xl font-bold text-green-600">{parsedWorkflow.roi}</div>
+//                       </div>
+//                       <div className="p-4 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl">
+//                         <div className="flex items-center gap-2 mb-2">
+//                           <CreditCard className="h-4 w-4 text-blue-600" />
+//                           <span className="font-semibold text-blue-700 dark:text-blue-300">Monthly Cost</span>
+//                         </div>
+//                         <div className="text-xl font-bold text-blue-600">{parsedWorkflow.estimatedCost}</div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 )}
+
+//                 {/* Enhanced Streaming Steps */}
+//                 {(isStreaming || streamingSteps.length > 0) && (
+//                   <div ref={stepContainerRef} className="space-y-8">
+//                     <div className="flex items-center gap-4 mb-8">
+//                       <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
+//                         <Workflow className="h-6 w-6 text-white" />
+//                       </div>
+//                       <div>
+//                         <h3 className="text-2xl font-bold">Intelligent Workflow Steps</h3>
+//                         <p className="text-muted-foreground">AI-designed automation with smart integrations</p>
+//                       </div>
+//                       <Badge variant="outline" className="ml-auto text-base px-3 py-1">
+//                         {isStreaming ? `${streamingSteps.length} steps generated...` : `${streamingSteps.length} total steps`}
+//                       </Badge>
+//                     </div>
+                    
+//                     {streamingSteps.map((step) => (
+//                       <StepComponent key={step.id} step={step} />
+//                     ))}
+                    
+//                     {isStreaming && (
+//                       <div className="flex justify-center py-8">
+//                         <div className="flex items-center gap-3 text-muted-foreground">
+//                           <Loader2 className="h-5 w-5 animate-spin" />
+//                           <span className="font-medium">AI is generating more intelligent steps...</span>
+//                         </div>
+//                       </div>
+//                     )}
+//                   </div>
+//                 )}
+
+//                 {/* Enhanced Initial State */}
+//                 {!isGenerating && !parsedWorkflow && !hasInitialRequest && (
+//                   <div className="flex flex-col items-center justify-center py-24 text-center">
+//                     <div className="relative mb-8">
+//                       <div className="w-24 h-24 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center">
+//                         <Brain className="h-12 w-12 text-blue-500" />
+//                       </div>
+//                       <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+//                         <Sparkles className="h-4 w-4 text-white" />
+//                       </div>
+//                     </div>
+//                     <h3 className="text-2xl font-bold mb-4">Ready to Create Enterprise-Grade Automation</h3>
+//                     <p className="text-center max-w-lg mb-8 text-muted-foreground leading-relaxed">
+//                       Our advanced AI will analyze your requirements and generate a complete, production-ready workflow with intelligent integrations and enterprise architecture.
+//                     </p>
+//                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-muted-foreground">
+//                       <div className="flex flex-col items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+//                         <Brain className="h-5 w-5 text-blue-500" />
+//                         <span className="font-medium">AI-Powered</span>
+//                       </div>
+//                       <div className="flex flex-col items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+//                         <Zap className="h-5 w-5 text-green-500" />
+//                         <span className="font-medium">Smart Integrations</span>
+//                       </div>
+//                       <div className="flex flex-col items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+//                         <Rocket className="h-5 w-5 text-purple-500" />
+//                         <span className="font-medium">Enterprise Ready</span>
+//                       </div>
+//                       <div className="flex flex-col items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+//                         <TrendingUp className="h-5 w-5 text-orange-500" />
+//                         <span className="font-medium">ROI Optimized</span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 )}
+//               </CardContent>
+//             </Card>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default VoiceflowWorkflowBuilder
+
+
+
+
+
+
+
+
+
+
+
+
 "use client"
 
 import React, { useState, useCallback, useEffect, useRef } from "react"
@@ -7812,10 +9864,10 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Enhanced Left Column - Input */}
           <div className="lg:col-span-1 space-y-6">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10">
+            <Card className="border-2 border-border bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Wand2 className="h-5 w-5 text-blue-500" />
+                  <Wand2 className="h-5 w-5 text-primary" />
                   {!hasInitialRequest ? "Design Your Enterprise Automation" : "Refine Your Workflow"}
                 </CardTitle>
                 <CardDescription>
@@ -7839,8 +9891,8 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                               onClick={() => handleChannelToggle(channel.id)}
                               className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                                 selectedChannels.includes(channel.id)
-                                  ? "bg-blue-500 text-white border-blue-500 shadow-lg transform scale-105"
-                                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:transform hover:scale-102"
+                                  ? "bg-primary text-primary-foreground border-primary shadow-lg transform scale-105"
+                                  : "bg-card border-border hover:border-primary/50 hover:bg-accent hover:transform hover:scale-102"
                               }`}
                             >
                               <div className="flex items-center gap-3">
@@ -7896,7 +9948,7 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                     <Button
                       onClick={handleInitialSubmit}
                       disabled={isGenerating || !workflowRequest.trim()}
-                      className="w-full flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 text-base"
+                      className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 text-base"
                     >
                       {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
                       Generate Enterprise AI Workflow
@@ -7922,7 +9974,7 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                       <Button
                         onClick={handleRefine}
                         disabled={isGenerating || !refinementInput.trim()}
-                        className="flex-1 flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium"
+                        className="flex-1 flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                       >
                         {isGenerating && currentAction === "refine" ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -7934,7 +9986,7 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                       <Button
                         onClick={handleApprove}
                         disabled={isGenerating || !parsedWorkflow}
-                        className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white flex items-center gap-2 font-medium"
+                        className="flex-1 bg-secondary hover:bg-secondary/90 text-secondary-foreground flex items-center gap-2 font-medium"
                       >
                         {isGenerating && currentAction === "approve" ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -7950,31 +10002,31 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
             </Card>
 
             {/* Enhanced Business Context */}
-            <Card className="border-2 border-border/50 bg-gradient-to-br from-gray-50/50 to-blue-50/50 dark:from-gray-900/50 dark:to-blue-900/20">
+            <Card className="border-2 border-border bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5 text-blue-500" />
+                  <Building className="h-5 w-5 text-primary" />
                   Business Context
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                <div className="p-3 bg-white/50 rounded-lg">
-                  <span className="font-semibold text-blue-600">Business:</span>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <span className="font-semibold text-primary">Business:</span>
                   <p className="text-muted-foreground mt-1">{businessInfo.businessName}</p>
                 </div>
-                <div className="p-3 bg-white/50 rounded-lg">
-                  <span className="font-semibold text-blue-600">Industry:</span>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <span className="font-semibold text-primary">Industry:</span>
                   <p className="text-muted-foreground mt-1">{businessInfo.businessType}</p>
                 </div>
                 {businessInfo.description && (
-                  <div className="p-3 bg-white/50 rounded-lg">
-                    <span className="font-semibold text-blue-600">Description:</span>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <span className="font-semibold text-primary">Description:</span>
                     <p className="text-muted-foreground mt-1">{businessInfo.description}</p>
                   </div>
                 )}
                 {selectedChannels.length > 0 && (
-                  <div className="p-3 bg-white/50 rounded-lg">
-                    <span className="font-semibold text-blue-600">Selected Platforms:</span>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <span className="font-semibold text-primary">Selected Platforms:</span>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {selectedChannels.map((channel) => (
                         <Badge key={channel} variant="secondary" className="text-xs">
@@ -7985,8 +10037,8 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                   </div>
                 )}
                 {automationFeatures.length > 0 && (
-                  <div className="p-3 bg-white/50 rounded-lg">
-                    <span className="font-semibold text-blue-600">AI Features:</span>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <span className="font-semibold text-primary">AI Features:</span>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {automationFeatures.map((feature) => (
                         <Badge key={feature} variant="outline" className="text-xs">
@@ -8002,13 +10054,13 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
 
           {/* Enhanced Right Column - AI Generated Workflow */}
           <div className="lg:col-span-2">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 min-h-[700px] bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10">
+            <Card className="border-2 border-border min-h-[700px] bg-card backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-6 w-6 text-blue-500" />
+                  <Brain className="h-6 w-6 text-primary" />
                   Enterprise AI Workflow Generation
                   {parsedWorkflow && (
-                    <Badge variant="secondary" className="ml-auto bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                    <Badge variant="secondary" className="ml-auto bg-primary text-primary-foreground">
                       <Star className="h-3 w-3 mr-1" />
                       AI Generated
                     </Badge>
@@ -8022,9 +10074,9 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                 {/* Enhanced Status Message */}
                 {responseStatus && (
                   <div className={`mb-6 p-4 rounded-xl border-2 ${
-                    responseStatus.includes("✅") ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 text-green-800 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-700 dark:text-green-300" :
-                    responseStatus.includes("❌") ? "bg-gradient-to-r from-red-50 to-pink-50 border-red-200 text-red-800 dark:from-red-900/20 dark:to-pink-900/20 dark:border-red-700 dark:text-red-300" :
-                    "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 text-blue-800 dark:from-blue-900/20 dark:to-purple-900/20 dark:border-blue-700 dark:text-blue-300"
+                    responseStatus.includes("✅") ? "bg-secondary/50 border-secondary text-secondary-foreground" :
+                    responseStatus.includes("❌") ? "bg-destructive/10 border-destructive/50 text-destructive" :
+                    "bg-primary/10 border-primary/50 text-primary"
                   }`}>
                     <div className="flex items-center gap-3">
                       {responseStatus.includes("✅") ? <CheckCircle className="h-5 w-5" /> :
@@ -8040,9 +10092,9 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
 
                 {/* Enhanced Workflow Header */}
                 {parsedWorkflow && !isGenerating && (
-                  <div className="mb-8 p-8 rounded-2xl bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border-2 border-blue-200 dark:border-blue-700">
+                  <div className="mb-8 p-8 rounded-2xl bg-muted/30 border-2 border-border backdrop-blur-sm">
                     <div className="text-center mb-8">
-                      <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      <h3 className="text-3xl font-bold mb-3 text-foreground">
                         {parsedWorkflow.title}
                       </h3>
                       <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
@@ -8051,39 +10103,39 @@ Return JSON format with complete workflow details, estimated costs, ROI projecti
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
-                        <div className="text-2xl font-bold text-blue-600 mb-1">{parsedWorkflow.metrics?.automationRate}</div>
+                      <div className="text-center p-4 bg-card rounded-xl shadow-sm border border-border">
+                        <div className="text-2xl font-bold text-primary mb-1">{parsedWorkflow.metrics?.automationRate}</div>
                         <div className="text-xs text-muted-foreground font-medium">Automation Rate</div>
                       </div>
-                      <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
-                        <div className="text-2xl font-bold text-green-600 mb-1">{parsedWorkflow.metrics?.responseTime}</div>
+                      <div className="text-center p-4 bg-card rounded-xl shadow-sm border border-border">
+                        <div className="text-2xl font-bold text-primary mb-1">{parsedWorkflow.metrics?.responseTime}</div>
                         <div className="text-xs text-muted-foreground font-medium">Response Time</div>
                       </div>
-                      <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
-                        <div className="text-2xl font-bold text-purple-600 mb-1">{parsedWorkflow.metrics?.accuracy}</div>
+                      <div className="text-center p-4 bg-card rounded-xl shadow-sm border border-border">
+                        <div className="text-2xl font-bold text-primary mb-1">{parsedWorkflow.metrics?.accuracy}</div>
                         <div className="text-xs text-muted-foreground font-medium">AI Accuracy</div>
                       </div>
-                      <div className="text-center p-4 bg-white/70 rounded-xl shadow-sm">
-                        <div className="text-2xl font-bold text-orange-600 mb-1">{parsedWorkflow.estimatedBuildTime}</div>
+                      <div className="text-center p-4 bg-card rounded-xl shadow-sm border border-border">
+                        <div className="text-2xl font-bold text-primary mb-1">{parsedWorkflow.estimatedBuildTime}</div>
                         <div className="text-xs text-muted-foreground font-medium">Build Time</div>
                       </div>
                     </div>
 
                     {/* Enhanced ROI and Cost Information */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl">
+                      <div className="p-4 bg-secondary/30 rounded-xl border border-border">
                         <div className="flex items-center gap-2 mb-2">
-                          <TrendingUp className="h-4 w-4 text-green-600" />
-                          <span className="font-semibold text-green-700 dark:text-green-300">Expected ROI</span>
+                          <TrendingUp className="h-4 w-4 text-primary" />
+                          <span className="font-semibold text-foreground">Expected ROI</span>
                         </div>
-                        <div className="text-xl font-bold text-green-600">{parsedWorkflow.roi}</div>
+                        <div className="text-xl font-bold text-primary">{parsedWorkflow.roi}</div>
                       </div>
-                      <div className="p-4 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl">
+                      <div className="p-4 bg-accent/30 rounded-xl border border-border">
                         <div className="flex items-center gap-2 mb-2">
-                          <CreditCard className="h-4 w-4 text-blue-600" />
-                          <span className="font-semibold text-blue-700 dark:text-blue-300">Monthly Cost</span>
+                          <CreditCard className="h-4 w-4 text-primary" />
+                          <span className="font-semibold text-foreground">Monthly Cost</span>
                         </div>
-                        <div className="text-xl font-bold text-blue-600">{parsedWorkflow.estimatedCost}</div>
+                        <div className="text-xl font-bold text-primary">{parsedWorkflow.estimatedCost}</div>
                       </div>
                     </div>
                   </div>
