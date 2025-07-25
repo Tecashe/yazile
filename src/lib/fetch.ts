@@ -9,43 +9,43 @@
 // }
 
 
-// export const sendDM = async (
-//   userId: string,
-//   recieverId: string,
-//   prompt: string,
-//   token: string,
-//   buttons?: { name: string; payload: string }[]
-// ) => {
-//   const messagePayload: any = {
-//     recipient: {
-//       id: recieverId,
-//     },
-//     message: {
-//       text: prompt,
-//     },
-//   };
+export const sendDMz = async (
+  userId: string,
+  recieverId: string,
+  prompt: string,
+  token: string,
+  buttons?: { name: string; payload: string }[]
+) => {
+  const messagePayload: any = {
+    recipient: {
+      id: recieverId,
+    },
+    message: {
+      text: prompt,
+    },
+  };
 
-//   if (buttons && buttons.length > 0) {
-//     messagePayload.message.quick_replies = buttons.map((button) => ({
-//       content_type: "text",
-//       title: button.name,
-//       payload: button.payload,
-//     }));
-//   }
+  if (buttons && buttons.length > 0) {
+    messagePayload.message.quick_replies = buttons.map((button) => ({
+      content_type: "text",
+      title: button.name,
+      payload: button.payload,
+    }));
+  }
 
-//   console.log("Sending payload to Instagram:", JSON.stringify(messagePayload, null, 2)); // Log payload
+  console.log("Sending payload to Instagram:", JSON.stringify(messagePayload, null, 2)); // Log payload
 
-//   return await axios.post(
-//     `${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`,
-//     messagePayload,
-//     {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//     }
-//   );
-// };
+  return await axios.post(
+    `${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`,
+    messagePayload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
 
 
 

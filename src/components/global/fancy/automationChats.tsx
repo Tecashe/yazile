@@ -3652,7 +3652,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import type { Conversation, Message } from "@/types/dashboard"
 import { fetchChatsAndBusinessVariables } from "@/actions/messageAction/messageAction"
-import { sendDM } from "@/lib/fetch"
+import { sendDMz } from "@/lib/fetch"
 import { cn } from "@/lib/utils"
 import FancyLoader from "./fancy-loader"
 import ExampleConversations from "./exampleConvo"
@@ -4019,7 +4019,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId 
       })
 
       // Use the new sendDM function directly
-      const result = await sendDM(
+      const result = await sendDMz(
         pageId, // userId (the page sending the message)
         chatState.selectedConversation.userId || "123456", // receiverId (the user receiving the message)
         newMessage, // prompt (the message content)
