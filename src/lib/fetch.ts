@@ -36,7 +36,7 @@ export const sendDMz = async (
   console.log("Sending payload to Instagram:", JSON.stringify(messagePayload, null, 2)); // Log payload
 
   return await axios.post(
-    `${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`,
+    `${process.env.INSTAGRAM_BASE_URL}/v20.0/${userId}/messages`,
     messagePayload,
     {
       headers: {
