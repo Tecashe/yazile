@@ -11779,7 +11779,7 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
                         ) : (
                           <ThumbsUp className="h-4 w-4" />
                         )}
-                        Submit to Development Team
+                        Approve design
                       </Button>
                     </div>
                   </>
