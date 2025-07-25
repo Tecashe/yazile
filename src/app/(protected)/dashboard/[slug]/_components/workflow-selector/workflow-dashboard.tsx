@@ -566,7 +566,7 @@ export default function WorkflowDashboard({ workflowDetails, onDeactivate, isDea
                 </div>
               ) : (
                 <p className="text-muted-foreground text-center">
-                  Detailed insights into your workflow's performance, message volume, and lead qualification 
+                  Detailed insights into your workflow&apos;s performance, message volume, and lead qualification 
                   will appear here once your workflow is active.
                 </p>
               )}

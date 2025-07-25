@@ -165,10 +165,10 @@ const WorkflowPendingPage: React.FC<WorkflowPendingPageProps> = ({
               <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
                 <div className="flex items-center gap-3 mb-2">
                   <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <h3 className="font-semibold text-blue-800 dark:text-blue-300">You'll be notified when ready!</h3>
+                  <h3 className="font-semibold text-blue-800 dark:text-blue-300">You&apos;ll be notified when ready!</h3>
                 </div>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  We'll send an email to <strong>{businessInfo.email}</strong> when 
+                  We&apos;ll send an email to <strong>{businessInfo.email}</strong> when 
                   your workflow is complete and available in the marketplace.
                 </p>
               </div>
@@ -202,7 +202,7 @@ const WorkflowPendingPage: React.FC<WorkflowPendingPageProps> = ({
                 </div>
                 
                 <div className="pt-2">
-                  <h4 className="font-medium mb-2 text-primary">What's happening now:</h4>
+                  <h4 className="font-medium mb-2 text-primary">What&apos;s happening now:</h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
@@ -268,7 +268,7 @@ const WorkflowPendingPage: React.FC<WorkflowPendingPageProps> = ({
                   </h3>
                   <p className="text-sm text-green-700 dark:text-green-400 mb-3">
                     Our development team is here to help! If you have any questions about your workflow 
-                    or need to make changes, don't hesitate to reach out.
+                    or need to make changes, don&apos;t hesitate to reach out.
                   </p>
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ const WorkflowPendingPage: React.FC<WorkflowPendingPageProps> = ({
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               This page will persist across browser sessions. You can safely close this tab and return later 
-              to check your workflow status. We'll email you when it's ready!
+              to check your workflow status. We&apos;ll email you when it&apos;s ready!
             </p>
           </div>
         </div>
