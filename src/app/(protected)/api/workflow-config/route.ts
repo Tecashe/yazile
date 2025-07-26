@@ -1,8 +1,8 @@
 
 // import { type NextRequest, NextResponse } from "next/server"
-// import { auth } from "@clerk/nextjs/server"
 // import { client } from "@/lib/prisma"
 // import { z } from "zod"
+// import { encrypt } from "@/lib/encryption"
 // import { onUserInfor } from "@/actions/user"
 
 // const createWorkflowConfigSchema = z.object({
@@ -144,7 +144,7 @@
 //             workflowConfigId: workflowConfig.id,
 //             integrationName: integration.name,
 //             integrationType: "api_key", // Generic type, can be refined
-//             encryptedCredentials: JSON.stringify(credentialsToStore), // In production, encrypt this
+//             encryptedCredentials: encrypt(JSON.stringify(credentialsToStore)), // In production, encrypt this
 //             isActive: true, // Credentials are active by default when created
 //           },
 //         })
@@ -290,7 +290,7 @@
 //               },
 //             },
 //             update: {
-//               encryptedCredentials: JSON.stringify(credentialsToStore),
+//               encryptedCredentials: encrypt(JSON.stringify(credentialsToStore)),
 //               isActive: true, // Assume credentials are active when updated
 //               updatedAt: new Date(),
 //             },
@@ -298,7 +298,7 @@
 //               workflowConfigId: id,
 //               integrationName: integration.name,
 //               integrationType: "api_key", // Generic type
-//               encryptedCredentials: JSON.stringify(credentialsToStore),
+//               encryptedCredentials: encrypt(JSON.stringify(credentialsToStore)),
 //               isActive: true,
 //             },
 //           })
@@ -327,9 +327,7 @@
 //   }
 // }
 
-
 import { type NextRequest, NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
 import { client } from "@/lib/prisma"
 import { z } from "zod"
 import { encrypt } from "@/lib/encryption"
