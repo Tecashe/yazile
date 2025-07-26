@@ -11966,7 +11966,7 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
                         <Sparkles className="h-4 w-4 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-2xl font-bold mb-4">Ready to Create Your Custom Workflow</h3>
+                    <h3 className="text-2xl font-bold mb-4">Ready to Design Your Custom Workflow</h3>
                     <p className="text-center max-w-lg mb-8 text-muted-foreground leading-relaxed">
                       Our advanced AI will analyze your unique requirements and generate a completely custom, enterprise-grade workflow with bespoke integrations and architecture.
                     </p>
