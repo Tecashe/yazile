@@ -11624,11 +11624,8 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
             Back to Selection
           </Button>
           <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              🤖 Custom AI Workflow Designer
-            </h1>
             <p className="text-muted-foreground text-xl max-w-3xl mx-auto leading-relaxed">
-              Design a completely custom workflow tailored to your unique business needs. Our AI will create the perfect automation solution just for you.
+              Design a completely custom workflow tailored to your unique business needs.
             </p>
             <div className="flex items-center justify-center gap-6 mt-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
