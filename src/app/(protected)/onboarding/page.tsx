@@ -156,6 +156,11 @@
 // export default Page
 
 
+
+
+
+
+
 import { redirect } from 'next/navigation'
 import { client } from '@/lib/prisma'
 import { onBoardUser, onUserInfor } from '@/actions/user'
@@ -201,3 +206,7 @@ const Page = async () => {
 }
 
 export default Page
+
+
+
+
