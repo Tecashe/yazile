@@ -252,7 +252,7 @@ import {
   Settings,
   Heart,
 } from "lucide-react"
-import "@/styles/globals.css" // Import globals.css at the top of the file
+
 
 const slides = [
   {
