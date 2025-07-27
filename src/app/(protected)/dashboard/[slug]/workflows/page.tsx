@@ -15,17 +15,23 @@
 //   )
 // }
 
-
-import type { Metadata } from "next"
+"use client"
+import { useState } from "react"
 import WorkflowSelector from "../_components/workflow-selector/workflow-selector"
 
-export const metadata: Metadata = {
-  title: "Workflow Automation | AI-Powered Business Workflows",
-  description:
-    "Create and manage AI-powered automation workflows for your business. Choose from templates or build custom solutions with intelligent integrations.",
+interface PendingWorkflowData {
+  id: string
+  submittedAt: string
+  status: string
+  workflowType: string
+  estimatedCompletion: string
 }
 
 export default function WorkflowSelectorPage() {
+  const [step, setStep] = useState("selection")
+  const [workflowCreationStatus, setWorkflowCreationStatus] = useState("")
+  const [pendingWorkflowData, setPendingWorkflowData] = useState<PendingWorkflowData | null>(null)
+
   return (
     <div className="min-h-screen bg-background">
       <WorkflowSelector
@@ -43,10 +49,10 @@ export default function WorkflowSelectorPage() {
         customRequest=""
         selectedIntegrations={[]}
         integrationConfigs={{}}
-        setStep={() => {}}
+        setStep={setStep}
         modifyingWorkflowId={null}
-        setWorkflowCreationStatus={() => {}}
-        setPendingWorkflowData={() => {}}
+        setWorkflowCreationStatus={setWorkflowCreationStatus}
+        setPendingWorkflowData={setPendingWorkflowData}
       />
     </div>
   )
