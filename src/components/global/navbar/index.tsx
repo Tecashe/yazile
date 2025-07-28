@@ -231,6 +231,9 @@
 
 // export default Navbar
 
+
+
+
 "use client"
 
 import React from "react"
@@ -261,6 +264,36 @@ import { useClerk } from "@clerk/nextjs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { GlobalSearchDialog } from "./global-search-dialog"
 import { useState } from "react"
+
+// Safe wrapper for SidebarTrigger to handle provider context
+const SafeSidebarTrigger = () => {
+  try {
+    return <SidebarTrigger className="-ml-1" />
+  } catch (error) {
+    // If SidebarProvider is not available, render a placeholder button
+    return (
+      <Button variant="ghost" size="icon" className="-ml-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+        <span className="sr-only">Toggle Menu</span>
+      </Button>
+    )
+  }
+}
 
 type Props = {
   slug: string
@@ -323,9 +356,9 @@ const Navbar = ({ slug }: Props) => {
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-4">
-          {/* Sidebar Trigger - wrapped in try-catch for safety */}
+          {/* Sidebar Trigger - with proper error handling */}
           <React.Suspense fallback={<div className="w-7 h-7" />}>
-            <SidebarTrigger className="-ml-1" />
+            <SafeSidebarTrigger />
           </React.Suspense>
           <Separator orientation="vertical" className="mr-2 h-4" />
 
