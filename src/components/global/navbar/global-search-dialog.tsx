@@ -151,7 +151,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchDialogPro
             {!isLoading && query && filteredResults.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No results found for "{query}"</p>
+                <p>No results found for &ldquo;{query}&rdquo;</p>
                 <p className="text-sm">Try adjusting your search terms or filters</p>
               </div>
             )}
