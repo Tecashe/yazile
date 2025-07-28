@@ -2735,7 +2735,7 @@ export default function WorkflowSelector() {
                     </div>
                   </div>
                   <CardDescription className="text-sm leading-relaxed">
-                    Need something more specific? Describe your unique business requirements and we'll build a custom
+                    Need something more specific? Describe your unique business requirements and we&apos;ll build a custom
                     workflow just for you.
                   </CardDescription>
                 </CardHeader>
@@ -2944,7 +2944,7 @@ export default function WorkflowSelector() {
                       <Database className="h-5 w-5 text-chart-1" />
                       Default CRM Workflow Overview
                     </CardTitle>
-                    <CardDescription>Here's what your default workflow will include</CardDescription>
+                    <CardDescription>Here&apos;s what your default workflow will include</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
