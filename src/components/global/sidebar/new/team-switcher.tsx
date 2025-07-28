@@ -83,7 +83,6 @@
 //   )
 // }
 
-
 "use client"
 
 import * as React from "react"
@@ -119,7 +118,8 @@ export function PlanSwitcher() {
 
   // Get plan display info
   const getPlanInfo = () => {
-    if (isLoading) {
+    // Only show loading if we're actually loading and don't have subscription data yet
+    if (isLoading && !subscription) {
       return {
         name: "Loading...",
         logo: User,
@@ -144,6 +144,7 @@ export function PlanSwitcher() {
           color: "from-purple-600 to-purple-400"
         }
       default:
+        // If no subscription data or FREE plan, show Free Plan
         return {
           name: "Free Plan",
           logo: User,
