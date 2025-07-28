@@ -245,7 +245,7 @@ import { useState } from "react"
 import { Plus, GitBranch } from "lucide-react"
 import { NavMain } from "./nav-main"
 import { NavUser } from "./nav-user"
-import { TeamSwitcher } from "./team-switcher"
+import { PlanSwitcher } from "./team-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -344,7 +344,7 @@ export function AppSidebar({ slug }: Props) {
   return (
     <Sidebar variant="inset" collapsible="icon" className="border-r-0 bg-background">
       <SidebarHeader className="bg-background border-b border-border/50">
-        <TeamSwitcher teams={teams} />
+        <PlanSwitcher />
         {/* <div className="px-2 py-2">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
