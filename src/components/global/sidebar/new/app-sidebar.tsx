@@ -402,7 +402,7 @@ export function AppSidebar({ slug }: Props) {
                 <SidebarMenuButton asChild className="hover:bg-accent/50">
                   <Link href={`/dashboard/${slug}/posting`}>
                     <Instagram className="h-4 w-4" />
-                    <span>Posting</span>
+                    <span>Schedule Content</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -410,7 +410,7 @@ export function AppSidebar({ slug }: Props) {
                 <SidebarMenuButton asChild className="hover:bg-accent/50">
                   <Link href={`/dashboard/${slug}/affiliate`}>
                     <GitBranch className="h-4 w-4" />
-                    <span>Affiliates</span>
+                    <span>Refer & Earn</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
