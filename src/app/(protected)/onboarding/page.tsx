@@ -198,7 +198,7 @@ const Page = async () => {
   }
 
   if (userStatus?.isInfluencer) {
-    return redirect('/influencer')
+    return redirect('/influencers')
   }
 
   // Step 4: If no roles are assigned, go to onboarding flow
