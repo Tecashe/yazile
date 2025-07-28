@@ -714,7 +714,7 @@ const CardForm = ({
         </div>
         <h3 className="text-2xl font-semibold text-white">Complete Your Upgrade</h3>
         <p className="text-zinc-400">
-          You're upgrading to <span className="text-white font-medium">{plan.name}</span> plan
+          You&apos;re upgrading to <span className="text-white font-medium">{plan.name}</span> plan
         </p>
         <div className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-900 rounded-full">
           <span className="text-2xl font-bold text-white">{plan.price}</span>
