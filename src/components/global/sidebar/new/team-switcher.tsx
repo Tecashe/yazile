@@ -239,7 +239,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebars"
-import { ChevronsUpDown, Crown, User, Building2 } from "lucide-react"
+import { ChevronsUpDown, Crown, User, Building2, CreditCard } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import PaymentPopup from "@/components/global/stripe/payment-popup"
 
@@ -258,9 +258,9 @@ export function PlanSwitcher() {
 
   // Simple constant plan info
   const planInfo = {
-    name: "My Workspace",
-    logo: Building2,
-    status: "Active",
+    name: "Current Plan",
+    logo: CreditCard,
+    status: "FREE",
     color: "from-blue-600 to-blue-400"
   }
 
