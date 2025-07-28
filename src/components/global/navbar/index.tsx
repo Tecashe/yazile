@@ -232,12 +232,9 @@
 // export default Navbar
 
 
-
-
 "use client"
 
-import React from "react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import React, { useState, useEffect } from "react"
 import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
@@ -248,7 +245,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { usePathname } from "next/navigation"
-import { Bell, Search, Cog } from "lucide-react"
+import { Bell, Search, Cog, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -263,36 +260,58 @@ import { Badge } from "@/components/ui/badge"
 import { useClerk } from "@clerk/nextjs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { GlobalSearchDialog } from "./global-search-dialog"
-import { useState } from "react"
+import dynamic from "next/dynamic"
 
-// Safe wrapper for SidebarTrigger to handle provider context
+// Dynamically import SidebarTrigger with no SSR to avoid context issues
+const DynamicSidebarTrigger = dynamic(
+  () => import("@/components/ui/sidebar").then((mod) => ({ default: mod.SidebarTrigger })),
+  {
+    ssr: false,
+    loading: () => (
+      <Button variant="ghost" size="icon" className="-ml-1">
+        <Menu className="h-4 w-4" />
+        <span className="sr-only">Toggle Menu</span>
+      </Button>
+    ),
+  },
+)
+
+// Safe wrapper for SidebarTrigger
 const SafeSidebarTrigger = () => {
-  try {
-    return <SidebarTrigger className="-ml-1" />
-  } catch (error) {
-    // If SidebarProvider is not available, render a placeholder button
+  const [mounted, setMounted] = useState(false)
+  const [hasSidebarProvider, setHasSidebarProvider] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    // Check if we're in a context that has SidebarProvider
+    try {
+      // This is a simple check - you might need to adjust based on your app structure
+      const sidebarElement = document.querySelector("[data-sidebar]")
+      setHasSidebarProvider(!!sidebarElement)
+    } catch {
+      setHasSidebarProvider(false)
+    }
+  }, [])
+
+  if (!mounted) {
     return (
       <Button variant="ghost" size="icon" className="-ml-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
+        <Menu className="h-4 w-4" />
         <span className="sr-only">Toggle Menu</span>
       </Button>
     )
   }
+
+  if (hasSidebarProvider) {
+    return <DynamicSidebarTrigger className="-ml-1" />
+  }
+
+  return (
+    <Button variant="ghost" size="icon" className="-ml-1">
+      <Menu className="h-4 w-4" />
+      <span className="sr-only">Toggle Menu</span>
+    </Button>
+  )
 }
 
 type Props = {
@@ -357,9 +376,7 @@ const Navbar = ({ slug }: Props) => {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-4">
           {/* Sidebar Trigger - with proper error handling */}
-          <React.Suspense fallback={<div className="w-7 h-7" />}>
-            <SafeSidebarTrigger />
-          </React.Suspense>
+          <SafeSidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
 
           {/* Breadcrumbs */}
