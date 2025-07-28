@@ -239,9 +239,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebars"
-import { ChevronsUpDown, Crown, User, Building2, CreditCard } from "lucide-react"
+import { ChevronsUpDown, Crown, User, Building2, CreditCard, ChevronDown, ChevronUp } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import PaymentPopup from "@/components/global/stripe/payment-popup"
+import { motion, AnimatePresence } from "framer-motion"
+import user from "pusher-js/types/src/core/user"
+import { SubscriptionPlan } from "../../subscription-plan"
+import UpgradeCard from "../upgrade"
+import UpgradedCard from "../upgraded"
 
 export function PlanSwitcher() {
   const { isMobile } = useSidebar()
@@ -293,13 +298,25 @@ export function PlanSwitcher() {
               <DropdownMenuLabel className="text-xs text-muted-foreground">Current Context</DropdownMenuLabel>
               
               <DropdownMenuItem className="gap-2 p-2 cursor-default">
-                <div className={`flex size-6 items-center justify-center rounded-sm border bg-gradient-to-tr ${planInfo.color} text-white`}>
+                {/* <div className={`flex size-6 items-center justify-center rounded-sm border bg-gradient-to-tr ${planInfo.color} text-white`}>
                   <planInfo.logo className="size-4 shrink-0" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-medium">{planInfo.name}</span>
                   <span className="text-xs text-muted-foreground">{planInfo.status}</span>
-                </div>
+                </div> */}
+                <div className="mt-4">                
+                  <SubscriptionPlan type="PRO">
+                    <div className="flex-1 flex flex-col justify-end">
+                      <UpgradedCard userName={"Member"} />
+                    </div>
+                  </SubscriptionPlan>
+                  <SubscriptionPlan type="FREE">
+                    <div className="flex-1 flex flex-col justify-end">
+                      <UpgradeCard />
+                    </div>
+                  </SubscriptionPlan>                
+              </div> 
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
