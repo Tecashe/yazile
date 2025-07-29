@@ -1355,12 +1355,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
     const followerCount = insights.find((i: any) => i.name === "follower_count")?.values?.[0]?.value || 1000
     const engagementRate = ((avgEngagementPerPost / followerCount) * 100).toFixed(2)
 
-    // Calculate posting frequency
-    // const postDates = posts.map((post: any => new Date(post.timestamp))
-    // const oldestPost = Math.min(...postDates.map((d) => d.getTime()))
-    // const newestPost = Math.max(...postDates.map((d) => d.getTime()))
-    // const daysDiff = (newestPost - oldestPost) / (1000 * 60 * 60 * 24)
-    // const postsPerWeek = daysDiff > 0 ? ((posts.length / daysDiff) * 7).toFixed(1) : "0"
+   
     const postDates = posts.map((post: any) => new Date(post.timestamp))
     const oldestPost = Math.min(...postDates.map((d: Date) => d.getTime()))
     const newestPost = Math.max(...postDates.map((d: Date) => d.getTime()))
@@ -1828,7 +1823,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Click "Analyze Times" to get AI-powered posting recommendations</p>
+                  <p>Click &ldquo;Analyze Times&rdquo; to get AI-powered posting recommendations</p>
                 </div>
               )}
             </CardContent>
