@@ -432,7 +432,7 @@ import {
   SidebarMenuButton,
   SidebarSeparator,
   SidebarGroupAction,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebars"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltips"
 import { usePathname } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
