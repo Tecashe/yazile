@@ -935,7 +935,7 @@ const Navbar = ({ slug }: Props) => {
             </Button>
 
             {/* User Menu */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
@@ -971,7 +971,7 @@ const Navbar = ({ slug }: Props) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Support</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </div>
       </header>
