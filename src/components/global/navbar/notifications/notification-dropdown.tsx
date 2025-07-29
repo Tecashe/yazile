@@ -128,7 +128,7 @@ export function NotificationDropdown() {
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Bell className="h-12 w-12 text-muted-foreground/50 mb-2" />
               <p className="text-sm text-muted-foreground">No notifications yet</p>
-              <p className="text-xs text-muted-foreground">We'll notify you when something happens</p>
+              <p className="text-xs text-muted-foreground">We&apos;ll notify you when something happens</p>
             </div>
           ) : (
             <div className="p-2">
