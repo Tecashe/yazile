@@ -1461,7 +1461,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
   return (
     <div className="space-y-6">
       {/* Header with controls */}
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Instagram className="h-6 w-6 text-pink-600" />
           <h1 className="text-2xl font-bold">Instagram Growth Analytics</h1>
@@ -1488,7 +1488,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
             Generate AI Insights
           </Button>
         </div>
-      </div>
+      </div> */}
 
       {/* Analysis Status */}
       {analysisState.lastAnalysis && (
