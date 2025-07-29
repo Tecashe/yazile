@@ -240,8 +240,180 @@
 //   )
 // }
 
+
+
+
+// "use client"
+// import { Plus, GitBranch } from "lucide-react"
+// import { NavMain } from "./nav-main"
+// import { NavUser } from "./nav-user"
+// import { PlanSwitcher } from "./team-switcher"
+// import {
+//   Sidebar,
+//   SidebarContent,
+//   SidebarFooter,
+//   SidebarHeader,
+//   SidebarRail,
+//   SidebarGroup,
+//   SidebarGroupLabel,
+//   SidebarGroupContent,
+//   SidebarMenu,
+//   SidebarMenuItem,
+//   SidebarMenuButton,
+//   SidebarSeparator,
+//   SidebarGroupAction,
+// } from "@/components/ui/sidebars"
+// import { usePathname } from "next/navigation"
+// import { useClerk } from "@clerk/nextjs"
+// import Link from "next/link"
+// import { SIDEBAR_MENU } from "@/constants/menu"
+// import { Instagram } from "lucide-react"
+
+// // Transform your menu data to work with the new sidebar
+// const transformMenuData = (slug: string, pathname: string) => {
+//   return SIDEBAR_MENU.map((group) => ({
+//     ...group,
+//     items: group.items.map((item) => ({
+//       ...item,
+//       url: buildItemUrl(item, group.label, slug),
+//       isActive: isPathActive(item, group.label, slug, pathname),
+//       items: item.subItems?.map((subItem) => ({
+//         ...subItem,
+//         url: buildSubItemUrl(subItem, item, group.label, slug),
+//         isActive: isPathActive(subItem, group.label, slug, pathname, item),
+//       })),
+//     })),
+//   }))
+// }
+
+// // Helper function to build URLs
+// const buildItemUrl = (item: any, groupLabel: string, slug: string) => {
+//   const basePath = `/dashboard/${slug}`
+//   const itemPath = item.label.toLowerCase()
+
+//   if (itemPath === "home") return basePath
+//   if (groupLabel.toLowerCase() === "agents" && itemPath === "agents") return `${basePath}/agents`
+
+//   return `${basePath}/${itemPath}`
+// }
+
+// const buildSubItemUrl = (subItem: any, parentItem: any, groupLabel: string, slug: string) => {
+//   const basePath = `/dashboard/${slug}`
+//   const subItemPath = subItem.label.toLowerCase().replace(/\s+/g, "-")
+
+//   if (groupLabel.toLowerCase() === "agents") {
+//     return `${basePath}/agents/${subItemPath}`
+//   }
+
+//   return `${basePath}/${parentItem.label.toLowerCase()}/${subItemPath}`
+// }
+
+// // Helper function to check if path is active
+// const isPathActive = (item: any, groupLabel: string, slug: string, pathname: string, parentItem?: any) => {
+//   const itemUrl = parentItem
+//     ? buildSubItemUrl(item, parentItem, groupLabel, slug)
+//     : buildItemUrl(item, groupLabel, slug)
+
+//   return pathname === itemUrl || pathname.startsWith(`${itemUrl}/`)
+// }
+
+
+// type Props = {
+//   slug: string
+// }
+
+// export function AppSidebar({ slug }: Props) {
+//   const pathname = usePathname()
+//   const { user, signOut } = useClerk()
+
+//   const transformedMenu = transformMenuData(slug, pathname)
+
+//   const userData = {
+//     name: user?.fullName || "User",
+//     email: user?.primaryEmailAddress?.emailAddress || "user@example.com",
+//     avatar: user?.imageUrl || "/placeholder.svg",
+//   }
+
+//   return (
+//     <Sidebar variant="inset" collapsible="icon" className="border-r-0 bg-background">
+//       <SidebarHeader className="bg-background border-b border-border/50">
+//         <PlanSwitcher />
+//       </SidebarHeader>
+
+//       <SidebarContent className="bg-background">
+//         {transformedMenu.map((group) => (
+//           <SidebarGroup key={group.id} className="px-2">
+//             <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
+//               {group.label}
+//               <SidebarGroupAction asChild>
+//                 <Plus className="h-4 w-4 opacity-60 hover:opacity-100 transition-opacity" />
+//               </SidebarGroupAction>
+//             </SidebarGroupLabel>
+//             <SidebarGroupContent>
+//               <NavMain items={group.items} />
+//             </SidebarGroupContent>
+//           </SidebarGroup>
+//         ))}
+
+//         <SidebarSeparator className="mx-4 bg-border/50" />
+
+//         {/* Quick Actions */}
+//         <SidebarGroup className="px-2">
+//           <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
+//             Quick Actions
+//           </SidebarGroupLabel>
+//           <SidebarGroupContent>
+//             <SidebarMenu>
+//               <SidebarMenuItem>
+//                 <SidebarMenuButton asChild className="hover:bg-accent/50">
+//                   <Link href={`/dashboard/${slug}/automations`}>
+//                     <Plus className="h-4 w-4" />
+//                     <span>New Automation</span>
+//                   </Link>
+//                 </SidebarMenuButton>
+//               </SidebarMenuItem>
+//               <SidebarMenuItem>
+//                 <SidebarMenuButton asChild className="hover:bg-accent/50">
+//                   <Link href={`/dashboard/${slug}/agents`}>
+//                     <Plus className="h-4 w-4" />
+//                     <span>New Agent</span>
+//                   </Link>
+//                 </SidebarMenuButton>
+//               </SidebarMenuItem>
+//               <SidebarMenuItem>
+//                 <SidebarMenuButton asChild className="hover:bg-accent/50">
+//                   <Link href={`/dashboard/${slug}/posting`}>
+//                     <Instagram className="h-4 w-4" />
+//                     <span>Schedule Content</span>
+//                   </Link>
+//                 </SidebarMenuButton>
+//               </SidebarMenuItem>
+//               <SidebarMenuItem>
+//                 <SidebarMenuButton asChild className="hover:bg-accent/50">
+//                   <Link href={`/dashboard/${slug}/affiliate`}>
+//                     <GitBranch className="h-4 w-4" />
+//                     <span>Refer & Earn</span>
+//                   </Link>
+//                 </SidebarMenuButton>
+//               </SidebarMenuItem>
+//             </SidebarMenu>
+//           </SidebarGroupContent>
+//         </SidebarGroup>
+//       </SidebarContent>
+
+//       <SidebarFooter className="bg-background border-t border-border/50">
+//         <NavUser user={userData} onSignOut={signOut} />
+//       </SidebarFooter>
+//       <SidebarRail />
+//     </Sidebar>
+//   )
+// }
+
+
 "use client"
-import { useState } from "react"
+
+import React from "react"
+
 import { Plus, GitBranch } from "lucide-react"
 import { NavMain } from "./nav-main"
 import { NavUser } from "./nav-user"
@@ -258,10 +430,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarInput,
   SidebarSeparator,
   SidebarGroupAction,
-} from "@/components/ui/sidebars"
+} from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltips"
 import { usePathname } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
 import Link from "next/link"
@@ -273,37 +445,44 @@ const transformMenuData = (slug: string, pathname: string) => {
   return SIDEBAR_MENU.map((group) => ({
     ...group,
     items: group.items.map((item) => ({
-      ...item,
+      title: item.label,
       url: buildItemUrl(item, group.label, slug),
+      icon: extractIconComponent(item.icon),
       isActive: isPathActive(item, group.label, slug, pathname),
+      description: item.description,
       items: item.subItems?.map((subItem) => ({
-        ...subItem,
+        title: subItem.label,
         url: buildSubItemUrl(subItem, item, group.label, slug),
         isActive: isPathActive(subItem, group.label, slug, pathname, item),
+        description: subItem.description,
       })),
     })),
   }))
+}
+
+// Helper function to extract the icon component from ReactNode
+const extractIconComponent = (iconNode: React.ReactNode): any => {
+  if (React.isValidElement(iconNode)) {
+    return iconNode.type
+  }
+  return undefined
 }
 
 // Helper function to build URLs
 const buildItemUrl = (item: any, groupLabel: string, slug: string) => {
   const basePath = `/dashboard/${slug}`
   const itemPath = item.label.toLowerCase()
-
   if (itemPath === "home") return basePath
   if (groupLabel.toLowerCase() === "agents" && itemPath === "agents") return `${basePath}/agents`
-
   return `${basePath}/${itemPath}`
 }
 
 const buildSubItemUrl = (subItem: any, parentItem: any, groupLabel: string, slug: string) => {
   const basePath = `/dashboard/${slug}`
   const subItemPath = subItem.label.toLowerCase().replace(/\s+/g, "-")
-
   if (groupLabel.toLowerCase() === "agents") {
     return `${basePath}/agents/${subItemPath}`
   }
-
   return `${basePath}/${parentItem.label.toLowerCase()}/${subItemPath}`
 }
 
@@ -312,17 +491,8 @@ const isPathActive = (item: any, groupLabel: string, slug: string, pathname: str
   const itemUrl = parentItem
     ? buildSubItemUrl(item, parentItem, groupLabel, slug)
     : buildItemUrl(item, groupLabel, slug)
-
   return pathname === itemUrl || pathname.startsWith(`${itemUrl}/`)
 }
-
-const teams = [
-  {
-    name: "Yazzil",
-    logo: Instagram,
-    plan: "PRO",
-  },
-]
 
 type Props = {
   slug: string
@@ -331,8 +501,6 @@ type Props = {
 export function AppSidebar({ slug }: Props) {
   const pathname = usePathname()
   const { user, signOut } = useClerk()
-  const [searchQuery, setSearchQuery] = useState("")
-
   const transformedMenu = transformMenuData(slug, pathname)
 
   const userData = {
@@ -342,87 +510,137 @@ export function AppSidebar({ slug }: Props) {
   }
 
   return (
-    <Sidebar variant="inset" collapsible="icon" className="border-r-0 bg-background">
-      <SidebarHeader className="bg-background border-b border-border/50">
-        <PlanSwitcher />
-        {/* <div className="px-2 py-2">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <SidebarInput
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 bg-muted/50 border-border/50"
-            />
-          </div>
-        </div> */}
-      </SidebarHeader>
-
-      <SidebarContent className="bg-background">
-        {transformedMenu.map((group) => (
-          <SidebarGroup key={group.id} className="px-2">
-            <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
-              {group.label}
-              <SidebarGroupAction asChild>
-                <Plus className="h-4 w-4 opacity-60 hover:opacity-100 transition-opacity" />
-              </SidebarGroupAction>
-            </SidebarGroupLabel>
+    <TooltipProvider delayDuration={300}>
+      <Sidebar variant="inset" collapsible="icon" className="border-r-0 bg-background">
+        <SidebarHeader className="bg-background border-b border-border/50">
+          <PlanSwitcher />
+        </SidebarHeader>
+        <SidebarContent className="bg-background">
+          {transformedMenu.map((group) => (
+            <SidebarGroup key={group.id} className="px-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
+                    {group.label}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarGroupAction asChild>
+                          <Plus className="h-4 w-4 opacity-60 hover:opacity-100 transition-opacity" />
+                        </SidebarGroupAction>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>Add new {group.label.toLowerCase()} item</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </SidebarGroupLabel>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  <p className="font-medium">{group.label}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+                </TooltipContent>
+              </Tooltip>
+              <SidebarGroupContent>
+                <NavMain items={group.items} />
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+          <SidebarSeparator className="mx-4 bg-border/50" />
+          {/* Quick Actions */}
+          <SidebarGroup className="px-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
+                  Quick Actions
+                </SidebarGroupLabel>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                <p className="font-medium">Quick Actions</p>
+                <p className="text-sm text-muted-foreground mt-1">Frequently used actions for faster workflow</p>
+              </TooltipContent>
+            </Tooltip>
             <SidebarGroupContent>
-              <NavMain items={group.items} />
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild className="hover:bg-accent/50">
+                        <Link href={`/dashboard/${slug}/automations`}>
+                          <Plus className="h-4 w-4" />
+                          <span>New Automation</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium">New Automation</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Create a new automated workflow to streamline your business processes
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild className="hover:bg-accent/50">
+                        <Link href={`/dashboard/${slug}/agents`}>
+                          <Plus className="h-4 w-4" />
+                          <span>New Agent</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium">New Agent</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Set up a new AI agent to handle customer interactions and support
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild className="hover:bg-accent/50">
+                        <Link href={`/dashboard/${slug}/posting`}>
+                          <Instagram className="h-4 w-4" />
+                          <span>Schedule Content</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium">Schedule Content</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Plan and schedule your Instagram posts for optimal engagement
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild className="hover:bg-accent/50">
+                        <Link href={`/dashboard/${slug}/affiliate`}>
+                          <GitBranch className="h-4 w-4" />
+                          <span>Refer & Earn</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium">Refer & Earn</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Invite friends and earn rewards through our affiliate program
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </SidebarMenuItem>
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ))}
-
-        <SidebarSeparator className="mx-4 bg-border/50" />
-
-        {/* Quick Actions */}
-        <SidebarGroup className="px-2">
-          <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
-            Quick Actions
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="hover:bg-accent/50">
-                  <Link href={`/dashboard/${slug}/automations`}>
-                    <Plus className="h-4 w-4" />
-                    <span>New Automation</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="hover:bg-accent/50">
-                  <Link href={`/dashboard/${slug}/agents`}>
-                    <Plus className="h-4 w-4" />
-                    <span>New Agent</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="hover:bg-accent/50">
-                  <Link href={`/dashboard/${slug}/posting`}>
-                    <Instagram className="h-4 w-4" />
-                    <span>Schedule Content</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="hover:bg-accent/50">
-                  <Link href={`/dashboard/${slug}/affiliate`}>
-                    <GitBranch className="h-4 w-4" />
-                    <span>Refer & Earn</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter className="bg-background border-t border-border/50">
-        <NavUser user={userData} onSignOut={signOut} />
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+        </SidebarContent>
+        <SidebarFooter className="bg-background border-t border-border/50">
+          <NavUser user={userData} onSignOut={signOut} />
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+    </TooltipProvider>
   )
 }
