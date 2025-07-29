@@ -91,6 +91,8 @@ model User {
 
   businessWorkflowConfigs BusinessWorkflowConfig[]
 
+  generalNotifications GeneralNotification[]
+
   webhookNotifications Notification[]
   alerts               Alert[]
 }
@@ -177,6 +179,8 @@ model Business {
   agentAssignments AgentBusinessAssignment[]
   handoffSettings  HandoffSettings[]
   agentPerformance AgentPerformance[]
+
+  generalNotifications GeneralNotification[]
 
   workflowConfigs BusinessWorkflowConfig[]
 }
@@ -2903,4 +2907,78 @@ model WorkflowExecutionLog {
   @@index([workflowConfigId])
   @@index([timestamp])
   @@index([executionStatus])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////
+/////////////////////////////////
+//////////////////////////////////
+
+
+
+
+
+
+model GeneralNotification {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  businessId String?   @db.Uuid
+  
+  // Notification content
+  type      GeneralNotificationType
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  
+  // Optional metadata and action
+  metadata  Json?    // Store additional data like IDs, counts, etc.
+  actionUrl String?  // URL to navigate to when clicked
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  readAt    DateTime? // When the notification was read
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business  Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([businessId])
+}
+
+enum GeneralNotificationType {
+  LEAD_GENERATED
+  LEAD_QUALIFIED
+  AUTOMATION_COMPLETED
+  AUTOMATION_ERROR
+  CAMPAIGN_STARTED
+  CAMPAIGN_COMPLETED
+  INFLUENCER_APPLIED
+  INFLUENCER_ACCEPTED
+  WORKFLOW_ACTIVATED
+  WORKFLOW_COMPLETED
+  CRM_SYNC_SUCCESS
+  CRM_SYNC_ERROR
+  SYSTEM_ALERT
+  BUSINESS_UPDATE
 }
