@@ -274,7 +274,7 @@ export default function PrivacyPage() {
                       <strong>Email:</strong> privacy@yazzil.com
                     </p>
                     <p className="text-muted-foreground">
-                      <strong>Address:</strong> 3945 Innovation Drive, San Francisco, CA 94105, United States
+                      <strong>Address:</strong> 00100 Nairobi, Kenya
                     </p>
                     <p className="text-muted-foreground">
                       <strong>Data Protection Officer:</strong> dpo@yazzil.com
