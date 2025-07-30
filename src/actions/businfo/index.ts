@@ -1,4 +1,6 @@
 'use server'
+
+
 type SaveResult = {
   status: number;
   data: string;
@@ -13,7 +15,7 @@ import type {
 } from "@/types/business"
 
 
-import { onCurrentUser } from '../user'
+import { onUserInfor } from '../user'
 import {
   getBusinessesForWebhook,
   createBusiness,
@@ -26,9 +28,9 @@ import {
 import { FormSchema } from '@/types/schema'
 
 export const createNewBusiness = async (businessData: FormSchema) => {
-  const user = await onCurrentUser()
+  const user = await onUserInfor()
   try {
-    const business = await createBusiness(user.id, businessData)
+    const business = await createBusiness(user.data?.id ||"1234", businessData)
     if (business) return { status: 200, data: 'Business created', res: business }
     return { status: 404, data: 'Oops! something went wrong' }
   } catch (error) {
@@ -39,9 +41,9 @@ export const createNewBusiness = async (businessData: FormSchema) => {
 
 
 export const getAllBusinesses = async () => {
-  const user = await onCurrentUser()
+  const user = await onUserInfor()
   try {
-    const result = await getBusinesses(user.id)
+    const result = await getBusinesses(user.data?.id||"")
     if (result && result.businesses) {
       return { status: 200, data: { businesses: result.businesses } }
     }
@@ -52,7 +54,7 @@ export const getAllBusinesses = async () => {
 }
 
 export const getBusinessInfo = async (id: string) => {
-  await onCurrentUser()
+  await onUserInfor()
   try {
     const business = await findBusiness(id)
     if (business) return { status: 200, data: business }
@@ -66,7 +68,7 @@ export const updateBusinessInfo = async (
   businessId: string,
   data: Partial<FormSchema>
 ) => {
-  await onCurrentUser()
+  await onUserInfor()
   try {
     const update = await updateBusiness(businessId, data)
     if (update) {
@@ -79,7 +81,7 @@ export const updateBusinessInfo = async (
 }
 
 export const deleteBusiness = async (businessId: string) => {
-  await onCurrentUser()
+  await onUserInfor()
   try {
     const deleted = await deleteBusinessQuery(businessId)
     if (deleted) {
@@ -92,7 +94,7 @@ export const deleteBusiness = async (businessId: string) => {
 }
 
 export const toggleAutoReply = async (businessId: string, autoReplyEnabled: boolean) => {
-  await onCurrentUser()
+  await onUserInfor()
   try {
     const update = await updateBusiness(businessId, { autoReplyEnabled })
     if (update) {
