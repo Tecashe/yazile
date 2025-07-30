@@ -107,8 +107,31 @@ export const toggleAutoReply = async (businessId: string, autoReplyEnabled: bool
 }
 
 // Add this new function
+export const getBusinessForWebhookE = async (businessId: string) => {
+  try {
+    const result = await getBusinessesForWebhook(businessId)
+    if (result) {
+      return { status: 200, data: { business: result } }
+    }
+    return { status: 404, data: { business: null } }
+  } catch (error) {
+    console.error('Error fetching business for webhook:', error)
+    return { status: 500, data: { business: null } }
+  }
+}
+
+
+// Add this new function with proper validation
 export const getBusinessForWebhook = async (businessId: string) => {
   try {
+    // Validate businessId before making the database call
+    if (!businessId || businessId.trim() === '') {
+      console.error('getBusinessForWebhook: businessId is undefined, null, or empty')
+      return { status: 400, data: { business: null, error: 'Business ID is required' } }
+    }
+
+    console.log('getBusinessForWebhook: Fetching business with ID:', businessId)
+    
     const result = await getBusinessesForWebhook(businessId)
     if (result) {
       return { status: 200, data: { business: result } }
