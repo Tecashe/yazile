@@ -2603,7 +2603,7 @@ export default function WorkflowSelector() {
 
     return (
       <div className="min-h-screen bg-background">
-        <div className="radial--gradient--automations">
+        <div className="radiale--gradient--automations">
           <div className="max-w-7xl mx-auto p-6">
             <div className="text-center mb-12">
               <div className="flex items-center justify-center gap-3 mb-6">
@@ -2824,7 +2824,7 @@ export default function WorkflowSelector() {
   if (step === "configuration") {
     return (
       <div className="min-h-screen bg-background">
-        <div className="radial--gradient--automations">
+        <div className="radiale--gradient--automations">
           <div className="max-w-4xl mx-auto p-6">
             <div className="mb-8">
               <Button variant="ghost" onClick={() => setStep("selection")} className="mb-6 hover:bg-accent">
@@ -3033,7 +3033,7 @@ export default function WorkflowSelector() {
   if (step === "review") {
     return (
       <div className="min-h-screen bg-background">
-        <div className="radial--gradient--automations">
+        <div className="radiale--gradient--automations">
           <div className="max-w-5xl mx-auto p-6">
             <div className="mb-8">
               <Button variant="ghost" onClick={() => setStep("configuration")} className="mb-6 hover:bg-accent">
