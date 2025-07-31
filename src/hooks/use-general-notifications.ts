@@ -366,7 +366,7 @@ export function useGeneralNotificationStream() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Page is hidden, close connection to save resources
+        // Page is hidden, close connection to save resoces
         cleanup()
       } else {
         // Page is visible, reconnect
