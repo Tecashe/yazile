@@ -1592,7 +1592,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
             </div>
           )}
 
-          {/* Account Insights from API */}
+          {/* Account Insights */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {insightsData?.data?.map((insight: any, index: number) => {
               const icons = [Users, Eye, Globe, TrendingUp]
