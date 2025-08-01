@@ -33,14 +33,14 @@ export async function GET(request: NextRequest) {
       where: {
         userId: targetUserId,
       },
-      include: {
-        assignedAdmin: {
-          select: {
-            firstname: true,
-            lastname: true,
-          },
-        },
-      },
+      // include: {
+      //   assignedAdmin: {
+      //     select: {
+      //       firstname: true,
+      //       lastname: true,
+      //     },
+      //   },
+      // },
       orderBy: {
         createdAt: "desc",
       },
