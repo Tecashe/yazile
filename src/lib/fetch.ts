@@ -389,7 +389,7 @@ export const sendDMz = async (
 //     recipient: {
 //       comment_id: commentId,
 //     },
-//     messaging_type: "RESPONSE", // Added this required parameter
+//     messaging_type: "RESPONSE", // Added this required paramete
 //     message: {
 //       text: prompt,
 //     },
