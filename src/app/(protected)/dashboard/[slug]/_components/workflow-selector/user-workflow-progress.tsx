@@ -136,7 +136,7 @@ export default function UserWorkflowProgress({ userId }: UserWorkflowProgressPro
         <CardContent className="p-8 text-center">
           <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Workflow Requests</h3>
-          <p className="text-muted-foreground">You haven't submitted any custom workflow requests yet.</p>
+          <p className="text-muted-foreground">You haven&apos;t submitted any custom workflow requests yet.</p>
         </CardContent>
       </Card>
     )
@@ -264,7 +264,7 @@ export default function UserWorkflowProgress({ userId }: UserWorkflowProgressPro
                       <h4 className="text-sm font-medium text-red-800 dark:text-red-300">Request Rejected</h4>
                     </div>
                     <p className="text-sm text-red-700 dark:text-red-400">
-                      Unfortunately, your request couldn't be fulfilled. Please check the development notes above for
+                      Unfortunately, your request couldn&apos;t be fulfilled. Please check the development notes above for
                       more details.
                     </p>
                   </div>
