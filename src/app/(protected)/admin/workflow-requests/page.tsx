@@ -1559,7 +1559,7 @@ import {
   Wand2,
 } from "lucide-react"
 import type { CustomWorkflowRequest, WorkflowTemplate, WorkflowStep } from "@/types/workflow"
-import AdminWorkflowDesigner from "../workflow-designer/page" // Import the new designer component
+import AdminWorkflowDesigner from "./workflow-designer"
 
 const statusConfig = {
   SUBMITTED: {
@@ -2373,7 +2373,7 @@ export default function AdminWorkflowRequestsDashboard() {
                           <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Template Created!</h4>
                         </div>
                         <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-2">
-                          Template "{request.completedTemplate.name}" has been created and is{" "}
+                          Template &ldquo;{request.completedTemplate.name}&rdquo; has been created and is{" "}
                           {request.completedTemplate.isPublic ? "publicly available" : "private to this user"}.
                         </p>
                         <div className="flex items-center gap-2">
