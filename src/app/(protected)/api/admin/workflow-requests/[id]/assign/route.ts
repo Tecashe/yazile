@@ -1,3 +1,4 @@
+
 import { type NextRequest, NextResponse } from "next/server"
 import { client } from "@/lib/prisma"
 import { getAuth } from "@clerk/nextjs/server"
@@ -39,12 +40,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
             email: true,
           },
         },
-        // assignedAdmin: {
-        //   select: {
-        //     firstname: true,
-        //     lastname: true,
-        //   },
-        // },
       },
     })
 
@@ -59,18 +54,18 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     })
 
     // Notify user about assignment
-    // await client.generalNotification.create({
-    //   data: {
-    //     userId: updatedRequest.userId,
-    //     type: "WORKFLOW_ASSIGNED",
-    //     title: "Workflow Request Assigned",
-    //     message: `Your custom workflow request "${updatedRequest.title}" has been assigned to ${updatedRequest.assignedAdmin?.firstname} ${updatedRequest.assignedAdmin?.lastname} for review.`,
-    //     metadata: {
-    //       requestId: id,
-    //       adminName: `${updatedRequest.assignedAdmin?.firstname} ${updatedRequest.assignedAdmin?.lastname}`,
-    //     },
-    //   },
-    // })
+    await client.generalNotification.create({
+      data: {
+        userId: updatedRequest.userId,
+        type: "WORKFLOW_ASSIGNED",
+        title: "Workflow Request Assigned",
+        message: `Your custom workflow request "${updatedRequest.title}" has been assigned to one of our desgners for review.`,
+        metadata: {
+          requestId: id,
+          adminName: `Workflow Designer`,
+        },
+      },
+    })
 
     return NextResponse.json({
       success: true,

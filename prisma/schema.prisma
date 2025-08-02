@@ -2075,6 +2075,7 @@ model CustomWorkflowRequest {
   status               CustomRequestStatus @default(SUBMITTED)
   aiSuggestions        Json? // AI-generated suggestions
   adminNotes           String?             @db.Text
+  editRequestDetails   Json?
   estimatedDelivery    DateTime?
   actualDelivery       DateTime?
   createdAt            DateTime            @default(now())
@@ -2195,6 +2196,8 @@ enum CustomRequestStatus {
   COMPLETED
   REJECTED
   CANCELED
+  ACTIVE
+  EDIT_REQUESTED
 }
 
 enum NotificationType {
@@ -2970,6 +2973,9 @@ enum GeneralNotificationType {
   INFLUENCER_ACCEPTED
   WORKFLOW_ACTIVATED
   WORKFLOW_COMPLETED
+  WORKFLOW_ASSIGNED
+  WORKFLOW_EDIT_REQUEST
+  EDIT_REQUESTED
   CRM_SYNC_SUCCESS
   CRM_SYNC_ERROR
   SYSTEM_ALERT

@@ -47,7 +47,7 @@ interface BusinessWorkflowConfig {
   }
   integrations: { name: string; config: IntegrationConfig }[]
   customRequest?: string
-  status: "DRAFT" | "CONFIGURING" | "SUBMITTED" | "PENDING_CREATION" | "ACTIVE" | "INACTIVE" | "CUSTOM_REQUEST"
+  status: "DRAFT" | "CONFIGURING" | "SUBMITTED" | "PENDING_CREATION" | "ACTIVE" | "INACTIVE" | "CUSTOM_REQUEST" | "EDIT_REQUESTED" 
   createdAt: Date
   updatedAt: Date
   isActive: boolean
