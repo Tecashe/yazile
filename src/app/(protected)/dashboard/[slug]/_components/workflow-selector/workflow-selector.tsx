@@ -4562,7 +4562,7 @@ import type {
   PendingWorkflowData,
   CRMIntegration,
   CustomWorkflowRequest,
-} from "@/types/workflow" // Add this import
+} from "@/types/workflow" 
 
 const Logger = {
   info: (message: string, ...args: any[]) => {
@@ -5270,7 +5270,7 @@ export default function WorkflowSelector() {
                   </div>
                   {hasPendingCustomWorkflow && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      You have a pending custom workflow. Please check "My Workflow Requests".
+                      You have a pending custom workflow. Please check &ldquo;My Workflow Requests&rdquo;.
                     </p>
                   )}
                 </CardContent>
