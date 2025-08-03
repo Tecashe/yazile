@@ -132,29 +132,172 @@
 //   }
 // }
 
-import { type NextRequest, NextResponse } from "next/server"
-import { client } from "@/lib/prisma"
-import { getAuth } from "@clerk/nextjs/server"
 
-export async function GET(request: NextRequest) {
+
+
+// import { type NextRequest, NextResponse } from "next/server"
+// import { client } from "@/lib/prisma"
+// import { getAuth } from "@clerk/nextjs/server"
+
+// export async function GET(request: NextRequest) {
+//   try {
+//     const { userId } = getAuth(request)
+
+//     if (!userId) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+//     }
+
+//     // Check if user is admin
+//     const user = await client.user.findUnique({
+//       where: { clerkId: userId },
+//       select: { isAdmin: true },
+//     })
+
+//     if (!user?.isAdmin) {
+//       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+//     }
+
+//     // Fetch all workflow templates
+//     const templates = await client.businessWorkflowTemplate.findMany({
+//       include: {
+//         _count: {
+//           select: {
+//             businessConfigs: true,
+//           },
+//         },
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     })
+
+//     return NextResponse.json({
+//       success: true,
+//       templates,
+//     })
+//   } catch (error) {
+//     console.error("Error fetching workflow templates:", error)
+//     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+//   }
+// }
+
+// export async function POST(request: NextRequest) {
+//   try {
+//     const { userId } = getAuth(request)
+//     const body = await request.json()
+
+//     if (!userId) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+//     }
+
+//     // Check if user is admin
+//     const user = await client.user.findUnique({
+//       where: { clerkId: userId },
+//       select: { id: true, isAdmin: true },
+//     })
+
+//     if (!user?.isAdmin) {
+//       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+//     }
+
+//     // Create new workflow template from the custom request
+//     const template = await client.businessWorkflowTemplate.create({
+//       data: {
+//         name: body.name,
+//         category: body.category,
+//         description: body.description,
+//         complexity: body.complexity || "MEDIUM",
+//         operations: body.operations || [],
+//         features: body.features || [],
+//         integrations: body.integrations || [],
+//         isPublic: body.isPublic || false,
+//         isActive: true,
+//         createdByAdmin: body.createdByAdmin || true,
+//         originalRequestId: body.originalRequestId,
+//         voiceflowProjectId: body.voiceflowProjectId,
+//         voiceflowVersionId: body.voiceflowVersionId,
+//         publishedBy: user.id,
+//         publishedAt: new Date(),
+//       },
+//     })
+
+//     // If this template was created from a request, link it and update status
+//     if (body.originalRequestId) {
+//       await client.customWorkflowRequest.update({
+//         where: { id: body.originalRequestId },
+//         data: {
+//           completedTemplateId: template.id,
+//           status: "COMPLETED",
+//           actualDelivery: new Date(),
+//         },
+//       })
+
+//       // Notify the user that their custom workflow is ready
+//       const originalRequest = await client.customWorkflowRequest.findUnique({
+//         where: { id: body.originalRequestId },
+//         include: {
+//           user: {
+//             select: { id: true, firstname: true, lastname: true },
+//           },
+//         },
+//       })
+
+//       if (originalRequest) {
+//         await client.generalNotification.create({
+//           data: {
+//             userId: originalRequest.userId,
+//             type: "WORKFLOW_COMPLETED",
+//             title: "Custom Workflow Ready!",
+//             message: `Your custom workflow "${template.name}" has been completed and is now available for use.`,
+//             metadata: {
+//               templateId: template.id,
+//               templateName: template.name,
+//               requestId: body.originalRequestId,
+//               isPublic: body.isPublic,
+//             },
+//           },
+//         })
+//       }
+//     }
+
+//     return NextResponse.json({
+//       success: true,
+//       template,
+//     })
+//   } catch (error) {
+//     console.error("Error creating workflow template:", error)
+//     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+//   }
+// }
+
+
+
+
+import { NextResponse } from "next/server"
+import { client } from "@/lib/prisma"
+import { auth } from "@clerk/nextjs/server"
+import { onUserInfor } from "@/actions/user"
+
+export async function GET(request: Request) {
   try {
-    const { userId } = getAuth(request)
+    const  userr  = await onUserInfor()
+    const userId = userr.data?.id
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Check if user is admin
+    // Check if user is admin (proper database lookup like the original)
     const user = await client.user.findUnique({
       where: { clerkId: userId },
       select: { isAdmin: true },
     })
 
     if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return new NextResponse("Forbidden: Not an admin", { status: 403 })
     }
 
-    // Fetch all workflow templates
+    // Fetch all workflow templates (using correct model name from original)
     const templates = await client.businessWorkflowTemplate.findMany({
       include: {
         _count: {
@@ -174,30 +317,37 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error fetching workflow templates:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { userId } = getAuth(request)
-    const body = await request.json()
+    const  userr  = await onUserInfor()
+    const userId = userr.data?.id
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Check if user is admin
+    // Check if user is admin (proper database lookup like the original)
     const user = await client.user.findUnique({
       where: { clerkId: userId },
       select: { id: true, isAdmin: true },
     })
 
     if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return new NextResponse("Forbidden: Not an admin", { status: 403 })
     }
 
-    // Create new workflow template from the custom request
+    const body = await request.json()
+
+    // Validate required fields
+    if (!body.name || !body.description || !body.category) {
+      return new NextResponse("Missing required fields for template creation", { status: 400 })
+    }
+
+    // Create new workflow template (using correct model and fields from original)
     const template = await client.businessWorkflowTemplate.create({
       data: {
         name: body.name,
@@ -208,11 +358,12 @@ export async function POST(request: NextRequest) {
         features: body.features || [],
         integrations: body.integrations || [],
         isPublic: body.isPublic || false,
-        isActive: true,
+        isActive: body.isActive !== undefined ? body.isActive : true,
         createdByAdmin: body.createdByAdmin || true,
         originalRequestId: body.originalRequestId,
         voiceflowProjectId: body.voiceflowProjectId,
         voiceflowVersionId: body.voiceflowVersionId,
+        workflowDesign: body.workflowDesign || {},
         publishedBy: user.id,
         publishedAt: new Date(),
       },
@@ -260,9 +411,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       template,
-    })
+    }, { status: 201 })
   } catch (error) {
     console.error("Error creating workflow template:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }

@@ -2857,6 +2857,7 @@ model BusinessWorkflowTemplate {
   businessConfigs BusinessWorkflowConfig[]
 
   isPublic              Boolean                 @default(true)
+  workflowDesign        Json?
   createdByAdmin        Boolean                 @default(false)
   originalRequestId     String?                 @db.Uuid
   publishedAt           DateTime?
@@ -2872,6 +2873,8 @@ model BusinessWorkflowTemplate {
 model BusinessWorkflowConfig {
   id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId             String                    @db.Uuid
+  name               String?                   
+  description        String?                   @db.Text
   user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   businessId         String                    @db.Uuid
   business           Business                  @relation(fields: [businessId], references: [id], onDelete: Cascade)
