@@ -241,17 +241,20 @@ export async function POST(request: Request) {
     }
 
     const newWorkflowConfig = await client.businessWorkflowConfig.create({
-      data: {
-        businessId,
-        workflowTemplateId: workflowTemplateId || undefined,
-        name: templateName,
-        description: templateDescription,
-        status: status || "ACTIVE",
-        isActive: isActive ?? true,
-        customizations: businessInfo || {},
-        customRequest: customRequest || undefined,
-      },
-    })
+        data: {
+          userId, // REQUIRED - you need to provide this
+          businessId,
+          name: templateName,
+          description: templateDescription,
+          workflowTemplateId: workflowTemplateId || undefined,
+          businessInfo: businessInfo || {}, // Changed from 'customizations'
+          integrationConfigs: [], // Optional, has default value
+          customRequest: customRequest || undefined,
+          status: status || "DRAFT", // Default is DRAFT, not ACTIVE
+          isActive: isActive ?? false, // Default is false, not true
+        },
+      });
+
 
     return NextResponse.json({ 
       success: true, 

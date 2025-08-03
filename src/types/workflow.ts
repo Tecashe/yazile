@@ -662,6 +662,7 @@ export interface BusinessWorkflowConfig {
   isActive: boolean // Added isActive
   createdAt: string
   updatedAt: string
+  workflowTemplate?:WorkflowTemplate
   template?: WorkflowTemplate // The associated template (optional if custom)
   customizations: any // JSON field for specific business customizations
   credentials: IntegrationCredential[] // Array of credentials stored for this config
