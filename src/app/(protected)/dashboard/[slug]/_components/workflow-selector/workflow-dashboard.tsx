@@ -1063,7 +1063,7 @@ export default function WorkflowDashboard({ workflowDetails, onDeactivate, isDea
       <Card>
         <CardHeader>
           <CardTitle>Workflow Performance (Last 30 Days)</CardTitle>
-          <CardDescription>Overview of your workflow's operational metrics.</CardDescription>
+          <CardDescription>Overview of your workflow&apos;s operational metrics.</CardDescription>
         </CardHeader>
         <CardContent>
           {loadingAnalytics ? (

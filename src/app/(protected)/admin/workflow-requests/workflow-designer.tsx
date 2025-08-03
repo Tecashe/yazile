@@ -2157,7 +2157,7 @@ const AdminWorkflowDesigner: React.FC<AdminWorkflowDesignerProps> = ({
           <CardHeader>
             <CardTitle>Original Request Details</CardTitle>
             <CardDescription>
-              This template is being designed based on a user's custom workflow request.
+              This template is being designed based on a user&apos;s custom workflow request.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2279,9 +2279,9 @@ const AdminWorkflowDesigner: React.FC<AdminWorkflowDesignerProps> = ({
       {initialRequest?.aiSuggestions?.workflowDesign && (
         <Card>
           <CardHeader>
-            <CardTitle>User's AI-Suggested Workflow Design (Read-Only)</CardTitle>
+            <CardTitle>User&apos;s AI-Suggested Workflow Design (Read-Only)</CardTitle>
             <CardDescription>
-              This is the workflow design suggested by AI based on the user's request. Use this as a reference to build
+              This is the workflow design suggested by AI based on the user&apos;s request. Use this as a reference to build
               the actual Voiceflow project and configure the template.
             </CardDescription>
           </CardHeader>
@@ -2364,7 +2364,7 @@ const AdminWorkflowDesigner: React.FC<AdminWorkflowDesignerProps> = ({
           {templateForm.integrations.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
               <Settings className="h-12 w-12 mx-auto mb-4" />
-              <p>No integrations added yet. Click "Add Integration" to specify required connections.</p>
+              <p>No integrations added yet. Click &ldquo;Add Integration&rdquo; to specify required connections.</p>
             </div>
           )}
           {templateForm.integrations.map((integration, integrationIndex) => (
