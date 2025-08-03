@@ -1853,7 +1853,7 @@ export default function AdminWorkflowRequestsDashboard() {
                   <Badge variant="outline" className="text-xs font-medium">
                     {step.type}
                   </Badge>
-                  {step.complexity && (
+                  {/* {step.complexity && (
                     <Badge
                       variant="secondary"
                       className={`text-xs ${
@@ -1866,7 +1866,7 @@ export default function AdminWorkflowRequestsDashboard() {
                     >
                       {step.complexity} complexity
                     </Badge>
-                  )}
+                  )} */}
                   {step.estimatedTime && (
                     <Badge variant="secondary" className="text-xs">
                       <Timer className="h-3 w-3 mr-1" />
@@ -1965,11 +1965,6 @@ export default function AdminWorkflowRequestsDashboard() {
                         99.9%
                       </Badge>
                     </div>
-                    {step.businessImpact && (
-                      <p className="text-xs text-muted-foreground mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
-                        {step.businessImpact}
-                      </p>
-                    )}
                   </div>
                 </div>
 

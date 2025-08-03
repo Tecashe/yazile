@@ -4874,7 +4874,7 @@ export default function WorkflowSelector() {
           const pendingData: PendingWorkflowData = {
             id: result.workflowConfig.id,
             submittedAt: result.workflowConfig.createdAt, // Use createdAt from response
-            status: "PENDING_CREATION",
+            status: "UNDER_REVIEW",
             workflowType: "Custom Workflow",
             estimatedCompletion: "3-5",
           }

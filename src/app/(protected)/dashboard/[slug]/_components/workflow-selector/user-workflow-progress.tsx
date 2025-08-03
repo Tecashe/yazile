@@ -1047,7 +1047,7 @@ export default function UserWorkflowProgress({
                     <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
                       <StatusIcon
                         className={`h-5 w-5 mt-0.5 ${
-                          request.status === "IN_DEVELOPMENT" ? "animate-spin" : ""
+                          request.status === "IN_DEVELOPMENT" ? "Creating..." : ""
                         } text-primary`}
                       />
                       <div>
