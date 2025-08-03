@@ -1,5 +1,5 @@
 'use server'
-
+import { onUserInfor } from '../user'
 
 type SaveResult = {
   status: number;
@@ -15,7 +15,7 @@ import type {
 } from "@/types/business"
 
 
-import { onUserInfor } from '../user'
+
 import {
   getBusinessesForWebhook,
   createBusiness,
@@ -30,7 +30,7 @@ import { FormSchema } from '@/types/schema'
 export const createNewBusiness = async (businessData: FormSchema) => {
   const user = await onUserInfor()
   try {
-    const business = await createBusiness(user.data?.id ||"1234", businessData)
+    const business = await createBusiness(user.data?.id ||"", businessData)
     if (business) return { status: 200, data: 'Business created', res: business }
     return { status: 404, data: 'Oops! something went wrong' }
   } catch (error) {
