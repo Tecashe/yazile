@@ -1,3 +1,4 @@
+'use client'
 import type { Metadata } from "next"
 import WorkflowSelector from "../_components/workflow-selector/workflow-selector"
 
@@ -7,16 +8,9 @@ export const metadata: Metadata = {
     "Select the perfect workflow template for your business type and automate your social media responses with AI-powered conversations.",
 }
 
-// export default function WorkflowSelectorPage() {
-//   return (
-//     <div className="min-h-screen">
-//       <WorkflowSelector />
-//     </div>
-//   )
-// }
 
 
-import { getAllBusinesses } from '@/actions/businfo'; // Adjust path
+import { getAllBusinesses } from '@/actions/businfo'; 
 import { useEffect, useState } from 'react';
 
 export default function WorkflowSelectorPage() {
