@@ -45,7 +45,8 @@ export const createNewBusiness = async (businessData: FormSchema) => {
     console.log('User:', user)
     
     console.log('Creating business with ID:', user.data?.id)
-    const business = await createBusiness(user.data?.id || "", businessData)
+    // const business = await createBusiness(user.data?.id || "", businessData)
+    const business = await createBusiness(user.data?.clerkId || "", businessData)
     console.log('Business result:', business)
     
     if (business) return { status: 200, data: 'Business created', res: business }
