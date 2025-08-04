@@ -156,8 +156,8 @@ export default function Home() {
                     ))}
                   </div>
                   <div className="text-sm">
-                    <div className="font-semibold text-foreground">500+ businesses</div>
-                    <div className="text-muted-foreground">already growing with Yazzil</div>
+                    <div className="font-semibold text-foreground">Let Your Business</div>
+                    <div className="text-muted-foreground">Growing with Yazzil</div>
                   </div>
                 </div>
               </div>
@@ -286,11 +286,11 @@ export default function Home() {
           </div>
 
           {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          {/* <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
             <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center">
               <div className="w-1 h-3 bg-muted-foreground/50 rounded-full mt-2 animate-pulse" />
             </div>
-          </div>
+          </div> */}
         </section>
 
         {/* Stats Section */}
@@ -298,7 +298,7 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary">500+</div>
+                <div className="text-3xl font-bold text-primary">50+</div>
                 <div className="text-sm text-muted-foreground">Active Businesses</div>
               </div>
               <div className="text-center">
