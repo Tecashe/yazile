@@ -242,8 +242,6 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/c
 import { ChevronsUpDown, Crown, User, Building2, CreditCard, ChevronDown, ChevronUp } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import PaymentPopup from "@/components/global/stripe/payment-popup"
-import { motion, AnimatePresence } from "framer-motion"
-import user from "pusher-js/types/src/core/user"
 import { SubscriptionPlan } from "../../subscription-plan"
 import UpgradeCard from "../upgrade"
 import UpgradedCard from "../upgraded"
@@ -252,6 +250,7 @@ export function PlanSwitcher() {
   const { isMobile } = useSidebar()
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false)
   const { toast } = useToast()
+  
 
   const handleUpgradeSuccess = () => {
     toast({
@@ -265,7 +264,7 @@ export function PlanSwitcher() {
   const planInfo = {
     name: "Current Plan",
     logo: CreditCard,
-    status: "FREE",
+    status: "PRO USER.",
     color: "from-blue-600 to-blue-400"
   }
 

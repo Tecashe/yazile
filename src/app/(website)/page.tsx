@@ -138,7 +138,7 @@ export default function Home() {
                   </Button>
                 </div>
 
-                {/* <div className="flex items-center gap-6 justify-center lg:justify-start pt-4">
+                <div className="flex items-center gap-6 justify-center lg:justify-start pt-4">
                   <div className="flex -space-x-3">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <div
@@ -159,7 +159,7 @@ export default function Home() {
                     <div className="font-semibold text-foreground">Let Your Business</div>
                     <div className="text-muted-foreground">Growing with Yazzil</div>
                   </div>
-                </div> */}
+                </div>
               </div>
 
               {/* Visual Side - Stylistic Screenshots Layout */}
