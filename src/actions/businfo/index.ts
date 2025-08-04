@@ -27,18 +27,34 @@ import {
 } from './queries'
 import { FormSchema } from '@/types/schema'
 
+// export const createNewBusiness = async (businessData: FormSchema) => {
+//   const user = await onUserInfor()
+//   try {
+//     const business = await createBusiness(user.data?.id ||"", businessData)
+//     if (business) return { status: 200, data: 'Business created', res: business }
+//     return { status: 404, data: 'Oops! something went wrong' }
+//   } catch (error) {
+//     return { status: 500, data: 'Try refreshing the page first' }
+//   }
+// }
+
 export const createNewBusiness = async (businessData: FormSchema) => {
-  const user = await onUserInfor()
   try {
-    const business = await createBusiness(user.data?.id ||"", businessData)
+    console.log('Getting user info...')
+    const user = await onUserInfor()
+    console.log('User:', user)
+    
+    console.log('Creating business with ID:', user.data?.id)
+    const business = await createBusiness(user.data?.id || "", businessData)
+    console.log('Business result:', business)
+    
     if (business) return { status: 200, data: 'Business created', res: business }
     return { status: 404, data: 'Oops! something went wrong' }
   } catch (error) {
-    return { status: 500, data: 'Try refreshing the page first' }
+    console.error('Error in createNewBusiness:', error)
+    return { status: 500, data: 'Try refreshing the page firstdt' }
   }
 }
-
-
 
 export const getAllBusinesses = async () => {
   const user = await onUserInfor()
