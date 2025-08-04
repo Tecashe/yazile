@@ -50,7 +50,8 @@ export const createNewBusiness = async (businessData: FormSchema) => {
 export const getAllBusinesses = async () => {
   const user = await onUserInfor()
   try {
-    const result = await getBusinesses(user.data?.id||"")
+    // const result = await getBusinesses(user.data?.id||"")
+    const result = await getBusinesses(user.data?.clerkId || "")
     if (result && result.businesses) {
       return { status: 200, data: { businesses: result.businesses } }
     }
