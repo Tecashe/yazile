@@ -264,7 +264,7 @@ export function PlanSwitcher() {
   const planInfo = {
     name: "Current Plan",
     logo: CreditCard,
-    status: "PRO USER.",
+    status: "USAGE",
     color: "from-blue-600 to-blue-400"
   }
 
