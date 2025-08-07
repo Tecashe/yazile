@@ -391,9 +391,9 @@ export default function PrivacyPage() {
                     <p className="text-muted-foreground">
                       <strong>Email:</strong> privacy@yazzil.com
                     </p>
-                    <p className="text-muted-foreground">
+                    {/* <p className="text-muted-foreground">
                       <strong>Address:</strong> 00100 Nairobi, Kenya
-                    </p>
+                    </p> */}
                     <p className="text-muted-foreground">
                       <strong>Data Protection Officer:</strong> dpo@yazzil.com
                     </p>
