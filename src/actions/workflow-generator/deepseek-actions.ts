@@ -461,6 +461,626 @@
 
 
 
+// 'use server'
+
+// interface DeepSeekRequest {
+//   action: "initial" | "refine"
+//   businessInfo: {
+//     businessName: string
+//     businessType: string
+//     description?: string
+//     website?: string
+//     phone?: string
+//     email?: string
+//   }
+//   selectedIntegrations: string[]
+//   selectedOperations: Record<string, string[]>
+//   selectedGoals: string[]
+//   workflowRequest: string
+//   instructions?: string
+//   currentWorkflow?: {
+//     title?: string
+//     description?: string
+//     steps?: any[]
+//   }
+// }
+
+// interface DeepSeekResponse {
+//   success: boolean
+//   workflowData?: any
+//   error?: string
+// }
+
+// const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
+// const REQUEST_TIMEOUT = 25000 // 25 seconds timeout
+
+// const SUPPORTED_INTEGRATIONS = [
+//   {
+//     id: "airtable",
+//     name: "Airtable",
+//     description: "Cloud-based database for storing and managing customer data, leads, and interactions",
+//   },
+//   {
+//     id: "google-sheets",
+//     name: "Google Sheets",
+//     description: "Spreadsheet platform for data tracking, reporting, and team collaboration",
+//   },
+//   {
+//     id: "mailchimp",
+//     name: "Mailchimp",
+//     description: "Email marketing platform for newsletters, campaigns, and audience management",
+//   },
+//   {
+//     id: "notion",
+//     name: "Notion",
+//     description: "All-in-one workspace for notes, databases, and team collaboration",
+//   },
+// ]
+
+// const instagramGoals = [
+//   { id: "lead-generation", label: "Lead Generation from DMs", description: "Capture and qualify leads from Instagram conversations" },
+//   { id: "customer-support", label: "Customer Support Automation", description: "Provide instant support and resolve common issues" },
+//   { id: "product-inquiries", label: "Product Inquiry Handling", description: "Answer product questions and share information" },
+//   { id: "appointment-booking", label: "Appointment/Consultation Booking", description: "Schedule meetings and consultations automatically" },
+//   { id: "content-engagement", label: "Content Engagement Responses", description: "Respond to comments and engagement on posts" },
+//   { id: "influencer-outreach", label: "Influencer/Partnership Outreach", description: "Manage collaboration and partnership requests" },
+// ]
+
+// // Create a timeout wrapper for fetch
+// async function fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
+//   const controller = new AbortController()
+//   const timeoutId = setTimeout(() => controller.abort(), timeout)
+  
+//   try {
+//     const response = await fetch(url, {
+//       ...options,
+//       signal: controller.signal,
+//     })
+//     clearTimeout(timeoutId)
+//     return response
+//   } catch (error) {
+//     clearTimeout(timeoutId)
+//     if (error instanceof Error && error.name === 'AbortError') {
+//       throw new Error('Request timeout - DeepSeek API took too long to respond')
+//     }
+//     throw error
+//   }
+// }
+
+// export async function generateWorkflowWithDeepSeek(request: DeepSeekRequest): Promise<DeepSeekResponse> {
+//   console.log('Server action called with:', { 
+//     action: request.action, 
+//     hasApiKey: !!process.env.DEEPSEEK_API_KEY,
+//     workflowRequest: request.workflowRequest?.substring(0, 100) + '...'
+//   })
+
+//   try {
+//     // Check for API key first
+//     if (!process.env.DEEPSEEK_API_KEY) {
+//       console.error('DEEPSEEK_API_KEY is missing')
+//       return {
+//         success: false,
+//         error: "DEEPSEEK_API_KEY environment variable is missing. Please add it to your .env.local file."
+//       }
+//     }
+
+//     // Validate request
+//     if (!request.workflowRequest?.trim()) {
+//       return {
+//         success: false,
+//         error: "Workflow request is required"
+//       }
+//     }
+
+//     // Prepare context for AI
+//     const selectedIntegrationDetails = request.selectedIntegrations.map(id => 
+//       SUPPORTED_INTEGRATIONS.find(int => int.id === id)
+//     ).filter(Boolean)
+
+//     const selectedGoalDetails = request.selectedGoals.map(id => 
+//       instagramGoals.find(goal => goal.id === id)
+//     ).filter(Boolean)
+
+//     // Simplified and more focused system prompt
+//     const systemPrompt = `You are an Instagram automation expert. Create a practical workflow with 4-6 steps.
+
+// REQUIREMENTS:
+// - Focus on Instagram DM automation
+// - Each step needs: title, description, type, inputs, outputs, details (3 items), businessImpact, estimatedTime, complexity
+// - Step types: trigger, analysis, filter, response, integration, storage
+// - Use provided integrations strategically
+// - Make it implementable in Voiceflow
+
+// Available Integrations: ${selectedIntegrationDetails.map(int => int?.name).join(', ')}
+
+// Return ONLY this JSON structure:
+// {
+//   "title": "workflow title",
+//   "description": "workflow description", 
+//   "steps": [
+//     {
+//       "title": "step title",
+//       "description": "step description",
+//       "type": "trigger|analysis|filter|response|integration|storage",
+//       "inputs": ["input1", "input2"],
+//       "outputs": ["output1", "output2"], 
+//       "details": ["detail1", "detail2", "detail3"],
+//       "voiceflowBlock": "Voiceflow block type",
+//       "businessImpact": "business impact",
+//       "estimatedTime": "< 2s",
+//       "needsIntegration": true/false,
+//       "complexity": "low|medium|high"
+//     }
+//   ],
+//   "benefits": ["benefit1", "benefit2", "benefit3"],
+//   "exampleScenario": "example scenario"
+// }`
+
+//     const userPrompt = request.action === "initial" 
+//       ? `Create Instagram DM automation for:
+// Business: ${request.businessInfo.businessName} (${request.businessInfo.businessType})
+// Requirements: "${request.workflowRequest}"
+// Goals: ${selectedGoalDetails.map(g => g?.label).join(', ')}
+// Integrations: ${selectedIntegrationDetails.map(int => int?.name).join(', ')}`
+//       : `Refine this workflow: ${request.currentWorkflow?.title}
+// Feedback: "${request.instructions}"`
+
+//     console.log('Making API call to DeepSeek...')
+
+//     // Make API call with timeout
+//     const response = await fetchWithTimeout(DEEPSEEK_API_URL, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+//       },
+//       body: JSON.stringify({
+//         model: 'deepseek-chat',
+//         messages: [
+//           {
+//             role: 'system',
+//             content: systemPrompt
+//           },
+//           {
+//             role: 'user',
+//             content: userPrompt
+//           }
+//         ],
+//         temperature: 0.7,
+//         max_tokens: 1500, // Reduced for faster response
+//         stream: false,
+//       }),
+//     }, REQUEST_TIMEOUT)
+
+//     console.log('DeepSeek API response status:', response.status)
+
+//     if (!response.ok) {
+//       const errorText = await response.text().catch(() => 'Unknown error')
+//       console.error('DeepSeek API error:', errorText)
+//       return {
+//         success: false,
+//         error: `DeepSeek API error (${response.status}): ${errorText.substring(0, 200)}`
+//       }
+//     }
+
+//     const data = await response.json()
+//     console.log('DeepSeek API response received, processing...')
+    
+//     const aiResponseText = data.choices?.[0]?.message?.content
+
+//     if (!aiResponseText) {
+//       console.error('No content in DeepSeek response:', data)
+//       return {
+//         success: false,
+//         error: "No response content from DeepSeek AI"
+//       }
+//     }
+
+//     console.log('AI response text length:', aiResponseText.length)
+
+//     // Parse AI response with better error handling
+//     let cleanedText = aiResponseText.trim()
+    
+//     // Remove code block markers if present
+//     if (cleanedText.startsWith('```json')) {
+//       cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+//     } else if (cleanedText.startsWith('```')) {
+//       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '')
+//     }
+    
+//     let aiResponse
+    
+//     try {
+//       aiResponse = JSON.parse(cleanedText)
+//       console.log('Successfully parsed AI response')
+//     } catch (parseError) {
+//       console.error("JSON parse error:", parseError)
+//       console.error("Cleaned text:", cleanedText.substring(0, 500))
+      
+//       // Try to extract JSON from the response
+//       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
+//       if (jsonMatch) {
+//         try {
+//           aiResponse = JSON.parse(jsonMatch[0])
+//           console.log('Successfully extracted and parsed JSON from response')
+//         } catch (secondParseError) {
+//           return {
+//             success: false,
+//             error: "AI returned invalid JSON format. Please try again with a simpler request."
+//           }
+//         }
+//       } else {
+//         return {
+//           success: false,
+//           error: "AI response doesn't contain valid JSON. Please try again."
+//         }
+//       }
+//     }
+
+//     // Validate the parsed response has required fields
+//     if (!aiResponse.title || !aiResponse.steps || !Array.isArray(aiResponse.steps)) {
+//       console.error('Invalid AI response structure:', aiResponse)
+//       return {
+//         success: false,
+//         error: "AI response missing required fields. Please try again with more specific requirements."
+//       }
+//     }
+
+//     // Ensure we have at least some steps
+//     if (aiResponse.steps.length === 0) {
+//       return {
+//         success: false,
+//         error: "AI didn't generate any workflow steps. Please try again with more detailed requirements."
+//       }
+//     }
+
+//     console.log('Returning successful response with', aiResponse.steps.length, 'steps')
+
+//     return {
+//       success: true,
+//       workflowData: aiResponse
+//     }
+
+//   } catch (error) {
+//     console.error("DeepSeek AI generation error:", error)
+    
+//     // Handle specific error types
+//     if (error instanceof Error) {
+//       if (error.message.includes('timeout')) {
+//         return {
+//           success: false,
+//           error: "Request timed out. DeepSeek API is taking too long to respond. Please try again."
+//         }
+//       }
+//       if (error.message.includes('fetch')) {
+//         return {
+//           success: false,
+//           error: "Network error connecting to DeepSeek API. Please check your connection and try again."
+//         }
+//       }
+//       return {
+//         success: false,
+//         error: `AI generation failed: ${error.message}`
+//       }
+//     }
+    
+//     return {
+//       success: false,
+//       error: "AI generation failed due to an unknown error. Please try again."
+//     }
+//   }
+// }
+
+
+// 'use server'
+
+// interface DeepSeekRequest {
+//   action: "initial" | "refine"
+//   businessInfo: {
+//     businessName: string
+//     businessType: string
+//     description?: string
+//     website?: string
+//     phone?: string
+//     email?: string
+//   }
+//   selectedIntegrations: string[]
+//   selectedOperations: Record<string, string[]>
+//   selectedGoals: string[]
+//   workflowRequest: string
+//   instructions?: string
+//   currentWorkflow?: {
+//     title?: string
+//     description?: string
+//     steps?: any[]
+//   }
+// }
+
+// export interface DeepSeekResponse {
+//   success: boolean
+//   workflowData?: any
+//   error?: string
+// }
+
+// const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
+// const REQUEST_TIMEOUT = 20000 // Reduced to 20 seconds
+// const MAX_RETRIES = 2
+
+// const SUPPORTED_INTEGRATIONS = [
+//   {
+//     id: "airtable",
+//     name: "Airtable",
+//     description: "Database for customer data",
+//   },
+//   {
+//     id: "google-sheets",
+//     name: "Google Sheets", 
+//     description: "Spreadsheet for data tracking",
+//   },
+//   {
+//     id: "mailchimp",
+//     name: "Mailchimp",
+//     description: "Email marketing platform",
+//   },
+//   {
+//     id: "notion",
+//     name: "Notion",
+//     description: "Workspace for collaboration",
+//   },
+// ]
+
+// const instagramGoals = [
+//   { id: "lead-generation", label: "Lead Generation" },
+//   { id: "customer-support", label: "Customer Support" },
+//   { id: "product-inquiries", label: "Product Inquiries" },
+//   { id: "appointment-booking", label: "Appointment Booking" },
+//   { id: "content-engagement", label: "Content Engagement" },
+//   { id: "influencer-outreach", label: "Influencer Outreach" },
+// ]
+
+// // Timeout wrapper with retry logic
+// async function fetchWithRetry(url: string, options: RequestInit, maxRetries: number = MAX_RETRIES): Promise<Response> {
+//   let lastError: Error
+
+//   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+//     try {
+//       const controller = new AbortController()
+//       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+      
+//       const response = await fetch(url, {
+//         ...options,
+//         signal: controller.signal,
+//       })
+      
+//       clearTimeout(timeoutId)
+      
+//       if (response.ok) {
+//         return response
+//       }
+      
+//       // If it's a rate limit or server error, retry
+//       if (response.status === 429 || response.status >= 500) {
+//         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+//       }
+      
+//       // For other errors, don't retry
+//       return response
+      
+//     } catch (error) {
+//       lastError = error instanceof Error ? error : new Error('Unknown error')
+      
+//       if (error instanceof Error && error.name === 'AbortError') {
+//         lastError = new Error(`Request timeout (attempt ${attempt}/${maxRetries})`)
+//       }
+      
+//       // Don't retry on the last attempt
+//       if (attempt === maxRetries) {
+//         break
+//       }
+      
+//       // Exponential backoff: wait 1s, then 2s
+//       const delay = Math.pow(2, attempt - 1) * 1000
+//       console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`)
+//       await new Promise(resolve => setTimeout(resolve, delay))
+//     }
+//   }
+  
+//   throw lastError
+// }
+
+// export async function generateWorkflowWithDeepSeek(request: DeepSeekRequest): Promise<DeepSeekResponse> {
+//   console.log('Server action called:', { 
+//     action: request.action, 
+//     hasApiKey: !!process.env.DEEPSEEK_API_KEY,
+//     requestLength: request.workflowRequest?.length
+//   })
+
+//   try {
+//     // Validate API key
+//     if (!process.env.DEEPSEEK_API_KEY) {
+//       return {
+//         success: false,
+//         error: "API key missing. Please configure DEEPSEEK_API_KEY."
+//       }
+//     }
+
+//     // Validate request
+//     if (!request.workflowRequest?.trim()) {
+//       return {
+//         success: false,
+//         error: "Workflow request is required"
+//       }
+//     }
+
+//     // Get selected integration names
+//     const integrationNames = request.selectedIntegrations
+//       .map(id => SUPPORTED_INTEGRATIONS.find(int => int.id === id)?.name)
+//       .filter(Boolean)
+//       .join(', ')
+
+//     // Get selected goal labels
+//     const goalLabels = request.selectedGoals
+//       .map(id => instagramGoals.find(goal => goal.id === id)?.label)
+//       .filter(Boolean)
+//       .join(', ')
+
+//     // Ultra-simplified system prompt for faster processing
+//     const systemPrompt = `Create Instagram DM automation workflow. Return ONLY valid JSON:
+// {
+//   "title": "workflow name",
+//   "description": "brief description",
+//   "steps": [
+//     {
+//       "title": "step name",
+//       "description": "what it does",
+//       "type": "trigger|analysis|filter|response|integration|storage",
+//       "inputs": ["input1"],
+//       "outputs": ["output1"],
+//       "details": ["detail1", "detail2"],
+//       "voiceflowBlock": "block type",
+//       "businessImpact": "impact",
+//       "estimatedTime": "< 2s",
+//       "needsIntegration": true,
+//       "complexity": "low"
+//     }
+//   ],
+//   "benefits": ["benefit1", "benefit2"],
+//   "exampleScenario": "example"
+// }`
+
+//     // Simplified user prompt
+//     const userPrompt = request.action === "initial" 
+//       ? `Business: ${request.businessInfo.businessName}
+// Request: "${request.workflowRequest}"
+// Goals: ${goalLabels}
+// Integrations: ${integrationNames}
+// Create 4-5 steps for Instagram DM automation.`
+//       : `Modify workflow: ${request.currentWorkflow?.title}
+// Changes: "${request.instructions}"`
+
+//     console.log('Making optimized API call...')
+
+//     // Make API call with retry logic
+//     const response = await fetchWithRetry(DEEPSEEK_API_URL, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+//       },
+//       body: JSON.stringify({
+//         model: 'deepseek-chat',
+//         messages: [
+//           {
+//             role: 'system',
+//             content: systemPrompt
+//           },
+//           {
+//             role: 'user',
+//             content: userPrompt
+//           }
+//         ],
+//         temperature: 0.3, // Reduced for more consistent output
+//         max_tokens: 1000, // Further reduced for speed
+//         stream: false,
+//       }),
+//     })
+
+//     if (!response.ok) {
+//       const errorText = await response.text().catch(() => 'Unknown error')
+//       return {
+//         success: false,
+//         error: `API error (${response.status}): ${errorText.substring(0, 100)}`
+//       }
+//     }
+
+//     const data = await response.json()
+//     const aiResponseText = data.choices?.[0]?.message?.content
+
+//     if (!aiResponseText) {
+//       return {
+//         success: false,
+//         error: "No response from AI. Please try again."
+//       }
+//     }
+
+//     // Fast JSON parsing
+//     let cleanedText = aiResponseText.trim()
+    
+//     // Remove markdown if present
+//     if (cleanedText.includes('\`\`\`')) {
+//       const jsonMatch = cleanedText.match(/\`\`\`(?:json)?\s*(\{[\s\S]*?\})\s*\`\`\`/)
+//       if (jsonMatch) {
+//         cleanedText = jsonMatch[1]
+//       }
+//     }
+    
+//     let aiResponse
+//     try {
+//       aiResponse = JSON.parse(cleanedText)
+//     } catch (parseError) {
+//       // Try to extract JSON object
+//       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
+//       if (jsonMatch) {
+//         try {
+//           aiResponse = JSON.parse(jsonMatch[0])
+//         } catch {
+//           return {
+//             success: false,
+//             error: "AI returned invalid format. Please try with simpler requirements."
+//           }
+//         }
+//       } else {
+//         return {
+//           success: false,
+//           error: "AI response format error. Please try again."
+//         }
+//       }
+//     }
+
+//     // Quick validation
+//     if (!aiResponse.title || !aiResponse.steps || !Array.isArray(aiResponse.steps) || aiResponse.steps.length === 0) {
+//       return {
+//         success: false,
+//         error: "AI generated incomplete workflow. Please try again with more specific requirements."
+//       }
+//     }
+
+//     console.log('Successfully generated workflow with', aiResponse.steps.length, 'steps')
+
+//     return {
+//       success: true,
+//       workflowData: aiResponse
+//     }
+
+//   } catch (error) {
+//     console.error("Generation error:", error)
+    
+//     if (error instanceof Error) {
+//       if (error.message.includes('timeout')) {
+//         return {
+//           success: false,
+//           error: "Request timed out. The AI service is overloaded. Please try again in a moment."
+//         }
+//       }
+//       if (error.message.includes('fetch') || error.message.includes('network')) {
+//         return {
+//           success: false,
+//           error: "Network error. Please check your connection and try again."
+//         }
+//       }
+//       return {
+//         success: false,
+//         error: `Generation failed: ${error.message.substring(0, 100)}`
+//       }
+//     }
+    
+//     return {
+//       success: false,
+//       error: "Unknown error occurred. Please try again."
+//     }
+//   }
+// }
+
 'use server'
 
 interface DeepSeekRequest {
@@ -485,82 +1105,205 @@ interface DeepSeekRequest {
   }
 }
 
-interface DeepSeekResponse {
+export interface DeepSeekResponse {
   success: boolean
   workflowData?: any
   error?: string
 }
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
-const REQUEST_TIMEOUT = 25000 // 25 seconds timeout
+const REQUEST_TIMEOUT = 30000 // Increased to 30 seconds
+const MAX_RETRIES = 3 // Increased retries
+const BASE_DELAY = 1000 // Base delay for exponential backoff
 
 const SUPPORTED_INTEGRATIONS = [
   {
     id: "airtable",
     name: "Airtable",
-    description: "Cloud-based database for storing and managing customer data, leads, and interactions",
+    description: "Database for customer data",
   },
   {
     id: "google-sheets",
-    name: "Google Sheets",
-    description: "Spreadsheet platform for data tracking, reporting, and team collaboration",
+    name: "Google Sheets", 
+    description: "Spreadsheet for data tracking",
   },
   {
     id: "mailchimp",
     name: "Mailchimp",
-    description: "Email marketing platform for newsletters, campaigns, and audience management",
+    description: "Email marketing platform",
   },
   {
     id: "notion",
     name: "Notion",
-    description: "All-in-one workspace for notes, databases, and team collaboration",
+    description: "Workspace for collaboration",
   },
 ]
 
 const instagramGoals = [
-  { id: "lead-generation", label: "Lead Generation from DMs", description: "Capture and qualify leads from Instagram conversations" },
-  { id: "customer-support", label: "Customer Support Automation", description: "Provide instant support and resolve common issues" },
-  { id: "product-inquiries", label: "Product Inquiry Handling", description: "Answer product questions and share information" },
-  { id: "appointment-booking", label: "Appointment/Consultation Booking", description: "Schedule meetings and consultations automatically" },
-  { id: "content-engagement", label: "Content Engagement Responses", description: "Respond to comments and engagement on posts" },
-  { id: "influencer-outreach", label: "Influencer/Partnership Outreach", description: "Manage collaboration and partnership requests" },
+  { id: "lead-generation", label: "Lead Generation" },
+  { id: "customer-support", label: "Customer Support" },
+  { id: "product-inquiries", label: "Product Inquiries" },
+  { id: "appointment-booking", label: "Appointment Booking" },
+  { id: "content-engagement", label: "Content Engagement" },
+  { id: "influencer-outreach", label: "Influencer Outreach" },
 ]
 
-// Create a timeout wrapper for fetch
-async function fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-  
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    })
-    clearTimeout(timeoutId)
-    return response
-  } catch (error) {
-    clearTimeout(timeoutId)
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timeout - DeepSeek API took too long to respond')
+// Improved timeout wrapper with better error handling and retry logic
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries: number = MAX_RETRIES): Promise<Response> {
+  let lastError: Error = new Error('Request failed') // Initialize to fix TypeScript error
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Making API request (attempt ${attempt}/${maxRetries})...`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => {
+        controller.abort()
+        console.log(`Request timeout after ${REQUEST_TIMEOUT}ms`)
+      }, REQUEST_TIMEOUT)
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      })
+      
+      clearTimeout(timeoutId)
+      
+      console.log(`API response status: ${response.status}`)
+      
+      if (response.ok) {
+        return response
+      }
+      
+      // If it's a rate limit, server error, or gateway timeout, retry
+      if (response.status === 429 || response.status >= 500 || response.status === 408) {
+        const errorMessage = await response.text().catch(() => 'Unknown error')
+        lastError = new Error(`HTTP ${response.status}: ${errorMessage.substring(0, 200)}`)
+        console.log(`Retryable error on attempt ${attempt}: ${lastError.message}`)
+        
+        // Don't retry on the last attempt
+        if (attempt < maxRetries) {
+          const delay = BASE_DELAY * Math.pow(2, attempt - 1) // Exponential backoff: 1s, 2s, 4s
+          console.log(`Waiting ${delay}ms before retry...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        }
+      }
+      
+      // For other errors (4xx client errors), don't retry but return the response
+      return response
+      
+    } catch (error) {
+      const currentError = error instanceof Error ? error : new Error('Unknown error')
+      
+      if (currentError.name === 'AbortError') {
+        lastError = new Error(`Request timeout after ${REQUEST_TIMEOUT / 1000} seconds (attempt ${attempt}/${maxRetries})`)
+        console.log(`Timeout on attempt ${attempt}`)
+      } else if (currentError.message.includes('fetch') || currentError.message.includes('network')) {
+        lastError = new Error(`Network error: ${currentError.message} (attempt ${attempt}/${maxRetries})`)
+        console.log(`Network error on attempt ${attempt}: ${currentError.message}`)
+      } else {
+        lastError = currentError
+        console.log(`Error on attempt ${attempt}: ${currentError.message}`)
+      }
+      
+      // Don't retry on the last attempt
+      if (attempt < maxRetries) {
+        const delay = BASE_DELAY * Math.pow(2, attempt - 1)
+        console.log(`Waiting ${delay}ms before retry...`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
     }
-    throw error
+  }
+  
+  throw lastError
+}
+
+// Optimized JSON parsing with better error handling
+function parseAIResponse(responseText: string): any {
+  if (!responseText?.trim()) {
+    throw new Error('Empty response from AI')
+  }
+
+  let cleanedText = responseText.trim()
+  
+  // Remove markdown code blocks if present
+  if (cleanedText.includes('```')) {
+    const jsonMatch = cleanedText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
+    if (jsonMatch) {
+      cleanedText = jsonMatch[1].trim()
+    }
+  }
+  
+  // Try direct parsing first
+  try {
+    return JSON.parse(cleanedText)
+  } catch (parseError) {
+    console.log('Direct JSON parse failed, trying to extract JSON object...')
+    
+    // Try to find and extract JSON object
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[0])
+      } catch (extractError) {
+        console.log('JSON extraction also failed')
+        throw new Error(`Invalid JSON format. Parse error: ${parseError instanceof Error ? parseError.message : 'Unknown'}`)
+      }
+    }
+    
+    throw new Error('No valid JSON found in response')
   }
 }
 
+// Validate workflow structure
+function validateWorkflow(workflow: any): string | null {
+  if (!workflow || typeof workflow !== 'object') {
+    return 'Workflow must be an object'
+  }
+  
+  if (!workflow.title || typeof workflow.title !== 'string') {
+    return 'Workflow must have a title'
+  }
+  
+  if (!workflow.steps || !Array.isArray(workflow.steps)) {
+    return 'Workflow must have steps array'
+  }
+  
+  if (workflow.steps.length === 0) {
+    return 'Workflow must have at least one step'
+  }
+  
+  // Validate each step has minimum required fields
+  for (let i = 0; i < workflow.steps.length; i++) {
+    const step = workflow.steps[i]
+    if (!step.title || typeof step.title !== 'string') {
+      return `Step ${i + 1} must have a title`
+    }
+    if (!step.type || typeof step.type !== 'string') {
+      return `Step ${i + 1} must have a type`
+    }
+  }
+  
+  return null // Valid
+}
+
 export async function generateWorkflowWithDeepSeek(request: DeepSeekRequest): Promise<DeepSeekResponse> {
-  console.log('Server action called with:', { 
+  const startTime = Date.now()
+  console.log('Server action called:', { 
     action: request.action, 
     hasApiKey: !!process.env.DEEPSEEK_API_KEY,
-    workflowRequest: request.workflowRequest?.substring(0, 100) + '...'
+    requestLength: request.workflowRequest?.length,
+    timestamp: new Date().toISOString()
   })
 
   try {
-    // Check for API key first
+    // Validate API key
     if (!process.env.DEEPSEEK_API_KEY) {
-      console.error('DEEPSEEK_API_KEY is missing')
+      console.error('DEEPSEEK_API_KEY environment variable is missing')
       return {
         success: false,
-        error: "DEEPSEEK_API_KEY environment variable is missing. Please add it to your .env.local file."
+        error: "API configuration missing. Please contact support."
       }
     }
 
@@ -568,71 +1311,93 @@ export async function generateWorkflowWithDeepSeek(request: DeepSeekRequest): Pr
     if (!request.workflowRequest?.trim()) {
       return {
         success: false,
-        error: "Workflow request is required"
+        error: "Workflow request description is required"
       }
     }
 
-    // Prepare context for AI
-    const selectedIntegrationDetails = request.selectedIntegrations.map(id => 
-      SUPPORTED_INTEGRATIONS.find(int => int.id === id)
-    ).filter(Boolean)
+    if (request.workflowRequest.length > 2000) {
+      return {
+        success: false,
+        error: "Workflow request is too long. Please keep it under 2000 characters."
+      }
+    }
 
-    const selectedGoalDetails = request.selectedGoals.map(id => 
-      instagramGoals.find(goal => goal.id === id)
-    ).filter(Boolean)
+    // Get selected integration names
+    const integrationNames = request.selectedIntegrations
+      .map(id => SUPPORTED_INTEGRATIONS.find(int => int.id === id)?.name)
+      .filter(Boolean)
+      .join(', ') || 'None selected'
 
-    // Simplified and more focused system prompt
-    const systemPrompt = `You are an Instagram automation expert. Create a practical workflow with 4-6 steps.
+    // Get selected goal labels
+    const goalLabels = request.selectedGoals
+      .map(id => instagramGoals.find(goal => goal.id === id)?.label)
+      .filter(Boolean)
+      .join(', ') || 'General automation'
 
-REQUIREMENTS:
-- Focus on Instagram DM automation
-- Each step needs: title, description, type, inputs, outputs, details (3 items), businessImpact, estimatedTime, complexity
-- Step types: trigger, analysis, filter, response, integration, storage
-- Use provided integrations strategically
-- Make it implementable in Voiceflow
+    // Optimized system prompt - more concise but still comprehensive
+    const systemPrompt = `You are a workflow automation expert. Create Instagram DM automation workflows for Voiceflow.
 
-Available Integrations: ${selectedIntegrationDetails.map(int => int?.name).join(', ')}
-
-Return ONLY this JSON structure:
+CRITICAL: Respond with ONLY valid JSON in this exact format:
 {
-  "title": "workflow title",
-  "description": "workflow description", 
+  "title": "Clear workflow name",
+  "description": "Brief description (1-2 sentences)",
   "steps": [
     {
-      "title": "step title",
-      "description": "step description",
+      "title": "Step name",
+      "description": "What this step does",
       "type": "trigger|analysis|filter|response|integration|storage",
-      "inputs": ["input1", "input2"],
-      "outputs": ["output1", "output2"], 
-      "details": ["detail1", "detail2", "detail3"],
-      "voiceflowBlock": "Voiceflow block type",
-      "businessImpact": "business impact",
+      "inputs": ["required_input"],
+      "outputs": ["produced_output"],
+      "details": ["implementation_detail"],
+      "voiceflowBlock": "block_type",
+      "businessImpact": "business_benefit",
       "estimatedTime": "< 2s",
-      "needsIntegration": true/false,
+      "needsIntegration": false,
       "complexity": "low|medium|high"
     }
   ],
   "benefits": ["benefit1", "benefit2", "benefit3"],
-  "exampleScenario": "example scenario"
-}`
+  "exampleScenario": "Real example of workflow in action"
+}
 
-    const userPrompt = request.action === "initial" 
-      ? `Create Instagram DM automation for:
+Requirements:
+- Create 3-6 logical steps
+- Focus on Instagram DM automation
+- Make steps actionable in Voiceflow
+- Keep JSON structure exact`
+
+    // Build user prompt based on action type
+    let userPrompt: string
+    
+    if (request.action === "initial") {
+      userPrompt = `Create Instagram DM automation workflow:
+
 Business: ${request.businessInfo.businessName} (${request.businessInfo.businessType})
-Requirements: "${request.workflowRequest}"
-Goals: ${selectedGoalDetails.map(g => g?.label).join(', ')}
-Integrations: ${selectedIntegrationDetails.map(int => int?.name).join(', ')}`
-      : `Refine this workflow: ${request.currentWorkflow?.title}
-Feedback: "${request.instructions}"`
+Request: "${request.workflowRequest}"
+Goals: ${goalLabels}
+Available Integrations: ${integrationNames}
 
-    console.log('Making API call to DeepSeek...')
+Create a practical workflow with 3-6 steps that automates Instagram DM handling for this business.`
+    } else {
+      userPrompt = `Modify existing workflow: "${request.currentWorkflow?.title || 'Current Workflow'}"
 
-    // Make API call with timeout
-    const response = await fetchWithTimeout(DEEPSEEK_API_URL, {
+Current Description: ${request.currentWorkflow?.description || 'No description'}
+Current Steps: ${request.currentWorkflow?.steps?.length || 0}
+
+Modification Request: "${request.instructions}"
+
+Update the workflow JSON with the requested changes while maintaining the same structure.`
+    }
+
+    console.log('Making API call with optimized parameters...')
+
+    // Make API call with retry logic
+    const response = await fetchWithRetry(DEEPSEEK_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
@@ -646,95 +1411,64 @@ Feedback: "${request.instructions}"`
             content: userPrompt
           }
         ],
-        temperature: 0.7,
-        max_tokens: 1500, // Reduced for faster response
+        temperature: 0.2, // Low temperature for consistent JSON output
+        max_tokens: 1500, // Reasonable limit for workflow data
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.1,
         stream: false,
       }),
-    }, REQUEST_TIMEOUT)
+    })
 
-    console.log('DeepSeek API response status:', response.status)
+    const responseTime = Date.now() - startTime
+    console.log(`API response received in ${responseTime}ms`)
 
     if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error')
-      console.error('DeepSeek API error:', errorText)
+      const errorText = await response.text().catch(() => 'Failed to read error response')
+      console.error(`API error ${response.status}:`, errorText.substring(0, 200))
       return {
         success: false,
-        error: `DeepSeek API error (${response.status}): ${errorText.substring(0, 200)}`
+        error: `AI service error (${response.status}). ${response.status === 429 ? 'Service is busy, please try again.' : 'Please try again.'}`
       }
     }
 
     const data = await response.json()
-    console.log('DeepSeek API response received, processing...')
-    
     const aiResponseText = data.choices?.[0]?.message?.content
 
     if (!aiResponseText) {
-      console.error('No content in DeepSeek response:', data)
+      console.error('Empty AI response:', data)
       return {
         success: false,
-        error: "No response content from DeepSeek AI"
+        error: "AI service returned empty response. Please try again."
       }
     }
 
-    console.log('AI response text length:', aiResponseText.length)
+    console.log(`AI response length: ${aiResponseText.length} characters`)
 
-    // Parse AI response with better error handling
-    let cleanedText = aiResponseText.trim()
-    
-    // Remove code block markers if present
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '')
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '')
-    }
-    
+    // Parse AI response
     let aiResponse
-    
     try {
-      aiResponse = JSON.parse(cleanedText)
-      console.log('Successfully parsed AI response')
+      aiResponse = parseAIResponse(aiResponseText)
     } catch (parseError) {
-      console.error("JSON parse error:", parseError)
-      console.error("Cleaned text:", cleanedText.substring(0, 500))
-      
-      // Try to extract JSON from the response
-      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          aiResponse = JSON.parse(jsonMatch[0])
-          console.log('Successfully extracted and parsed JSON from response')
-        } catch (secondParseError) {
-          return {
-            success: false,
-            error: "AI returned invalid JSON format. Please try again with a simpler request."
-          }
-        }
-      } else {
-        return {
-          success: false,
-          error: "AI response doesn't contain valid JSON. Please try again."
-        }
-      }
-    }
-
-    // Validate the parsed response has required fields
-    if (!aiResponse.title || !aiResponse.steps || !Array.isArray(aiResponse.steps)) {
-      console.error('Invalid AI response structure:', aiResponse)
+      console.error('JSON parsing failed:', parseError)
       return {
         success: false,
-        error: "AI response missing required fields. Please try again with more specific requirements."
+        error: `AI response format error: ${parseError instanceof Error ? parseError.message : 'Invalid format'}. Please try with a simpler request.`
       }
     }
 
-    // Ensure we have at least some steps
-    if (aiResponse.steps.length === 0) {
+    // Validate workflow structure
+    const validationError = validateWorkflow(aiResponse)
+    if (validationError) {
+      console.error('Workflow validation failed:', validationError)
       return {
         success: false,
-        error: "AI didn't generate any workflow steps. Please try again with more detailed requirements."
+        error: `Invalid workflow structure: ${validationError}. Please try again.`
       }
     }
 
-    console.log('Returning successful response with', aiResponse.steps.length, 'steps')
+    const totalTime = Date.now() - startTime
+    console.log(`Successfully generated workflow with ${aiResponse.steps.length} steps in ${totalTime}ms`)
 
     return {
       success: true,
@@ -742,31 +1476,38 @@ Feedback: "${request.instructions}"`
     }
 
   } catch (error) {
-    console.error("DeepSeek AI generation error:", error)
+    const totalTime = Date.now() - startTime
+    console.error(`Generation error after ${totalTime}ms:`, error)
     
-    // Handle specific error types
     if (error instanceof Error) {
       if (error.message.includes('timeout')) {
         return {
           success: false,
-          error: "Request timed out. DeepSeek API is taking too long to respond. Please try again."
+          error: "Request timed out. The AI service is experiencing high load. Please try again in a moment."
         }
       }
-      if (error.message.includes('fetch')) {
+      if (error.message.includes('network') || error.message.includes('fetch')) {
         return {
           success: false,
-          error: "Network error connecting to DeepSeek API. Please check your connection and try again."
+          error: "Network connectivity issue. Please check your internet connection and try again."
         }
       }
+      if (error.message.includes('429')) {
+        return {
+          success: false,
+          error: "AI service is busy. Please wait a moment and try again."
+        }
+      }
+      
       return {
         success: false,
-        error: `AI generation failed: ${error.message}`
+        error: `Generation failed: ${error.message.substring(0, 150)}${error.message.length > 150 ? '...' : ''}`
       }
     }
     
     return {
       success: false,
-      error: "AI generation failed due to an unknown error. Please try again."
+      error: "An unexpected error occurred. Please try again."
     }
   }
 }
