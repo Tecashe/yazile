@@ -11242,7 +11242,6 @@
 
 // export default VoiceflowWorkflowBuilder
 
-
 "use client"
 
 import type React from "react"
@@ -11257,10 +11256,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Sparkles, Loader2, CheckCircle, Settings, ThumbsUp, MessageCircle, RefreshCw, Zap, AlertCircle, PlayCircle, Workflow, ChevronDown, ChevronRight, Database, Filter, Mail, Star, Brain, Layers, Wand2, Check, Link2, Instagram, FileSpreadsheet, FileText, Users, Target, MessageSquare, Heart, UserPlus, ShoppingBag, Calendar, Info, Clock, TrendingUp } from 'lucide-react'
 
-import { generateText } from 'ai'
-
-// Configure DeepSeek directly without OpenAI wrapper
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
+import { generateWorkflowWithDeepSeek } from "@/actions/workflow-generator/deepseek-actions"
 
 // TypeScript interfaces
 interface BusinessInfo {
@@ -11517,7 +11513,7 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
 
   const [selectedGoals, setSelectedGoals] = useState<string[]>(["customer-support"])
 
-  // Enhanced workflow generation with real DeepSeek AI
+  // Enhanced workflow generation with real DeepSeek AI via server action
   const generateWorkflowWithAI = useCallback(
     async (action: "initial" | "refine", instructions?: string): Promise<void> => {
       setIsGenerating(true)
@@ -11538,13 +11534,77 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
           setEstimatedTimeRemaining(prev => Math.max(0, prev - 1))
         }, 1000)
 
-        // Generate workflow with DeepSeek
-        const aiResponse = await callDeepSeekAI(action, instructions)
+        // Update progress phases
+        addAiThought("🤖 Sending detailed requirements to DeepSeek AI...")
+        setCurrentPhase(1)
+        setStreamingProgress(20)
+
+        // Call server action
+        const aiResponse = await generateWorkflowWithDeepSeek({
+          action,
+          businessInfo,
+          selectedIntegrations,
+          selectedOperations,
+          selectedGoals,
+          workflowRequest,
+          instructions,
+          currentWorkflow: parsedWorkflow ? {
+            title: parsedWorkflow.title,
+            description: parsedWorkflow.description,
+            steps: streamingSteps
+          } : undefined
+        })
 
         clearInterval(progressInterval)
 
         if (aiResponse.success && aiResponse.workflowData) {
-          setParsedWorkflow(aiResponse.workflowData)
+          addAiThought("🧠 DeepSeek AI analyzing and creating custom workflow...")
+          setCurrentPhase(2)
+          setStreamingProgress(60)
+
+          addAiThought("✨ Processing AI-generated workflow steps...")
+          setCurrentPhase(3)
+          setStreamingProgress(80)
+
+          // Process the AI-generated steps
+          const workflowSteps = await processAIGeneratedSteps(aiResponse.workflowData.steps)
+
+          const workflow: ParsedWorkflow = {
+            title: aiResponse.workflowData.title || `${businessInfo.businessName} Instagram Automation`,
+            description: aiResponse.workflowData.description || `Custom Instagram DM automation workflow`,
+            platform: "Instagram DMs via Voiceflow",
+            estimatedBuildTime: "1-2 weeks",
+            complexity: "Custom",
+            steps: workflowSteps,
+            integrations: getAssignedIntegrations(workflowSteps),
+            benefits: aiResponse.workflowData.benefits || [
+              "Custom AI-generated automation",
+              "Instagram-optimized workflow",
+              "Voiceflow-compatible implementation"
+            ],
+            exampleScenario: aiResponse.workflowData.exampleScenario || "Custom workflow tailored to your specific requirements",
+            voiceflowFeatures: [
+              "Custom Intent Recognition",
+              "Dynamic Conditional Logic", 
+              "Tailored API Integrations",
+              "Personalized Response Generation"
+            ],
+            instagramFocus: [
+              "Custom DM automation flow",
+              "Personalized customer interactions",
+              "Business-specific automation logic"
+            ],
+            estimatedCost: "$200-500/month",
+            roi: "300-600% within 3 months",
+            metrics: {
+              automationRate: "90%",
+              responseTime: "< 15 seconds", 
+              accuracy: "94%",
+              scalability: "High",
+            },
+          }
+
+          setParsedWorkflow(workflow)
           setStreamingProgress(100)
           setResponseStatus("✅ Custom Instagram workflow generated successfully!")
           addAiThought("🎉 Workflow ready for Voiceflow implementation!")
@@ -11562,193 +11622,8 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
         }, 1000)
       }
     },
-    [businessInfo, selectedIntegrations, selectedOperations, selectedGoals, workflowRequest],
+    [businessInfo, selectedIntegrations, selectedOperations, selectedGoals, workflowRequest, parsedWorkflow, streamingSteps],
   )
-
-  // Real DeepSeek AI workflow generation
-  const callDeepSeekAI = async (
-    action: "initial" | "refine",
-    instructions?: string,
-  ): Promise<{ success: boolean; workflowData?: ParsedWorkflow; error?: string }> => {
-    try {
-      // Check for API key
-      if (!process.env.DEEPSEEK_API_KEY) {
-        throw new Error("DEEPSEEK_API_KEY environment variable is missing")
-      }
-
-      // Prepare context for AI
-      const selectedIntegrationDetails = selectedIntegrations.map(id => 
-        SUPPORTED_INTEGRATIONS.find(int => int.id === id)
-      ).filter(Boolean)
-
-      const selectedGoalDetails = selectedGoals.map(id => 
-        instagramGoals.find(goal => goal.id === id)
-      ).filter(Boolean)
-
-      const systemPrompt = `You are an expert Instagram automation workflow designer specializing in Voiceflow implementations. Create practical, actionable workflows that businesses can actually implement.
-
-Key Requirements:
-- Focus on Instagram DM automation specifically
-- Each step must be implementable in Voiceflow
-- Use only the provided integrations (max 1 per step, no duplicates)
-- Create 4-7 logical workflow steps
-- Ensure steps flow logically from one to the next
-- Make it practical for real business use
-
-Available Integrations: ${selectedIntegrationDetails.map(int => `${int?.name} - ${int?.description}`).join('; ')}
-
-Return ONLY valid JSON in this exact format:
-{
-  "title": "specific workflow title",
-  "description": "clear workflow description",
-  "steps": [
-    {
-      "title": "specific step title",
-      "description": "detailed step description",
-      "type": "trigger|analysis|filter|response|integration|storage",
-      "inputs": ["specific input 1", "specific input 2"],
-      "outputs": ["specific output 1", "specific output 2"],
-      "details": ["implementation detail 1", "implementation detail 2", "implementation detail 3"],
-      "voiceflowBlock": "specific Voiceflow block type",
-      "businessImpact": "specific business impact explanation",
-      "estimatedTime": "execution time",
-      "needsIntegration": true/false,
-      "complexity": "low/medium/high"
-    }
-  ],
-  "benefits": ["specific benefit 1", "specific benefit 2", "specific benefit 3"],
-  "exampleScenario": "detailed example scenario"
-}`
-
-      const userPrompt = action === "initial" 
-        ? `Create a custom Instagram DM automation workflow for:
-
-Business: ${businessInfo.businessName} (${businessInfo.businessType})
-Description: ${businessInfo.description}
-
-User Requirements: "${workflowRequest}"
-
-Selected Goals: ${selectedGoalDetails.map(g => `${g?.label} - ${g?.description}`).join('; ')}
-
-Selected Integrations: ${selectedIntegrationDetails.map(int => `${int?.name} (Operations: ${selectedOperations[int?.id || '']?.join(', ') || 'all available'})`).join('; ')}
-
-Create a workflow that specifically addresses these requirements and uses the selected integrations strategically.`
-        : `Refine this existing Instagram automation workflow based on feedback:
-
-Current Workflow: ${parsedWorkflow?.title} - ${parsedWorkflow?.description}
-Current Steps: ${streamingSteps.map(s => s.title).join(', ')}
-
-Refinement Request: "${instructions}"
-
-Update the workflow to address this feedback while maintaining Instagram focus and Voiceflow compatibility.`
-
-      addAiThought("🤖 Sending detailed requirements to DeepSeek AI...")
-      setCurrentPhase(1)
-      setStreamingProgress(20)
-
-      // Direct API call to DeepSeek
-      const response = await fetch(DEEPSEEK_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: userPrompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 2000,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(`DeepSeek API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
-      }
-
-      const data = await response.json()
-      const aiResponseText = data.choices?.[0]?.message?.content
-
-      if (!aiResponseText) {
-        throw new Error("No response from DeepSeek AI")
-      }
-
-      addAiThought("🧠 DeepSeek AI analyzing and creating custom workflow...")
-      setCurrentPhase(2)
-      setStreamingProgress(60)
-
-      // Parse AI response
-      const cleanedText = aiResponseText.replace(/\`\`\`json\n?|\n?\`\`\`/g, '').trim()
-      let aiResponse
-      
-      try {
-        aiResponse = JSON.parse(cleanedText)
-      } catch (parseError) {
-        console.error("JSON parse error:", parseError)
-        console.error("Raw AI response:", aiResponseText)
-        throw new Error("AI returned invalid response format")
-      }
-
-      addAiThought("✨ Processing AI-generated workflow steps...")
-      setCurrentPhase(3)
-      setStreamingProgress(80)
-
-      // Process the AI-generated steps
-      const workflowSteps = await processAIGeneratedSteps(aiResponse.steps)
-
-      const workflow: ParsedWorkflow = {
-        title: aiResponse.title || `${businessInfo.businessName} Instagram Automation`,
-        description: aiResponse.description || `Custom Instagram DM automation workflow`,
-        platform: "Instagram DMs via Voiceflow",
-        estimatedBuildTime: "1-2 weeks",
-        complexity: "Custom",
-        steps: workflowSteps,
-        integrations: getAssignedIntegrations(workflowSteps),
-        benefits: aiResponse.benefits || [
-          "Custom AI-generated automation",
-          "Instagram-optimized workflow",
-          "Voiceflow-compatible implementation"
-        ],
-        exampleScenario: aiResponse.exampleScenario || "Custom workflow tailored to your specific requirements",
-        voiceflowFeatures: [
-          "Custom Intent Recognition",
-          "Dynamic Conditional Logic", 
-          "Tailored API Integrations",
-          "Personalized Response Generation"
-        ],
-        instagramFocus: [
-          "Custom DM automation flow",
-          "Personalized customer interactions",
-          "Business-specific automation logic"
-        ],
-        estimatedCost: "$200-500/month",
-        roi: "300-600% within 3 months",
-        metrics: {
-          automationRate: "90%",
-          responseTime: "< 15 seconds", 
-          accuracy: "94%",
-          scalability: "High",
-        },
-      }
-
-      return { success: true, workflowData: workflow }
-    } catch (error) {
-      console.error("DeepSeek AI generation error:", error)
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "AI generation failed",
-      }
-    }
-  }
 
   // Process AI-generated steps with enhanced streaming
   const processAIGeneratedSteps = async (aiSteps: any[]): Promise<WorkflowStep[]> => {
@@ -11914,13 +11789,14 @@ Update the workflow to address this feedback while maintaining Instagram focus a
         urgency: "NORMAL",
       }
 
-      // Real API call would go here
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // Store in localStorage
+      const workflowId = `instagram-${Date.now()}`
+      localStorage.setItem(`workflow-submission-${workflowId}`, JSON.stringify(payload))
 
       setResponseStatus("✅ Instagram workflow submitted successfully!")
 
       const pendingData = {
-        id: `instagram-${Date.now()}`,
+        id: workflowId,
         submittedAt: new Date().toISOString(),
         status: "PENDING_CREATION",
         workflowType: "Instagram Automation",
