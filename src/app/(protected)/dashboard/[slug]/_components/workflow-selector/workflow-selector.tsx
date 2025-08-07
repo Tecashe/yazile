@@ -6126,7 +6126,7 @@ export default function WorkflowSelector({ businessId, onWorkflowSelected }: Wor
 
   const handleCustomWorkflowSelect = () => {
     if (activeWorkflowExists) return
-    if (subscription?.plan.toUpperCase() !== "ENTERPRISE") {
+    if (subscription?.plan.toUpperCase() !== "PRO") {
       setShowPaymentPopup(true)
       return
     }
