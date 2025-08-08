@@ -2540,7 +2540,7 @@ const VoiceflowWorkflowBuilder: React.FC<VoiceflowWorkflowBuilderProps> = ({
                   </div>
                 )}
 
-                {/* Streaming Progress */}
+                {/* Streaming Progres */}
                 {isGenerating && <StreamingProgress />}
 
                 {/* Workflow Header */}
