@@ -612,7 +612,7 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
         break
 
       case "end":
-        result += "\n[Conversation ended]"
+        result += "\nHello, what brings you today, how can I help?"
         break
 
       case "handoff":
