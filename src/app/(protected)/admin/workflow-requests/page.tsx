@@ -2013,9 +2013,15 @@ export default function AdminWorkflowRequestsDashboard() {
   // If the designer is open, render it instead of the dashboard
   if (isWorkflowDesignerOpen) {
     return (
+      // <AdminWorkflowDesigner
+      //   initialRequest={selectedRequest}
+      //   initialTemplate={selectedTemplate}
+      //   onBackToDashboard={handleBackToDashboard}
+      //   onTemplateSaved={handleTemplateSaved}
+      // />
       <AdminWorkflowDesigner
-        initialRequest={selectedRequest}
-        initialTemplate={selectedTemplate}
+        initialRequest={selectedRequest as any}
+        initialTemplate={selectedTemplate as any}
         onBackToDashboard={handleBackToDashboard}
         onTemplateSaved={handleTemplateSaved}
       />

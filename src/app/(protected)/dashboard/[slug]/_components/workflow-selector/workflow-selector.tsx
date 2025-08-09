@@ -1461,9 +1461,10 @@
 
 
 
-
 "use client"
 import { useState, useEffect } from "react"
+import { DialogFooter } from "@/components/ui/dialog"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -1487,6 +1488,7 @@ import {
   Zap,
   Globe,
   Lock,
+  BarChart3,
 } from "lucide-react"
 import WorkflowDashboard from "./workflow-dashboard"
 import CustomWorkflowBuilder from "./custom-workflow-builder"
@@ -1509,16 +1511,8 @@ import type {
   PendingWorkflowData,
   CRMIntegration,
   CustomWorkflowRequest,
-  WorkflowTemplate,
 } from "@/types/workflow" // Add this import
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
 
 const Logger = {
@@ -1534,6 +1528,27 @@ const Logger = {
   error: (message: string, ...args: any[]) => {
     console.error(`%cERROR: ${message}`, "color: red;", ...args)
   },
+}
+
+interface WorkflowTemplate {
+  id: string
+  name: string
+  category: string
+  description: string
+  complexity: "SIMPLE" | "MEDIUM" | "COMPLEX"
+  estimatedSetupTime: number
+  operations: string[]
+  features: string[]
+  integrations: any // Json field - can be array of objects or simple strings
+  commonUseCase?: string
+  isActive: boolean
+  isPublic: boolean
+  workflowDesign?: any
+  createdByAdmin: boolean
+  voiceflowProjectId?: string
+  voiceflowVersionId?: string
+  createdAt: string
+  updatedAt: string
 }
 
 interface WorkflowSelectorProps {
@@ -1776,12 +1791,32 @@ export default function WorkflowSelector({ businessId, onWorkflowSelected }: Wor
 
   const fetchTemplates = async () => {
     try {
-      const response = await fetch("/api/workflow-templates")
+      setLoading(true)
+      const response = await fetch("/api/workflow-templates?published=true")
       const data = await response.json()
-      // Filter for public and active templates
-      setTemplates(data.templates?.filter((t: WorkflowTemplate) => t.isPublic && t.isActive) || [])
+
+      if (response.ok) {
+        // Filter for published and active templates
+        const publishedTemplates =
+          data.templates?.filter((template: any) => template.isActive && template.isPublic) || []
+        setTemplates(publishedTemplates)
+      } else {
+        console.error("Failed to fetch templates:", data.error)
+        toast({
+          title: "Error",
+          description: "Failed to load workflow templates",
+          variant: "destructive",
+        })
+      }
     } catch (error) {
       console.error("Error fetching templates:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load workflow templates",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -2034,6 +2069,36 @@ export default function WorkflowSelector({ businessId, onWorkflowSelected }: Wor
     // Re-check subscription status and if enterprise, allow to proceed
     if (subscription?.plan.toUpperCase() === "ENTERPRISE") {
       handleCustomWorkflowSelect() // Try to proceed with custom workflow selection again
+    }
+  }
+
+  const getComplexityColor = (complexity: string) => {
+    switch (complexity) {
+      case "SIMPLE":
+        return "text-green-600 bg-green-50 border-green-200"
+      case "MEDIUM":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200"
+      case "COMPLEX":
+        return "text-red-600 bg-red-50 border-red-200"
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200"
+    }
+  }
+
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "ai_assistant":
+        return <Sparkles className="h-5 w-5" />
+      case "sales":
+        return <BarChart3 className="h-5 w-5" />
+      case "marketing":
+        return <Zap className="h-5 w-5" />
+      case "support":
+        return <Users className="h-5 w-5" />
+      case "hr":
+        return <Users className="h-5 w-5" />
+      default:
+        return <SettingsIcon className="h-5 w-5" />
     }
   }
 
@@ -2390,6 +2455,95 @@ export default function WorkflowSelector({ businessId, onWorkflowSelected }: Wor
                   </CardContent>
                 </Card>
               </div>
+
+              {templates.length > 0 && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <Globe className="h-6 w-6 text-primary" />
+                    Available Workflow Templates
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {templates.map((template) => (
+                      <Card
+                        key={template.id}
+                        className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 border-2 hover:border-primary/50"
+                        onClick={() => handleSelectTemplate(template)}
+                      >
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 rounded-lg bg-primary/10">{getCategoryIcon(template.category)}</div>
+                            <div className="flex-1">
+                              <CardTitle className="text-lg">{template.name}</CardTitle>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="outline" className={getComplexityColor(template.complexity)}>
+                                  {template.complexity}
+                                </Badge>
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                  <Globe className="h-3 w-3 mr-1" />
+                                  Published
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <CardDescription className="text-sm leading-relaxed">{template.description}</CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2">Key Features:</h4>
+                            <ul className="space-y-1">
+                              {template.features.slice(0, 3).map((feature, idx) => (
+                                <li key={idx} className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                  <span className="text-muted-foreground">{feature}</span>
+                                </li>
+                              ))}
+                              {template.features.length > 3 && (
+                                <li className="text-xs text-muted-foreground">
+                                  +{template.features.length - 3} more features
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+
+                          {template.integrations &&
+                            Array.isArray(template.integrations) &&
+                            template.integrations.length > 0 && (
+                              <div>
+                                <h4 className="font-semibold text-sm mb-2">Required Integrations:</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {template.integrations.slice(0, 3).map((integration: any, idx: number) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs">
+                                      {typeof integration === "string"
+                                        ? integration
+                                        : integration.name || "Integration"}
+                                    </Badge>
+                                  ))}
+                                  {template.integrations.length > 3 && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{template.integrations.length - 3} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>{template.estimatedSetupTime}min setup</span>
+                            </div>
+                            <Button size="sm">
+                              Configure
+                              <ArrowLeft className="h-3 w-3 ml-1 rotate-180" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* CRM Connection Notice */}
@@ -2851,20 +3005,30 @@ export default function WorkflowSelector({ businessId, onWorkflowSelected }: Wor
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {selectedTemplate?.integrations.map((integration) => (
-                <div key={integration.name}>
-                  {" "}
-                  {/* or integration.id */}
-                  <Label htmlFor={integration.name}>{integration.name} API Key</Label>
-                  <Input
-                    id={integration.name}
-                    type="password"
-                    value={credentials[integration.name] || ""}
-                    onChange={(e) => handleCredentialChange(integration.name, e.target.value)}
-                    placeholder={`Enter ${integration.name} API Key`}
-                  />
-                </div>
-              ))}
+              {selectedTemplate?.integrations && Array.isArray(selectedTemplate.integrations) ? (
+                selectedTemplate.integrations.map((integration: any, index: number) => (
+                  <div key={index}>
+                    <Label htmlFor={`integration-${index}`}>
+                      {typeof integration === "string" ? integration : integration.name || `Integration ${index + 1}`}{" "}
+                      API Key
+                    </Label>
+                    <Input
+                      id={`integration-${index}`}
+                      type="password"
+                      value={credentials[typeof integration === "string" ? integration : integration.name] || ""}
+                      onChange={(e) =>
+                        handleCredentialChange(
+                          typeof integration === "string" ? integration : integration.name,
+                          e.target.value,
+                        )
+                      }
+                      placeholder={`Enter ${typeof integration === "string" ? integration : integration.name} API Key`}
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No integrations configured for this template.</p>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCredentialDialogOpen(false)}>
@@ -2956,6 +3120,3 @@ export default function WorkflowSelector({ businessId, onWorkflowSelected }: Wor
     </div>
   )
 }
-
-
-
