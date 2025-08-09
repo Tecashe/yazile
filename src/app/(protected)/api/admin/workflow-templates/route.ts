@@ -360,59 +360,100 @@
 //   }
 // }
 
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { client } from "@/lib/prisma"
 import { onUserInfor } from "@/actions/user"
 
-export async function GET(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    console.log("=== Starting admin route (no admin check) ===")
-    
-    // Use your working onUserInfor function
-    const userInfo = await onUserInfor()
-    console.log("UserInfo result:", JSON.stringify(userInfo, null, 2))
+    const userr = await onUserInfor()
+    const userId = userr.data?.id
 
-    if (!userInfo.data) {
-      console.log("No user data found in userInfo")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    console.log("User authenticated:", userInfo.data.email)
+    // Check if user is admin (proper database lookup)
+    const user = await client.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true, isAdmin: true },
+    })
 
-    // Fetch all workflow requests with complete data
-    const requests = await client.customWorkflowRequest.findMany({
+    if (!user?.isAdmin) {
+      return new NextResponse("Forbidden: Not an admin", { status: 403 })
+    }
+
+    const body = await request.json()
+
+    // Create new workflow template
+    const newTemplate = await client.businessWorkflowTemplate.create({
+      data: {
+        name: body.name,
+        category: body.category,
+        description: body.description,
+        complexity: body.complexity || "MEDIUM",
+        operations: body.operations || [],
+        features: body.features || [],
+        integrations: body.integrations || [],
+        isPublic: body.isPublic || false,
+        isActive: body.isActive !== undefined ? body.isActive : true,
+        voiceflowProjectId: body.voiceflowProjectId,
+        voiceflowVersionId: body.voiceflowVersionId,
+        
+        // Add any other required fields based on your schema
+      },
       include: {
-        user: {
-          select: {
-            id: true,
-            firstname: true,
-            lastname: true,
-            email: true,
-          },
+        _count: {
+          select: { businessConfigs: true },
         },
-        completedTemplate: {
-          select: {
-            id: true,
-            name: true,
-            isPublic: true,
-            isActive: true,
-          },
+      },
+    })
+
+    return NextResponse.json({
+      success: true,
+      template: newTemplate,
+    })
+  } catch (error) {
+    console.error("Error creating workflow template:", error)
+    return new NextResponse("Internal Server Error", { status: 500 })
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const userr = await onUserInfor()
+    const userId = userr.data?.id
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    // Check if user is admin
+    const user = await client.user.findUnique({
+      where: { clerkId: userId },
+      select: { isAdmin: true },
+    })
+
+    if (!user?.isAdmin) {
+      return new NextResponse("Forbidden: Not an admin", { status: 403 })
+    }
+
+    // Fetch all workflow templates
+    const templates = await client.businessWorkflowTemplate.findMany({
+      include: {
+        _count: {
+          select: { businessConfigs: true },
         },
       },
       orderBy: { createdAt: "desc" },
     })
 
-    console.log("Found", requests.length, "workflow requests")
-
     return NextResponse.json({
       success: true,
-      requests,
+      templates,
     })
   } catch (error) {
-    // console.error("=== Error in admin route ===")
-    // console.error("Error type:", error.constructor.name)
-    // console.error("Error message:", error.message)
-    // console.error("Full error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error fetching workflow templates:", error)
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }

@@ -178,7 +178,7 @@ const AdminWorkflowDesigner: React.FC<AdminWorkflowDesignerProps> = ({
     [],
   )
 
-  const handleSaveTemplate = async (publish: boolean) => {
+  const handleSaveTemplateE = async (publish: boolean) => {
     setIsSaving(true)
     try {
       const templateData = {
@@ -230,6 +230,93 @@ const AdminWorkflowDesigner: React.FC<AdminWorkflowDesignerProps> = ({
       setIsSaving(false)
     }
   }
+
+
+
+
+const handleSaveTemplate = async (publish: boolean) => {
+  setIsSaving(true)
+  try {
+    const templateData = {
+      ...templateForm,
+      // Remove workflowDesign since it doesn't exist in your schema
+      isPublic: false, // We'll handle publishing separately
+      originalRequestId: initialRequest?.id || undefined,
+      createdByAdmin: true,
+    }
+
+    let response
+    let templateId = initialTemplate?.id
+
+    if (templateId) {
+      // Update existing template using the [id] route
+      response = await fetch(`/api/admin/workflow-templates/${templateId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(templateData),
+      })
+    } else {
+      // Create new template - you'll need to create a POST route at /api/admin/workflow-templates/route.ts
+      response = await fetch("/api/admin/workflow-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(templateData),
+      })
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || errorData.error || "Failed to save template.")
+    }
+
+    const saveResult = await response.json()
+    
+    // Get the template ID from the result (either existing or newly created)
+    templateId = templateId || saveResult.template?.id
+
+    // If we want to publish, use the publish endpoint
+    if (publish && templateId) {
+      const publishResponse = await fetch(`/api/admin/workflow-templates/${templateId}/publish`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isPublic: true,
+          isActive: true,
+        }),
+      })
+
+      if (!publishResponse.ok) {
+        const errorData = await publishResponse.json().catch(() => ({}))
+        throw new Error(errorData.message || errorData.error || "Failed to publish template.")
+      }
+    }
+
+    toast({
+      title: "Success!",
+      description: `Template ${publish ? "published" : "saved as draft"} successfully.`,
+      variant: "default",
+    })
+    
+    onTemplateSaved() // Notify parent to refresh templates
+    onBackToDashboard() // Go back to dashboard after saving
+
+  } catch (error: any) {
+    console.error("Save template error:", error)
+    toast({
+      title: "Error",
+      description: error.message || "An unexpected error occurred.",
+      variant: "destructive",
+    })
+  } finally {
+    setIsSaving(false)
+  }
+}
+
+
+
+
+
+
 
   return (
     <div className="space-y-6 p-6">
