@@ -2,7 +2,6 @@
 
 import { client } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { auth } from "@clerk/nextjs/server"
 import { onUserInfor } from "../user"
 
 export async function createWorkflowTemplate(data: {

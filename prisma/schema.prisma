@@ -2847,7 +2847,7 @@ model BusinessWorkflowTemplate {
   estimatedSetupTime Int      @default(15) // in minutes
   operations         String[] // Array of operation steps
   features           String[] // Array of features
-  integrations       String[] // Array of available integrations
+  integrations       Json? // Array of available integrations
   commonUseCase      String?  @db.Text
   isActive           Boolean  @default(true)
   createdAt          DateTime @default(now())
