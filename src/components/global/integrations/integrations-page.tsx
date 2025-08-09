@@ -1104,6 +1104,7 @@
 // }
 
 
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -1181,7 +1182,7 @@ export default function IntegrationsPage() {
     message: "",
   })
 
-  // Check for OAuth code in URL (for Instagram callback)
+  // Check for OAuth code in URL (for Instagram callback
   const code = searchParams.get("code")
 
   // Fetch user data including integrations

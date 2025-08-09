@@ -2,13 +2,12 @@
 
 "use client"
 
-import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Trash2, MoreVertical, ExternalLink, RefreshCw } from "lucide-react"
+import { Trash2, MoreVertical, RefreshCw } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,9 +32,7 @@ interface AccountsListProps {
 }
 
 export default function AccountsList({ accounts = [], onRemove }: AccountsListProps) {
-  const [expandedAccount, setExpandedAccount] = useState<string | null>(null)
 
-  // Ensure accounts is an array
   const safeAccounts = Array.isArray(accounts) ? accounts : []
 
   if (safeAccounts.length === 0) {
@@ -104,10 +101,6 @@ export default function AccountsList({ accounts = [], onRemove }: AccountsListPr
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Refresh Connection
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        View Profile
-                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-red-600 focus:text-red-600"
@@ -120,41 +113,6 @@ export default function AccountsList({ accounts = [], onRemove }: AccountsListPr
                   </DropdownMenu>
                 </div>
               </div>
-
-              <div
-                className="mt-2 cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                onClick={() => setExpandedAccount(expandedAccount === account.id ? null : account.id)}
-              >
-                {expandedAccount === account.id ? "Hide details" : "Show details"}
-              </div>
-
-              {expandedAccount === account.id && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-3 pt-3 border-t"
-                >
-                  <div className="grid gap-2">
-                    <div className="grid grid-cols-2 gap-1 text-sm">
-                      <span className="text-muted-foreground">Status:</span>
-                      <span>{account.isActive ? "Active" : "Inactive"}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1 text-sm">
-                      <span className="text-muted-foreground">Connected on:</span>
-                      <span>{"---"}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1 text-sm">
-                      <span className="text-muted-foreground">Last synced:</span>
-                      <span>2 hours ago</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1 text-sm">
-                      <span className="text-muted-foreground">Permissions:</span>
-                      <span>Read, Write, Analytics</span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
             </div>
           </motion.li>
         ))}

@@ -1577,18 +1577,6 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
                   </div>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Posts/Week</p>
-                      <p className="text-2xl font-bold">{realMetrics.postsPerWeek}</p>
-                    </div>
-                    <Calendar className="h-6 w-6 text-orange-600" />
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           )}
 
