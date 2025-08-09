@@ -12,16 +12,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Check if user is admin (proper database lookup)
-    const user = await client.user.findUnique({
-      where: { clerkId: userId },
-      select: { isAdmin: true },
-    })
-
-    if (!user?.isAdmin) {
-      return new NextResponse("Forbidden: Not an admin", { status: 403 })
-    }
-
     const { id } = params
 
     // Use correct model name
@@ -55,16 +45,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 })
-    }
-
-    // Check if user is admin (proper database lookup)
-    const user = await client.user.findUnique({
-      where: { clerkId: userId },
-      select: { id: true, isAdmin: true },
-    })
-
-    if (!user?.isAdmin) {
-      return new NextResponse("Forbidden: Not an admin", { status: 403 })
     }
 
     const { id } = params
@@ -106,16 +86,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 })
-    }
-
-    // Check if user is admin (proper database lookup)
-    const user = await client.user.findUnique({
-      where: { clerkId: userId },
-      select: { isAdmin: true },
-    })
-
-    if (!user?.isAdmin) {
-      return new NextResponse("Forbidden: Not an admin", { status: 403 })
     }
 
     const { id } = params

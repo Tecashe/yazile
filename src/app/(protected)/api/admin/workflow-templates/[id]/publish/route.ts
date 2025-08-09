@@ -12,14 +12,14 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
+    // Get user for publishedBy field
     const user = await client.user.findUnique({
       where: { clerkId: userId },
-      select: { id: true, isAdmin: true },
+      select: { id: true },
     })
 
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Update template visibility and status
@@ -50,5 +50,3 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-
-
