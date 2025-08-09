@@ -96,8 +96,7 @@ export default function PrivacyPage() {
 
                     <h3 className="text-lg font-semibold">Meta Platform Data</h3>
                     <p className="text-muted-foreground">
-                      With your explicit consent and through authorized Meta APIs, we collect data from your connected Facebook 
-                      and Instagram accounts to provide our automation services. This includes:
+                      With your explicit consent and through authorized Meta APIs, we collect data from your connected Instagram accounts to provide our automation services. This includes:
                     </p>
                     <ul className="text-muted-foreground list-disc ml-6 space-y-1">
                       <li><strong>Comments Management:</strong> Comments on your posts, replies, and comment metadata to help you manage interactions</li>
@@ -187,22 +186,21 @@ export default function PrivacyPage() {
                     <ul className="text-muted-foreground list-disc ml-6 space-y-1">
                       <li>We do not share, sell, or transfer Meta platform data to third parties for advertising or marketing purposes</li>
                       <li>We do not use Meta data to create advertising audiences or profiles for other users</li>
-                      <li>We only share Meta data with service providers who are contractually bound to protect it and use it solely for providing our services</li>
                       <li>Any sharing complies with Meta&apos;s Platform Terms and Data Policy</li>
                     </ul>
 
                     <h3 className="text-lg font-semibold">Service Providers</h3>
                     <p className="text-muted-foreground">
                       We work with trusted third-party service providers who help us operate our platform. These
-                      providers are contractually bound to protect your information and use it only for specified
-                      purposes. They have no independent right to use Meta platform data.
+                      providers have no independent right to access or use Meta platform data that you have given us access to.
                     </p>
 
                     <h3 className="text-lg font-semibold">Legal Requirements</h3>
                     <p className="text-muted-foreground">
                       We may disclose your information if required by law, court order, or government request, or to
                       protect the safety and security of our users and platform. We will notify affected users when
-                      legally permitted to do so.
+                      legally permitted to do so. We strictly ensure that this process is legal and that the requesting authority 
+                      have a lawful procedure that ensures this safety of the affected person.
                     </p>
 
                     <h3 className="text-lg font-semibold">Business Transfers</h3>
@@ -241,8 +239,7 @@ export default function PrivacyPage() {
                     <h3 className="text-lg font-semibold">Regular Audits</h3>
                     <p className="text-muted-foreground">
                       We conduct regular security audits and penetration testing to identify and address potential
-                      vulnerabilities. Our security practices are reviewed by independent third parties and comply
-                      with Meta&apos;s security standards.
+                      vulnerabilities.
                     </p>
                   </div>
                 </section>
@@ -351,18 +348,9 @@ export default function PrivacyPage() {
                   </div>
                 </section>
 
-                <section>
-                  <h2 className="text-2xl font-bold mb-4">8. International Transfers</h2>
-                  <p className="text-muted-foreground">
-                    Your information, including data from Meta platforms, may be transferred to and processed in 
-                    countries other than your own. We ensure that such transfers comply with applicable privacy laws, 
-                    Meta&apos;s requirements, and provide adequate protection for your information through appropriate 
-                    safeguards such as Standard Contractual Clauses.
-                  </p>
-                </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold mb-4">9. Children&apos;s Privacy</h2>
+                  <h2 className="text-2xl font-bold mb-4">8. Children&apos;s Privacy</h2>
                   <p className="text-muted-foreground">
                     Our services are not intended for children under 13 years of age (or the applicable age of digital 
                     consent in your jurisdiction). We do not knowingly collect personal information from children under 
@@ -372,7 +360,7 @@ export default function PrivacyPage() {
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold mb-4">10. Changes to This Policy</h2>
+                  <h2 className="text-2xl font-bold mb-4">9. Changes to This Policy</h2>
                   <p className="text-muted-foreground">
                     We may update this privacy policy from time to time to reflect changes in our practices, legal
                     requirements, or Meta&apos;s terms. We will notify you of any material changes by email or through our 
@@ -382,7 +370,7 @@ export default function PrivacyPage() {
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold mb-4">11. Contact Us and Data Protection</h2>
+                  <h2 className="text-2xl font-bold mb-4">10. Contact Us and Data Protection</h2>
                   <p className="text-muted-foreground">
                     If you have any questions about this privacy policy, our privacy practices, or your data rights, 
                     please contact us:
@@ -401,13 +389,7 @@ export default function PrivacyPage() {
                       <strong>Meta Data Subject Requests:</strong> meta-privacy@yazzil.com
                     </p>
                   </div>
-                  <div className="mt-4 p-4 bg-muted/20 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Note:</strong> This privacy policy is accessible to Meta&apos;s web crawlers and is hosted 
-                      on a non-geo-blocked URL to comply with Meta&apos;s Platform Terms. We ensure transparency and 
-                      accessibility of our privacy practices to all users and platform partners.
-                    </p>
-                  </div>
+                  
                 </section>
               </div>
             </div>
