@@ -6951,7 +6951,7 @@ export default function EnhancedWorkflowSelector({
                     <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-card-foreground mb-2">No Active Workflows</h3>
                     <p className="text-muted-foreground mb-6">
-                      You haven't activated any workflows yet. Browse our template library to get started.
+                      You haven&apos;t activated any workflows yet. Browse our template library to get started.
                     </p>
                     <Button onClick={() => setActiveTab("browse")}>
                       <Zap className="h-4 w-4 mr-2" />
@@ -7280,8 +7280,8 @@ export default function EnhancedWorkflowSelector({
                   Confirm Deactivation
                 </DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to deactivate "{showDeactivateDialog?.workflowTemplate?.name || "this workflow"}
-                  "? This will stop all automated responses. You can reconfigure and reactivate it later.
+                  Are you sure you want to deactivate &ldquo;{showDeactivateDialog?.workflowTemplate?.name || "this workflow"}
+                  &rdquo;? This will stop all automated responses. You can reconfigure and reactivate it later.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
