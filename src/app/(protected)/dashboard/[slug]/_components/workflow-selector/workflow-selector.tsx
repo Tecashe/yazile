@@ -2936,7 +2936,6 @@
 //   )
 // }
 
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -3727,11 +3726,8 @@ export default function EnhancedWorkflowSelector({
 
   // All other handler functions from original component
   const handleDefaultWorkflowSelect = () => {
-    if (activeWorkflowExists) return
-    setIsDefaultWorkflow(true)
-    setIsCustomWorkflow(false)
-    setCustomRequest("")
-    setStep("configuration")
+    // Default workflow is read-only and uses auto-fetched CRM integration
+    return
   }
 
   const handleCustomWorkflowSelect = () => {
@@ -4155,12 +4151,11 @@ export default function EnhancedWorkflowSelector({
                   Default AI Assistant Workflow
                 </h2>
                 <Card
-                  className={`border-2 ${
+                  className={`relative overflow-hidden ${
                     defaultWorkflowStatus === "active"
                       ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
                       : "border-gray-300 bg-gray-50 dark:bg-gray-950/20 opacity-75"
-                  } ${activeWorkflowExists ? "cursor-not-allowed" : "cursor-pointer"} transition-all duration-300`}
-                  onClick={() => !activeWorkflowExists && handleDefaultWorkflowSelect()}
+                  } transition-all duration-300`}
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
@@ -4178,12 +4173,10 @@ export default function EnhancedWorkflowSelector({
                       <Badge
                         variant={defaultWorkflowStatus === "active" ? "default" : "secondary"}
                         className={
-                          defaultWorkflowStatus === "active"
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200"
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                          defaultWorkflowStatus === "active" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-gray-500"
                         }
                       >
-                        {defaultWorkflowStatus === "active" ? "Active" : "Deactivated"}
+                        {defaultWorkflowStatus === "active" ? "Active" : "Auto-Managed"}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -4384,14 +4377,26 @@ export default function EnhancedWorkflowSelector({
                       return (
                         <Card
                           key={template.id}
-                          className={`border-2 transition-all duration-300 ${
+                          className={`relative overflow-hidden ${
                             isActive
                               ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
                               : isConfigured
                                 ? "border-gray-300 bg-gray-50 dark:bg-gray-950/20"
                                 : "border-gray-300 bg-gray-50 dark:bg-gray-950/20 hover:border-primary/50 hover:shadow-lg"
                           } ${activeWorkflowExists && !isActive ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
-                          onClick={() => !activeWorkflowExists && !isActive && handleConfigureTemplate(template)}
+                          onClick={() => {
+                            if (activeWorkflowExists && !isActive) {
+                              toast({
+                                title: "Active Workflow Exists",
+                                description: "Please deactivate your current workflow before configuring a new one.",
+                                variant: "destructive",
+                              })
+                              return
+                            }
+                            if (!isActive) {
+                              handleConfigureTemplate(template)
+                            }
+                          }}
                         >
                           <CardHeader className="pb-4">
                             <div className="flex items-center justify-between">
