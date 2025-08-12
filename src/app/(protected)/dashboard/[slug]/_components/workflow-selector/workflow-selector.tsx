@@ -2936,6 +2936,7 @@
 //   )
 // }
 
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -3352,7 +3353,7 @@ export default function EnhancedWorkflowSelector({
     }
 
     fetchWorkflowStatus()
-  }, [currentUserId, activeWorkflowExists, hasPendingCustomWorkflow, step])
+  }, [currentUserId, hasPendingCustomWorkflow, step])
 
   useEffect(() => {
     fetchWorkflows()
@@ -3457,16 +3458,9 @@ export default function EnhancedWorkflowSelector({
     setStep("configuration")
   }
 
-  const handleConfigureTemplate = (template: WorkflowTemplate) => {
-    if (!businessDetails) {
-      toast({
-        title: "Business Details Required",
-        description: "Please complete your business profile first to configure workflows.",
-        variant: "destructive",
-      })
-      return
-    }
+  const hasActiveWorkflow = workflowConfigs.some((config) => config.isActive)
 
+  const handleConfigureTemplate = (template: WorkflowTemplate) => {
     const hasActiveWorkflow = workflowConfigs.some((config) => config.isActive)
     if (hasActiveWorkflow) {
       toast({
@@ -3731,7 +3725,7 @@ export default function EnhancedWorkflowSelector({
   }
 
   const handleCustomWorkflowSelect = () => {
-    if (activeWorkflowExists) return
+    if (hasActiveWorkflow) return
     if (subscription?.plan.toUpperCase() !== "PRO") {
       setShowPaymentPopup(true)
       return
@@ -4284,8 +4278,8 @@ export default function EnhancedWorkflowSelector({
                   Custom Workflow Request
                 </h2>
                 <Card
-                  className={`cursor-pointer transition-all duration-300 border-2 border-dashed border-border/50 glassEffect hover:border-primary/50 hover:shadow-lg flex flex-col ${activeWorkflowExists || hasPendingCustomWorkflow ? "opacity-50 cursor-not-allowed" : ""}`}
-                  onClick={() => !activeWorkflowExists && handleCustomWorkflowSelect()}
+                  className={`cursor-pointer transition-all duration-300 border-2 border-dashed border-border/50 glassEffect hover:border-primary/50 hover:shadow-lg flex flex-col ${hasActiveWorkflow || hasPendingCustomWorkflow ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => !hasActiveWorkflow && handleCustomWorkflowSelect()}
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-center gap-4 mb-4">
@@ -4345,7 +4339,7 @@ export default function EnhancedWorkflowSelector({
                         onClick={() => handleCustomWorkflowSelect()}
                         variant="outline"
                         className="flex-1 bg-transparent hover:bg-accent"
-                        disabled={activeWorkflowExists || hasPendingCustomWorkflow}
+                        disabled={hasActiveWorkflow || hasPendingCustomWorkflow}
                       >
                         {hasPendingCustomWorkflow ? "Custom Workflow Pending" : "Request Custom Workflow"}
                       </Button>
@@ -4383,9 +4377,9 @@ export default function EnhancedWorkflowSelector({
                               : isConfigured
                                 ? "border-gray-300 bg-gray-50 dark:bg-gray-950/20"
                                 : "border-gray-300 bg-gray-50 dark:bg-gray-950/20 hover:border-primary/50 hover:shadow-lg"
-                          } ${activeWorkflowExists && !isActive ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
+                          } ${hasActiveWorkflow && !isActive ? "opacity-75" : "cursor-pointer"}`}
                           onClick={() => {
-                            if (activeWorkflowExists && !isActive) {
+                            if (hasActiveWorkflow && !isActive) {
                               toast({
                                 title: "Active Workflow Exists",
                                 description: "Please deactivate your current workflow before configuring a new one.",
@@ -4509,13 +4503,13 @@ export default function EnhancedWorkflowSelector({
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  handleConfigureTemplate(template)
+                                  if (!isActive) {
+                                    handleConfigureTemplate(template)
+                                  }
                                 }}
                                 variant="outline"
                                 size="sm"
-                                disabled={workflowConfigs.some(
-                                  (config) => config.isActive && config.templateId !== template.id,
-                                )}
+                                disabled={hasActiveWorkflow && !isActive}
                                 className="ml-auto"
                               >
                                 {isActivating ? (
