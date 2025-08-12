@@ -7982,7 +7982,6 @@
 
 
 
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -8040,7 +8039,6 @@ import {
   Globe,
   Lock,
   XCircle,
-  Play,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -8239,6 +8237,11 @@ export default function EnhancedWorkflowSelector({
   const [configuredTemplates, setConfiguredTemplates] = useState<Set<string>>(new Set())
   // const [showDeactivateDialog, setShowDeactivateDialog] = useState<WorkflowConfig | null>(null)
   const [showDeactivateDialog, setShowDeactivateDialog] = useState<WorkflowConfig | BusinessWorkflowConfig | null>(null)
+
+  const [testingCredentials, setTestingCredentials] = useState<Record<string, boolean>>({})
+  const [credentialTestResults, setCredentialTestResults] = useState<
+    Record<string, { success: boolean; message: string }>
+  >({})
 
   const categories = [
     { value: "all", label: "All Templates" },
@@ -8498,6 +8501,11 @@ export default function EnhancedWorkflowSelector({
   }
 
   // All handler functions from original component
+  const handleDefaultWorkflowSelect = () => {
+    // Default workflow is read-only and managed automatically by CRM integration
+    return
+  }
+
   const handleSelectTemplate = (template: WorkflowTemplate) => {
     setSelectedTemplate(template)
     setIsDefaultWorkflow(false)
@@ -8722,6 +8730,43 @@ export default function EnhancedWorkflowSelector({
     }))
   }
 
+  const testCredentials = async (integrationName: string, credentials: Record<string, string>) => {
+    const testKey = `${integrationName}-test`
+    setTestingCredentials((prev) => ({ ...prev, [testKey]: true }))
+
+    try {
+      const response = await fetch("/api/test-credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ integrationName, credentials }),
+      })
+
+      const result = await response.json()
+      setCredentialTestResults((prev) => ({
+        ...prev,
+        [testKey]: { success: result.success, message: result.message },
+      }))
+
+      toast({
+        title: result.success ? "Credentials Valid" : "Credentials Invalid",
+        description: result.message,
+        variant: result.success ? "default" : "destructive",
+      })
+    } catch (error) {
+      setCredentialTestResults((prev) => ({
+        ...prev,
+        [testKey]: { success: false, message: "Test failed" },
+      }))
+      toast({
+        title: "Test Failed",
+        description: "Unable to test credentials",
+        variant: "destructive",
+      })
+    } finally {
+      setTestingCredentials((prev) => ({ ...prev, [testKey]: false }))
+    }
+  }
+
   const validateCredentials = (): boolean => {
     if (!selectedTemplate) return false
 
@@ -8735,6 +8780,17 @@ export default function EnhancedWorkflowSelector({
           })
           return false
         }
+      }
+
+      const testKey = `${integration.name}-test`
+      const testResult = credentialTestResults[testKey]
+      if (testResult && !testResult.success) {
+        toast({
+          title: "Invalid Credentials",
+          description: `Please fix credentials for ${integration.name}`,
+          variant: "destructive",
+        })
+        return false
       }
     }
     return true
@@ -8762,14 +8818,6 @@ export default function EnhancedWorkflowSelector({
   }
 
   // All other handler functions from original component
-  const handleDefaultWorkflowSelect = () => {
-    if (activeWorkflowExists) return
-    setIsDefaultWorkflow(true)
-    setIsCustomWorkflow(false)
-    setCustomRequest("")
-    setStep("configuration")
-  }
-
   const handleCustomWorkflowSelect = () => {
     if (activeWorkflowExists) return
     if (subscription?.plan.toUpperCase() !== "PRO") {
@@ -9195,8 +9243,7 @@ export default function EnhancedWorkflowSelector({
                     defaultWorkflowStatus === "active"
                       ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
                       : "border-gray-300 bg-gray-50 dark:bg-gray-950/20 opacity-75"
-                  } ${activeWorkflowExists ? "cursor-not-allowed" : "cursor-pointer"} transition-all duration-300`}
-                  onClick={() => !activeWorkflowExists && handleDefaultWorkflowSelect()}
+                  } transition-all duration-300`}
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
@@ -9276,19 +9323,16 @@ export default function EnhancedWorkflowSelector({
                               </Badge>
                             </div>
                           ))}
-                          {defaultWorkflowStatus === "active" && (
-                            <div className="mt-2 p-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
-                              <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                                🎉 Your default workflow is automatically active and processing Instagram DMs!
+                          {defaultWorkflowStatus === "active" && activeCRMIntegrations.length > 0 && (
+                            <div className="pt-4 border-t">
+                              <p className="text-sm text-muted-foreground mb-3">
+                                This workflow is automatically managed by your CRM integration and cannot be configured
+                                manually.
                               </p>
-                            </div>
-                          )}
-                          {defaultWorkflowStatus === "deactivated" && (
-                            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                                <AlertTriangle className="h-4 w-4 inline mr-1" />
-                                Deactivated due to active custom workflow
-                              </p>
+                              <Button disabled className="bg-emerald-600 dark:bg-emerald-700">
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Auto-Active (Read Only)
+                              </Button>
                             </div>
                           )}
                         </div>
@@ -9416,6 +9460,7 @@ export default function EnhancedWorkflowSelector({
                         (config) => config.templateId === template.id && config.isActive,
                       )
                       const isActivating = activatingTemplate === template.id
+                      const isLocked = activeWorkflowExists && !isActive
 
                       return (
                         <Card
@@ -9423,16 +9468,18 @@ export default function EnhancedWorkflowSelector({
                           className={`border-2 transition-all duration-300 ${
                             isActive
                               ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
-                              : isConfigured
-                                ? "border-gray-300 bg-gray-50 dark:bg-gray-950/20"
-                                : "border-gray-300 bg-gray-50 dark:bg-gray-950/20 hover:border-primary/50 hover:shadow-lg"
-                          } ${activeWorkflowExists && !isActive ? "opacity-75 cursor-not-allowed" : "cursor-pointer"}`}
-                          onClick={() => !activeWorkflowExists && !isActive && handleConfigureTemplate(template)}
+                              : isLocked
+                                ? "border-gray-300 bg-gray-100 dark:bg-gray-900 opacity-60 cursor-not-allowed"
+                                : isConfigured
+                                  ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20"
+                                  : "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 hover:border-emerald-500/50 hover:shadow-lg cursor-pointer"
+                          }`}
+                          onClick={() => !isLocked && !isActive && handleConfigureTemplate(template)}
                         >
                           <CardHeader className="pb-4">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 template-icon-container">
+                                <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
                                   {getCategoryIcon(template.category)}
                                 </div>
                                 <div className="flex-1">
@@ -9456,10 +9503,19 @@ export default function EnhancedWorkflowSelector({
                                 {isConfigured && !isActive && (
                                   <Badge
                                     variant="secondary"
-                                    className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                    className="bg-emerald-100 text-emerald-600 dark:bg-emerald-800 dark:text-emerald-400"
                                   >
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Configured
+                                  </Badge>
+                                )}
+                                {isLocked && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                  >
+                                    <Lock className="h-3 w-3 mr-1" />
+                                    Locked
                                   </Badge>
                                 )}
                                 <Badge
@@ -9477,12 +9533,15 @@ export default function EnhancedWorkflowSelector({
                             <div className="grid md:grid-cols-2 gap-6">
                               {/* Process Flow - EXACT SAME AS DEFAULT */}
                               <div>
-                                <h4 className="font-semibold text-sm mb-3 text-primary">Process Flow:</h4>
+                                <h4 className="font-semibold text-sm mb-3 text-emerald-600 flex items-center gap-2">
+                                  <Sparkles className="h-4 w-4" />
+                                  Process Flow:
+                                </h4>
                                 <div className="space-y-2">
                                   {template.operations && template.operations.length > 0 ? (
-                                    template.operations.slice(0, 5).map((operation, idx) => (
+                                    template.operations.slice(0, 4).map((operation, idx) => (
                                       <div key={idx} className="flex items-center gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-medium">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-medium">
                                           {idx + 1}
                                         </div>
                                         <span className="text-sm text-muted-foreground">{operation}</span>
@@ -9490,7 +9549,7 @@ export default function EnhancedWorkflowSelector({
                                     ))
                                   ) : (
                                     <div className="flex items-center gap-3">
-                                      <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-medium">
+                                      <div className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center font-medium">
                                         1
                                       </div>
                                       <span className="text-sm text-muted-foreground">Custom workflow process</span>
@@ -9500,23 +9559,23 @@ export default function EnhancedWorkflowSelector({
                               </div>
 
                               <div>
-                                <h4 className="font-semibold text-sm mb-3 text-primary">Key Features:</h4>
+                                <h4 className="font-semibold text-sm mb-3 text-emerald-600">Key Features:</h4>
                                 <ul className="space-y-2">
                                   {template.features && template.features.length > 0 ? (
                                     template.features.slice(0, 4).map((feature, idx) => (
                                       <li key={idx} className="flex items-center gap-2 text-sm">
-                                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                        <CheckCircle className="h-3 w-3 text-emerald-600 flex-shrink-0" />
                                         <span className="text-muted-foreground">{feature}</span>
                                       </li>
                                     ))
                                   ) : (
                                     <li className="flex items-center gap-2 text-sm">
-                                      <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                      <CheckCircle className="h-3 w-3 text-emerald-600 flex-shrink-0" />
                                       <span className="text-muted-foreground">Advanced automation features</span>
                                     </li>
                                   )}
                                   {template.features && template.features.length > 4 && (
-                                    <li className="text-xs text-muted-foreground ml-6">
+                                    <li className="text-xs text-muted-foreground ml-5">
                                       +{template.features.length - 4} more features
                                     </li>
                                   )}
@@ -9524,51 +9583,56 @@ export default function EnhancedWorkflowSelector({
                               </div>
                             </div>
 
-                            <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {template.category}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">Ready to configure</span>
-                              </div>
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleConfigureTemplate(template)
-                                }}
-                                variant="outline"
-                                size="sm"
-                                disabled={activeWorkflowExists && !isActive}
-                                className="ml-auto"
-                              >
-                                {isActivating ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Activating...
-                                  </>
-                                ) : isActive ? (
-                                  <>
-                                    <Settings className="h-4 w-4 mr-2" />
-                                    Manage
-                                  </>
-                                ) : isConfigured ? (
-                                  <>
-                                    <Play className="h-4 w-4 mr-2" />
-                                    Activate
-                                  </>
-                                ) : (
-                                  <>
-                                    <Settings className="h-4 w-4 mr-2" />
-                                    Configure
-                                  </>
-                                )}
-                              </Button>
+                            <div className="pt-4 border-t">
+                              {isActive ? (
+                                <div className="space-y-3">
+                                  <Button disabled className="w-full bg-emerald-600 dark:bg-emerald-700">
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Currently Active
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleDeactivateWorkflow()
+                                    }}
+                                    className="w-full border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/20"
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Deactivate Workflow
+                                  </Button>
+                                </div>
+                              ) : isLocked ? (
+                                <div className="space-y-2">
+                                  <Button disabled className="w-full">
+                                    <Lock className="h-4 w-4 mr-2" />
+                                    Locked (Another Workflow Active)
+                                  </Button>
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Deactivate your current workflow to configure this template
+                                  </p>
+                                </div>
+                              ) : (
+                                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800">
+                                  <Settings className="h-4 w-4 mr-2" />
+                                  Configure & Activate
+                                </Button>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
                       )
                     })}
                   </div>
+                  {activeWorkflowExists && (
+                    <Alert className="mt-4">
+                      <Lock className="h-4 w-4" />
+                      <AlertDescription>
+                        You have an active workflow. Deactivate it first to configure a different workflow template.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               )}
             </div>
@@ -10156,6 +10220,39 @@ export default function EnhancedWorkflowSelector({
                             </div>
 
                             {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  testCredentials(integration.name, credentialsEnhanced[integration.name] || {})
+                                }
+                                disabled={testingCredentials[`${integration.name}-test`] || !fieldValue}
+                                className="text-xs"
+                              >
+                                {testingCredentials[`${integration.name}-test`] ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                )}
+                                Test Connection
+                              </Button>
+
+                              {credentialTestResults[`${integration.name}-test`] && (
+                                <Badge
+                                  variant={
+                                    credentialTestResults[`${integration.name}-test`].success
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {credentialTestResults[`${integration.name}-test`].success ? "Valid" : "Invalid"}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         )
                       })}
@@ -10750,112 +10847,6 @@ export default function EnhancedWorkflowSelector({
       </>
     )
   }
-  // if (isConfiguring) {
-  //   return (
-
-  //     <Card className="w-full max-w-3xl mx-auto">
-  //       <CardHeader>
-  //         <CardTitle>Select a Workflow Template</CardTitle>
-  //         <CardDescription>Choose from our pre-built templates or custom solutions.</CardDescription>
-  //       </CardHeader>
-  //       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  //         {templates.length === 0 ? (
-  //           <div className="col-span-full text-center py-8 text-muted-foreground">No templates available yet.</div>
-  //         ) : (
-  //           templates.map((template) => (
-  //             <Card
-  //               key={template.id}
-  //               className="cursor-pointer hover:shadow-lg transition-shadow"
-  //               onClick={() => handleSelectTemplate(template)}
-  //             >
-  //               <CardHeader>
-  //                 <CardTitle className="text-lg">{template.name}</CardTitle>
-  //                 <CardDescription>{template.category}</CardDescription>
-  //               </CardHeader>
-  //               <CardContent>
-  //                 <p className="text-sm text-muted-foreground line-clamp-2">{template.description}</p>
-  //                 <div className="mt-3 flex flex-wrap gap-2">
-  //                   <Badge variant="secondary">{template.complexity}</Badge>
-  //                   {template.isPublic ? (
-  //                     <Badge
-  //                       variant="outline"
-  //                       className="bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300"
-  //                     >
-  //                       <Globe className="h-3 w-3 mr-1" /> Public
-  //                     </Badge>
-  //                   ) : (
-  //                     <Badge
-  //                       variant="outline"
-  //                       className="bg-orange-50 text-orange-700 dark:bg-orange-950/20 dark:text-orange-300"
-  //                     >
-  //                       <Lock className="h-3 w-3 mr-1" /> Private
-  //                     </Badge>
-  //                   )}
-  //                   {template.integrations && template.integrations.length > 0 && (
-  //                     <Badge variant="outline">
-  //                       <Zap className="h-3 w-3 mr-1" /> {template.integrations.length} Integrations
-  //                     </Badge>
-  //                   )}
-  //                 </div>
-  //               </CardContent>
-  //             </Card>
-  //           ))
-  //         )}
-  //       </CardContent>
-  //       <Dialog open={isCredentialDialogOpen} onOpenChange={setIsCredentialDialogOpen}>
-  //         <DialogContent>
-  //           <DialogHeader>
-  //             <DialogTitle>Enter Credentials for {selectedTemplate?.name}</DialogTitle>
-  //             <DialogDescription>
-  //               Please provide the necessary API keys or tokens for this workflow&apos;s integrations.
-  //             </DialogDescription>
-  //           </DialogHeader>
-  //           <div className="space-y-4 py-4">
-  //             {selectedTemplate?.integrations && Array.isArray(selectedTemplate.integrations) ? (
-  //               selectedTemplate.integrations.map((integration: any, index: number) => (
-  //                 <div key={index}>
-  //                   <Label htmlFor={`integration-${index}`}>
-  //                     {typeof integration === "string" ? integration : integration.name || `Integration ${index + 1}`}{" "}
-  //                     API Key
-  //                   </Label>
-  //                   <Input
-  //                     id={`integration-${index}`}
-  //                     type="password"
-  //                     value={credentials[typeof integration === "string" ? integration : integration.name] || ""}
-  //                     onChange={(e) =>
-  //                       handleCredentialChange(
-  //                         typeof integration === "string" ? integration : integration.name,
-  //                         e.target.value,
-  //                       )
-  //                     }
-  //                     placeholder={`Enter ${typeof integration === "string" ? integration : integration.name} API Key`}
-  //                   />
-  //                 </div>
-  //               ))
-  //             ) : (
-  //               <p className="text-sm text-muted-foreground">No integrations configured for this template.</p>
-  //             )}
-  //           </div>
-  //           <DialogFooter>
-  //             <Button variant="outline" onClick={() => setIsCredentialDialogOpen(false)}>
-  //               Cancel
-  //             </Button>
-  //             <Button onClick={handleCreateWorkflowConfig} disabled={submittingCredentials}>
-  //               {submittingCredentials ? (
-  //                 <>
-  //                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-  //                   Activating...
-  //                 </>
-  //               ) : (
-  //                 "Activate Workflow"
-  //               )}
-  //             </Button>
-  //           </DialogFooter>
-  //         </DialogContent>
-  //       </Dialog>
-  //     </Card>
-  //   )
-  // }
 
   // Default workflow list view
   return (
