@@ -546,6 +546,8 @@ export function AppSidebar({ slug }: Props) {
           ))}
           <SidebarSeparator className="mx-4 bg-border/50" />
           {/* Quick Actions */}
+
+
           <SidebarGroup className="px-2">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -560,7 +562,8 @@ export function AppSidebar({ slug }: Props) {
             </Tooltip>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
+
+                {/* <SidebarMenuItem>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <SidebarMenuButton asChild className="hover:bg-accent/50">
@@ -577,8 +580,10 @@ export function AppSidebar({ slug }: Props) {
                       </p>
                     </TooltipContent>
                   </Tooltip>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
+                </SidebarMenuItem> */}
+
+
+                {/* <SidebarMenuItem>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <SidebarMenuButton asChild className="hover:bg-accent/50">
@@ -595,8 +600,10 @@ export function AppSidebar({ slug }: Props) {
                       </p>
                     </TooltipContent>
                   </Tooltip>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
+                </SidebarMenuItem> */}
+
+
+                {/* <SidebarMenuItem>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <SidebarMenuButton asChild className="hover:bg-accent/50">
@@ -613,7 +620,10 @@ export function AppSidebar({ slug }: Props) {
                       </p>
                     </TooltipContent>
                   </Tooltip>
-                </SidebarMenuItem>
+                </SidebarMenuItem> */}
+
+
+
                 <SidebarMenuItem>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -635,6 +645,10 @@ export function AppSidebar({ slug }: Props) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+
+
+
         </SidebarContent>
         <SidebarFooter className="bg-background border-t border-border/50">
           <NavUser user={userData} onSignOut={signOut} />
