@@ -27,7 +27,7 @@ const UpgradedCard = ({ userName }: Props) => {
           </li>
           <li className="flex items-center">
             <Shield className="text-[#D064AC] mr-1" size={12} />
-            Unlimited Automations!
+            AI leads qualification
           </li>
         </ul>
       </div>
