@@ -343,62 +343,66 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       },
     ],
   },
-  {
-    id: uuid(),
-    label: "Agents",
-    description: "AI-powered agents and workflow management",
-    items: [
-      {
-        id: uuid(),
-        label: "Agents",
-        icon: icon(Bot, "text-rose-600"),
-        description: "Manage your AI agents and their configurations",
-        subItems: [
-          {
-            id: uuid(),
-            label: "Workflows",
-            icon: icon(Webhook, "text-teal-500", 18),
-            description: "Design custom workflows for your AI agents",
-          },
-          {
-            id: uuid(),
-            label: "Templates",
-            icon: icon(Layout, "text-indigo-500", 18),
-            description: "Pre-built templates to quickly set up common agent workflows",
-          },
-          {
-            id: uuid(),
-            label: "Custom Requests",
-            icon: icon(Split, "text-purple-500", 18),
-            description: "Handle custom requests and specialized agent interactions",
-          },
-          {
-            id: uuid(),
-            label: "Analytics",
-            icon: icon(Calculator, "text-orange-500", 18),
-            description: "Track agent performance and interaction analytics",
-          },
-        ],
-      },
-    ],
-  },
+
+
+  // {
+  //   id: uuid(),
+  //   label: "Agents",
+  //   description: "AI-powered agents and workflow management",
+  //   items: [
+  //     {
+  //       id: uuid(),
+  //       label: "Agents",
+  //       icon: icon(Bot, "text-rose-600"),
+  //       description: "Manage your AI agents and their configurations",
+  //       subItems: [
+  //         {
+  //           id: uuid(),
+  //           label: "Workflows",
+  //           icon: icon(Webhook, "text-teal-500", 18),
+  //           description: "Design custom workflows for your AI agents",
+  //         },
+  //         {
+  //           id: uuid(),
+  //           label: "Templates",
+  //           icon: icon(Layout, "text-indigo-500", 18),
+  //           description: "Pre-built templates to quickly set up common agent workflows",
+  //         },
+  //         {
+  //           id: uuid(),
+  //           label: "Custom Requests",
+  //           icon: icon(Split, "text-purple-500", 18),
+  //           description: "Handle custom requests and specialized agent interactions",
+  //         },
+  //         {
+  //           id: uuid(),
+  //           label: "Analytics",
+  //           icon: icon(Calculator, "text-orange-500", 18),
+  //           description: "Track agent performance and interaction analytics",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+
+
   {
     id: uuid(),
     label: "Integrations",
     description: "Connect and manage external services",
     items: [
-      {
-        id: uuid(),
-        label: "WhatsApp",
-        icon: icon(Send, "text-green-600"),
-        description: "Connect and manage your WhatsApp Business integration",
-      },
-      {
-        id: uuid(),
-        label: "Connections",
-        icon: icon(Route, "text-cyan-600"),
-        description: "Manage all your connected platforms and services",
-      },
+      // {
+      //   id: uuid(),
+      //   label: "WhatsApp",
+      //   icon: icon(Send, "text-green-600"),
+      //   description: "Connect and manage your WhatsApp Business integration",
+      // },
+      // {
+      //   id: uuid(),
+      //   label: "Connections",
+      //   icon: icon(Route, "text-cyan-600"),
+      //   description: "Manage all your connected platforms and services",
+      // },
       {
         id: uuid(),
         label: "Integrations",
@@ -407,7 +411,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       },
       {
         id: uuid(),
-        label: "Handoff",
+        label: "Human-Handoff",
         icon: icon(Merge, "text-slate-600"),
         description: "Configure handoff rules between automated and manual processes",
       },
@@ -430,12 +434,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         icon: icon(MessageCircle, "text-violet-600"),
         description: "View and manage all conversations across integrated platforms",
       },
-      {
-        id: uuid(),
-        label: "Pricing",
-        icon: icon(DollarSign, "text-green-700"),
-        description: "Manage your subscription, billing, and pricing plans",
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Pricing",
+      //   icon: icon(DollarSign, "text-green-700"),
+      //   description: "Manage your subscription, billing, and pricing plans",
+      // },
       {
         id: uuid(),
         label: "Opportunities",
