@@ -1166,7 +1166,7 @@ interface InstagramDashboardProps {
   userId: string
 }
 
-// Analysis control state
+// Analysis control stat
 interface AnalysisState {
   lastAnalysis: Date | null
   isAnalyzing: boolean
