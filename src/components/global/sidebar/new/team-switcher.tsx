@@ -136,7 +136,7 @@ import { SubscriptionPlan } from "../../subscription-plan"
 import UpgradeCard from "../upgrade"
 import UpgradedCard from "../upgraded"
 
-// Types for better type safety
+
 interface PlanInfo {
   name: string
   displayName: string
