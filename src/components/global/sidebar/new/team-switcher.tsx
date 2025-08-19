@@ -129,7 +129,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebars"
-import { ChevronsUpDown, Crown, User, Building2, CreditCard, Shield } from "lucide-react"
+import { ChevronsUpDown, Crown, User, Building2, Shield, CreditCard } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import PaymentPopup from "@/components/global/stripe/payment-popup"
 import { SubscriptionPlan } from "../../subscription-plan"
@@ -186,7 +186,7 @@ export function PlanSwitcher() {
       displayName: "Pro",
       logo: CreditCard,
       status: "Premium Access",
-      color: "from-purple-600 to-pink-400",
+      color: "black",
       features: ["Smart AI responses", "Unlimited automations", "Priority support"],
       isActive: false,
       type: 'PRO'
