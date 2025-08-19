@@ -186,7 +186,7 @@ export function PlanSwitcher() {
       displayName: "Pro",
       logo: CreditCard,
       status: "Premium Access",
-      color: "black",
+      color: "blue",
       features: ["Smart AI responses", "Unlimited automations", "Priority support"],
       isActive: false,
       type: 'PRO'
