@@ -199,7 +199,7 @@ export default function WorkflowDashboardPage() {
               <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">No Active Workflows</h3>
               <p className="text-muted-foreground mb-6">
-                You haven't activated any workflows yet. Browse our template library to get started.
+                You haven&apos;t activated any workflows yet. Browse our template library to get started.
               </p>
               <Button onClick={() => router.push("/workflows")}>
                 <Zap className="h-4 w-4 mr-2" />

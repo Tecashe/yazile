@@ -115,7 +115,7 @@ export default function WorkflowRequestsPage() {
             <CardContent className="p-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">No Requests Yet</h3>
-              <p className="text-muted-foreground mb-6">You haven't submitted any custom workflow requests yet.</p>
+              <p className="text-muted-foreground mb-6">You haven&apos;t submitted any custom workflow requests yet.</p>
               <Button onClick={() => router.push("/workflows")}>Browse Templates</Button>
             </CardContent>
           </Card>
