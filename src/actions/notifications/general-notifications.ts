@@ -1,7 +1,6 @@
 "use server"
 
 import { client } from "@/lib/prisma"
-import { auth } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache"
 import { onUserInfor } from "../user"
 
@@ -18,7 +17,7 @@ export interface GeneralNotificationData {
   businessId?: string
 }
 
-// Get general notifications for current user
+
 export async function getGeneralNotifications(limit = 20, businessId?: string): Promise<GeneralNotificationData[]> {
   try {
      const  user  = await onUserInfor()

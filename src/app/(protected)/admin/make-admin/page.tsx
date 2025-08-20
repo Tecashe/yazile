@@ -1,8 +1,6 @@
 import { makeUserAdmin } from "../actions"
 import { redirect } from "next/navigation"
 
-// This is a utility page to make a user an admin
-// You can navigate to /admin/make-admin?email=user@example.com to make a user an admin
 export default async function MakeAdminPage({
   searchParams,
 }: {

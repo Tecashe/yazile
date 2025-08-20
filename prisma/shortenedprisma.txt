@@ -11,38 +11,72 @@ datasource db {
 }
 
 model User {
-  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerkId          String             @unique
-  email            String             @unique
-  firstname        String?
-  lastname         String?
-  phone            String?            @unique
-  phoneVerified    Boolean            @default(false)
-  isAdmin          Boolean            @default(false)
-  isInfluencer     Boolean            @default(false)
-  isABusiness      Boolean            @default(false)
-  createdAt        DateTime           @default(now())
-  subscription     Subscription?
-  integrations     Integrations[]
-  automations      Automation[]
-  businessHours    BusinessHours?
-  businesses       Business[]
-  marketingInfo    MarketingInfo[]
-  scheduledContent ScheduledContent[]
-  auditLogs        AuditLog[]
-  sentMessages     ChatMessage[]      @relation("SentMessages")
-  receivedMessages ChatMessage[]      @relation("ReceivedMessages")
-  notifications    UserNotification[]
-  emails           Email[]
-  referredByCode   String?
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId             String              @unique
+  email               String              @unique
+  firstname           String?
+  lastname            String?
+  phone               String?             @unique
+  phoneVerified       Boolean             @default(false)
+  isAdmin             Boolean             @default(false)
+  isInfluencer        Boolean             @default(false)
+  isABusiness         Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  subscription        Subscription?
+  integrations        Integrations[]
+  automations         Automation[]
+  businessHours       BusinessHours?
+  businesses          Business[]
+  marketingInfo       MarketingInfo[]
+  scheduledContent    ScheduledContent[]
+  auditLogs           AuditLog[]
+  sentMessages        ChatMessage[]       @relation("SentMessages")
+  receivedMessages    ChatMessage[]       @relation("ReceivedMessages")
+  notifications       UserNotification[]
+  emails              Email[]
+  uploadedAttachments ChatAttachment[]    @relation("UploadedAttachments")
+  receivedAttachments ChatAttachment[]    @relation("ReceivedAttachments")
+  invoices            Invoice[]           @relation("UserInvoices")
+  payments            Payment[]           @relation("UserPayments")
+  referralCodes       ReferralCode[]      @relation("UserReferralCodes")
+  referrals           Referral[]          @relation("UserReferrals")
+  referredBy          Referral[]          @relation("ReferredUsers")
+  commissionPayouts   CommissionPayout[]  @relation("UserCommissionPayouts")
+  referredByCode      String?
+  affiliate           AffiliateUser?
+  affiliateReferrals  AffiliateReferral[] @relation("referredUser")
+  whatsAppBusinesses  WhatsAppBusiness[]
+  whatsAppRules       WhatsAppRule[]
+  whatsAppTemplates   WhatsAppTemplate[]
 
   leads                 Lead[]
   leadScoringRules      LeadScoringRule[]
   leadQualificationRule LeadQualificationRule[]
   leadNurturingSequence LeadNurturingSequence[]
   crmIntegration        CrmIntegration[]
+  n8nConnection         N8nConnection[]
   n8nWorkflows          N8nWorkflow[]
   leadTag               LeadTag[]
+  userWorkflow          UserWorkflow[]
+  customWorkflowRequest CustomWorkflowRequest[]
+
+  influencers         Influencer[]
+  campaigns           Campaign[]
+  influencerLists     InfluencerList[]
+  influencerImports   InfluencerImport[]
+  portalSettings      PortalSettings[]
+  aiDiscoverySettings AIDiscoverySettings?
+  dataSourceSettings  DataSourceSettings?
+
+  importHistory        ImportHistory[]
+  instagramCredentials InstagramCredentials?
+
+  businessProfile             BusinessProfile?
+  businessProfilesDescription BusinessProfileDescription[]
+  savedSearches               SavedSearch[]
+  chatParticipations          CollabChatParticipant[]
+
+  onboardingProgress OnboardingProgress?
 
   handoffSettings HandoffSettings?
   handoffs        HumanHandoff[]
@@ -55,10 +89,14 @@ model User {
   revenueMetrics       RevenueMetrics[]
   revenueOpportunities RevenueOpportunity[]
 
+  businessWorkflowConfigs BusinessWorkflowConfig[]
+
   generalNotifications GeneralNotification[]
 
   webhookNotifications Notification[]
   alerts               Alert[]
+
+  adminWorkflowAssignments AdminWorkflowAssignment[]
 }
 
 model ScheduledContent {
@@ -110,12 +148,12 @@ model Business {
   targetAudience            String
   website                   String
   instagramHandle           String
-  whatsappNumber            String? // Added for WhatsApp
-  pinterestHandle           String? // Added for Pinterest
-  twitterHandle             String? // Added for Twitter
-  facebookPageId            String? // Added for Facebook
-  linkedinProfileId         String? // Added for LinkedIn
-  tiktokHandle              String? // Added for TikTok
+  whatsappNumber            String? 
+  pinterestHandle           String? 
+  twitterHandle             String? 
+  facebookPageId            String?
+  linkedinProfileId         String?
+  tiktokHandle              String?
   welcomeMessage            String
   responseLanguage          String
   businessHours             String
@@ -132,7 +170,12 @@ model Business {
   logo                String?
   location            String?
   size                String?
-  onboardingCompleted Boolean  @default(false)
+  influencerRatings   InfluencerRating[]
+  campaigns           Campaign[]
+  opportunities       Opportunity[]
+  savedSearches       SavedSearch[]
+  chatParticipations  CollabChatParticipant[]
+  onboardingCompleted Boolean                 @default(false)
 
   handoffs         HumanHandoff[]
   agentAssignments AgentBusinessAssignment[]
@@ -140,6 +183,8 @@ model Business {
   agentPerformance AgentPerformance[]
 
   generalNotifications GeneralNotification[]
+
+  workflowConfigs BusinessWorkflowConfig[]
 }
 
 model Integrations {
@@ -186,26 +231,27 @@ model Integrations {
 }
 
 model Automation {
-  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name            String             @default("New Automation")
-  createdAt       DateTime           @default(now())
-  isFallback      Boolean            @default(false)
-  active          Boolean            @default(false)
-  platform        INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
-  trigger         Trigger[]
-  listenMode      String             @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
-  listener        Listener?
-  posts           Post[]
-  leads           Lead[]
-  dms             Dms[]
-  messages        Message[]
-  conversations   Conversation[]
-  User            User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId          String?            @db.Uuid
-  keywords        Keyword[]
-  scheduledPosts  ScheduledContent[]
-  handoffs        HumanHandoff[]
-  responseMetrics ResponseMetrics[]
+  id                          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                        String                      @default("New Automation")
+  createdAt                   DateTime                    @default(now())
+  isFallback                  Boolean                     @default(false)
+  active                      Boolean                     @default(false)
+  platform                    INTEGRATIONS                @default(INSTAGRAM) // Added to specify which platform this automation is for
+  trigger                     Trigger[]
+  businessProfilesDescription BusinessProfileDescription?
+  listenMode                  String                      @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
+  listener                    Listener?
+  posts                       Post[]
+  leads                       Lead[]
+  dms                         Dms[]
+  messages                    Message[]
+  conversations               Conversation[]
+  User                        User?                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                      String?                     @db.Uuid
+  keywords                    Keyword[]
+  scheduledPosts              ScheduledContent[]
+  handoffs                    HumanHandoff[]
+  responseMetrics             ResponseMetrics[]
 
   fallbackMessage String?
   buttons         Json? // Store as JSON array
@@ -213,7 +259,10 @@ model Automation {
   messageTrackers   MessageTracker[]
   sentimentAnalyses SentimentAnalysis[]
 
-  businessWorkflowConfigId String? @db.Uuid
+  workflowExecutionLogs WorkflowExecutionLog[]
+
+  businessWorkflowConfigId String?                 @db.Uuid // NEW: Link to BusinessWorkflowConfig
+  businessWorkflowConfig   BusinessWorkflowConfig? @relation(fields: [businessWorkflowConfigId], references: [id], onDelete: SetNull)
 }
 
 model Message {
@@ -469,35 +518,6 @@ model Email {
   updatedAt    DateTime       @updatedAt
 }
 
-model EmailCampaign {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  description  String?
-  templateId   String         @db.Uuid
-  template     EmailTemplate  @relation(fields: [templateId], references: [id])
-  status       CampaignStatus @default(DRAFT)
-  scheduledFor DateTime?
-  sentAt       DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  emails       Email[]
-}
-
-enum EmailStatus {
-  SCHEDULED
-  SENT
-  FAILED
-  OPENED
-  CLICKED
-}
-
-enum CampaignStatus {
-  DRAFT
-  SCHEDULED
-  SENDING
-  COMPLETED
-  CANCELLED
-}
 
 // Lead Qualification Models
 model Lead {
@@ -627,6 +647,7 @@ enum LeadStatus {
 }
 
 /////////////////////
+
 
 // CRM Integration Models
 model CrmIntegration {
@@ -787,6 +808,7 @@ enum NurturingStepType {
   CONDITION
   CRM_UPDATE
 }
+
 
 enum SUBSCRIPTION_PLAN {
   FREE
@@ -1219,6 +1241,7 @@ model SentimentAnalysis {
   @@index([sentiment])
 }
 
+
 model PremiumAnalytics {
   id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId                String   @db.Uuid
@@ -1394,6 +1417,7 @@ model Alert {
   @@index([createdAt])
 }
 
+
 model GeneralNotification {
   id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId     String  @db.Uuid
@@ -1441,4 +1465,19 @@ enum GeneralNotificationType {
   CRM_SYNC_ERROR
   SYSTEM_ALERT
   BUSINESS_UPDATE
+}
+
+model AdminWorkflowAssignment {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  adminUserId         String                @db.Uuid
+  adminUser           User                  @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  requestId           String                @db.Uuid
+  request             CustomWorkflowRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  assignedAt          DateTime              @default(now())
+  estimatedCompletion DateTime?
+  actualCompletion    DateTime?
+  notes               String?               @db.Text
+
+  @@index([adminUserId])
+  @@index([requestId])
 }

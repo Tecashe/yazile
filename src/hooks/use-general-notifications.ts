@@ -224,7 +224,7 @@ export function useGeneralNotifications(businessId?: string) {
     fetchNotifications()
 
     // Fallback polling every 60 seconds (less frequent than SSE)
-    const interval = setInterval(fetchNotifications, 60000)
+    const interval = setInterval(fetchNotifications, 600000)
 
     return () => clearInterval(interval)
   }, [fetchNotifications])

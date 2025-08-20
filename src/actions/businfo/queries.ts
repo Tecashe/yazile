@@ -275,7 +275,7 @@ export const getBusinessAutomationDatum = async (clerkId: string) => {
 
   if (!business) return null
 
-  // Parse JSON fields and return only serializable data
+  
   return {
     id: business.id,
     name: business.name,

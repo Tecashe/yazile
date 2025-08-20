@@ -4,8 +4,6 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { client } from "@/lib/prisma"
-import { auth } from "@clerk/nextjs/server"
-import { sendMail } from "@/lib/email-service"
 import { onCurrentUser } from "@/actions/user"
 import { sendCampaign, sendTestEmail as sendTestEmailService } from "@/lib/email-service"
 
