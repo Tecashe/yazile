@@ -1,25 +1,34 @@
 'use server'
 
-import type {
-  AutomationGoalsData,
-  CustomerJourneyData,
-  FeatureSelectionData,
-  BusinessTypeData,
-  WebsiteAnalysisData,
-} from "@/types/business"
-
-
 import { client } from '@/lib/prisma'
 import { FormSchema } from '@/components/global/businessInfo/businessInfo'
 
 export const createBusiness = async (clerkId: string, businessData: FormSchema) => {
+  // Filter only the fields that exist in the Business model
+  const businessFields = {
+    name: businessData.name,
+    businessName: businessData.businessName,
+    businessType: businessData.businessType,
+    businessDescription: businessData.businessDescription,
+    website: businessData.website,
+    responseLanguage: businessData.responseLanguage,
+  }
+
   return await client.user.update({
     where: {
       clerkId,
     },
     data: {
       businesses: {
-        create: businessData,
+        create: {
+          ...businessFields,
+          automation: {
+            create: {
+              name: `${businessData.businessName} Automation`,
+              // Add other required automation fields here based on your Automation model
+            },
+          },
+        },
       },
     },
   })
@@ -37,7 +46,6 @@ export async function getBusinessIdForUser(userId: string) {
 
   return user.businesses[0].id
 }
-
 
 export const getBusinesses = async (clerkId: string) => {
   return await client.user.findUnique({
@@ -92,9 +100,6 @@ export const deleteBusiness = async (businessId: string) => {
   }
 }
 
-
-
-// Add this new function
 export const getBusinessesForWebhook = async (businessId: string) => {
   return await client.business.findUnique({
     where: {
@@ -103,17 +108,14 @@ export const getBusinessesForWebhook = async (businessId: string) => {
   })
 }
 
-
-
+// Updated type to only include fields that exist in the new Business model
 type BusinessUpdateData = Partial<FormSchema> & {
-  automationGoals?: AutomationGoalsData
-  customerJourney?: CustomerJourneyData
-  features?: FeatureSelectionData
-  businessTypeData?: BusinessTypeData
-  websiteAnalysis?: WebsiteAnalysisData
-  automationSetupComplete?: boolean
-  automationSetupDate?: Date
-  automationAdditionalNotes?: string
+  name?: string
+  businessName?: string
+  businessType?: string
+  businessDescription?: string
+  website?: string
+  responseLanguage?: string
 }
 
 export const updateBusines = async (clerkId: string, update: BusinessUpdateData) => {
@@ -121,19 +123,9 @@ export const updateBusines = async (clerkId: string, update: BusinessUpdateData)
   console.log(`[updateBusiness] Update data:`, JSON.stringify(update, null, 2))
 
   try {
-    // Ensure all JSON fields are properly stringified
-    const processedUpdate = Object.entries(update).reduce<Record<string, any>>((acc, [key, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        acc[key] = JSON.stringify(value)
-      } else {
-        acc[key] = value
-      }
-      return acc
-    }, {})
-
     const result = await client.business.update({
-      where: { id:clerkId },
-      data: processedUpdate,
+      where: { id: clerkId },
+      data: update,
     })
 
     console.log(`[updateBusiness] Update successful. Result:`, JSON.stringify(result, null, 2))
@@ -155,51 +147,28 @@ export const getBusinessAutomationData = async (clerkId: string) => {
     select: {
       id: true,
       name: true,
-      instagramHandle: true,
-      website: true,
-      industry: true,
-      targetAudience: true,
+      businessName: true,
+      businessType: true,
       businessDescription: true,
-      autoReplyEnabled: true,
-      automationGoals: true,
-      customerJourney: true,
-      features: true,
-      businessTypeData: true,
-      websiteAnalysis: true,
-      automationSetupComplete: true,
-      automationSetupDate: true,
-      automationAdditionalNotes: true,
+      website: true,
+      responseLanguage: true,
+      automationId: true,
     },
   })
 
   if (!business) return null
 
-  // Parse JSON fields
   return {
     id: business.id,
     name: business.name,
-    instagramHandle: business.instagramHandle,
-    website: business.website,
-    industry: business.industry,
-    targetAudience: business.targetAudience,
+    businessName: business.businessName,
+    businessType: business.businessType,
     businessDescription: business.businessDescription,
-    autoReplyEnabled: business.autoReplyEnabled,
-    // Safely parse JSON fields
-    automationGoals: business.automationGoals ? JSON.parse(business.automationGoals as string) : null,
-    customerJourney: business.customerJourney ? JSON.parse(business.customerJourney as string) : null,
-    features: business.features ? JSON.parse(business.features as string) : null,
-    businessTypeData: business.businessTypeData ? JSON.parse(business.businessTypeData as string) : null,
-    websiteAnalysis: business.websiteAnalysis ? JSON.parse(business.websiteAnalysis as string) : null,
-    automationSetupComplete: business.automationSetupComplete,
-    // Convert Date to string or number
-    automationSetupDate: business.automationSetupDate ? business.automationSetupDate.toISOString() : null,
-    automationAdditionalNotes: business.automationAdditionalNotes,
+    website: business.website,
+    responseLanguage: business.responseLanguage,
+    automationId: business.automationId,
   }
-  
 }
-
-//----
-
 
 export async function getBusinessInfo(businessId: string) {
   try {
@@ -207,11 +176,10 @@ export async function getBusinessInfo(businessId: string) {
       where: { id: businessId },
       select: {
         businessName: true,
-        instagramHandle: true,
-        website: true,
-        industry: true,
-        targetAudience: true,
+        businessType: true,
         businessDescription: true,
+        website: true,
+        responseLanguage: true,
       },
     })
 
@@ -226,11 +194,10 @@ export async function saveBusinessInfo(
   businessId: string,
   businessInfo: {
     businessName: string
-    instagramHandle: string
-    website: string
-    industry: string
-    targetAudience: string
+    businessType: string
     businessDescription: string
+    website: string
+    responseLanguage: string
   },
 ) {
   try {
@@ -246,8 +213,6 @@ export async function saveBusinessInfo(
   }
 }
 
-
-
 export const getBusinessAutomationDatum = async (clerkId: string) => {
   const business = await client.business.findUnique({
     where: {
@@ -256,43 +221,25 @@ export const getBusinessAutomationDatum = async (clerkId: string) => {
     select: {
       id: true,
       name: true,
-      instagramHandle: true,
-      website: true,
-      industry: true,
-      targetAudience: true,
+      businessName: true,
+      businessType: true,
       businessDescription: true,
-      autoReplyEnabled: true,
-      automationGoals: true,
-      customerJourney: true,
-      features: true,
-      businessTypeData: true,
-      websiteAnalysis: true,
-      automationSetupComplete: true,
-      automationSetupDate: true,
-      automationAdditionalNotes: true,
+      website: true,
+      responseLanguage: true,
+      automationId: true,
     },
   })
 
   if (!business) return null
 
-  
   return {
     id: business.id,
     name: business.name,
-    instagramHandle: business.instagramHandle,
-    website: business.website,
-    industry: business.industry,
-    targetAudience: business.targetAudience,
+    businessName: business.businessName,
+    businessType: business.businessType,
     businessDescription: business.businessDescription,
-    autoReplyEnabled: business.autoReplyEnabled,
-    automationGoals: business.automationGoals ? JSON.parse(business.automationGoals as string) : null,
-    customerJourney: business.customerJourney ? JSON.parse(business.customerJourney as string) : null,
-    features: business.features ? JSON.parse(business.features as string) : null,
-    businessTypeData: business.businessTypeData ? JSON.parse(business.businessTypeData as string) : null,
-    websiteAnalysis: business.websiteAnalysis ? JSON.parse(business.websiteAnalysis as string) : null,
-    automationSetupComplete: business.automationSetupComplete,
-    automationSetupDate: business.automationSetupDate ? business.automationSetupDate.toISOString() : null,
-    automationAdditionalNotes: business.automationAdditionalNotes,
+    website: business.website,
+    responseLanguage: business.responseLanguage,
+    automationId: business.automationId,
   }
 }
-

@@ -12,25 +12,19 @@ import { createNewBusiness } from '@/actions/businfo'
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sparkles, Loader2 } from 'lucide-react'
 
+// Updated FormSchema to match the new Business model
 export const FormSchema = z.object({
   id: z.string().optional(),
+  name: z.string().optional(),
   businessName: z.string().min(1, { message: 'Business name is required' }),
-  website: z.string().min(1, { message: 'Website url required' }),
-  targetAudience: z.string().min(1, { message: 'target audience required' }),
   businessType: z.string().min(1, { message: 'Business type is required' }),
   businessDescription: z.string().min(10, { message: 'Description must be at least 10 characters' }),
-  industry: z.string().min(1, { message: 'Industry is required' }),
-  instagramHandle: z.string().min(1, { message: 'Instagram handle is required' }),
-  welcomeMessage: z.string().min(1, { message: 'Welcome message is required' }),
+  website: z.string().min(1, { message: 'Website URL is required' }),
   responseLanguage: z.string().min(1, { message: 'Response language is required' }),
-  businessHours: z.string().min(1, { message: 'Business hours are required' }),
-  promotionMessage: z.string().min(1, { message: 'Promotion message is required' }),
-  autoReplyEnabled: z.boolean().default(false),
 })
 
 export type FormSchema = z.infer<typeof FormSchema>
@@ -39,9 +33,32 @@ interface BusinessFormProps {
   onBusinessCreated: (newBusiness: FormSchema) => void
 }
 
-const businessTypes = ['Retail', 'Service', 'Manufacturing', 'Tech']
-const industries = ['Fashion', 'Food', 'Technology', 'Healthcare']
-const languages = ['English', 'Spanish', 'French', 'German']
+const businessTypes = [
+  'E-commerce',
+  'Service Business', 
+  'Restaurant/Food',
+  'Retail Store',
+  'Consulting',
+  'Healthcare',
+  'Education',
+  'Technology',
+  'Real Estate',
+  'Finance',
+  'Other'
+]
+
+const languages = [
+  'English',
+  'Spanish', 
+  'French',
+  'German',
+  'Italian',
+  'Portuguese',
+  'Chinese',
+  'Japanese',
+  'Arabic',
+  'Hindi'
+]
 
 function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -50,17 +67,22 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
   const { control, handleSubmit, watch, formState: { errors } } = useForm<FormSchema>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      autoReplyEnabled: false,
+      name: '',
+      businessName: '',
+      businessType: '',
+      businessDescription: '',
+      website: '',
+      responseLanguage: '',
     },
   })
   const { toast } = useToast()
 
+  // Updated form steps to match new schema
   const formSteps = [
-    ['businessName', 'businessType', 'industry'],
-    ['businessDescription', 'instagramHandle'],
-    ['welcomeMessage', 'responseLanguage', 'businessHours'],
-    ['promotionMessage', 'autoReplyEnabled'],
-    ['targetAudience', 'website'],
+    ['businessName', 'businessType'],
+    ['businessDescription'],
+    ['website', 'responseLanguage'],
+    ['name'], // Optional display name
   ]
 
   const onSubmit = async (data: FormSchema) => {
@@ -108,6 +130,28 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
   }
 
   const progress = ((currentStep + 1) / formSteps.length) * 100
+
+  const getFieldLabel = (fieldName: string) => {
+    const labels: Record<string, string> = {
+      name: 'Display Name (Optional)',
+      businessName: 'Business Name',
+      businessType: 'Business Type',
+      businessDescription: 'Business Description',
+      website: 'Website URL',
+      responseLanguage: 'Response Language',
+    }
+    return labels[fieldName] || fieldName
+  }
+
+  const getFieldPlaceholder = (fieldName: string) => {
+    const placeholders: Record<string, string> = {
+      name: 'e.g., My Awesome Store',
+      businessName: 'e.g., Acme Corporation',
+      businessDescription: 'Describe what your business does, your products/services, and what makes you unique...',
+      website: 'https://www.yourbusiness.com',
+    }
+    return placeholders[fieldName] || `Enter your ${fieldName}`
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-gray-900 text-gray-100 shadow-xl overflow-hidden">
@@ -165,46 +209,48 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
                   transition={{ duration: 0.5 }}
                   className="mb-4"
                 >
-                  <Label htmlFor={field} className="text-gray-300">{field}</Label>
+                  <Label htmlFor={field} className="text-gray-300 text-sm font-medium">
+                    {getFieldLabel(field)}
+                  </Label>
                   <Controller
                     name={field as keyof FormSchema}
                     control={control}
                     render={({ field: { onChange, value } }) => {
-                      if (field === 'businessType' || field === 'industry' || field === 'responseLanguage') {
+                      if (field === 'businessType') {
                         return (
                           <Select onValueChange={onChange} value={value as string}>
-                            <SelectTrigger className="mt-1 bg-gray-800 text-white border-gray-700">
-                              <SelectValue placeholder={`Select ${field}`} />
+                            <SelectTrigger className="mt-1 bg-gray-800 text-white border-gray-700 focus:ring-2 focus:ring-purple-500">
+                              <SelectValue placeholder="Select your business type" />
                             </SelectTrigger>
                             <SelectContent className="bg-gray-800 text-white border-gray-700">
-                              {(field === 'businessType' ? businessTypes :
-                                field === 'industry' ? industries :
-                                languages).map((option) => (
+                              {businessTypes.map((option) => (
                                 <SelectItem key={option} value={option}>{option}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         )
-                      } else if (field === 'businessDescription' || field === 'website' || field === 'targetAudience' || field === 'welcomeMessage' || field === 'promotionMessage') {
+                      } else if (field === 'responseLanguage') {
+                        return (
+                          <Select onValueChange={onChange} value={value as string}>
+                            <SelectTrigger className="mt-1 bg-gray-800 text-white border-gray-700 focus:ring-2 focus:ring-purple-500">
+                              <SelectValue placeholder="Select response language" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 text-white border-gray-700">
+                              {languages.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )
+                      } else if (field === 'businessDescription') {
                         return (
                           <Textarea
                             id={field}
                             value={value as string}
                             onChange={onChange}
-                            className="mt-1 bg-gray-800 text-white border-gray-700"
-                            placeholder={`Enter your ${field}`}
+                            className="mt-1 bg-gray-800 text-white border-gray-700 focus:ring-2 focus:ring-purple-500 min-h-[120px]"
+                            placeholder={getFieldPlaceholder(field)}
                           />
-                        )
-                      } else if (field === 'autoReplyEnabled') {
-                        return (
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Switch
-                              id={field}
-                              checked={value as boolean}
-                              onCheckedChange={onChange}
-                            />
-                            <Label htmlFor={field} className="text-gray-300">Enable Auto Reply</Label>
-                          </div>
                         )
                       } else {
                         return (
@@ -212,8 +258,8 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
                             id={field}
                             value={value as string}
                             onChange={onChange}
-                            className="mt-1 bg-gray-800 text-white border-gray-700"
-                            placeholder={`Enter your ${field}`}
+                            className="mt-1 bg-gray-800 text-white border-gray-700 focus:ring-2 focus:ring-purple-500"
+                            placeholder={getFieldPlaceholder(field)}
                           />
                         )
                       }
@@ -232,7 +278,7 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
               type="button"
               onClick={prevStep}
               disabled={currentStep === 0}
-              className="bg-gray-700 hover:bg-gray-600"
+              className="bg-gray-700 hover:bg-gray-600 transition-colors"
             >
               Previous
             </Button>
@@ -240,7 +286,7 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
               <Button
                 type="button"
                 onClick={nextStep}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 transition-colors"
               >
                 Next
               </Button>
@@ -248,7 +294,7 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-colors"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -273,4 +319,3 @@ function BusinessForm({ onBusinessCreated }: BusinessFormProps) {
 }
 
 export default BusinessForm
-

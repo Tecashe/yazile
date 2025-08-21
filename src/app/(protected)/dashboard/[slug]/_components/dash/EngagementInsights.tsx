@@ -10,7 +10,7 @@ import { getAutomationsForUser, getEngagementDataForAutomation } from "@/actions
 import DMTimeline from "./DMTimeline"
 import DMDistribution from "./DMDistribution"
 import DMInsights from "./DMInsights"
-import TopDMDays from "./TopDMDays"
+
 import type { AutomationOption, EngagementData, Automation } from "@/types/dashboard"
 
 const EngagementInsights: React.FC = () => {
@@ -139,9 +139,6 @@ const EngagementInsights: React.FC = () => {
               </TabsContent>
               <TabsContent value="distribution">
                 <DMDistribution data={data} />
-              </TabsContent>
-              <TabsContent value="topdays">
-                <TopDMDays data={data} />
               </TabsContent>
               <TabsContent value="insights">
                 <DMInsights data={data} />

@@ -1669,7 +1669,6 @@ import {
   ChevronDown,
   ChevronRight,
   Info,
-  Lightbulb,
   ExternalLink,
   Scissors,
   MapPin,

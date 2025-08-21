@@ -104,7 +104,7 @@ export const deleteBusiness = async (businessId: string) => {
 export const toggleAutoReply = async (businessId: string, autoReplyEnabled: boolean) => {
   await onUserInfor()
   try {
-    const update = await updateBusiness(businessId, { autoReplyEnabled })
+    const update = await updateBusiness(businessId,{})
     if (update) {
       return { status: 200, data: `Auto-reply ${autoReplyEnabled ? 'enabled' : 'disabled'}` }
     }

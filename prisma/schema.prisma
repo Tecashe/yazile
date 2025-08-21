@@ -93,46 +93,22 @@ model MarketingInfo {
 }
 
 model Business {
-  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String?
-  businessName              String
-  businessType              String
-  businessDescription       String
-  industry                  String
-  automationSetupComplete   Boolean   @default(false)
-  automationSetupDate       DateTime?
-  automationAdditionalNotes String?
-  automationGoals           Json?
-  customerJourney           Json?
-  features                  Json?
-  businessTypeData          Json?
-  websiteAnalysis           Json?
-  targetAudience            String
-  website                   String
-  instagramHandle           String
-  whatsappNumber            String? // Added for WhatsApp
-  pinterestHandle           String? // Added for Pinterest
-  twitterHandle             String? // Added for Twitter
-  facebookPageId            String? // Added for Facebook
-  linkedinProfileId         String? // Added for LinkedIn
-  tiktokHandle              String? // Added for TikTok
-  welcomeMessage            String
-  responseLanguage          String
-  businessHours             String
-  autoReplyEnabled          Boolean
-  promotionMessage          String
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
-  User                      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                    String?   @db.Uuid
+  id                  String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String?
+  businessName        String
+  businessType        String
+  businessDescription String
+  automationId        String  @unique @db.Uuid
 
-  learningTopics      String[]
-  growthChallenges    String[]
-  goalStatement       String?
-  logo                String?
-  location            String?
-  size                String?
-  onboardingCompleted Boolean  @default(false)
+  website String
+
+  responseLanguage String
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  User       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String?    @db.Uuid
 
   handoffs         HumanHandoff[]
   agentAssignments AgentBusinessAssignment[]
@@ -140,6 +116,9 @@ model Business {
   agentPerformance AgentPerformance[]
 
   generalNotifications GeneralNotification[]
+
+  @@index([userId])
+  @@index([automationId])
 }
 
 model Integrations {
@@ -210,8 +189,9 @@ model Automation {
   fallbackMessage String?
   buttons         Json? // Store as JSON array
 
-  messageTrackers   MessageTracker[]
-  sentimentAnalyses SentimentAnalysis[]
+  messageTrackers             MessageTracker[]
+  sentimentAnalyses           SentimentAnalysis[]
+  businessProfilesDescription Business?
 
   businessWorkflowConfigId String? @db.Uuid
 }
