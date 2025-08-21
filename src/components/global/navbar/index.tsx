@@ -970,7 +970,6 @@ import { usePathname } from "next/navigation"
 import { Search, Cog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { GlobalSearchDialog } from "./global-search-dialog"
 import { NotificationDropdown } from "./notifications/notification-dropdown" 
 import { useState } from "react"
 
@@ -1101,9 +1100,6 @@ const Navbar = ({ slug }: Props) => {
           </div>
         </div>
       </header>
-
-      {/* Global Search Dialog */}
-      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </>
   )
 }

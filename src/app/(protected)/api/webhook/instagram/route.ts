@@ -1744,7 +1744,6 @@ class MessageProcessor {
         }
       }
 
-      Logger.success(`Context built - Automation: ${automation.id} (${automation.User?.subscription?.plan || "FREE"})`)
 
       return {
         data,

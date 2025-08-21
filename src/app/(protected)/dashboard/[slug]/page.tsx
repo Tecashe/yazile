@@ -10,7 +10,6 @@ import { AutomationList } from "./_components/newdash/automation-list"
 import { BarDuoToneBlue } from "@/icons"
 import EnhancedMetricsCard from "./_components/dash/EnhancedMetricsCard"
 import EngagementInsights from "./_components/dash/EngagementInsights"
-import HashtagCloud from "./_components/dash/HashtagCloud"
 import { EnhancedDashboardCards } from "@/components/global/dashboard/dashboard-cards"
 
 
@@ -64,15 +63,7 @@ export default async function DashboardPage() {
           </Suspense>
         
         </div>
-        <div className="grid grid-cols-1 gap-6">      
-        <HashtagCloud />
-       
       </div>
-      </div>
-      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ContentSuggestions />
-        <AIPerformance />
-      </div>       */}
     </div>
   )
 }

@@ -193,7 +193,6 @@ model Automation {
   sentimentAnalyses           SentimentAnalysis[]
   businessProfilesDescription Business?
 
-  businessWorkflowConfigId String? @db.Uuid
 }
 
 model Message {
@@ -944,9 +943,9 @@ model ProcessedMessage {
   @@index([processCount]) // NEW: Index for analytics queries
 }
 
-// Add these NEW models to your existing schema.prisma file
 
-// Multi-tenant Human Handoff Models
+
+
 model HumanHandoff {
   id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId           String           @db.Uuid
