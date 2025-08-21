@@ -1724,9 +1724,10 @@ class MessageProcessor {
                   },
                 },
               },
-              businessWorkflowConfig: {
-                select: { id: true },
-              },
+              //TODO
+              // businessWorkflowConfig: {
+              //   select: { id: true },
+              // },
             },
           })
           Logger.info(`🔍 Automation lookup result:`, automation ? `Found: ${automation.id}` : "Not found")

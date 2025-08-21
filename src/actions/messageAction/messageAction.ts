@@ -17,8 +17,8 @@ export async function fetchBusinessData(userId: string) {
     return business
       ? {
           business_name: business.businessName || "",
-          welcome_message: business.welcomeMessage || "",
-          business_industry: business.industry || "",
+          welcome_message:  "Hello and welcome",
+          business_industry: business.businessType || "",
         }
       : null
   } catch (error) {
