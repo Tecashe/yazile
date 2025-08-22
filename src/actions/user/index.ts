@@ -108,8 +108,42 @@ export const onSubscribe = async (session_id: string) => {
   }
 }
 
+// export const onUserInfor = async () => {
+//   const user = await onCurrentUser()
+//   try {
+//     const profile = await findUser(user.id)
+//     if (profile) {
+//       // Return only serializable data
+//       return {
+//         status: 200,
+//         data: {
+//           id: profile.id,
+//           clerkId: profile.clerkId,
+//           email: profile.email,
+//           firstname: profile.firstname,
+//           lastname: profile.lastname,
+          
+//         },
+//       }
+//     }
+
+//     return { status: 404 }
+//   } catch (error) {
+//     console.error("Error in onUserInfo:", error)
+//     return { status: 500, error: "Internal Server Error" }
+//   }
+// }
+
+
 export const onUserInfor = async () => {
   const user = await onCurrentUser()
+  
+  // DEBUG: Log the user object to see what we're working with
+  console.log("Current user:", user)
+  console.log("User ID:", user.id)
+  console.log("User ID type:", typeof user.id)
+  console.log("User ID length:", user.id?.length)
+  
   try {
     const profile = await findUser(user.id)
     if (profile) {
@@ -122,7 +156,6 @@ export const onUserInfor = async () => {
           email: profile.email,
           firstname: profile.firstname,
           lastname: profile.lastname,
-          
         },
       }
     }
