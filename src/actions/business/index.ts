@@ -193,16 +193,16 @@
 "use server"
 
 import { client } from "@/lib/prisma"
-import { onCurrentUser,onUserInfor } from "../user"
+import { onUserInfor } from "../user"
 import { revalidatePath } from "next/cache"
 
 // Business Profile Actions
 export const getBusinessProfile = async (userId?: string) => {
   try {
-    const user = userId ? { id: userId } : await onCurrentUser()
+    const user = await onUserInfor()
 
     const business = await client.business.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.data?.id },
     })
 
     return { status: 200, data: business }
@@ -222,12 +222,11 @@ export const createBusinessProfile = async (data: {
   automationId: string
 }) => {
   try {
-    const user = await onUserInfor()
-    const userid = user.data?.clerkId
+    const user = await onUserInfor()    
 
     // Check if business profile already exists
     const existingBusiness = await client.business.findFirst({
-      where: { userId: user.data?.clerkId },
+      where: { userId: user.data?.id },
     })
 
     if (existingBusiness) {
@@ -245,7 +244,7 @@ export const createBusinessProfile = async (data: {
     const business = await client.business.create({
       data: {
         ...data,
-        userId: user.data?.clerkId,
+        userId: user.data?.id,
       },
     })
 
@@ -267,11 +266,11 @@ export const updateBusinessProfile = async (data: {
   responseLanguage?: string
 }) => {
   try {
-    const user = await onCurrentUser()
+    const user = await onUserInfor()
 
     // Check if business profile exists
     const existingBusiness = await client.business.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.data?.id },
     })
 
     if (!existingBusiness) {
