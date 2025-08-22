@@ -223,11 +223,11 @@ export const createBusinessProfile = async (data: {
 }) => {
   try {
     const user = await onUserInfor()
-    const userid = user.data?.id
+    const userid = user.data?.clerkId
 
     // Check if business profile already exists
     const existingBusiness = await client.business.findFirst({
-      where: { userId: userid },
+      where: { userId: user.data?.clerkId },
     })
 
     if (existingBusiness) {
@@ -245,7 +245,7 @@ export const createBusinessProfile = async (data: {
     const business = await client.business.create({
       data: {
         ...data,
-        userId: userid,
+        userId: user.data?.clerkId,
       },
     })
 
