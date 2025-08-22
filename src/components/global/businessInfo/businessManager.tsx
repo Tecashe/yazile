@@ -20,8 +20,17 @@ export default function BusinessManager() {
       try {
         const result = await getAllBusinesses()
         if (result.status === 200 && result.data.businesses.length > 0) {
-          setBusiness(result.data.businesses[0])
-        } else {
+          const businessData = result.data.businesses[0];
+          setBusiness({
+            businessName: businessData.businessName,
+            businessType: businessData.businessType,
+            businessDescription: businessData.businessDescription,
+            website: businessData.website,
+            responseLanguage: businessData.responseLanguage,
+            id: businessData.id,
+            name: businessData.name ?? undefined, // Convert null to undefined
+          });
+        }else {
           setBusiness(null)
         }
       } catch (error) {
