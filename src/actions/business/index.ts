@@ -403,7 +403,7 @@ import { onUserInfor } from "../user"
 import { revalidatePath } from "next/cache"
 
 // Business Profile Actions
-export const getBusinessProfile = async (userId?: string) => {
+export const getBusinessProfileD = async (userId?: string) => {
   try {
     const user = await onUserInfor()
 
@@ -422,7 +422,7 @@ export const getBusinessProfile = async (userId?: string) => {
   }
 }
 
-export const createBusinessProfile = async (data: {
+export const createBusinessProfileR = async (data: {
   name?: string
   businessName: string
   businessType: string
@@ -475,7 +475,7 @@ export const createBusinessProfile = async (data: {
   }
 }
 
-export const updateBusinessProfile = async (data: {
+export const updateBusinessProfileE = async (data: {
   name?: string
   businessName?: string
   businessType?: string
@@ -626,6 +626,127 @@ export async function getBusinessProfileDescription(businessId: string) {
 }
 
 // Helper function to get user's automations (useful for dropdowns/selection)
+export const getUserAutomationsE = async () => {
+  try {
+    const user = await onUserInfor()
+
+    if (user.status !== 200 || !user.data?.id) {
+      return { status: 401, data: [], error: "User not authenticated" }
+    }
+
+    const automations = await client.automation.findMany({
+      where: { userId: user.data.id },
+      select: {
+        id: true,
+        name: true,
+        active: true,
+        platform: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    return { status: 200, data: automations }
+  } catch (error) {
+    console.error("Error fetching user automations:", error)
+    return { status: 500, data: [], error: "Failed to fetch automations" }
+  }
+}
+
+
+
+
+
+
+
+// business.ts - Updated server actions
+// "use server"
+
+// import { client } from "@/lib/prisma"
+// import { onUserInfor } from "../user"
+// import { revalidatePath } from "next/cache"
+import { validate as isValidUUID } from 'uuid'
+
+// Business Profile Actions
+export const getBusinessProfile = async (userId?: string) => {
+  try {
+    const user = await onUserInfor()
+
+    if (user.status !== 200 || !user.data?.id) {
+      return { status: 401, data: null, error: "User not authenticated" }
+    }
+
+    const business = await client.business.findFirst({
+      where: { userId: user.data.id },
+    })
+
+    return { status: 200, data: business }
+  } catch (error) {
+    console.error("Error fetching business profile:", error)
+    return { status: 500, data: null, error: "Failed to fetch business profile" }
+  }
+}
+
+export const createBusinessProfile = async (data: {
+  name?: string
+  businessName: string
+  businessType: string
+  businessDescription: string
+  website: string
+  responseLanguage: string
+  automationId: string
+}) => {
+  try {
+    const user = await onUserInfor()
+
+    if (user.status !== 200 || !user.data?.id) {
+      return { status: 401, error: "User not authenticated" }
+    }
+
+    // Validate automation ID format
+    if (!data.automationId || !isValidUUID(data.automationId)) {
+      return { status: 400, error: "Invalid automation ID format" }
+    }
+
+    // Check if business profile already exists
+    const existingBusiness = await client.business.findFirst({
+      where: { userId: user.data.id },
+    })
+
+    if (existingBusiness) {
+      return { status: 400, error: "Business profile already exists" }
+    }
+
+    // Verify automation exists and belongs to the user
+    const automation = await client.automation.findFirst({
+      where: { 
+        id: data.automationId,
+        userId: user.data.id // Ensure user owns this automation
+      },
+    })
+
+    if (!automation) {
+      return { status: 400, error: "Invalid automation ID or automation not found" }
+    }
+
+    const business = await client.business.create({
+      data: {
+        ...data,
+        userId: user.data.id,
+      },
+    })
+
+    revalidatePath("/")
+    revalidatePath("/setup")
+    revalidatePath("/dashboard")
+    return { status: 201, data: business }
+  } catch (error) {
+    console.error("Error creating business profile:", error)
+    return { status: 500, error: "Failed to create business profile" }
+  }
+}
+
+// Helper function to get user's automations (useful for dropdowns/selection)
 export const getUserAutomations = async () => {
   try {
     const user = await onUserInfor()
@@ -650,5 +771,46 @@ export const getUserAutomations = async () => {
   } catch (error) {
     console.error("Error fetching user automations:", error)
     return { status: 500, data: [], error: "Failed to fetch automations" }
+  }
+}
+
+// Rest of your existing functions remain the same...
+export const updateBusinessProfile = async (data: {
+  name?: string
+  businessName?: string
+  businessType?: string
+  businessDescription?: string
+  website?: string
+  responseLanguage?: string
+}) => {
+  try {
+    const user = await onUserInfor()
+
+    if (user.status !== 200 || !user.data?.id) {
+      return { status: 401, error: "User not authenticated" }
+    }
+
+    const existingBusiness = await client.business.findFirst({
+      where: { userId: user.data.id },
+    })
+
+    if (!existingBusiness) {
+      return { status: 404, error: "Business profile not found" }
+    }
+
+    const business = await client.business.update({
+      where: { id: existingBusiness.id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    })
+
+    revalidatePath("/")
+    revalidatePath("/setup")
+    return { status: 200, data: business }
+  } catch (error) {
+    console.error("Error updating business profile:", error)
+    return { status: 500, error: "Failed to update business profile" }
   }
 }

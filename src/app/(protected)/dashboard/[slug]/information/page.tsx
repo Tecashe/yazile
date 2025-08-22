@@ -1,8 +1,9 @@
+// BusinessSetupPage.tsx - Updated component
 "use client"
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,13 +12,23 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { createBusinessProfile } from "@/actions/business"
-import { Building2, Globe, MessageSquare, Briefcase } from "lucide-react"
+import { createBusinessProfile, getUserAutomations } from "@/actions/business"
+import { Building2, Globe, MessageSquare, Briefcase, Loader2 } from "lucide-react"
+
+interface Automation {
+  id: string
+  name: string
+  active: boolean
+  platform: string
+  createdAt: Date
+}
 
 export default function BusinessSetupPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [automationsLoading, setAutomationsLoading] = useState(true)
+  const [automations, setAutomations] = useState<Automation[]>([])
   const [formData, setFormData] = useState({
     name: "",
     businessName: "",
@@ -25,7 +36,7 @@ export default function BusinessSetupPage() {
     businessDescription: "",
     website: "",
     responseLanguage: "English",
-    automationId: "temp-automation-id", // TODO: Replace with actual automation ID from your context
+    automationId: "", // Remove temp value
   })
 
   const businessTypes = [
@@ -54,6 +65,42 @@ export default function BusinessSetupPage() {
     "Arabic",
   ]
 
+  // Load user automations on component mount
+  useEffect(() => {
+    const loadAutomations = async () => {
+      try {
+        const result = await getUserAutomations()
+        if (result.status === 200) {
+          setAutomations(result.data)
+          // Auto-select first automation if available
+          if (result.data.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              automationId: result.data[0].id
+            }))
+          }
+        } else {
+          toast({
+            title: "Warning",
+            description: "Could not load your automations. You may need to create one first.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error('Error loading automations:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load automations.",
+          variant: "destructive",
+        })
+      } finally {
+        setAutomationsLoading(false)
+      }
+    }
+
+    loadAutomations()
+  }, [toast])
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -73,6 +120,15 @@ export default function BusinessSetupPage() {
       return
     }
 
+    if (!formData.automationId) {
+      toast({
+        title: "Missing Automation",
+        description: "Please select an automation or create one first.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -83,7 +139,7 @@ export default function BusinessSetupPage() {
           title: "Success!",
           description: "Your business profile has been created successfully.",
         })
-        router.push("/") // Redirect back to main page
+        router.push("/dashboard") // Redirect to dashboard
       } else {
         toast({
           title: "Error",
@@ -92,6 +148,7 @@ export default function BusinessSetupPage() {
         })
       }
     } catch (error) {
+      console.error('Submit error:', error)
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -165,6 +222,46 @@ export default function BusinessSetupPage() {
                 </Select>
               </div>
 
+              {/* Add Automation Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="automation">Select Automation *</Label>
+                {automationsLoading ? (
+                  <div className="flex items-center justify-center p-4 border rounded-md">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Loading automations...
+                  </div>
+                ) : automations.length > 0 ? (
+                  <Select
+                    value={formData.automationId}
+                    onValueChange={(value) => handleInputChange("automationId", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an automation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {automations.map((automation) => (
+                        <SelectItem key={automation.id} value={automation.id}>
+                          {automation.name} ({automation.platform})
+                          {!automation.active && " - Inactive"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="p-4 border rounded-md bg-yellow-50 text-yellow-800">
+                    <p>No automations found. Please create an automation first.</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-2"
+                      onClick={() => router.push("/create-automation")}
+                    >
+                      Create Automation
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="website">Website</Label>
                 <div className="relative">
@@ -216,8 +313,19 @@ export default function BusinessSetupPage() {
                 </p>
               </div>
 
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-                {isLoading ? "Creating Profile..." : "Create Business Profile"}
+              <Button 
+                type="submit" 
+                className="w-full bg-blue-600 hover:bg-blue-700" 
+                disabled={isLoading || automationsLoading || !formData.automationId}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Creating Profile...
+                  </>
+                ) : (
+                  "Create Business Profile"
+                )}
               </Button>
             </form>
           </CardContent>
@@ -226,3 +334,4 @@ export default function BusinessSetupPage() {
     </div>
   )
 }
+
