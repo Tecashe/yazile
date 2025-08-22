@@ -108,41 +108,83 @@ export const onSubscribe = async (session_id: string) => {
   }
 }
 
-// export const onUserInfor = async () => {
-//   const user = await onCurrentUser()
-//   try {
-//     const profile = await findUser(user.id)
-//     if (profile) {
-//       // Return only serializable data
-//       return {
-//         status: 200,
-//         data: {
-//           id: profile.id,
-//           clerkId: profile.clerkId,
-//           email: profile.email,
-//           firstname: profile.firstname,
-//           lastname: profile.lastname,
-          
-//         },
-//       }
-//     }
 
-//     return { status: 404 }
-//   } catch (error) {
-//     console.error("Error in onUserInfo:", error)
-//     return { status: 500, error: "Internal Server Error" }
-//   }
-// }
+
+
 
 
 export const onUserInfor = async () => {
   const user = await onCurrentUser()
+
+  console.log("Clerk user ID:", user.id)
+  console.log("Looking for user with clerkId:", user.id)
   
-  // DEBUG: Log the user object to see what we're working with
-  console.log("Current user:", user)
-  console.log("User ID:", user.id)
-  console.log("User ID type:", typeof user.id)
-  console.log("User ID length:", user.id?.length)
+  try {
+    const profile = await findUser(user.id)
+    console.log("Profile found:", profile)
+    
+    if (profile) {
+      console.log("Profile ID (database UUID):", profile.id)
+      console.log("Profile clerkId:", profile.clerkId)
+      
+      // Return only serializable data
+      return {
+        status: 200,
+        data: {
+          id: profile.id,           // Database UUID
+          clerkId: profile.clerkId, // Clerk ID
+          email: profile.email,
+          firstname: profile.firstname,
+          lastname: profile.lastname,
+        },
+      }
+    }
+
+    console.log("No profile found for clerkId:", user.id)
+    console.log("User might need to be created in database")
+    
+    // Option 1: Return 404 (current behavior)
+    return { status: 404, error: "User not found in database" }
+    
+    // Option 2: Auto-create user (uncomment if you want this)
+    /*
+    console.log("Auto-creating user in database...")
+    const newProfile = await client.user.create({
+      data: {
+        clerkId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || "",
+        firstname: user.firstName || "",
+        lastname: user.lastName || "",
+      }
+    })
+    
+    console.log("Created new user:", newProfile)
+    
+    return {
+      status: 200,
+      data: {
+        id: newProfile.id,
+        clerkId: newProfile.clerkId,
+        email: newProfile.email,
+        firstname: newProfile.firstname,
+        lastname: newProfile.lastname,
+      },
+    }
+    */
+
+  } catch (error) {
+    console.error("Error in onUserInfo:", error)
+    return { status: 500, error: "Internal Server Error" }
+  }
+}
+
+
+
+
+
+export const onUserInfore = async () => {
+  const user = await onCurrentUser()
+
   
   try {
     const profile = await findUser(user.id)
