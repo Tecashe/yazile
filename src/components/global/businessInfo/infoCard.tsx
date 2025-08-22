@@ -169,11 +169,6 @@ function BusinessInfo({ business }: BusinessInfoProps) {
                     />
                   ) : key === 'autoReplyEnabled' ? (
                     <div className="flex items-center space-x-2 mt-1">
-                      <Switch
-                        id={key}
-                        checked={editedBusiness[key as keyof FormSchema] as boolean}
-                        onCheckedChange={(checked) => handleChange(key, checked)}
-                      />
                       <Label htmlFor={key} className="text-gray-300">Auto Reply {editedBusiness[key as keyof FormSchema] ? 'Enabled' : 'Disabled'}</Label>
                     </div>
                   ) : (
@@ -186,9 +181,7 @@ function BusinessInfo({ business }: BusinessInfoProps) {
                   )
                 ) : (
                   <p className="mt-1 text-lg">
-                    {key === 'autoReplyEnabled' 
-                      ? (editedBusiness[key as keyof FormSchema] as boolean ? 'Yes' : 'No')
-                      : editedBusiness[key as keyof FormSchema]?.toString()}
+                   yes
                   </p>
                 )}
               </motion.div>

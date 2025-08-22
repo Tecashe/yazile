@@ -1,6 +1,6 @@
 
 import { getBusinessForWebhook } from "@/actions/businfo"
-
+import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
 import type { JsonValue } from "@prisma/client/runtime/library"
 import { decrypt } from "@/lib/encryption"
@@ -313,48 +313,14 @@ export async function fetchEnhancedBusinessVariables(
     let workflowConfigWithCredentials: any = null
     let crmIntegration: any = null
 
-    if (workflowConfigId) {
-      try {
-        workflowConfigWithCredentials = await client.businessWorkflowConfig.findUnique({
-          where: { id: workflowConfigId },
-          include: { credentials: true }, // Remove crmIntegration from include
-        })
-
-        if (!workflowConfigWithCredentials) {
-          Logger.warning(`Workflow config with ID ${workflowConfigId} not found.`)
-        } else {
-          // Fetch CRM integration separately if crmIntegrationId exists
-          if (workflowConfigWithCredentials.crmIntegrationId) {
-            try {
-              crmIntegration = await client.crmIntegration.findUnique({
-                where: { id: workflowConfigWithCredentials.crmIntegrationId },
-              })
-              if (!crmIntegration) {
-                Logger.warning(`CRM integration with ID ${workflowConfigWithCredentials.crmIntegrationId} not found.`)
-              }
-            } catch (crmError) {
-              Logger.error(
-                `Error fetching CRM integration for ${workflowConfigWithCredentials.crmIntegrationId}:`,
-                crmError,
-              )
-            }
-          }
-        }
-      } catch (dbError) {
-        Logger.error(`Error fetching workflow config with credentials for ${workflowConfigId}:`, dbError)
-      }
-    } else {
-      Logger.warning("No workflowConfigId provided to fetch integration credentials.")
-    }
-
+    
     // Build robust fallback variables
     const result: Record<string, string> = {
       // Core business information with multiple fallbacks
       business_profile: profileContent || "Professional business assistant",
       business_name: businessContext.businessName || businessData?.businessName || "Our Business",
-      welcome_message:
-        businessContext.welcomeMessage || businessData?.welcomeMessage || "Hello! How can I help you today?",
-      business_industry: businessContext.industry || businessData?.industry || "Customer Service",
+      welcome_message:"Hello! How can I help you today?",
+      business_industry: businessContext.businessType || businessData?.industry || "Customer Service",
       business_type: businessData?.businessType || "Service Business",
       business_description:
         businessContext.businessDescription ||
@@ -364,9 +330,8 @@ export async function fetchEnhancedBusinessVariables(
       response_language: businessData?.responseLanguage || "English", // Use businessData directly
       business_hours: businessData?.businessHours || "24/7",
       auto_reply_enabled: businessData?.autoReplyEnabled ? "Yes" : "Yes", // Default to Yes
-      promotion_message:
-        businessContext.promotionMessage || businessData?.promotionMessage || "Thank you for contacting us!",
-      target_audience: businessContext.targetAudience || businessData?.targetAudience || "Valued customers",
+      promotion_message: "Thank you for contacting us!",
+      target_audience:"Valued customers",
       website: businessData?.website || "",
 
       // Customer data placeholders
