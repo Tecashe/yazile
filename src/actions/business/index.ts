@@ -451,7 +451,7 @@ export const createBusinessProfile = async (data: {
     const automation = await client.automation.findFirst({
       where: { 
         id: data.automationId,
-        userId: user.data.id // Ensure user owns this automation
+        // userId: user.data.id // Ensure user owns this automation
       },
     })
 
