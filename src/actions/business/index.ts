@@ -193,7 +193,7 @@
 "use server"
 
 import { client } from "@/lib/prisma"
-import { onCurrentUser, onUserInfor } from "../user"
+import { onCurrentUser,onUserInfor } from "../user"
 import { revalidatePath } from "next/cache"
 
 // Business Profile Actions
@@ -222,11 +222,12 @@ export const createBusinessProfile = async (data: {
   automationId: string
 }) => {
   try {
-    const user = await onCurrentUser()
+    const user = await onUserInfor()
+    const userid = user.data?.id
 
     // Check if business profile already exists
     const existingBusiness = await client.business.findFirst({
-      where: { userId: user.id },
+      where: { userId: userid },
     })
 
     if (existingBusiness) {
@@ -244,7 +245,7 @@ export const createBusinessProfile = async (data: {
     const business = await client.business.create({
       data: {
         ...data,
-        userId: user.id,
+        userId: userid,
       },
     })
 
