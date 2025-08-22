@@ -4,10 +4,7 @@ import { getBusinessProfileForAutomation } from "@/actions/webhook/business-prof
 import type { VoiceflowVariables } from "@/types/voiceflow"
 import type { JsonValue } from "@prisma/client/runtime/library"
 import { decrypt } from "@/lib/encryption"
-import { client } from "@/lib/prisma"
 import axios from "axios"
-
-
 
 
 
