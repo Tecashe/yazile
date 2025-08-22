@@ -5774,11 +5774,11 @@ export async function analyzeEnhancedMessage(
           if (business) {
             businessInfo = {
               name: business.businessName || businessContext.businessName,
-              industry: business.industry,
+              industry: business.businessType,
               services: business.businessDescription,
-              targetMarket: business.targetAudience,
+              targetMarket: "everyone with the need ",
               priceRange: "Contact for pricing",
-              valueProposition: business.welcomeMessage,
+              valueProposition: "Hello",
               contactName: business.name,
               fromEmail: `noreply@${business.businessName?.toLowerCase().replace(/\s+/g, "") || "business"}.com`,
               bookingLink: business.website ? `${business.website}/book` : undefined,

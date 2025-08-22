@@ -57,27 +57,14 @@ interface BusinessData {
   businessName: string
   businessType: string
   businessDescription: string
-  industry: string
-  automationSetupComplete: boolean
-  automationSetupDate: Date | null
-  automationAdditionalNotes: string | null
-  automationGoals: JsonValue | null
-  customerJourney: JsonValue | null
-  features: JsonValue | null
-  businessTypeData: JsonValue | null
-  websiteAnalysis: JsonValue | null
-  targetAudience: string
   website: string
-  instagramHandle: string
-  welcomeMessage: string
   responseLanguage: string
-  businessHours: string
-  autoReplyEnabled: boolean
-  promotionMessage: string
+  automationId: string
+  userId: string | null
   createdAt: Date
   updatedAt: Date
-  userId: string | null
 }
+
 
 interface ConversationContext {
   pageId: string
@@ -276,6 +263,228 @@ const cacheManager = new VoiceflowCacheManager()
 // BUSINESS VARIABLES FETCHER
 // ============================================================================
 
+// export async function fetchEnhancedBusinessVariables(
+//   businessId: string,
+//   automationId: string,
+//   workflowConfigId: string | null,
+//   conversationContext?: ConversationContext,
+// ): Promise<Record<string, string>> {
+//   Logger.info("🔍 Fetching enhanced business variables...")
+
+//   try {
+//     // Get business profile and traditional business data in parallel
+//     const [profileResult, businessResult] = await Promise.allSettled([
+//       getBusinessProfileForAutomation(automationId),
+//       getBusinessForWebhook(businessId),
+//     ])
+
+//     // Handle business profile
+//     const { profileContent, businessContext } =
+//       profileResult.status === "fulfilled" ? profileResult.value : { profileContent: "", businessContext: {} }
+
+//     let businessData: BusinessData | null = null
+//     if (
+//       businessResult.status === "fulfilled" &&
+//       businessResult.value.status === 200 &&
+//       businessResult.value.data.business
+//     ) {
+//       businessData = businessResult.value.data.business
+//     } else {
+//       Logger.warning("Business data fetch failed, using profile data only")
+//     }
+
+//     // Fetch workflow configuration and credentials if workflowConfigId is provided
+//     let workflowConfigWithCredentials: any = null
+//     let crmIntegration: any = null
+
+    
+//     // Build robust fallback variables
+//     const result: Record<string, string> = {
+//       // Core business information with multiple fallbacks
+//       business_profile: profileContent || "Professional business assistant",
+//       business_name: businessContext.businessName || businessData?.businessName || "Our Business",
+//       welcome_message:"Hello! How can I help you today?",
+//       business_industry: businessContext.businessType || businessData?.industry || "Customer Service",
+//       business_type: businessData?.businessType || "Service Business",
+//       business_description:
+//         businessContext.businessDescription ||
+//         businessData?.businessDescription ||
+//         "We provide excellent customer service",
+//       instagram_handle: businessData?.instagramHandle || "",
+//       response_language: businessData?.responseLanguage || "English", // Use businessData directly
+//       business_hours: businessData?.businessHours || "24/7",
+//       auto_reply_enabled: businessData?.autoReplyEnabled ? "Yes" : "Yes", // Default to Yes
+//       promotion_message: "Thank you for contacting us!",
+//       target_audience:"Valued customers",
+//       website: businessData?.website || "",
+
+//       // Customer data placeholders
+//       customer_name: "",
+//       customer_email: "",
+//       customer_phone: "",
+
+//       // System status
+//       system_status: "operational",
+//       fallback_mode: businessData ? "false" : "true",
+//       workflow_config_id: workflowConfigId || "", // Pass the workflow config ID to Voiceflow
+//     }
+
+//     // Add conversation context
+//     if (conversationContext) {
+//       result.customer_type = conversationContext.customerType
+//       result.is_new_user = conversationContext.isNewUser.toString()
+//       result.current_message = conversationContext.userMessage
+//       result.conversation_history = conversationContext.messageHistory
+//         .slice(-3) // Reduce to last 3 messages to avoid overwhelming Voiceflow
+//         .map((msg) => `${msg.role}: ${msg.content}`)
+//         .join(" | ")
+//       result.conversation_length = conversationContext.messageHistory.length.toString()
+
+//       // Conversation insights
+//       const hasQuestions = conversationContext.userMessage.includes("?")
+//       const hasUrgentWords = /urgent|asap|immediately|emergency|help/i.test(conversationContext.userMessage)
+//       const hasPurchaseIntent = /buy|purchase|order|price|cost|payment/i.test(conversationContext.userMessage)
+
+//       result.has_questions = hasQuestions.toString()
+//       result.is_urgent = hasUrgentWords.toString()
+//       result.has_purchase_intent = hasPurchaseIntent.toString()
+
+//       // Add greeting detection
+//       const isGreeting = /^(hi|hello|hey|good morning|good afternoon|good evening)$/i.test(
+//         conversationContext.userMessage.trim(),
+//       )
+//       result.is_greeting = isGreeting.toString()
+//     }
+
+//     // Parse JSON fields safely only if businessData exists
+//     if (businessData) {
+//       const jsonFields = [
+//         { field: businessData.automationGoals, keys: ["primary_goal", "response_time", "custom_goals"] },
+//         { field: businessData.customerJourney, keys: ["journey_steps"] },
+//         { field: businessData.features, keys: ["enabled_features"] },
+//       ]
+
+//       jsonFields.forEach(({ field, keys }) => {
+//         if (field) {
+//           try {
+//             const parsed = typeof field === "string" ? JSON.parse(field) : (field as Record<string, any>)
+//             keys.forEach((key) => {
+//               if (key === "journey_steps") {
+//                 result[key] = JSON.stringify(parsed.journeySteps || [])
+//               } else if (key === "enabled_features") {
+//                 result[key] =
+//                   parsed.features
+//                     ?.filter((f: any) => f.enabled)
+//                     .map((f: any) => f.name)
+//                     .join(", ") || ""
+//               } else {
+//                 result[key] = parsed[key.replace("_", "")] || ""
+//               }
+//             })
+//           } catch (error) {
+//             Logger.error(`Error parsing ${keys[0]}:`, error)
+//             // Set safe defaults
+//             keys.forEach((key) => {
+//               result[key] = ""
+//             })
+//           }
+//         }
+//       })
+
+//       // Add remaining fields
+//       if (businessData.businessTypeData) {
+//         result.business_type_data = JSON.stringify(businessData.businessTypeData)
+//       }
+//       if (businessData.websiteAnalysis) {
+//         result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
+//       }
+
+//       result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
+//       result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
+//       result.automation_additional_notes = businessData.automationAdditionalNotes || ""
+//     } else {
+//       // Set safe defaults when no business data
+//       result.primary_goal = "Provide excellent customer service"
+//       result.response_time = "immediate"
+//       result.custom_goals = "Help customers effectively"
+//       result.journey_steps = "[]"
+//       result.enabled_features = "chat, support"
+//       result.automation_setup_complete = "Yes"
+//       result.automation_setup_date = new Date().toISOString()
+//       result.automation_additional_notes = "Using fallback configuration"
+//     }
+
+//     // Add CRM integration credentials to variables
+//     if (crmIntegration) {
+//       try {
+//         const decryptedCredentials = decrypt(crmIntegration.apiKey)
+//         const parsedConfig = JSON.parse(decryptedCredentials)
+
+//         // Map credentials to Voiceflow variables using a consistent naming convention
+//         // Example: integrationName_credentialField
+//         // Ensure these variable names are defined in your Voiceflow projects
+//         for (const key in parsedConfig) {
+//           if (Object.prototype.hasOwnProperty.call(parsedConfig, key)) {
+//             const vfVarName = `${crmIntegration.provider.toLowerCase().replace(/\s/g, "_")}_${key}`
+//             result[vfVarName] = parsedConfig[key]
+//           }
+//         }
+
+//         Logger.debug(`Decrypted and added variables for ${crmIntegration.provider}`)
+//       } catch (e) {
+//         Logger.error(`Failed to decrypt or parse credentials for ${crmIntegration.provider}:`, e)
+//       }
+//     } else {
+//       Logger.warning(`No CRM integration found for workflow config ID ${workflowConfigId}. Using default variables.`)
+//     }
+
+//     // Add decrypted integration credentials to variables
+//     if (workflowConfigWithCredentials && workflowConfigWithCredentials.credentials) {
+//       workflowConfigWithCredentials.credentials.forEach((cred: any) => {
+//         try {
+//           const decryptedCredential = decrypt(cred.apiKey)
+//           const parsedCredential = JSON.parse(decryptedCredential)
+//           for (const key in parsedCredential) {
+//             if (Object.prototype.hasOwnProperty.call(parsedCredential, key)) {
+//               const vfVarName = `${cred.integrationName.toLowerCase().replace(/\s/g, "_")}_${key}`
+//               result[vfVarName] = parsedCredential[key]
+//             }
+//           }
+//           Logger.debug(`Decrypted and added variables for ${cred.integrationName}`)
+//         } catch (e) {
+//           Logger.error(`Failed to decrypt or parse credentials for ${cred.integrationName}:`, e)
+//         }
+//       })
+//     }
+
+//     result.system_timestamp = new Date().toISOString()
+//     result.voiceflow_health_score = circuitBreaker.getHealthScore().toFixed(2)
+
+//     Logger.success(`✅ Enhanced business variables prepared (fallback mode: ${result.fallback_mode})`)
+//     return result
+//   } catch (error) {
+//     Logger.error("❌ Error in fetchEnhancedBusinessVariables:", error)
+
+//     // Return minimal safe variables
+//     return {
+//       business_name: "Customer Service",
+//       welcome_message: "Hello! How can I help you today?",
+//       business_industry: "Customer Service",
+//       response_language: "English",
+//       customer_type: conversationContext?.customerType || "NEW",
+//       is_new_user: conversationContext?.isNewUser?.toString() || "true",
+//       current_message: conversationContext?.userMessage || "",
+//       system_status: "fallback",
+//       fallback_mode: "true",
+//       system_timestamp: new Date().toISOString(),
+//       voiceflow_health_score: "0.5",
+//       workflow_config_id: workflowConfigId || "",
+//     }
+//   }
+// }
+
+// Updated BusinessData interface to match your new Business model
+
 export async function fetchEnhancedBusinessVariables(
   businessId: string,
   automationId: string,
@@ -293,7 +502,17 @@ export async function fetchEnhancedBusinessVariables(
 
     // Handle business profile
     const { profileContent, businessContext } =
-      profileResult.status === "fulfilled" ? profileResult.value : { profileContent: "", businessContext: {} }
+      profileResult.status === "fulfilled" ? profileResult.value : { 
+        profileContent: "", 
+        businessContext: {
+          businessName: "Our Business",
+          businessType: "Service",
+          website: "",
+          responseLanguage: "English",
+          businessDescription: "",
+          name: "",
+        }
+      }
 
     let businessData: BusinessData | null = null
     if (
@@ -307,29 +526,66 @@ export async function fetchEnhancedBusinessVariables(
     }
 
     // Fetch workflow configuration and credentials if workflowConfigId is provided
-    let workflowConfigWithCredentials: any = null
-    let crmIntegration: any = null
+    // let workflowConfigWithCredentials: any = null
+    // let crmIntegration: any = null
 
+    // if (workflowConfigId) {
+    //   try {
+    //     workflowConfigWithCredentials = await client.businessWorkflowConfig.findUnique({
+    //       where: { id: workflowConfigId },
+    //       include: { credentials: true },
+    //     })
+
+    //     if (!workflowConfigWithCredentials) {
+    //       Logger.warning(`Workflow config with ID ${workflowConfigId} not found.`)
+    //     } else {
+    //       // Fetch CRM integration separately if crmIntegrationId exists
+    //       if (workflowConfigWithCredentials.crmIntegrationId) {
+    //         try {
+    //           crmIntegration = await client.crmIntegration.findUnique({
+    //             where: { id: workflowConfigWithCredentials.crmIntegrationId },
+    //           })
+    //           if (!crmIntegration) {
+    //             Logger.warning(`CRM integration with ID ${workflowConfigWithCredentials.crmIntegrationId} not found.`)
+    //           }
+    //         } catch (crmError) {
+    //           Logger.error(
+    //             `Error fetching CRM integration for ${workflowConfigWithCredentials.crmIntegrationId}:`,
+    //             crmError,
+    //           )
+    //         }
+    //       }
+    //     }
+    //   } catch (dbError) {
+    //     Logger.error(`Error fetching workflow config with credentials for ${workflowConfigId}:`, dbError)
+    //   }
+    // } else {
+    //   Logger.warning("No workflowConfigId provided to fetch integration credentials.")
+    // }
     
-    // Build robust fallback variables
+    // Build robust fallback variables using only fields available in new Business model
     const result: Record<string, string> = {
       // Core business information with multiple fallbacks
       business_profile: profileContent || "Professional business assistant",
       business_name: businessContext.businessName || businessData?.businessName || "Our Business",
-      welcome_message:"Hello! How can I help you today?",
-      business_industry: businessContext.businessType || businessData?.industry || "Customer Service",
-      business_type: businessData?.businessType || "Service Business",
+      display_name: businessContext.name || businessData?.name || "",
+      welcome_message: "Hello! How can I help you today?",
+      business_type: businessContext.businessType || businessData?.businessType || "Service Business",
       business_description:
         businessContext.businessDescription ||
         businessData?.businessDescription ||
         "We provide excellent customer service",
-      instagram_handle: businessData?.instagramHandle || "",
-      response_language: businessData?.responseLanguage || "English", // Use businessData directly
-      business_hours: businessData?.businessHours || "24/7",
-      auto_reply_enabled: businessData?.autoReplyEnabled ? "Yes" : "Yes", // Default to Yes
-      promotion_message: "Thank you for contacting us!",
-      target_audience:"Valued customers",
-      website: businessData?.website || "",
+      website: businessContext.website || businessData?.website || "",
+      response_language: businessContext.responseLanguage || businessData?.responseLanguage || "English",
+      automation_id: businessData?.automationId || automationId,
+
+      // Default values for fields that no longer exist in the model
+      business_industry: businessData?.businessType || "Customer Service", // Use businessType as industry fallback
+      instagram_handle: "", // No longer in model
+      business_hours: "24/7", // No longer in model
+      auto_reply_enabled: "Yes", // No longer in model, default to Yes
+      promotion_message: "Thank you for contacting us!", // No longer in model
+      target_audience: "Valued customers", // No longer in model
 
       // Customer data placeholders
       customer_name: "",
@@ -339,7 +595,7 @@ export async function fetchEnhancedBusinessVariables(
       // System status
       system_status: "operational",
       fallback_mode: businessData ? "false" : "true",
-      workflow_config_id: workflowConfigId || "", // Pass the workflow config ID to Voiceflow
+      workflow_config_id: workflowConfigId || "",
     }
 
     // Add conversation context
@@ -369,52 +625,19 @@ export async function fetchEnhancedBusinessVariables(
       result.is_greeting = isGreeting.toString()
     }
 
-    // Parse JSON fields safely only if businessData exists
+    // Since the complex JSON fields no longer exist, set safe defaults
     if (businessData) {
-      const jsonFields = [
-        { field: businessData.automationGoals, keys: ["primary_goal", "response_time", "custom_goals"] },
-        { field: businessData.customerJourney, keys: ["journey_steps"] },
-        { field: businessData.features, keys: ["enabled_features"] },
-      ]
-
-      jsonFields.forEach(({ field, keys }) => {
-        if (field) {
-          try {
-            const parsed = typeof field === "string" ? JSON.parse(field) : (field as Record<string, any>)
-            keys.forEach((key) => {
-              if (key === "journey_steps") {
-                result[key] = JSON.stringify(parsed.journeySteps || [])
-              } else if (key === "enabled_features") {
-                result[key] =
-                  parsed.features
-                    ?.filter((f: any) => f.enabled)
-                    .map((f: any) => f.name)
-                    .join(", ") || ""
-              } else {
-                result[key] = parsed[key.replace("_", "")] || ""
-              }
-            })
-          } catch (error) {
-            Logger.error(`Error parsing ${keys[0]}:`, error)
-            // Set safe defaults
-            keys.forEach((key) => {
-              result[key] = ""
-            })
-          }
-        }
-      })
-
-      // Add remaining fields
-      if (businessData.businessTypeData) {
-        result.business_type_data = JSON.stringify(businessData.businessTypeData)
-      }
-      if (businessData.websiteAnalysis) {
-        result.website_analysis = JSON.stringify(businessData.websiteAnalysis)
-      }
-
-      result.automation_setup_complete = businessData.automationSetupComplete ? "Yes" : "No"
-      result.automation_setup_date = businessData.automationSetupDate?.toISOString() || ""
-      result.automation_additional_notes = businessData.automationAdditionalNotes || ""
+      // Set defaults for fields that were previously JSON parsed
+      result.primary_goal = "Provide excellent customer service"
+      result.response_time = "immediate"
+      result.custom_goals = "Help customers effectively"
+      result.journey_steps = "[]"
+      result.enabled_features = "chat, support"
+      result.business_type_data = ""
+      result.website_analysis = ""
+      result.automation_setup_complete = "Yes"
+      result.automation_setup_date = new Date().toISOString()
+      result.automation_additional_notes = "Simplified business configuration"
     } else {
       // Set safe defaults when no business data
       result.primary_goal = "Provide excellent customer service"
@@ -428,47 +651,45 @@ export async function fetchEnhancedBusinessVariables(
     }
 
     // Add CRM integration credentials to variables
-    if (crmIntegration) {
-      try {
-        const decryptedCredentials = decrypt(crmIntegration.apiKey)
-        const parsedConfig = JSON.parse(decryptedCredentials)
+    // if (crmIntegration) {
+    //   try {
+    //     const decryptedCredentials = decrypt(crmIntegration.apiKey)
+    //     const parsedConfig = JSON.parse(decryptedCredentials)
 
-        // Map credentials to Voiceflow variables using a consistent naming convention
-        // Example: integrationName_credentialField
-        // Ensure these variable names are defined in your Voiceflow projects
-        for (const key in parsedConfig) {
-          if (Object.prototype.hasOwnProperty.call(parsedConfig, key)) {
-            const vfVarName = `${crmIntegration.provider.toLowerCase().replace(/\s/g, "_")}_${key}`
-            result[vfVarName] = parsedConfig[key]
-          }
-        }
+    //     // Map credentials to Voiceflow variables using a consistent naming convention
+    //     for (const key in parsedConfig) {
+    //       if (Object.prototype.hasOwnProperty.call(parsedConfig, key)) {
+    //         const vfVarName = `${crmIntegration.provider.toLowerCase().replace(/\s/g, "_")}_${key}`
+    //         result[vfVarName] = parsedConfig[key]
+    //       }
+    //     }
 
-        Logger.debug(`Decrypted and added variables for ${crmIntegration.provider}`)
-      } catch (e) {
-        Logger.error(`Failed to decrypt or parse credentials for ${crmIntegration.provider}:`, e)
-      }
-    } else {
-      Logger.warning(`No CRM integration found for workflow config ID ${workflowConfigId}. Using default variables.`)
-    }
+    //     Logger.debug(`Decrypted and added variables for ${crmIntegration.provider}`)
+    //   } catch (e) {
+    //     Logger.error(`Failed to decrypt or parse credentials for ${crmIntegration.provider}:`, e)
+    //   }
+    // } else {
+    //   Logger.warning(`No CRM integration found for workflow config ID ${workflowConfigId}. Using default variables.`)
+    // }
 
     // Add decrypted integration credentials to variables
-    if (workflowConfigWithCredentials && workflowConfigWithCredentials.credentials) {
-      workflowConfigWithCredentials.credentials.forEach((cred: any) => {
-        try {
-          const decryptedCredential = decrypt(cred.apiKey)
-          const parsedCredential = JSON.parse(decryptedCredential)
-          for (const key in parsedCredential) {
-            if (Object.prototype.hasOwnProperty.call(parsedCredential, key)) {
-              const vfVarName = `${cred.integrationName.toLowerCase().replace(/\s/g, "_")}_${key}`
-              result[vfVarName] = parsedCredential[key]
-            }
-          }
-          Logger.debug(`Decrypted and added variables for ${cred.integrationName}`)
-        } catch (e) {
-          Logger.error(`Failed to decrypt or parse credentials for ${cred.integrationName}:`, e)
-        }
-      })
-    }
+    // if (workflowConfigWithCredentials && workflowConfigWithCredentials.credentials) {
+    //   workflowConfigWithCredentials.credentials.forEach((cred: any) => {
+    //     try {
+    //       const decryptedCredential = decrypt(cred.apiKey)
+    //       const parsedCredential = JSON.parse(decryptedCredential)
+    //       for (const key in parsedCredential) {
+    //         if (Object.prototype.hasOwnProperty.call(parsedCredential, key)) {
+    //           const vfVarName = `${cred.integrationName.toLowerCase().replace(/\s/g, "_")}_${key}`
+    //           result[vfVarName] = parsedCredential[key]
+    //         }
+    //       }
+    //       Logger.debug(`Decrypted and added variables for ${cred.integrationName}`)
+    //     } catch (e) {
+    //       Logger.error(`Failed to decrypt or parse credentials for ${cred.integrationName}:`, e)
+    //     }
+    //   })
+    // }
 
     result.system_timestamp = new Date().toISOString()
     result.voiceflow_health_score = circuitBreaker.getHealthScore().toFixed(2)

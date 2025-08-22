@@ -113,7 +113,7 @@ export async function initiateHumanHandoff(request: HandoffRequest): Promise<Han
             businessId: business.id,
             requiredSkills: getRequiredSkills(business.businessType, request.reason),
             preferredLanguage: business.responseLanguage || "en",
-            businessHours: business.businessHours,
+            businessHours: "24/7",
             timezone: "UTC",
           },
 
