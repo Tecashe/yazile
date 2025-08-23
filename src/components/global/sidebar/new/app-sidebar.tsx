@@ -545,9 +545,6 @@ export function AppSidebar({ slug }: Props) {
             </SidebarGroup>
           ))}
           <SidebarSeparator className="mx-4 bg-border/50" />
-          {/* Quick Actions */}
-
-
           <SidebarGroup className="px-2">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -560,95 +557,7 @@ export function AppSidebar({ slug }: Props) {
                 <p className="text-sm text-muted-foreground mt-1">Frequently used actions for faster workflow</p>
               </TooltipContent>
             </Tooltip>
-            <SidebarGroupContent>
-              <SidebarMenu>
-
-                {/* <SidebarMenuItem>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <SidebarMenuButton asChild className="hover:bg-accent/50">
-                        <Link href={`/dashboard/${slug}/automations`}>
-                          <Plus className="h-4 w-4" />
-                          <span>New Automation</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="font-medium">New Automation</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Create a new automated workflow to streamline your business processes
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </SidebarMenuItem> */}
-
-
-                {/* <SidebarMenuItem>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <SidebarMenuButton asChild className="hover:bg-accent/50">
-                        <Link href={`/dashboard/${slug}/agents`}>
-                          <Plus className="h-4 w-4" />
-                          <span>New Agent</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="font-medium">New Agent</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Set up a new AI agent to handle customer interactions and support
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </SidebarMenuItem> */}
-
-
-                {/* <SidebarMenuItem>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <SidebarMenuButton asChild className="hover:bg-accent/50">
-                        <Link href={`/dashboard/${slug}/posting`}>
-                          <Instagram className="h-4 w-4" />
-                          <span>Schedule Content</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="font-medium">Schedule Content</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Plan and schedule your Instagram posts for optimal engagement
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </SidebarMenuItem> */}
-
-
-
-                <SidebarMenuItem>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <SidebarMenuButton asChild className="hover:bg-accent/50">
-                        <Link href={`/dashboard/${slug}/affiliate`}>
-                          <GitBranch className="h-4 w-4" />
-                          <span>Refer & Earn</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="font-medium">Refer & Earn</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Invite friends and earn rewards through our affiliate program
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
           </SidebarGroup>
-
-
-
-
         </SidebarContent>
         <SidebarFooter className="bg-background border-t border-border/50">
           <NavUser user={userData} onSignOut={signOut} />
