@@ -970,7 +970,6 @@ import { usePathname } from "next/navigation"
 import { Search, Cog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NotificationDropdown } from "./notifications/notification-dropdown" 
 import { useState } from "react"
 
 type Props = {
@@ -1086,11 +1085,6 @@ const Navbar = ({ slug }: Props) => {
               <Search className="h-4 w-4" />
               <span className="sr-only">Search</span>
             </Button>
-
-            {/* Real-time Notifications */}
-            <NotificationDropdown />
-
-            {/* Settings */}
             <Button variant="ghost" size="icon" asChild>
               <a href={`/dashboard/${slug}/settings`}>
                 <Cog className="h-4 w-4" />

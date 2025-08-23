@@ -428,24 +428,24 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         icon: icon(Users, "text-emerald-600"),
         description: "Manage and track your leads, prospects, and customer pipeline",
       },
-      {
-        id: uuid(),
-        label: "Messages",
-        icon: icon(MessageCircle, "text-violet-600"),
-        description: "View and manage all conversations across integrated platforms",
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Messages",
+      //   icon: icon(MessageCircle, "text-violet-600"),
+      //   description: "View and manage all conversations across integrated platforms",
+      // },
       // {
       //   id: uuid(),
       //   label: "Pricing",
       //   icon: icon(DollarSign, "text-green-700"),
       //   description: "Manage your subscription, billing, and pricing plans",
       // },
-      {
-        id: uuid(),
-        label: "Opportunities",
-        icon: icon(Award, "text-yellow-600"),
-        description: "Track business opportunities and potential revenue streams",
-      },
+      // {
+      //   id: uuid(),
+      //   label: "Opportunities",
+      //   icon: icon(Award, "text-yellow-600"),
+      //   description: "Track business opportunities and potential revenue streams",
+      // },
       {
         id: uuid(),
         label: "Settings",
