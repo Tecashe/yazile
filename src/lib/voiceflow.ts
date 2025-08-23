@@ -59,7 +59,7 @@ interface BusinessData {
   businessDescription: string
   website: string
   responseLanguage: string
-  automationId: string
+  automationId: string | null
   userId: string | null
   createdAt: Date
   updatedAt: Date
@@ -520,7 +520,7 @@ export async function fetchEnhancedBusinessVariables(
       businessResult.value.status === 200 &&
       businessResult.value.data.business
     ) {
-      businessData = businessResult.value.data.business
+      businessData = businessResult.value.data.business 
     } else {
       Logger.warning("Business data fetch failed, using profile data only")
     }
