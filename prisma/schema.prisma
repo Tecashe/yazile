@@ -61,6 +61,43 @@ model User {
   alerts               Alert[]
 }
 
+
+
+
+
+enum AutomationGoalType {
+  PAYMENT_PROCESSING
+  ECOMMERCE_INTEGRATION
+  APPOINTMENT_BOOKING
+  CUSTOMER_SUPPORT
+  LEAD_QUALIFICATION
+  CONTENT_DELIVERY
+  REVIEWS_FEEDBACK
+  PERSONALIZED_MARKETING
+}
+
+model AutomationGoal {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  goalType      AutomationGoalType
+  isActive      Boolean              @default(true)
+  priority      Int                  @default(1) // 1 = highest priority
+  customConfig  Json?                // Store custom configuration for each goal
+  
+  // Relationships
+  businessId    String               @db.Uuid
+  business      Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  
+  @@unique([businessId, goalType]) // Prevent duplicate goals for same business
+  @@index([businessId])
+  @@index([goalType])
+}
+
+
+
+
 model ScheduledContent {
   id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   instagramPostId  String?     @unique
@@ -98,7 +135,7 @@ model Business {
   businessName        String
   businessType        String
   businessDescription String
-  automationId        String  @unique @db.Uuid
+  automationId        String?  @unique @db.Uuid
 
   website String
 
@@ -106,9 +143,11 @@ model Business {
 
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automation Automation? @relation(fields: [automationId], references: [id], onDelete: Cascade)
   User       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String?    @db.Uuid
+
+  automationGoals     AutomationGoal[]
 
   handoffs         HumanHandoff[]
   agentAssignments AgentBusinessAssignment[]
