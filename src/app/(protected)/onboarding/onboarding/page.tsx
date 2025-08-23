@@ -1916,7 +1916,7 @@ const BusinessOnboarding = () => {
           Welcome Aboard! 🚀
         </h2>
         <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-          Your business profile has been created successfully. You're now ready to set up your Instagram DM automation with Voiceflow!
+          Your business profile has been created successfully. You&apos;re now ready to set up your Instagram DM automation with Voiceflow!
         </p>
         
         <div className="bg-slate-800/50 rounded-xl p-6 max-w-md mx-auto">
