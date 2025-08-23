@@ -427,18 +427,14 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarSeparator,
   SidebarGroupAction,
 } from "@/components/ui/sidebars"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltips"
 import { usePathname } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
-import Link from "next/link"
 import { SIDEBAR_MENU } from "@/constants/menu"
-import { Instagram } from "lucide-react"
+
 
 // Transform your menu data to work with the new sidebar
 const transformMenuData = (slug: string, pathname: string) => {
@@ -545,19 +541,6 @@ export function AppSidebar({ slug }: Props) {
             </SidebarGroup>
           ))}
           <SidebarSeparator className="mx-4 bg-border/50" />
-          <SidebarGroup className="px-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
-                  Quick Actions
-                </SidebarGroupLabel>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                <p className="font-medium">Quick Actions</p>
-                <p className="text-sm text-muted-foreground mt-1">Frequently used actions for faster workflow</p>
-              </TooltipContent>
-            </Tooltip>
-          </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className="bg-background border-t border-border/50">
           <NavUser user={userData} onSignOut={signOut} />

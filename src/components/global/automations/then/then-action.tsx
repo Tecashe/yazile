@@ -1685,7 +1685,7 @@ import FloatingPanel from "../../panel"
 import ResponseLibrary from "../response"
 import { ContextCard } from "../context"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { saveBusinessProfile } from "@/actions/business"
+import { saveBusinessProfile, getBusinessProfile } from "@/actions/business"
 import { toast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -1740,6 +1740,29 @@ const ThenAction = ({
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+
+  const [fetchedBusinessDescription, setFetchedBusinessDescription] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchBusinessDescription = async () => {
+      try {
+        const result = await getBusinessProfile()
+        if (result.status === 200 && result.data?.businessDescription) {
+          setFetchedBusinessDescription(result.data.businessDescription)
+          // If you have a businessProfile state, update it too
+          setBusinessProfile(result.data.businessDescription)
+        }
+      } catch (error) {
+        console.error("Error fetching business description:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBusinessDescription()
+  }, [])
 
   const setupProgress = (completedSteps.length / 3) * 100
 
@@ -3772,13 +3795,22 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                     <Briefcase className="h-4 w-4 mr-2 text-light-blue" />
                     Business Profile Information
                   </Label>
-                  <Textarea
+                      <Textarea
+                      id="business-profile"
+                      ref={textareaRef}
+                      placeholder="Enter comprehensive information about your business..."
+                      className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-1 focus:ring-light-blue/50 min-h-[400px] text-sm"
+                      defaultValue={fetchedBusinessDescription || businessProfile}
+                      onChange={(e) => setBusinessProfile(e.target.value)} // Make sure to track changes
+                      disabled={isLoading}
+                    />
+                  {/* <Textarea
                     id="business-profile"
                     ref={textareaRef}
                     placeholder="Enter comprehensive information about your business..."
                     className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-1 focus:ring-light-blue/50 min-h-[400px] text-sm"
                     defaultValue={businessProfile}
-                  />
+                  /> */}
                   <p className="text-xs text-muted-foreground">
                     Replace the placeholder text in [BRACKETS] with your specific business information.
                   </p>
