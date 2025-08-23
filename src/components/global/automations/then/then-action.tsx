@@ -3535,17 +3535,17 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                   )}
                   onClick={() => {
                     if (step === 1) {
-                      setActiveTab("templates")
+                      setActiveTab("editor")
                       setSetupStep(1)
                     }
                     if (step === 2) {
-                      setActiveTab("editor")
+                      setActiveTab("automation")
                       setSetupStep(2)
                     }
-                    if (step === 3) {
-                      setActiveTab("automation")
-                      setSetupStep(3)
-                    }
+                    // if (step === 3) {
+                    //   setActiveTab("examples")
+                    //   setSetupStep(3)
+                    // }
                   }}
                 >
                   <CardContent className="p-3">
