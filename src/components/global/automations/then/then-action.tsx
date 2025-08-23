@@ -1685,7 +1685,7 @@ import FloatingPanel from "../../panel"
 import ResponseLibrary from "../response"
 import { ContextCard } from "../context"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { saveBusinessProfile, getBusinessProfile } from "@/actions/business"
+import { saveBusinessProfile, getBusinessProfile,updateBusinessProfile } from "@/actions/business"
 import { toast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -1742,8 +1742,9 @@ const ThenAction = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
 
-  const [fetchedBusinessDescription, setFetchedBusinessDescription] = useState("")
+ const [fetchedBusinessDescription, setFetchedBusinessDescription] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchBusinessDescription = async () => {
@@ -1751,8 +1752,8 @@ const ThenAction = ({
         const result = await getBusinessProfile()
         if (result.status === 200 && result.data?.businessDescription) {
           setFetchedBusinessDescription(result.data.businessDescription)
-          // If you have a businessProfile state, update it too
           setBusinessProfile(result.data.businessDescription)
+          setLastUpdated(result.data.updatedAt.toISOString())
         }
       } catch (error) {
         console.error("Error fetching business description:", error)
@@ -1764,6 +1765,7 @@ const ThenAction = ({
     fetchBusinessDescription()
   }, [])
 
+  
   const setupProgress = (completedSteps.length / 3) * 100
 
  const templateCategories = [
@@ -3354,7 +3356,64 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
   `
 
   // Handle saving business profile to database
+
+
   const handleSaveProfile = async () => {
+  if (!businessProfile.trim()) {
+    toast({
+      title: "Error",
+      description: "Please enter or select a business profile before saving",
+      variant: "destructive",
+    })
+    return
+  }
+
+  setIsSaving(true)
+  try {
+    const result = await updateBusinessProfile({
+      businessDescription: businessProfile,
+    })
+
+    if (result.status === 200) {
+      setSaveSuccess(true)
+      setLastUpdated(new Date().toISOString())
+      setCompletedSteps((prev) => [...prev.filter((s) => s !== 2), 2])
+      toast({
+        title: "Success",
+        description: "Business profile saved successfully! Now set up your automation listeners.",
+        variant: "default",
+      })
+
+      // Auto-navigate to automation setup after saving
+      setTimeout(() => {
+        setActiveTab("automation")
+        setSetupStep(3)
+      }, 1500)
+
+      setTimeout(() => {
+        setSaveSuccess(false)
+      }, 3000)
+    } else {
+      throw new Error(result.error || "Failed to save business profile")
+    }
+  } catch (error) {
+    console.error("Error saving business profile:", error)
+    toast({
+      title: "Error",
+      description: "Failed to save business profile. Please try again.",
+      variant: "destructive",
+    })
+  } finally {
+    setIsSaving(false)
+  }
+}
+
+
+
+
+
+
+  const handleSaveProfileE = async () => {
     if (!businessProfile.trim()) {
       toast({
         title: "Error",
@@ -3789,7 +3848,109 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                 )}
               </div>
 
+
+
+
               <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="business-profile" className="text-sm text-text-secondary flex items-center">
+                  <Briefcase className="h-4 w-4 mr-2 text-light-blue" />
+                  Business Profile Information
+                </Label>
+                {isLoading ? (
+                  <div className="bg-background-90 border border-background-80 rounded-md min-h-[400px] flex items-center justify-center">
+                    <div className="flex items-center text-muted-foreground">
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Loading your business profile...
+                    </div>
+                  </div>
+                ) : (
+                  <Textarea
+                    id="business-profile"
+                    ref={textareaRef}
+                    placeholder="Enter comprehensive information about your business..."
+                    className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-1 focus:ring-light-blue/50 min-h-[400px] text-sm"
+                    value={businessProfile}
+                    onChange={(e) => setBusinessProfile(e.target.value)}
+                  />
+                )}
+                
+                <p className="text-xs text-muted-foreground">
+                  {fetchedBusinessDescription 
+                    ? "Your existing business profile is loaded. You can edit it and save changes."
+                    : "Replace the placeholder text in [BRACKETS] with your specific business information."
+                  }
+                </p>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4 mr-1" />
+                  <span>
+                    Last updated: {lastUpdated 
+                      ? new Date(lastUpdated).toLocaleString() 
+                      : "Not saved yet"
+                    }
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="border-light-blue/30 text-light-blue hover:bg-light-blue/10"
+                    onClick={() => {
+                      setBusinessProfile(fetchedBusinessDescription || "")
+                      if (textareaRef.current) {
+                        textareaRef.current.value = fetchedBusinessDescription || ""
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    {fetchedBusinessDescription ? "Reset" : "Clear"}
+                  </Button>
+                  <Button
+                    className="bg-light-blue hover:bg-light-blue/90 text-white"
+                    onClick={handleSaveProfile}
+                    disabled={isSaving || !businessProfile.trim() || isLoading}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : saveSuccess ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Saved! Next: Setup Automation
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        {fetchedBusinessDescription ? "Update & Continue" : "Save & Continue"}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+              
+
+
+
+
+
+
+
+
+
+
+
+
+              {/* <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="business-profile" className="text-sm text-text-secondary flex items-center">
                     <Briefcase className="h-4 w-4 mr-2 text-light-blue" />
@@ -3804,13 +3965,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                       onChange={(e) => setBusinessProfile(e.target.value)} // Make sure to track changes
                       disabled={isLoading}
                     />
-                  {/* <Textarea
-                    id="business-profile"
-                    ref={textareaRef}
-                    placeholder="Enter comprehensive information about your business..."
-                    className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-1 focus:ring-light-blue/50 min-h-[400px] text-sm"
-                    defaultValue={businessProfile}
-                  /> */}
+                  
                   <p className="text-xs text-muted-foreground">
                     Replace the placeholder text in [BRACKETS] with your specific business information.
                   </p>
@@ -3859,6 +4014,20 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                   </div>
                 </div>
               </div>
+ */}
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
 
             <Alert className="bg-green-500/10 border-green-500/30">
