@@ -475,7 +475,7 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
                 /* Plan Selection */
                 <div className="space-y-6">
                   <Tabs defaultValue="pro" className="w-full">
-                    <TabsList className="w-full bg-zinc-900 rounded-xl p-1 mb-6 grid grid-cols-4">
+                    <TabsList className="w-full bg-zinc-900 rounded-xl p-1 mb-6 grid grid-cols-3">
                       {PLANS.map((plan) => (
                         <TabsTrigger
                           key={plan.id}

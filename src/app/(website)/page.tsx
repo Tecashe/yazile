@@ -1342,7 +1342,7 @@ export default function Home() {
                         </Button>
 
                         <div className="space-y-3">
-                          <div className="text-sm font-medium">What's included:</div>
+                          <div className="text-sm font-medium">What&apos;s included:</div>
                           <ul className="space-y-2">
                             {plan.features.map((feature, featureIndex) => (
                               <li key={featureIndex} className="flex items-start gap-2 text-sm">
@@ -1391,7 +1391,7 @@ export default function Home() {
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <p className="text-muted-foreground italic">
-                      &quot;Yazzil has completely transformed how we handle Instagram DMs. We're converting 3x more leads than before with automated responses.&quot;
+                      &quot;Yazzil has completely transformed how we handle Instagram DMs. We&apos;re converting 3x more leads than before with automated responses.&quot;
                     </p>
                     <div>
                       <div className="font-semibold">Sarah Johnson</div>
