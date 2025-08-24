@@ -30,7 +30,7 @@ const PLANS = [
     price: "$0",
     period: "forever",
     icon: CheckCircle,
-    features: ["5 templates", "Basic analytics", "1 user"],
+    features: ["5 automations", "Basic pre-written reply", "20 DMs automated replies/day"],
     description: "Perfect for getting started",
   },
   {
@@ -39,17 +39,8 @@ const PLANS = [
     price: "$9.99",
     period: "per month",
     icon: Zap,
-    features: ["Unlimited templates", "AI-powered responses", "Advanced analytics", "1 user"],
+    features: ["AI-powered Intelligent replies", "50 automations", "Detailed Sentiment Analysis","Lead Qualification and CRM intelligent syncing"],
     description: "For power users and professionals",
-  },
-  {
-    id: "team",
-    name: "Team",
-    price: "$49.99",
-    period: "per month",
-    icon: Users,
-    features: ["Everything in Pro", "Team collaboration", "Up to 5 users", "Priority support"],
-    description: "Built for growing teams",
   },
   {
     id: "enterprise",
@@ -57,7 +48,7 @@ const PLANS = [
     price: "Custom",
     period: "",
     icon: Crown,
-    features: ["Everything in Team", "Unlimited users", "Dedicated support", "Custom integrations"],
+    features: ["Everything in Pro", "Unlimited automations", "Dedicated support", "Custom integrations"],
     description: "Enterprise-grade solutions",
   },
 ]
