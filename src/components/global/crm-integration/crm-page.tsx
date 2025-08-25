@@ -682,7 +682,7 @@ export function UnifiedCRMIntegration({ userId, analytics }: { userId: string; a
               <div>
                 <Label className="text-sm font-medium">Auto-sync qualified leads</Label>
                 <p className="text-xs text-muted-foreground">
-                  Automatically sync leads when they reach "Qualified" status
+                  Automatically sync leads when they reach &ldquo;Qualified&rdquo; status
                 </p>
               </div>
               <Switch
