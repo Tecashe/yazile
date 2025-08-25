@@ -15,6 +15,7 @@ interface IntegrationCardProps {
   description: string
   icon: ReactNode
   strategy: "INSTAGRAM" | "CRM"
+  category:string
 }
 
 export default function IntegrationCard({ title, description, icon, strategy }: IntegrationCardProps) {
