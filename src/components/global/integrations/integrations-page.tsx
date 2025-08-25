@@ -633,6 +633,12 @@
 //           <PlatformBenefits platform="whatsapp" />
 //         </TabsContent>
 //       </Tabs>
+
+
+
+
+
+
 //       <InstagramDashboard userId={userData?.data?.clerkId || "1234556"} />
 
 //       {showRequirements && (
@@ -843,6 +849,12 @@
 //           )}
 //         </AlertDialogContent>
 //       </AlertDialog>
+
+
+
+
+
+
 //     </div>
 //   )
 // }
@@ -866,6 +878,8 @@ import {
   Users,
   MessageSquare,
   ExternalLink,
+  Shield,
+  Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -883,6 +897,9 @@ import ConnectionStatus from "./connection-status"
 import InstagramDashboard from "./my-info"
 import { UnifiedCRMIntegration } from "@/components/global/crm-integration/crm-page"
 import { useSearchParams } from "next/navigation"
+import { AlertDialogHeader, AlertDialogFooter } from "@/components/ui/alert-dialog"
+import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@radix-ui/react-alert-dialog"
+import RequirementsModal from "./requirements-modal"
 
 export default function IntegrationsPage() {
   const [activeTab, setActiveTab] = useState("all")
@@ -1756,6 +1773,221 @@ export default function IntegrationsPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      
+
+      <InstagramDashboard userId={userData?.data?.clerkId || "1234556"} />
+
+      {showRequirements && (
+        <RequirementsModal
+          platform={showRequirements}
+          onClose={() => setShowRequirements(null)}
+          onConnect={() => handleConnectAfterRequirements(showRequirements)}
+        />
+      )}
+
+      {/* Deauthorization Confirmation Dialog */}
+      <AlertDialog
+        open={showDeauthorizeDialog.show}
+        onOpenChange={(open) =>
+          !open && setShowDeauthorizeDialog({ show: false, platform: "", accountId: "", accountName: "" })
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-red-500" />
+              Deauthorize Account
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to deauthorize <strong>{showDeauthorizeDialog.accountName}</strong>?
+              </p>
+              <p className="text-sm text-muted-foreground">This action will:</p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Revoke all access permissions for this account</li>
+                <li>Remove the account from your connected integrations</li>
+                <li>Stop all automated posting and data syncing</li>
+                <li>Delete stored account data from our servers</li>
+              </ul>
+              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                You&apos;ll need to reconnect the account to use it again.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeauthorizing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeauthorizeAccount}
+              disabled={isDeauthorizing}
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+            >
+              {isDeauthorizing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deauthorizing...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Deauthorize
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* Privacy Policy Agreement Dialog */}
+      <AlertDialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-500" />
+              Privacy & Data Usage
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>
+                Before connecting your account, please review our privacy policy to understand how we handle your data.
+              </p>
+              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                <h4 className="font-medium text-sm">We will access:</h4>
+                <ul className="text-sm space-y-1">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    Basic profile information
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    Posts and media content
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    Engagement metrics
+                  </li>
+                </ul>
+              </div>
+              <div className="flex items-start space-x-2">
+                <input
+                  type="checkbox"
+                  id="privacy-checkbox"
+                  checked={privacyPolicyAccepted}
+                  onChange={(e) => setPrivacyPolicyAccepted(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="privacy-checkbox" className="text-sm">
+                  I have read and agree to the{" "}
+                  <a
+                    href="https://www.yazzil.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Privacy Policy
+                  </a>
+                </label>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setPrivacyPolicyAccepted(false)
+                setShowPrivacyDialog(false)
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (privacyPolicyAccepted) {
+                  setShowPrivacyDialog(false)
+                  setShowRequirements(showRequirements || "instagram")
+                  setPrivacyPolicyAccepted(false) // Reset for next time
+                }
+              }}
+              disabled={!privacyPolicyAccepted}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Deauthorization Progress Dialog */}
+      <AlertDialog open={deauthorizationProgress.show} onOpenChange={() => {}}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {deauthorizationProgress.step === "completed" ? (
+                <CheckCircle className="h-5 w-5 text-green-500" />
+              ) : deauthorizationProgress.step === "error" ? (
+                <AlertCircle className="h-5 w-5 text-red-500" />
+              ) : (
+                <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+              )}
+              {deauthorizationProgress.step === "completed"
+                ? "Disconnected Successfully"
+                : deauthorizationProgress.step === "error"
+                  ? "Disconnection Failed"
+                  : "Disconnecting Account"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>{deauthorizationProgress.message}</p>
+
+              {deauthorizationProgress.step !== "error" && deauthorizationProgress.step !== "completed" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span>{deauthorizationProgress.step === "revoking" ? "1/2" : "2/2"}</span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: deauthorizationProgress.step === "revoking" ? "50%" : "100%",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {deauthorizationProgress.step === "completed" && (
+                <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    Your account has been successfully disconnected. You can now connect a different account if needed.
+                  </p>
+                </div>
+              )}
+
+              {deauthorizationProgress.step === "error" && (
+                <div className="bg-red-50 dark:bg-red-950 p-3 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    Please try again or manually revoke access from your Instagram settings.
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {(deauthorizationProgress.step === "completed" || deauthorizationProgress.step === "error") && (
+            <AlertDialogFooter>
+              <AlertDialogAction
+                onClick={() =>
+                  setDeauthorizationProgress({
+                    show: false,
+                    step: "confirming",
+                    message: "",
+                  })
+                }
+              >
+                Close
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
+
+
 
       {/* ... existing code for modals and dialogs ... */}
     </div>
