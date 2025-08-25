@@ -233,17 +233,7 @@ const BusinessOnboarding = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
-      if (availableAutomations.length === 0) {
-        toast({
-          title: "No Automations Found",
-          description: "Please create an automation first before setting up your business profile.",
-          variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
-      }
-
-      const automationId = availableAutomations[0].id
+      const automationId = availableAutomations.length > 0 ? availableAutomations[0].id : undefined
 
       const businessData = {
         businessName: formData.businessName,
@@ -251,7 +241,7 @@ const BusinessOnboarding = () => {
         businessDescription: formData.businessDescription,
         website: formData.website,
         responseLanguage: formData.responseLanguage,
-        automationId, // Always pass a valid automation ID
+        automationId, // Pass undefined if no automations exist
       }
 
       const result = await createBusinessProfile(businessData)
