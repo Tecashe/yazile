@@ -78,3 +78,12 @@ export function decrypt(encryptedText: string): string {
     return encryptedText // Return original text or throw error
   }
 }
+
+
+
+
+
+
+
+
+

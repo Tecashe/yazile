@@ -143,34 +143,8 @@ export const onUserInfor = async () => {
     console.log("No profile found for clerkId:", user.id)
     console.log("User might need to be created in database")
     
-    // Option 1: Return 404 (current behavior)
     return { status: 404, error: "User not found in database" }
     
-    // Option 2: Auto-create user (uncomment if you want this)
-    /*
-    console.log("Auto-creating user in database...")
-    const newProfile = await client.user.create({
-      data: {
-        clerkId: user.id,
-        email: user.emailAddresses[0]?.emailAddress || "",
-        firstname: user.firstName || "",
-        lastname: user.lastName || "",
-      }
-    })
-    
-    console.log("Created new user:", newProfile)
-    
-    return {
-      status: 200,
-      data: {
-        id: newProfile.id,
-        clerkId: newProfile.clerkId,
-        email: newProfile.email,
-        firstname: newProfile.firstname,
-        lastname: newProfile.lastname,
-      },
-    }
-    */
 
   } catch (error) {
     console.error("Error in onUserInfo:", error)
