@@ -26,7 +26,7 @@ import {
 import { createBusinessProfile, getUserAutomations } from "@/actions/business"
 import { createAutomationGoals } from "@/actions/business/automationgoals"
 import { toast } from "@/hooks/use-toast"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 
 // Type definitions
 interface Automation {
