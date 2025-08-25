@@ -26,6 +26,7 @@ import {
 import { createBusinessProfile, getUserAutomations } from "@/actions/business"
 import { createAutomationGoals } from "@/actions/business/automationgoals"
 import { toast } from "@/hooks/use-toast"
+import { useRouter } from "next/router"
 
 // Type definitions
 interface Automation {
@@ -58,6 +59,7 @@ const BusinessOnboarding = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isComplete, setIsComplete] = useState<boolean>(false)
   const [availableAutomations, setAvailableAutomations] = useState<Automation[]>([])
+  const router = useRouter()
 
   useEffect(() => {
     const fetchAutomations = async () => {
@@ -231,8 +233,17 @@ const BusinessOnboarding = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
-      // Use the first available automation or create without one
-      const automationId = availableAutomations.length > 0 ? availableAutomations[0].id : undefined
+      if (availableAutomations.length === 0) {
+        toast({
+          title: "No Automations Found",
+          description: "Please create an automation first before setting up your business profile.",
+          variant: "destructive",
+        })
+        setIsSubmitting(false)
+        return
+      }
+
+      const automationId = availableAutomations[0].id
 
       const businessData = {
         businessName: formData.businessName,
@@ -240,7 +251,7 @@ const BusinessOnboarding = () => {
         businessDescription: formData.businessDescription,
         website: formData.website,
         responseLanguage: formData.responseLanguage,
-        ...(automationId && { automationId }),
+        automationId, // Always pass a valid automation ID
       }
 
       const result = await createBusinessProfile(businessData)
@@ -257,11 +268,6 @@ const BusinessOnboarding = () => {
           description: "Your business profile has been created successfully.",
           variant: "default",
         })
-
-        // Auto-redirect after 3 seconds
-        setTimeout(() => {
-          window.location.href = "/dashboard"
-        }, 3000)
       } else {
         throw new Error(result.error || "Failed to create business profile")
       }
@@ -572,7 +578,7 @@ This detailed information helps our AI provide more accurate, personalized respo
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => (window.location.href = "/dashboard")}
+        onClick={() => router.push("/dashboard")}
         className="bg-sidebar-primary text-sidebar-primary-foreground px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
       >
         Continue to Dashboard
