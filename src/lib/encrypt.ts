@@ -47,7 +47,7 @@
 
 import crypto from "crypto"
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!
+const ENCRYPTION_KEY = process.env.CREDENTIAL_ENCRYPTION_KEY!
 if (!ENCRYPTION_KEY) {
   throw new Error("ENCRYPTION_KEY env var is required")
 }
