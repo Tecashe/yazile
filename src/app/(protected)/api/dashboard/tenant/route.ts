@@ -6,7 +6,7 @@ import { createTenant, getTenantByUserId } from '@/lib/tenant-service'
 export async function GET() {
   try {
     const user = await onUserInfor()
-    const tenant = await getTenantByUserId(user.data?.clerkId||"undefined")
+    const tenant = await getTenantByUserId(user.data?.id||"undefined")
     
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
@@ -44,12 +44,12 @@ export async function POST(request: NextRequest) {
     const { name, domain } = body
 
     // Check if tenant already exists
-    const existingTenant = await getTenantByUserId(user.data?.clerkId||"")
+    const existingTenant = await getTenantByUserId(user.data?.id||"")
     if (existingTenant) {
       return NextResponse.json({ error: 'Tenant already exists' }, { status: 400 })
     }
 
-    const tenant = await createTenant(user.data?.clerkId||"", name, domain)
+    const tenant = await createTenant(user.data?.id||"", name, domain)
 
     return NextResponse.json({
       success: true,
