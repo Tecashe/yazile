@@ -1,15 +1,15 @@
 
 // /api/dashboard/integrations/route.ts - Manage integrations
 import { NextRequest, NextResponse } from 'next/server'
-import { onCurrentUser } from '@/actions/user'
+import {  onUserInfor } from '@/actions/user'
 import { getTenantByUserId } from '@/lib/tenant-service'
 import { createIntegration, getIntegration } from '@/lib/integration-service'
 import { IntegrationType } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await onCurrentUser()
-    const tenant = await getTenantByUserId(user.id)
+    const user = await onUserInfor()
+    const tenant = await getTenantByUserId(user.data?.id||"")
     
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
@@ -62,8 +62,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await onCurrentUser()
-    const tenant = await getTenantByUserId(user.id)
+    const user = await onUserInfor()
+    const tenant = await getTenantByUserId(user.data?.id||"")
     
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })

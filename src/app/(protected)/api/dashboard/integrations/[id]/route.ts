@@ -2,7 +2,7 @@
 
 // /api/dashboard/integrations/[id]/route.ts - Update/Delete specific integration
 import { NextRequest, NextResponse } from 'next/server'
-import { onCurrentUser } from '@/actions/user'
+import { onUserInfor } from '@/actions/user'
 import { getTenantByUserId } from '@/lib/tenant-service'
 import { client } from '@/lib/prisma'
 import { encrypt, hashCredentials } from '@/lib/encrypt'
@@ -12,8 +12,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await onCurrentUser()
-    const tenant = await getTenantByUserId(user.id)
+    const user = await onUserInfor()
+    const tenant = await getTenantByUserId(user.data?.id||"")
     
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
@@ -68,8 +68,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await onCurrentUser()
-    const tenant = await getTenantByUserId(user.id)
+    const user = await onUserInfor()
+    const tenant = await getTenantByUserId(user.data?.id||"")
     
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
