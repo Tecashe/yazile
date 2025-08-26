@@ -1,12 +1,12 @@
 // /api/dashboard/tenant/route.ts - Create/Get tenant
 import { NextRequest, NextResponse } from 'next/server'
-import { onCurrentUser } from '@/actions/user'
+import { onUserInfor } from '@/actions/user'
 import { createTenant, getTenantByUserId } from '@/lib/tenant-service'
 
 export async function GET() {
   try {
-    const user = await onCurrentUser()
-    const tenant = await getTenantByUserId(user.id)
+    const user = await onUserInfor()
+    const tenant = await getTenantByUserId(user.data?.clerkId||"undefined")
     
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
@@ -39,17 +39,17 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await onCurrentUser()
+    const user = await onUserInfor()
     const body = await request.json()
     const { name, domain } = body
 
     // Check if tenant already exists
-    const existingTenant = await getTenantByUserId(user.id)
+    const existingTenant = await getTenantByUserId(user.data?.clerkId||"")
     if (existingTenant) {
       return NextResponse.json({ error: 'Tenant already exists' }, { status: 400 })
     }
 
-    const tenant = await createTenant(user.id, name, domain)
+    const tenant = await createTenant(user.data?.clerkId||"", name, domain)
 
     return NextResponse.json({
       success: true,
