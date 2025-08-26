@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, domain } = body
 
-    // Check if tenant already exists
+    // Check if tenant already exist
     const existingTenant = await getTenantByUserId(user.data?.id||"")
     if (existingTenant) {
       return NextResponse.json({ error: 'Tenant already exists' }, { status: 400 })

@@ -35,6 +35,7 @@ model User {
   notifications    UserNotification[]
   emails           Email[]
   referredByCode   String?
+  tenant           Tenant?
 
   leads                 Lead[]
   leadScoringRules      LeadScoringRule[]
@@ -1456,6 +1457,7 @@ model Tenant {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @db.Uuid // Reference to your existing User model
   name      String // Business/Organization name
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   domain    String? // Optional custom domain
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
