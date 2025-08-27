@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
     // Validate request
     const isValid = await validateVoiceflowRequest(request, body)
     if (!isValid) {
-      return NextResponse.json({ error: 'You are not Unauthorized Bro' }, { status: 401 })
+      return NextResponse.json({ error: 'You are Unauthorized' }, { status: 401 })
     }
     
     // Get Stripe integration for tenant
