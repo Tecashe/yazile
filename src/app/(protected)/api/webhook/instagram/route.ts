@@ -1767,6 +1767,8 @@ class MessageProcessor {
 // ============================================================================
 
 class VoiceflowHandler {
+
+  
   static async handle(context: ProcessingContext): Promise<ProcessingResult> {
     Logger.info("🎙️ === VOICEFLOW HANDLER (NO FALLBACKS) ===")
 
@@ -1781,7 +1783,6 @@ class VoiceflowHandler {
       const businessVariables = await RetryManager.withRetry(
         () =>
           fetchEnhancedBusinessVariables(
-            context.automation.business.id,
             context.automation.id,
             context.automation.businessWorkflowConfig?.id || null,
             {

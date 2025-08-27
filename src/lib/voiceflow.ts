@@ -371,7 +371,6 @@ async function fetchTenantIntegrations(businessId: string, userId: string): Prom
 
 // Enhanced fetchEnhancedBusinessVariables with tenant support
 export async function fetchEnhancedBusinessVariables(
-  businessId: string,
   automationId: string,
   workflowConfigId: string | null,
   conversationContext?: ConversationContext,
@@ -379,19 +378,55 @@ export async function fetchEnhancedBusinessVariables(
   Logger.info("🔍 Fetching enhanced business variables with multi-tenant support...")
 
   try {
-    // Get business profile and traditional business data in parallel
+    // // Get business profile and traditional business data in parallel
+    // const [profileResult, businessResult] = await Promise.allSettled([
+    //   getBusinessProfileForAutomation(automationId),
+    //   getBusinessForWebhook(),
+    // ])
+
+    // // Handle business profile
+    // const { profileContent, businessContext } =
+    //   profileResult.status === "fulfilled" ? profileResult.value : { 
+    //     profileContent: "", 
+    //     businessContext: {
+    //       businessName: "Our Business",
+    //       businessType: "Service",
+    //       website: "",
+    //       responseLanguage: "English",
+    //       businessDescription: "",
+    //       name: "",
+    //     }
+    //   }
+
+    // let businessData: BusinessData | null = null
+    // if (
+    //   businessResult.status === "fulfilled" &&
+    //   businessResult.value.status === 200 &&
+    //   businessResult.value.data.business
+    // ) {
+    //   businessData = businessResult.value.data.business 
+    // } else {
+    //   Logger.warning("Business data fetch failed, using profile data only")
+    // }
+
+    // // NEW: Fetch tenant integrations
+    // const tenantData = await fetchTenantIntegrations(businessId, businessData?.userId || "wow")
+
+
+
+    // Get business profile and business data in parallel
     const [profileResult, businessResult] = await Promise.allSettled([
       getBusinessProfileForAutomation(automationId),
-      getBusinessForWebhook(),
+      getBusinessForWebhook(), // No businessId parameter needed!
     ])
 
     // Handle business profile
     const { profileContent, businessContext } =
-      profileResult.status === "fulfilled" ? profileResult.value : { 
-        profileContent: "", 
+      profileResult.status === "fulfilled" ? profileResult.value : {
+        profileContent: "",
         businessContext: {
           businessName: "Our Business",
-          businessType: "Service",
+          businessType: "Service", 
           website: "",
           responseLanguage: "English",
           businessDescription: "",
@@ -405,13 +440,26 @@ export async function fetchEnhancedBusinessVariables(
       businessResult.value.status === 200 &&
       businessResult.value.data.business
     ) {
-      businessData = businessResult.value.data.business 
+      businessData = businessResult.value.data.business
     } else {
       Logger.warning("Business data fetch failed, using profile data only")
     }
 
-    // NEW: Fetch tenant integrations
-    const tenantData = await fetchTenantIntegrations(businessId, businessData?.userId || "wow")
+    // Fetch tenant integrations - now with proper userId!
+    const tenantData = businessData?.userId 
+      ? await fetchTenantIntegrations("", businessData.userId) // Empty businessId since we're querying by userId
+      : {
+          tenantId: null,
+          stripeCredentials: null,
+          crmCredentials: null,
+          integrations: []
+        }
+
+    Logger.info(`✅ Tenant data fetched: ${tenantData.integrations.length} integrations found`)
+
+    // Rest of your existing logic...
+
+
 
     // Build enhanced variables with tenant information
     const result: Record<string, string> = {

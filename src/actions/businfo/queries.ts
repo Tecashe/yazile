@@ -285,7 +285,7 @@ export const getBusinessForWebhookByUser = async (clerkId: string) => {
   return result
 }
 
-// Even simpler: Get business with userId directly
+// Even simpler: to Get business with userId directly
 export const getUserBusinessWithId = async (clerkId: string) => {
   return await client.business.findFirst({
     where: {
