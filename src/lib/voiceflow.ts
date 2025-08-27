@@ -352,7 +352,7 @@ async function fetchTenantIntegrations(businessId: string, userId: string): Prom
     }
 
     return {
-      tenantId: tenant.id,
+      tenantId: tenant.userId,
       stripeCredentials,
       crmCredentials,
       integrations
@@ -382,7 +382,7 @@ export async function fetchEnhancedBusinessVariables(
     // Get business profile and traditional business data in parallel
     const [profileResult, businessResult] = await Promise.allSettled([
       getBusinessProfileForAutomation(automationId),
-      getBusinessForWebhook(businessId),
+      getBusinessForWebhook(),
     ])
 
     // Handle business profile
@@ -411,7 +411,7 @@ export async function fetchEnhancedBusinessVariables(
     }
 
     // NEW: Fetch tenant integrations
-    const tenantData = await fetchTenantIntegrations(businessId, businessData?.userId || "")
+    const tenantData = await fetchTenantIntegrations(businessId, businessData?.userId || "wow")
 
     // Build enhanced variables with tenant information
     const result: Record<string, string> = {
@@ -978,7 +978,7 @@ export async function fetchEnhancedBusinessVariablesE(
     // Get business profile and traditional business data in parallel
     const [profileResult, businessResult] = await Promise.allSettled([
       getBusinessProfileForAutomation(automationId),
-      getBusinessForWebhook(businessId),
+      getBusinessForWebhook(),
     ])
 
     // Handle business profile

@@ -21,11 +21,45 @@ import {
   createBusiness,
   getBusinesses,
   findBusiness,
+  getUserBusinessWithId,
   updateBusines,
   updateBusiness,
   deleteBusiness as deleteBusinessQuery
 } from './queries'
 import { FormSchema } from '@/types/schema'
+
+
+
+// Replace your existing getBusinessForWebhook function with this:
+export const getBusinessForWebhook = async () => {
+  try {
+    // Get the authenticated user first
+    const user = await onUserInfor()
+    
+    if (!user.data?.clerkId) {
+      console.error('getBusinessForWebhook: No authenticated user found')
+      return { status: 401, data: { business: null, error: 'User not authenticated' } }
+    }
+
+    console.log('getBusinessForWebhook: Fetching business for user:', user.data.clerkId)
+    
+    // Use the new query to get business with userId included
+    const result = await getUserBusinessWithId(user.data.clerkId)
+    
+    if (result) {
+      console.log('getBusinessForWebhook: Found business:', result.id)
+      return { status: 200, data: { business: result } }
+    }
+    
+    console.log('getBusinessForWebhook: No business found for user')
+    return { status: 404, data: { business: null, error: 'No business found for user' } }
+  } catch (error) {
+    console.error('Error fetching business for webhook:', error)
+    return { status: 500, data: { business: null, error: 'Internal server error' } }
+  }
+}
+
+
 
 
 
@@ -130,7 +164,7 @@ export const getBusinessForWebhookE = async (businessId: string) => {
 
 
 // Add this new function with proper validation
-export const getBusinessForWebhook = async (businessId: string) => {
+export const getBusinessForWebhookEE = async (businessId: string) => {
   try {
     // Validate businessId before making the database call
     if (!businessId || businessId.trim() === '') {

@@ -1781,7 +1781,7 @@ class VoiceflowHandler {
       const businessVariables = await RetryManager.withRetry(
         () =>
           fetchEnhancedBusinessVariables(
-            context.automation.businessId,
+            context.automation.business.id,
             context.automation.id,
             context.automation.businessWorkflowConfig?.id || null,
             {

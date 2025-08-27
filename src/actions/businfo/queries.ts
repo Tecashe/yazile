@@ -243,3 +243,69 @@ export const getBusinessAutomationDatum = async (clerkId: string) => {
     automationId: business.automationId,
   }
 }
+
+////////////
+
+// Add this new function to your queries file
+export const getBusinessByUserId = async (clerkId: string) => {
+  return await client.user.findUnique({
+    where: {
+      clerkId,
+    },
+    select: {
+      id: true, // Include userId for tenant integration
+      businesses: {
+        take: 1, // Only get the first business since user has only one
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+    },
+  })
+}
+
+// Alternative: More direct approach - get business directly with user info
+export const getBusinessForWebhookByUser = async (clerkId: string) => {
+  const result = await client.business.findFirst({
+    where: {
+      User: {
+        clerkId: clerkId
+      }
+    },
+    include: {
+      User: {
+        select: {
+          id: true, // This is the userId you need for tenant integration
+          clerkId: true,
+        }
+      }
+    }
+  })
+  
+  return result
+}
+
+// Even simpler: Get business with userId directly
+export const getUserBusinessWithId = async (clerkId: string) => {
+  return await client.business.findFirst({
+    where: {
+      User: {
+        clerkId: clerkId
+      }
+    },
+    select: {
+      id: true,
+      name: true,
+      businessName: true,
+      businessType: true,
+      businessDescription: true,
+      website: true,
+      responseLanguage: true,
+      automationId: true,
+      userId: true, // This is what you need for fetchTenantIntegrations!
+      createdAt: true,
+      updatedAt: true,
+      // Add any other fields you need
+    }
+  })
+}
