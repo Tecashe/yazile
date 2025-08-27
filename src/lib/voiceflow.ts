@@ -5,6 +5,9 @@ import type { VoiceflowVariables } from "@/types/voiceflow"
 import type { JsonValue } from "@prisma/client/runtime/library"
 import { decrypt } from "@/lib/encryption"
 import axios from "axios"
+import { client } from "@/lib/prisma" // Assuming you have prisma client
+
+
 
 
 
@@ -263,6 +266,484 @@ const cacheManager = new VoiceflowCacheManager()
 // BUSINESS VARIABLES FETCHER
 // ============================================================================
 
+
+
+
+
+
+
+// Enhanced fetchEnhancedBusinessVariables function with multi-tenant support
+
+
+// Add this new function to fetch tenant and integration data
+async function fetchTenantIntegrations(businessId: string, userId: string): Promise<{
+  tenantId: string | null
+  stripeCredentials: any | null
+  crmCredentials: any | null
+  integrations: Array<{
+    id: string
+    type: string
+    name: string
+    credentials: any
+  }>
+}> {
+  try {
+    Logger.info(`🔍 Fetching tenant integrations for business: ${businessId}, user: ${userId}`)
+
+    // Find tenant by userId (assuming your tenant is linked to the business owner)
+    const tenant = await client.tenant.findFirst({
+      where: {
+        userId: userId // Link tenant to the business owner
+      },
+      include: {
+        integrations: {
+          where: {
+            isActive: true
+          }
+        }
+      }
+    })
+
+    if (!tenant) {
+      Logger.warning(`No tenant found for user: ${userId}`)
+      return {
+        tenantId: null,
+        stripeCredentials: null,
+        crmCredentials: null,
+        integrations: []
+      }
+    }
+
+    Logger.info(`✅ Found tenant: ${tenant.id} with ${tenant.integrations.length} integrations`)
+
+    // Decrypt and organize credentials
+    const integrations: Array<{
+      id: string
+      type: string
+      name: string
+      credentials: any
+    }> = []
+
+    let stripeCredentials = null
+    let crmCredentials = null
+
+    for (const integration of tenant.integrations) {
+      try {
+        const decryptedCredentials = JSON.parse(decrypt(integration.credentialsHash))
+        
+        integrations.push({
+          id: integration.id,
+          type: integration.type,
+          name: integration.name,
+          credentials: decryptedCredentials
+        })
+
+        // Separate Stripe and CRM credentials for easy access
+        if (integration.type === 'STRIPE') {
+          stripeCredentials = decryptedCredentials
+        } else if (['HUBSPOT', 'SALESFORCE', 'PIPEDRIVE'].includes(integration.type)) {
+          crmCredentials = decryptedCredentials
+        }
+
+        Logger.info(`🔐 Decrypted credentials for ${integration.type}: ${integration.name}`)
+      } catch (error) {
+        Logger.error(`Failed to decrypt credentials for integration ${integration.id}:`, error)
+      }
+    }
+
+    return {
+      tenantId: tenant.id,
+      stripeCredentials,
+      crmCredentials,
+      integrations
+    }
+
+  } catch (error) {
+    Logger.error("Error fetching tenant integrations:", error)
+    return {
+      tenantId: null,
+      stripeCredentials: null,
+      crmCredentials: null,
+      integrations: []
+    }
+  }
+}
+
+// Enhanced fetchEnhancedBusinessVariables with tenant support
+export async function fetchEnhancedBusinessVariables(
+  businessId: string,
+  automationId: string,
+  workflowConfigId: string | null,
+  conversationContext?: ConversationContext,
+): Promise<Record<string, string>> {
+  Logger.info("🔍 Fetching enhanced business variables with multi-tenant support...")
+
+  try {
+    // Get business profile and traditional business data in parallel
+    const [profileResult, businessResult] = await Promise.allSettled([
+      getBusinessProfileForAutomation(automationId),
+      getBusinessForWebhook(businessId),
+    ])
+
+    // Handle business profile
+    const { profileContent, businessContext } =
+      profileResult.status === "fulfilled" ? profileResult.value : { 
+        profileContent: "", 
+        businessContext: {
+          businessName: "Our Business",
+          businessType: "Service",
+          website: "",
+          responseLanguage: "English",
+          businessDescription: "",
+          name: "",
+        }
+      }
+
+    let businessData: BusinessData | null = null
+    if (
+      businessResult.status === "fulfilled" &&
+      businessResult.value.status === 200 &&
+      businessResult.value.data.business
+    ) {
+      businessData = businessResult.value.data.business 
+    } else {
+      Logger.warning("Business data fetch failed, using profile data only")
+    }
+
+    // NEW: Fetch tenant integrations
+    const tenantData = await fetchTenantIntegrations(businessId, businessData?.userId || "")
+
+    // Build enhanced variables with tenant information
+    const result: Record<string, string> = {
+      // Core business information
+      business_profile: profileContent || "Professional business assistant",
+      business_name: businessContext.businessName || businessData?.businessName || "Our Business",
+      display_name: businessContext.name || businessData?.name || "",
+      welcome_message: "Hello! How can I help you today?",
+      business_type: businessContext.businessType || businessData?.businessType || "Service Business",
+      business_description:
+        businessContext.businessDescription ||
+        businessData?.businessDescription ||
+        "We provide excellent customer service",
+      website: businessContext.website || businessData?.website || "",
+      response_language: businessContext.responseLanguage || businessData?.responseLanguage || "English",
+      automation_id: businessData?.automationId || automationId,
+
+      // CRITICAL: Multi-tenant variables for Voiceflow API blocks
+      tenant_id: tenantData.tenantId || "", // This is what your API blocks will use
+      has_stripe_integration: tenantData.stripeCredentials ? "true" : "false",
+      has_crm_integration: tenantData.crmCredentials ? "true" : "false",
+      stripe_configured: tenantData.stripeCredentials ? "true" : "false",
+      
+      // Integration status for conditional flows in Voiceflow
+      integrations_count: tenantData.integrations.length.toString(),
+      available_integrations: tenantData.integrations.map(i => i.type).join(","),
+
+      // Default values for backward compatibility
+      business_industry: businessData?.businessType || "Customer Service",
+      instagram_handle: "",
+      business_hours: "24/7",
+      auto_reply_enabled: "Yes",
+      promotion_message: "Thank you for contacting us!",
+      target_audience: "Valued customers",
+
+      // Customer data placeholders (will be populated during conversation)
+      customer_name: "",
+      customer_email: "",
+      customer_phone: "",
+
+      // System status
+      system_status: "operational",
+      fallback_mode: businessData ? "false" : "true",
+      workflow_config_id: workflowConfigId || "",
+    }
+
+    // Add conversation context
+    if (conversationContext) {
+      result.customer_type = conversationContext.customerType
+      result.is_new_user = conversationContext.isNewUser.toString()
+      result.current_message = conversationContext.userMessage
+      result.page_id = conversationContext.pageId
+      result.sender_id = conversationContext.senderId
+      
+      result.conversation_history = conversationContext.messageHistory
+        .slice(-3)
+        .map((msg) => `${msg.role}: ${msg.content}`)
+        .join(" | ")
+      result.conversation_length = conversationContext.messageHistory.length.toString()
+
+      // Conversation insights
+      const hasQuestions = conversationContext.userMessage.includes("?")
+      const hasUrgentWords = /urgent|asap|immediately|emergency|help/i.test(conversationContext.userMessage)
+      const hasPurchaseIntent = /buy|purchase|order|price|cost|payment/i.test(conversationContext.userMessage)
+
+      result.has_questions = hasQuestions.toString()
+      result.is_urgent = hasUrgentWords.toString()
+      result.has_purchase_intent = hasPurchaseIntent.toString()
+
+      // Add greeting detection
+      const isGreeting = /^(hi|hello|hey|good morning|good afternoon|good evening)$/i.test(
+        conversationContext.userMessage.trim(),
+      )
+      result.is_greeting = isGreeting.toString()
+    }
+
+    // Set business operation defaults
+    result.primary_goal = "Provide excellent customer service"
+    result.response_time = "immediate"
+    result.custom_goals = "Help customers effectively"
+    result.journey_steps = "[]"
+    result.enabled_features = "chat, support"
+    result.automation_setup_complete = "Yes"
+    result.automation_setup_date = new Date().toISOString()
+    result.automation_additional_notes = tenantData.tenantId 
+      ? "Multi-tenant configuration active"
+      : "Single tenant fallback mode"
+
+    // Add system metadata
+    result.system_timestamp = new Date().toISOString()
+    result.voiceflow_health_score = circuitBreaker.getHealthScore().toFixed(2)
+
+    Logger.success(`✅ Enhanced business variables prepared with tenant support`)
+    Logger.info(`🏢 Tenant ID: ${result.tenant_id}`)
+    Logger.info(`💳 Stripe: ${result.has_stripe_integration}`)
+    Logger.info(`📊 CRM: ${result.has_crm_integration}`)
+
+    return result
+
+  } catch (error) {
+    Logger.error("❌ Error in fetchEnhancedBusinessVariables:", error)
+
+    // Return minimal safe variables with empty tenant info
+    return {
+      business_name: "Customer Service",
+      welcome_message: "Hello! How can I help you today?",
+      business_industry: "Customer Service",
+      response_language: "English",
+      customer_type: conversationContext?.customerType || "NEW",
+      is_new_user: conversationContext?.isNewUser?.toString() || "true",
+      current_message: conversationContext?.userMessage || "",
+      tenant_id: "", // Empty tenant ID for fallback
+      has_stripe_integration: "false",
+      has_crm_integration: "false",
+      stripe_configured: "false",
+      system_status: "fallback",
+      fallback_mode: "true",
+      system_timestamp: new Date().toISOString(),
+      voiceflow_health_score: "0.5",
+      workflow_config_id: workflowConfigId || "",
+    }
+  }
+}
+
+// Enhanced getEnhancedVoiceflowResponse to ensure tenant variables are set
+export async function getEnhancedVoiceflowResponse(
+  userInput: string,
+  userId: string,
+  businessVariables: Record<string, string>,
+  voiceflowApiKey: string,
+  voiceflowProjectId: string,
+  voiceflowVersionId?: string,
+  options?: {
+    maxRetries?: number
+    timeoutMs?: number
+    enableFallbackDetection?: boolean
+    isFirstMessage?: boolean
+  },
+): Promise<VoiceflowResponse> {
+  const {
+    maxRetries = CONFIG.RETRY.MAX_ATTEMPTS,
+    timeoutMs = CONFIG.TIMEOUTS.INTERACTION,
+    enableFallbackDetection = true,
+    isFirstMessage = false,
+  } = options || {}
+
+  if (!voiceflowApiKey || !voiceflowProjectId) {
+    Logger.error("Voiceflow API Key or Project ID is missing.")
+    return {
+      success: false,
+      error: "Voiceflow API Key or Project ID is missing.",
+      healthScore: circuitBreaker.getHealthScore(),
+      fallbackReason: "Missing Voiceflow credentials",
+    }
+  }
+
+  try {
+    const result = await circuitBreaker.execute(async () => {
+      let lastError: Error | null = null
+
+      // Clean expired cache entries
+      cacheManager.cleanExpiredEntries()
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          Logger.info(`🎙️ Voiceflow API attempt ${attempt}/${maxRetries} for user ${userId}`)
+          
+          // Log tenant information for debugging
+          Logger.info(`🏢 Tenant variables: tenant_id=${businessVariables.tenant_id}, stripe=${businessVariables.has_stripe_integration}`)
+
+          // Check session state
+          const sessionData = cacheManager.getSession(userId)
+          const needsLaunch = isFirstMessage || !sessionData?.hasLaunched
+
+          // Prepare request payload with enhanced variable passing
+          let requestPayload: any
+          if (needsLaunch) {
+            Logger.info(`🚀 Sending launch request for user ${userId} with tenant variables`)
+            requestPayload = {
+              action: { type: "launch" },
+              config: {
+                tts: false,
+                stripSSML: true,
+                stopAll: true,
+                excludeTypes: ["block", "debug", "flow"],
+              },
+              // CRITICAL: Set variables at launch to ensure they're available immediately
+              state: { 
+                variables: {
+                  ...businessVariables,
+                  // Ensure critical tenant variables are definitely set
+                  tenant_id: businessVariables.tenant_id || "",
+                  session_initialized: "true",
+                  api_ready: businessVariables.tenant_id ? "true" : "false"
+                }
+              }
+            }
+          } else {
+            requestPayload = {
+              action: { type: "text", payload: userInput },
+              config: {
+                tts: false,
+                stripSSML: true,
+                stopAll: true,
+                excludeTypes: ["block", "debug", "flow"],
+              },
+              // Always include variables to maintain state
+              state: { 
+                variables: {
+                  ...businessVariables,
+                  current_message: userInput,
+                  message_timestamp: new Date().toISOString()
+                }
+              }
+            }
+          }
+
+          // Make API call
+          const response = await axios.post<VoiceflowTrace[]>(
+            `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+            requestPayload,
+            {
+              headers: {
+                Authorization: voiceflowApiKey,
+                versionID: voiceflowVersionId || undefined,
+                projectID: voiceflowProjectId,
+                accept: "application/json",
+                "content-type": "application/json",
+              },
+              timeout: timeoutMs,
+            },
+          )
+
+          // Handle launch + text sequence
+          if (needsLaunch && userInput.trim().length > 0) {
+            Logger.info(`📝 Following up with text request for user ${userId}`)
+            const textResponse = await axios.post<VoiceflowTrace[]>(
+              `https://general-runtime.voiceflow.com/state/user/${userId}/interact`,
+              {
+                action: { type: "text", payload: userInput },
+                config: {
+                  tts: false,
+                  stripSSML: true,
+                  stopAll: true,
+                  excludeTypes: ["block", "debug", "flow"],
+                },
+                // Maintain variables in follow-up request
+                state: { 
+                  variables: {
+                    ...businessVariables,
+                    current_message: userInput
+                  }
+                }
+              },
+              {
+                headers: {
+                  Authorization: voiceflowApiKey,
+                  versionID: voiceflowVersionId || undefined,
+                  projectID: voiceflowProjectId,
+                  accept: "application/json",
+                  "content-type": "application/json",
+                },
+                timeout: timeoutMs,
+              },
+            )
+            response.data = textResponse.data
+          }
+
+          // Mark session as launched
+          cacheManager.setSession(userId, true)
+
+          // Process response
+          const processedResponse = processEnhancedVoiceflowResponse(response.data)
+          const updatedVariables = await fetchVoiceflowVariables(
+            userId,
+            voiceflowApiKey,
+            voiceflowProjectId,
+            voiceflowVersionId,
+          )
+
+          // Fallback detection
+          if (enableFallbackDetection) {
+            const fallbackCheck = detectFallbackConditions(processedResponse, userInput)
+            if (fallbackCheck.shouldFallback) {
+              Logger.warning(`Voiceflow fallback condition detected: ${fallbackCheck.reason}`)
+              return {
+                success: false,
+                error: fallbackCheck.reason,
+                isEmpty: fallbackCheck.isEmpty,
+                fallbackReason: fallbackCheck.reason,
+                healthScore: circuitBreaker.getHealthScore(),
+              }
+            }
+          }
+
+          Logger.success(`Voiceflow API success on attempt ${attempt}`)
+          return {
+            success: true,
+            response: processedResponse,
+            variables: updatedVariables,
+            healthScore: circuitBreaker.getHealthScore(),
+          }
+        } catch (error) {
+          lastError = error as Error
+          Logger.error(`Voiceflow API attempt ${attempt} failed:`, error)
+
+          if (attempt < maxRetries) {
+            const baseDelay = Math.pow(2, attempt) * CONFIG.RETRY.BASE_DELAY
+            const jitter = Math.random() * CONFIG.RETRY.MAX_JITTER
+            const delay = baseDelay + jitter
+
+            Logger.info(`⏳ Retrying Voiceflow API in ${Math.round(delay)}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, delay))
+          }
+        }
+      }
+
+      throw lastError || new Error("Failed to get Voiceflow response after all retries")
+    })
+
+    return result
+  } catch (error) {
+    Logger.error("💥 Voiceflow circuit breaker or final error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      healthScore: circuitBreaker.getHealthScore(),
+      fallbackReason: "Circuit breaker open or API failure",
+    }
+  }
+}
+
 // export async function fetchEnhancedBusinessVariables(
 //   businessId: string,
 //   automationId: string,
@@ -485,7 +966,7 @@ const cacheManager = new VoiceflowCacheManager()
 
 // Updated BusinessData interface to match your new Business model
 
-export async function fetchEnhancedBusinessVariables(
+export async function fetchEnhancedBusinessVariablesE(
   businessId: string,
   automationId: string,
   workflowConfigId: string | null,
@@ -943,7 +1424,7 @@ function detectFallbackConditions(
 // MAIN VOICEFLOW HANDLER
 // ============================================================================
 
-export async function getEnhancedVoiceflowResponse(
+export async function getEnhancedVoiceflowResponseE(
   userInput: string,
   userId: string,
   businessVariables: Record<string, string>,

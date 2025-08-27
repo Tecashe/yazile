@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     if (!isValid) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+  
 
     // Get Stripe integration for tenant
     const integration = await getIntegration(tenantId, 'STRIPE')
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Payment link creation error:', error)
     
-    // Log failed API call
+    //Log failed API call
     // await logApiCall({
     //   tenantId: body?.tenantId,
     //   integrationId,
