@@ -3284,5 +3284,3 @@ class ResponseSender {
     )
   }
 }
-
-export { ResponseSender }
