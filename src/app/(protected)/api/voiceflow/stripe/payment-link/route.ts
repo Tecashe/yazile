@@ -327,8 +327,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
+
+
     // Update Voiceflow session with payment info
     await updateVoiceflowSession(vfSessionId, {
+      tenantId, // Pass tenantId for upsert create case
+      userId,   // Pass userId for upsert create case
+      platform: 'voiceflow', // Specify platform
       variables: JSON.stringify({
         paymentLinkId: paymentLink.id,
         paymentUrl: paymentLink.url,
@@ -336,6 +341,16 @@ export async function POST(request: NextRequest) {
         currency
       })
     })
+
+    // // Update Voiceflow session with payment info
+    // await updateVoiceflowSession(vfSessionId, {
+    //   variables: JSON.stringify({
+    //     paymentLinkId: paymentLink.id,
+    //     paymentUrl: paymentLink.url,
+    //     amount,
+    //     currency
+    //   })
+    // })
 
     // Log successful API call
     await logApiCall({
