@@ -2,6 +2,56 @@ import axios, { type AxiosError, type AxiosResponse } from "axios"
 import { client } from "@/lib/prisma"
 
 
+///for testing
+
+
+// Enhanced types for Instagram messaging
+interface InstagramQuickReply {
+  content_type: "text"
+  title: string
+  payload: string
+}
+
+interface InstagramButton {
+  type: "web_url" | "postback"
+  title: string
+  url?: string
+  payload?: string
+}
+
+interface InstagramGenericElement {
+  title: string
+  subtitle?: string
+  image_url?: string
+  buttons?: InstagramButton[]
+}
+
+interface InstagramAttachment {
+  type: "template"
+  payload: {
+    template_type: "generic" | "button"
+    elements?: InstagramGenericElement[]
+    text?: string
+    buttons?: InstagramButton[]
+  }
+}
+
+interface VoiceflowResponse {
+  text?: string
+  quickReplies?: Array<{ name: string; payload: string }>
+  buttons?: Array<{ name: string; payload: string }>
+  carousel?: Array<{
+    title: string
+    subtitle?: string
+    imageUrl?: string
+    buttons?: Array<{ name: string; payload: string; url?: string }>
+  }>
+  attachment?: any
+}
+
+///for testing
+
+
 export const sendDMz = async (
   userId: string,
   recieverId: string,
@@ -42,7 +92,7 @@ export const sendDMz = async (
 
 
 
-type InstagramQuickReply = {
+type InstagramQuickReplyE = {
   content_type: "text"
   title: string
   payload: string
@@ -166,7 +216,7 @@ export const generateTokenss = async (code: string) => {
 
 
 // Simple DM sending without typing indicators
-export async function sendDMs(
+export async function sendDMsE(
   userId: string,
   receiverId: string,
   prompt: string,
@@ -209,7 +259,7 @@ export async function sendDMs(
 }
 
 // Simple private message sending without typing indicators
-export async function sendPrivateMessages(
+export async function sendPrivateMessagesE(
   userId: string,
   commentId: string,
   prompt: string,
@@ -326,160 +376,241 @@ export const generateTokens = async (code: string) => {
 
 
 
-// Corrected sendDM function
-export const sendDM = async (
+// Enhanced DM sending function with support for all message types
+export async function sendDMs(
   userId: string,
-  recieverId: string,
+  receiverId: string,
   prompt: string,
   token: string,
-  buttons?: { name: string; payload: string }[]
-) => {
-  const messagePayload: any = {
-    recipient: {
-      id: recieverId,
-    },
-    message: {
-      text: prompt,
-    },
-    messaging_type: "RESPONSE", // REQUIRED: Instagram needs this
-  };
-
-  if (buttons && buttons.length > 0) {
-    // Instagram limits: max 13 quick replies, 20 chars per title
-    messagePayload.message.quick_replies = buttons.slice(0, 13).map((button) => ({
-      content_type: "text",
-      title: button.name.substring(0, 20), // FIXED: Enforce 20 char limit
-      payload: button.payload.substring(0, 1000), // FIXED: Enforce 1000 char limit
-    }));
-  }
-
-  console.log("Sending payload to Instagram:", JSON.stringify(messagePayload, null, 2));
-
+  quickReplies?: InstagramQuickReply[],
+  buttons?: InstagramButton[],
+  carousel?: InstagramGenericElement[],
+  attachment?: InstagramAttachment,
+): Promise<AxiosResponse> {
   try {
-    // FIXED: Use correct API version (v18.0 or v19.0, not v21.0)
-    const response = await axios.post(
-      `${process.env.INSTAGRAM_BASE_URL}/v18.0/${userId}/messages`,
-      messagePayload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log("Instagram DM sent successfully:", response.data);
-    return response;
-  } catch (error) {
-    console.error("Instagram DM send failed:",);
-    throw error;
-  }
-};
-
-// Corrected sendPrivateMessage function
-export const sendPrivateMessage = async (
-  userId: string,
-  commentId: string, // This should be the comment ID, not receiver ID
-  prompt: string,
-  token: string,
-  buttons?: { name: string; payload: string }[]
-) => {
-  console.log('Sending private message to comment:', commentId);
-
-  // FIXED: Correct payload structure for private replies
-  const messagePayload: any = {
-    message: prompt, // FIXED: Direct message property, no recipient needed
-  };
-
-  // Add quick replies if buttons are provided
-  if (buttons && buttons.length > 0) {
-    messagePayload.quick_replies = buttons.slice(0, 13).map((button) => ({
-      content_type: 'text',
-      title: button.name.substring(0, 20), // FIXED: Enforce 20 char limit
-      payload: button.payload.substring(0, 1000), // FIXED: Enforce 1000 char limit
-    }));
-  }
-
-  console.log("Sending private reply payload:", JSON.stringify(messagePayload, null, 2));
-
-  try {
-    // FIXED: Use correct private reply endpoint
-    const response = await axios.post(
-      `${process.env.INSTAGRAM_BASE_URL}/v18.0/${commentId}/private_replies`,
-      messagePayload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    console.log("Instagram private reply sent successfully:", response.data);
-    return response;
-  } catch (error) {
-    console.error("Instagram private reply failed:",);
-    throw error;
-  }
-};
-
-// BONUS: Add function to handle Voiceflow button format
-export const formatVoiceflowButtonsForInstagram = (
-  voiceflowButtons?: any[]
-): { name: string; payload: string }[] | undefined => {
-  if (!voiceflowButtons || voiceflowButtons.length === 0) return undefined;
-
-  return voiceflowButtons.slice(0, 13).map((button, index) => {
-    // Handle different Voiceflow button formats
-    let name: string;
-    let payload: string;
-
-    if (typeof button === 'string') {
-      name = button.substring(0, 20);
-      payload = button;
-    } else if (button.name || button.title || button.text) {
-      name = (button.name || button.title || button.text).substring(0, 20);
-      payload = button.payload || button.value || button.name || button.title || button.text;
-    } else {
-      name = `Option ${index + 1}`;
-      payload = JSON.stringify(button).substring(0, 1000);
+    const messagePayload: Record<string, any> = {
+      recipient: { id: receiverId },
+      messaging_type: "RESPONSE",
     }
 
-    return {
-      name: name || `Option ${index + 1}`,
-      payload: String(payload).substring(0, 1000),
-    };
-  });
-};
+    // Handle different message types
+    if (attachment) {
+      // Template messages (carousels, button templates)
+      messagePayload.message = {
+        attachment: attachment
+      }
+    } else if (carousel && carousel.length > 0) {
+      // Carousel template
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: carousel.slice(0, 10) // Instagram supports max 10 elements
+          }
+        }
+      }
+    } else if (buttons && buttons.length > 0) {
+      // Button template
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text: prompt,
+            buttons: buttons.slice(0, 3) // Instagram supports max 3 buttons in button template
+          }
+        }
+      }
+    } else {
+      // Regular text message
+      messagePayload.message = { text: prompt }
+      
+      // Add quick replies if provided
+      if (quickReplies && quickReplies.length > 0) {
+        messagePayload.message.quick_replies = quickReplies.slice(0, 13) // Max 13 quick replies
+      }
+    }
 
-// Updated function calls in your webhook (replace in ResponseSender)
-export const sendInstagramResponse = async (
-  context: any,
-  text: string,
-  voiceflowButtons?: any[]
-) => {
-  const formattedButtons = formatVoiceflowButtonsForInstagram(voiceflowButtons);
-  const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!;
+    console.log("Sending enhanced DM payload to Instagram:", JSON.stringify(messagePayload, null, 2))
 
-  let result;
+    const response = await axios.post(`${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`, messagePayload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      timeout: 15000,
+    })
 
-  if (context.data.messageType === "DM") {
-    result = await sendDM(
-      context.data.pageId,
-      context.data.senderId,
-      text,
-      token,
-      formattedButtons
-    );
-  } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
-    result = await sendPrivateMessage(
-      context.data.pageId,
-      context.data.commentId,
-      text,
-      token,
-      formattedButtons
-    );
+    await logMessageDelivery(userId, receiverId, prompt, "DM", true)
+    console.log("Instagram DM API response status:", response.status)
+    return response
+  } catch (error) {
+    const axiosError = error as AxiosError
+    console.error("Error sending enhanced DM to Instagram:", axiosError.response?.data || axiosError.message)
+    await logMessageDelivery(userId, receiverId, prompt, "DM", false, axiosError.message)
+    throw error
+  }
+}
+
+// Enhanced private message sending function
+export async function sendPrivateMessages(
+  userId: string,
+  commentId: string,
+  prompt: string,
+  token: string,
+  quickReplies?: InstagramQuickReply[],
+  buttons?: InstagramButton[],
+  carousel?: InstagramGenericElement[],
+  attachment?: InstagramAttachment,
+): Promise<AxiosResponse> {
+  try {
+    const messagePayload: Record<string, any> = {
+      recipient: { comment_id: commentId },
+      messaging_type: "RESPONSE",
+    }
+
+    // Handle different message types (same logic as DM)
+    if (attachment) {
+      messagePayload.message = {
+        attachment: attachment
+      }
+    } else if (carousel && carousel.length > 0) {
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: carousel.slice(0, 10)
+          }
+        }
+      }
+    } else if (buttons && buttons.length > 0) {
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text: prompt,
+            buttons: buttons.slice(0, 3)
+          }
+        }
+      }
+    } else {
+      messagePayload.message = { text: prompt }
+      
+      if (quickReplies && quickReplies.length > 0) {
+        messagePayload.message.quick_replies = quickReplies.slice(0, 13)
+      }
+    }
+
+    console.log("Sending enhanced private message payload:", JSON.stringify(messagePayload, null, 2))
+
+    const response = await axios.post(`${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`, messagePayload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      timeout: 15000,
+    })
+
+    await logMessageDelivery(userId, commentId, prompt, "COMMENT", true)
+    console.log("Instagram private message API response status:", response.status)
+    return response
+  } catch (error) {
+    const axiosError = error as AxiosError
+    console.error("Error sending enhanced private message to Instagram:", axiosError.response?.data || axiosError.message)
+    await logMessageDelivery(userId, commentId, prompt, "COMMENT", false, axiosError.message)
+    throw error
+  }
+}
+
+// Enhanced function to transform Voiceflow responses to Instagram format
+export function transformVoiceflowToInstagram(voiceflowResponse: VoiceflowResponse): {
+  text: string
+  quickReplies?: InstagramQuickReply[]
+  buttons?: InstagramButton[]
+  carousel?: InstagramGenericElement[]
+  attachment?: InstagramAttachment
+} {
+  const result: any = {
+    text: voiceflowResponse.text || ""
   }
 
-  return result;
-};
+  // Transform quick replies
+  if (voiceflowResponse.quickReplies && voiceflowResponse.quickReplies.length > 0) {
+    result.quickReplies = voiceflowResponse.quickReplies.slice(0, 13).map((reply) => ({
+      content_type: "text" as const,
+      title: String(reply.name || "").substring(0, 20) || "Option",
+      payload: String(reply.payload || reply.name || "").substring(0, 1000)
+    }))
+  }
+
+  // Transform buttons for button template
+  if (voiceflowResponse.buttons && voiceflowResponse.buttons.length > 0) {
+    result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button) => ({
+      type: "postback" as const,
+      title: String(button.name || "").substring(0, 20) || "Button",
+      payload: String(button.payload || button.name || "").substring(0, 1000)
+    }))
+  }
+
+  // Transform carousel
+  if (voiceflowResponse.carousel && voiceflowResponse.carousel.length > 0) {
+    result.carousel = voiceflowResponse.carousel.slice(0, 10).map((card) => {
+      const element: InstagramGenericElement = {
+        title: String(card.title || "").substring(0, 80) || "Card",
+        subtitle: card.subtitle ? String(card.subtitle).substring(0, 80) : undefined,
+        image_url: card.imageUrl || undefined
+      }
+
+      if (card.buttons && card.buttons.length > 0) {
+        element.buttons = card.buttons.slice(0, 3).map((button) => ({
+          type: button.url ? "web_url" as const : "postback" as const,
+          title: String(button.name || "").substring(0, 20) || "Button",
+          url: button.url,
+          payload: button.url ? undefined : String(button.payload || button.name || "").substring(0, 1000)
+        }))
+      }
+
+      return element
+    })
+  }
+
+  return result
+}
+
+// Updated generic send function that handles all types
+export async function sendInstagramMessage(
+  messageType: "DM" | "COMMENT",
+  userId: string,
+  targetId: string, // receiverId for DM, commentId for COMMENT
+  voiceflowResponse: VoiceflowResponse,
+  token: string,
+): Promise<AxiosResponse> {
+  const transformed = transformVoiceflowToInstagram(voiceflowResponse)
+  
+  if (messageType === "DM") {
+    return sendDMs(
+      userId,
+      targetId,
+      transformed.text,
+      token,
+      transformed.quickReplies,
+      transformed.buttons,
+      transformed.carousel,
+      transformed.attachment
+    )
+  } else {
+    return sendPrivateMessages(
+      userId,
+      targetId,
+      transformed.text,
+      token,
+      transformed.quickReplies,
+      transformed.buttons,
+      transformed.carousel,
+      transformed.attachment
+    )
+  }
+}

@@ -48,6 +48,7 @@ interface VoiceflowTrace {
 
 interface VoiceflowButton {
   name: string
+  url:string
   request?: {
     payload?: string
     type?: string
@@ -78,11 +79,39 @@ interface ConversationContext {
   messageHistory: Array<{ role: "user" | "assistant"; content: string }>
 }
 
+// interface VoiceflowResponse {
+//   success: boolean
+//   response?: {
+//     text: string
+//     quickReplies?: Array<{ title: string; payload: string }>
+//     requiresHumanHandoff?: boolean
+//     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//     sentiment?: "positive" | "neutral" | "negative"
+//     complexity?: "simple" | "medium" | "complex"
+//   }
+//   variables?: VoiceflowVariables
+//   error?: string
+//   isEmpty?: boolean
+//   healthScore?: number
+//   fallbackReason?: string
+// }
 interface VoiceflowResponse {
   success: boolean
   response?: {
     text: string
     quickReplies?: Array<{ title: string; payload: string }>
+    buttons?: Array<{ title: string; payload: string; url?: string }>
+    carousel?: Array<{
+      title: string
+      description?: string
+      image?: string
+      buttons?: Array<{ title: string; payload: string; url?: string }>
+    }>
+    attachment?: {
+      type: 'image' | 'video' | 'audio' | 'file'
+      url: string
+      caption?: string
+    }
     requiresHumanHandoff?: boolean
     priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
     sentiment?: "positive" | "neutral" | "negative"
@@ -1207,9 +1236,188 @@ export async function fetchEnhancedBusinessVariablesE(
 // VOICEFLOW RESPONSE PROCESSOR
 // ============================================================================
 
+// export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+//   text: string
+//   quickReplies?: { title: string; payload: string }[]
+//   requiresHumanHandoff?: boolean
+//   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   sentiment?: "positive" | "neutral" | "negative"
+//   complexity?: "simple" | "medium" | "complex"
+// } {
+//   let result = ""
+//   const quickReplies: { title: string; payload: string }[] = []
+//   let requiresHumanHandoff = false
+//   let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+//   let sentiment: "positive" | "neutral" | "negative" = "neutral"
+//   let complexity: "simple" | "medium" | "complex" = "medium"
+
+//   for (const trace of traces) {
+//     switch (trace.type) {
+//       case "speak":
+//       case "text":
+//         if ("message" in trace.payload) {
+//           const message = trace.payload.message
+//           result += message + "\n"
+
+//           // Analyze complexity
+//           if (message.length > 200 || message.split(".").length > 3) {
+//             complexity = "complex"
+//           } else if (message.length < 50) {
+//             complexity = "simple"
+//           }
+//         }
+//         break
+
+//       case "choice":
+//         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+//           trace.payload.buttons.forEach((button: VoiceflowButton) => {
+//             // Ensure we always have a valid title
+//             let title = button.name || "Option"
+
+//             // Trim to Instagram limits and ensure it's not empty
+//             title = title.trim()
+//             if (title.length === 0) {
+//               title = "Select"
+//             }
+
+//             if (title.length > CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT) {
+//               title = title.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
+//             }
+
+//             quickReplies.push({
+//               title,
+//               payload: button.request?.payload || button.name || title,
+//             })
+//           })
+//         }
+//         break
+
+//       case "visual":
+//         if ("image" in trace.payload) {
+//           result += `📷 Image: ${trace.payload.image}\n`
+//         }
+//         break
+
+//       case "card":
+//         if (trace.payload) {
+//           if ("title" in trace.payload) {
+//             result += `*${trace.payload.title}*\n`
+//           }
+//           if ("description" in trace.payload) {
+//             result += `${trace.payload.description}\n`
+//           }
+//         }
+//         break
+
+//       case "end":
+//         result += "\nHello, what brings you today, how can I help you?"
+//         break
+
+//       case "handoff":
+//         requiresHumanHandoff = true
+//         priority = "HIGH"
+//         if ("reason" in trace.payload) {
+//           result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+//         }
+//         break
+
+//       case "priority":
+//         if ("level" in trace.payload) {
+//           priority = trace.payload.level
+//         }
+//         break
+
+//       case "sentiment":
+//         if ("value" in trace.payload) {
+//           sentiment = trace.payload.value
+//         }
+//         break
+
+//       case "path":
+//         // Handle the path trace type
+//         if ("path" in trace.payload) {
+//           Logger.debug(`Path trace detected: ${trace.payload.path}`)
+//           // Don't add any text for path traces - they're just flow control
+//         }
+//         break
+
+//       case "debug":
+//         Logger.debug("Voiceflow debug:", trace.payload)
+//         break
+
+//       case "knowledgeBase":
+//         // COMPLETELY IGNORE KNOWLEDGE BASE TRACES
+//         Logger.debug("Ignoring knowledgeBase trace - workflow responses only")
+//         break
+
+//       default:
+//         Logger.warning(`Unhandled trace type: ${trace.type}`, trace)
+//         break
+//     }
+//   }
+
+//   // If we only got knowledge base traces and no actual workflow content, return empty
+//   if (!result.trim()) {
+//     Logger.warning("No workflow content found - only knowledge base traces detected")
+//     return {
+//       text: "",
+//       quickReplies: undefined,
+//       requiresHumanHandoff: false,
+//       priority: "LOW",
+//       sentiment: "neutral",
+//       complexity: "simple",
+//     }
+//   }
+
+//   // Auto-detect sentiment
+//   if (sentiment === "neutral") {
+//     const text = result.toLowerCase()
+//     if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+//       sentiment = "negative"
+//     } else if (
+//       text.includes("great") ||
+//       text.includes("excellent") ||
+//       text.includes("wonderful") ||
+//       text.includes("thank")
+//     ) {
+//       sentiment = "positive"
+//     }
+//   }
+
+//   // Trim to Instagram limits
+//   let finalText = result.trim()
+//   if (finalText.length > CONFIG.INSTAGRAM.MESSAGE_LIMIT) {
+//     finalText = finalText.substring(0, CONFIG.INSTAGRAM.MESSAGE_LIMIT - 3) + "..."
+//   }
+
+//   const limitedQuickReplies = quickReplies.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
+
+//   return {
+//     text: finalText,
+//     quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
+//     requiresHumanHandoff,
+//     priority,
+//     sentiment,
+//     complexity,
+//   }
+// }
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
   text: string
   quickReplies?: { title: string; payload: string }[]
+  buttons?: Array<{ title: string; payload: string; url?: string }>
+  carousel?: Array<{
+    title: string
+    description?: string
+    image?: string
+    buttons?: Array<{ title: string; payload: string; url?: string }>
+  }>
+  attachment?: {
+    type: 'image' | 'video' | 'audio' | 'file'
+    url: string
+    caption?: string
+  }
   requiresHumanHandoff?: boolean
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
   sentiment?: "positive" | "neutral" | "negative"
@@ -1217,6 +1425,18 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
 } {
   let result = ""
   const quickReplies: { title: string; payload: string }[] = []
+  const buttons: Array<{ title: string; payload: string; url?: string }> = []
+  const carousel: Array<{
+    title: string
+    description?: string
+    image?: string
+    buttons?: Array<{ title: string; payload: string; url?: string }>
+  }> = []
+  let attachment: {
+    type: 'image' | 'video' | 'audio' | 'file'
+    url: string
+    caption?: string
+  } | undefined = undefined
   let requiresHumanHandoff = false
   let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
   let sentiment: "positive" | "neutral" | "negative" = "neutral"
@@ -1255,17 +1475,82 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
               title = title.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
             }
 
-            quickReplies.push({
+            // Add to both quickReplies and buttons for compatibility
+            const buttonData = {
               title,
               payload: button.request?.payload || button.name || title,
+              url: button.url // Include URL if it exists
+            }
+
+            quickReplies.push({
+              title: buttonData.title,
+              payload: buttonData.payload
             })
+
+            buttons.push(buttonData)
+          })
+        }
+        break
+
+      case "carousel":
+        if ("cards" in trace.payload && Array.isArray(trace.payload.cards)) {
+          trace.payload.cards.forEach((card: any) => {
+            const carouselItem: {
+              title: string
+              description?: string
+              image?: string
+              buttons?: Array<{ title: string; payload: string; url?: string }>
+            } = {
+              title: card.title || "Card",
+              description: card.description,
+              image: card.imageUrl || card.image
+            }
+
+            // Process card buttons if they exist
+            if (card.buttons && Array.isArray(card.buttons)) {
+              carouselItem.buttons = card.buttons.map((btn: any) => ({
+                title: btn.name || btn.title || "Button",
+                payload: btn.request?.payload || btn.payload || btn.name,
+                url: btn.url
+              }))
+            }
+
+            carousel.push(carouselItem)
           })
         }
         break
 
       case "visual":
         if ("image" in trace.payload) {
+          // Set as attachment
+          attachment = {
+            type: 'image',
+            url: trace.payload.image,
+            caption: trace.payload.caption
+          }
           result += `📷 Image: ${trace.payload.image}\n`
+        }
+        break
+
+      case "media":
+        if ("url" in trace.payload) {
+          // Determine media type based on URL or explicit type
+          let mediaType: 'image' | 'video' | 'audio' | 'file' = 'file'
+          const url = trace.payload.url.toLowerCase()
+          
+          if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') || url.includes('.gif')) {
+            mediaType = 'image'
+          } else if (url.includes('.mp4') || url.includes('.avi') || url.includes('.mov')) {
+            mediaType = 'video'
+          } else if (url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg')) {
+            mediaType = 'audio'
+          }
+
+          attachment = {
+            type: mediaType,
+            url: trace.payload.url,
+            caption: trace.payload.caption || trace.payload.title
+          }
         }
         break
 
@@ -1328,11 +1613,14 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
   }
 
   // If we only got knowledge base traces and no actual workflow content, return empty
-  if (!result.trim()) {
+  if (!result.trim() && buttons.length === 0 && carousel.length === 0 && !attachment) {
     Logger.warning("No workflow content found - only knowledge base traces detected")
     return {
       text: "",
       quickReplies: undefined,
+      buttons: undefined,
+      carousel: undefined,
+      attachment: undefined,
       requiresHumanHandoff: false,
       priority: "LOW",
       sentiment: "neutral",
@@ -1362,10 +1650,14 @@ export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
   }
 
   const limitedQuickReplies = quickReplies.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
+  const limitedButtons = buttons.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
 
   return {
     text: finalText,
     quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
+    buttons: limitedButtons.length > 0 ? limitedButtons : undefined,
+    carousel: carousel.length > 0 ? carousel : undefined,
+    attachment,
     requiresHumanHandoff,
     priority,
     sentiment,
