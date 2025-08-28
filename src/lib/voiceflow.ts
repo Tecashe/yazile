@@ -577,7 +577,7 @@ export async function getEnhancedVoiceflowResponse(
   const {
     maxRetries = CONFIG.RETRY.MAX_ATTEMPTS,
     timeoutMs = CONFIG.TIMEOUTS.INTERACTION,
-    enableFallbackDetection = true,
+    enableFallbackDetection = false,
     isFirstMessage = false,
   } = options || {}
 
@@ -2055,7 +2055,7 @@ export async function getEnhancedVoiceflowResponseE(
   const {
     maxRetries = CONFIG.RETRY.MAX_ATTEMPTS,
     timeoutMs = CONFIG.TIMEOUTS.INTERACTION,
-    enableFallbackDetection = true,
+    enableFallbackDetection = false,
     isFirstMessage = false,
   } = options || {}
 
