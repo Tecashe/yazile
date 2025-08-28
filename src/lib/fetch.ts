@@ -525,8 +525,86 @@ export async function sendPrivateMessages(
   }
 }
 
+
+
+export function transformVoiceflowToInstagram(
+  voiceflowResponse: VoiceflowResponse
+): {
+  text: string
+  quickReplies?: InstagramQuickReply[]
+  buttons?: InstagramButton[]
+  carousel?: InstagramGenericElement[]
+  attachment?: InstagramAttachment
+} {
+  const result: any = {
+    text: voiceflowResponse.text || ""
+  }
+
+  // ---- Buttons (if present) ----
+  if (voiceflowResponse.buttons && voiceflowResponse.buttons.length > 0) {
+    result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button, idx) => {
+      const title = String(button.name || `Option ${idx + 1}`).substring(0, 20)
+      if (button.payload) {
+        return {
+          type: "web_url" as const,
+          title,
+          url: String(button.name) //TODO
+        }
+      }
+      return {
+        type: "postback" as const,
+        title,
+        payload: String(button.payload || button.name || `payload_${idx}`).substring(0, 1000)
+      }
+    })
+  }
+
+  // ---- Quick Replies (only if no buttons) ----
+  else if (voiceflowResponse.quickReplies && voiceflowResponse.quickReplies.length > 0) {
+    result.quickReplies = voiceflowResponse.quickReplies.slice(0, 13).map((reply, idx) => ({
+      content_type: "text" as const,
+      title: String(reply.name || `Option ${idx + 1}`).substring(0, 20),
+      payload: String(reply.payload || reply.name || `payload_${idx}`).substring(0, 1000)
+    }))
+  }
+
+  // ---- Carousel (generic template) ----
+  if (voiceflowResponse.carousel && voiceflowResponse.carousel.length > 0) {
+    result.carousel = voiceflowResponse.carousel.slice(0, 10).map((card, idx) => {
+      const element: InstagramGenericElement = {
+        title: String(card.title || `Card ${idx + 1}`).substring(0, 80),
+        subtitle: card.subtitle ? String(card.subtitle).substring(0, 80) : undefined,
+        image_url: card.imageUrl || undefined
+      }
+
+      if (card.buttons && card.buttons.length > 0) {
+        element.buttons = card.buttons.slice(0, 3).map((button, bIdx) => {
+          const btnTitle = String(button.name || `Action ${bIdx + 1}`).substring(0, 20)
+          if (button.url) {
+            return {
+              type: "web_url" as const,
+              title: btnTitle,
+              url: String(button.url)
+            }
+          }
+          return {
+            type: "postback" as const,
+            title: btnTitle,
+            payload: String(button.payload || button.name || `payload_${bIdx}`).substring(0, 1000)
+          }
+        })
+      }
+
+      return element
+    })
+  }
+
+  return result
+}
+
+
 // Enhanced function to transform Voiceflow responses to Instagram format
-export function transformVoiceflowToInstagram(voiceflowResponse: VoiceflowResponse): {
+export function transformVoiceflowToInstagramE(voiceflowResponse: VoiceflowResponse): {
   text: string
   quickReplies?: InstagramQuickReply[]
   buttons?: InstagramButton[]
@@ -567,7 +645,7 @@ export function transformVoiceflowToInstagram(voiceflowResponse: VoiceflowRespon
       if (card.buttons && card.buttons.length > 0) {
         element.buttons = card.buttons.slice(0, 3).map((button) => ({
           type: button.url ? "web_url" as const : "postback" as const,
-          title: String(button.name || "").substring(0, 20) || "Button",
+          title: String(button.name || "").substring(0, 20) || "Buttonii",
           url: button.url,
           payload: button.url ? undefined : String(button.payload || button.name || "").substring(0, 1000)
         }))
