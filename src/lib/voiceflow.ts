@@ -2000,14 +2000,14 @@ function detectFallbackConditions(
 
   const genericResponses = [
     "i don't understand",
-    "sorry, i didn't get that",
+    // "sorry, i didn't get that",
     "can you repeat that",
-    "i'm not sure what you mean",
-    "error",
-    "something went wrong",
-    "please try again",
-    "system error",
-    "unable to process",
+    // "i'm not sure what you mean",
+    // "error",
+    // "something went wrong",
+    // "please try again",
+    // "system error",
+    // "unable to process",
   ]
 
   const responseText = response.text.toLowerCase()
