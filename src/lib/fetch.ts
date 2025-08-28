@@ -377,7 +377,7 @@ export const generateTokens = async (code: string) => {
 
 
 // Enhanced DM sending function with support for all message types
-export async function sendDMs(
+export async function sendDMsEE(
   userId: string,
   receiverId: string,
   prompt: string,
@@ -612,5 +612,101 @@ export async function sendInstagramMessage(
       transformed.carousel,
       transformed.attachment
     )
+  }
+}
+
+
+///////////////
+
+export async function sendDMs(
+  userId: string,
+  receiverId: string,
+  prompt: string,
+  token: string,
+  quickReplies?: InstagramQuickReply[],
+  buttons?: InstagramButton[],
+  carousel?: InstagramGenericElement[],
+  attachment?: InstagramAttachment,
+): Promise<AxiosResponse> {
+  try {
+    const messagePayload: Record<string, any> = {
+      recipient: { id: receiverId },
+      messaging_type: "RESPONSE",
+    }
+
+    // Handle different message types with improved structure
+    if (attachment) {
+      messagePayload.message = {
+        attachment: attachment
+      }
+    } else if (carousel && carousel.length > 0) {
+      // Carousel template
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: carousel.slice(0, 10).map(card => ({
+              title: card.title.substring(0, 80),
+              subtitle: card.subtitle?.substring(0, 80),
+              image_url: card.image_url,
+              buttons: card.buttons?.slice(0, 3).map(btn => ({
+                type: btn.url ? "web_url" : "postback",
+                title: btn.title.substring(0, 20),
+                url: btn.url,
+                payload: btn.url ? undefined : btn.payload?.substring(0, 1000)
+              }))
+            }))
+          }
+        }
+      }
+    } else if (buttons && buttons.length > 0) {
+      // Button template with proper structure
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text: prompt.substring(0, 640), // Instagram limit for button template text
+            buttons: buttons.slice(0, 3).map(btn => ({
+              type: "postback",
+              title: btn.title.substring(0, 20),
+              payload: btn.payload?.substring(0, 1000)
+            }))
+          }
+        }
+      }
+    } else {
+      // Regular text message
+      messagePayload.message = { text: prompt }
+      
+      // Add quick replies if provided
+      if (quickReplies && quickReplies.length > 0) {
+        messagePayload.message.quick_replies = quickReplies.slice(0, 13).map(qr => ({
+          content_type: "text",
+          title: qr.title.substring(0, 20),
+          payload: qr.payload.substring(0, 1000)
+        }))
+      }
+    }
+
+    console.log("Sending enhanced DM payload to Instagram:", JSON.stringify(messagePayload, null, 2))
+
+    const response = await axios.post(`${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`, messagePayload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      timeout: 15000,
+    })
+
+    await logMessageDelivery(userId, receiverId, prompt, "DM", true)
+    console.log("Instagram DM API response status:", response.status)
+    return response
+  } catch (error) {
+    const axiosError = error as AxiosError
+    console.error("Error sending enhanced DM to Instagram:", axiosError.response?.data || axiosError.message)
+    await logMessageDelivery(userId, receiverId, prompt, "DM", false, axiosError.message)
+    throw error
   }
 }
