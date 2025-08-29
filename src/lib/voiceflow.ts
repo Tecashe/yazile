@@ -283,9 +283,51 @@ const cacheManager = new VoiceflowCacheManager()
 // BUSINESS VARIABLES FETCHER
 // ============================================================================
 
+// New function to manage Voiceflow sessions
+
+async function upsertVoiceflowSession(params: {
+  sessionId: string
+  tenantId: string
+  userId: string
+  platform: string
+  variables?: Record<string, any>
+  context?: ConversationContext
+}) {
+  try {
+    const { sessionId, tenantId, userId, platform, variables = {}, context } = params
+
+    await client.voiceflowSession.upsert({
+      where: { sessionId },
+      update: {
+        lastActiveAt: new Date(),
+        variables: JSON.stringify(variables),
+        context: JSON.stringify(context),
+        status: 'ACTIVE'
+      },
+      create: {
+        sessionId,
+        tenantId,
+        userId,
+        platform,
+        variables: JSON.stringify(variables),
+        context: JSON.stringify(context),
+        status: 'ACTIVE',
+        startedAt: new Date(),
+        lastActiveAt: new Date()
+      }
+    })
+
+    Logger.success(`✅ Voiceflow session upserted: ${sessionId}`)
+  } catch (error) {
+    Logger.error("Error upserting Voiceflow session:", error)
+  }
+}
+
 
 
 // Enhanced fetchEnhancedBusinessVariables function with multi-tenant support
+
+
 
 
 // Add this new function to fetch tenant and integration data
@@ -426,9 +468,22 @@ export async function fetchEnhancedBusinessVariables(
     // NEW: Fetch tenant integrations
     const tenantData = await fetchTenantIntegrations(businessId, businessData?.userId || "wow")
 
+    
+
+    if (conversationContext && tenantData.tenantId) {
+      await upsertVoiceflowSession({
+        sessionId: conversationContext.senderId, // Use senderId as sessionId
+        tenantId: tenantData.tenantId,
+        userId: conversationContext.senderId,
+        platform: "instagram", // or detect from context
+        variables: {}, // Will be updated during conversation
+        context: conversationContext
+      })
+    }
+
+    
 
 
-  
 
 
     // Build enhanced variables with tenant information
@@ -452,6 +507,10 @@ export async function fetchEnhancedBusinessVariables(
       has_stripe_integration: tenantData.stripeCredentials ? "true" : "false",
       has_crm_integration: tenantData.crmCredentials ? "true" : "false",
       stripe_configured: tenantData.stripeCredentials ? "true" : "false",
+
+      session_id: conversationContext?.senderId || "", // This is what your API blocks will use
+      user_id: conversationContext?.senderId || "",
+      
       
       // Integration status for conditional flows in Voiceflow
       integrations_count: tenantData.integrations.length.toString(),
