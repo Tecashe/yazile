@@ -527,84 +527,111 @@ export async function sendPrivateMessages(
 
 
 
-export function transformVoiceflowToInstagram(
-  voiceflowResponse: VoiceflowResponse
-): {
-  text: string
-  quickReplies?: InstagramQuickReply[]
-  buttons?: InstagramButton[]
-  carousel?: InstagramGenericElement[]
-  attachment?: InstagramAttachment
-} {
-  const result: any = {
-    text: voiceflowResponse.text || ""
-  }
+// export function transformVoiceflowToInstagram(voiceflowResponse: VoiceflowResponse) {
+//   // Helpers
+//   const clip = (v: unknown, n: number) => String(v ?? "").substring(0, n);
+//   const isHttpUrl = (u?: string) => !!u && /^(https?:)?\/\//i.test(u);
+//   const asHttps = (u?: string) => (u ? (u.startsWith("http") ? u : `https://${u}`) : undefined);
 
-  // ---- Buttons (if present) ----
-  if (voiceflowResponse.buttons && voiceflowResponse.buttons.length > 0) {
-    result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button, idx) => {
-      const title = String(button.name || `Option ${idx + 1}`).substring(0, 20)
-      if (button.payload) {
-        return {
-          type: "web_url" as const,
-          title,
-          url: String(button.name) //TODO
-        }
-      }
-      return {
-        type: "postback" as const,
-        title,
-        payload: String(button.payload || button.name || `payload_${idx}`).substring(0, 1000)
-      }
-    })
-  }
+//   const hasCarousel = Array.isArray(voiceflowResponse.carousel) && voiceflowResponse.carousel.length > 0;
+//   const hasButtons  = Array.isArray(voiceflowResponse.buttons)  && voiceflowResponse.buttons.length  > 0;
+//   const hasQuick    = Array.isArray(voiceflowResponse.quickReplies) && voiceflowResponse.quickReplies.length > 0;
 
-  // ---- Quick Replies (only if no buttons) ----
-  else if (voiceflowResponse.quickReplies && voiceflowResponse.quickReplies.length > 0) {
-    result.quickReplies = voiceflowResponse.quickReplies.slice(0, 13).map((reply, idx) => ({
-      content_type: "text" as const,
-      title: String(reply.name || `Option ${idx + 1}`).substring(0, 20),
-      payload: String(reply.payload || reply.name || `payload_${idx}`).substring(0, 1000)
-    }))
-  }
+//   const baseText = clip(voiceflowResponse.text || "", 640); // text hard cap (defensive)
 
-  // ---- Carousel (generic template) ----
-  if (voiceflowResponse.carousel && voiceflowResponse.carousel.length > 0) {
-    result.carousel = voiceflowResponse.carousel.slice(0, 10).map((card, idx) => {
-      const element: InstagramGenericElement = {
-        title: String(card.title || `Card ${idx + 1}`).substring(0, 80),
-        subtitle: card.subtitle ? String(card.subtitle).substring(0, 80) : undefined,
-        image_url: card.imageUrl || undefined
-      }
+//   // 1) CAROUSEL -> Generic Template
+//   if (hasCarousel) {
+//     const elements = voiceflowResponse.carousel!.slice(0, 10).map((card, idx) => {
+//       const title = clip(card?.title || `Card ${idx + 1}`, 80);
+//       const subtitle = card?.subtitle ? clip(card.subtitle, 80) : undefined;
+//       const image_url = isHttpUrl(card?.imageUrl) ? card!.imageUrl! : asHttps(card?.imageUrl);
 
-      if (card.buttons && card.buttons.length > 0) {
-        element.buttons = card.buttons.slice(0, 3).map((button, bIdx) => {
-          const btnTitle = String(button.name || `Action ${bIdx + 1}`).substring(0, 20)
-          if (button.url) {
-            return {
-              type: "web_url" as const,
-              title: btnTitle,
-              url: String(button.url)
-            }
-          }
-          return {
-            type: "postback" as const,
-            title: btnTitle,
-            payload: String(button.payload || button.name || `payload_${bIdx}`).substring(0, 1000)
-          }
-        })
-      }
+//       const buttons = (card?.buttons || []).slice(0, 3).map((b, bIdx) => {
+//         const title = clip(b?.name || `Action ${bIdx + 1}`, 20);
+//         if (b?.url) {
+//           return { type: "web_url" as const, title, url: asHttps(String(b.url))! };
+//         }
+//         return {
+//           type: "postback" as const,
+//           title,
+//           payload: clip(b?.payload || b?.name || `payload_${bIdx}`, 1000)
+//         };
+//       });
 
-      return element
-    })
-  }
+//       const el: any = { title, subtitle, image_url };
+//       if (buttons.length) el.buttons = buttons;
+//       return el;
+//     });
 
-  return result
-}
+//     return {
+//       // Send API–ready message object
+//       message: {
+//         attachment: {
+//           type: "template",
+//           payload: {
+//             template_type: "generic",
+//             elements
+//           }
+//         }
+//       }
+//     };
+//   }
+
+//   // 2) BUTTONS (no carousel) -> Button Template
+//   if (hasButtons) {
+//     const buttons = voiceflowResponse.buttons!.slice(0, 3).map((b, idx) => {
+//       const title = clip(b?.name || `Option ${idx + 1}`, 20);
+//       if (b?.url) {
+//         return { type: "web_url" as const, title, url: asHttps(String(b.url))! };
+//       }
+//       return {
+//         type: "postback" as const,
+//         title,
+//         payload: clip(b?.payload || b?.name || `payload_${idx}`, 1000)
+//       };
+//     });
+
+//     return {
+//       message: {
+//         attachment: {
+//           type: "template",
+//           payload: {
+//             template_type: "button",
+//             text: baseText || "Please choose an option",
+//             buttons
+//           }
+//         }
+//       }
+//     };
+//   }
+
+//   // 3) QUICK REPLIES (no templates) -> Text + quick_replies
+//   if (hasQuick) {
+//     const quick_replies = voiceflowResponse.quickReplies!.slice(0, 13).map((r, idx) => ({
+//       content_type: "text" as const,
+//       title: clip(r?.name || `Option ${idx + 1}`, 20),
+//       payload: clip(r?.payload || r?.name || `payload_${idx}`, 1000)
+//     }));
+
+//     return {
+//       message: {
+//         text: baseText || "Choose an option:",
+//         quick_replies
+//       }
+//     };
+//   }
+
+//   // 4) Plain text
+//   return {
+//     message: {
+//       text: baseText || ""
+//     }
+//   };
+// }
 
 
 // Enhanced function to transform Voiceflow responses to Instagram format
-export function transformVoiceflowToInstagramE(voiceflowResponse: VoiceflowResponse): {
+export function transformVoiceflowToInstagram(voiceflowResponse: VoiceflowResponse): {
   text: string
   quickReplies?: InstagramQuickReply[]
   buttons?: InstagramButton[]

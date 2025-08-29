@@ -2,7 +2,6 @@
 import { getBusinessForWebhook } from "@/actions/businfo"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
-import type { JsonValue } from "@prisma/client/runtime/library"
 import { decrypt } from "@/lib/encryption"
 import axios from "axios"
 import { client } from "@/lib/prisma" // Assuming you have prisma client
@@ -283,10 +282,6 @@ const cacheManager = new VoiceflowCacheManager()
 // ============================================================================
 // BUSINESS VARIABLES FETCHER
 // ============================================================================
-
-
-
-
 
 
 
