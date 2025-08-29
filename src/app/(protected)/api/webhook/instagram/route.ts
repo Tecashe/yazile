@@ -27,6 +27,8 @@ import { storeConversationMessage } from "@/actions/chats/queries"
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
 import { verifyInstagramWebhook } from "@/utils/instagram"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+import { getBusinessIdForUser } from "@/actions/businfo/queries"
+import { onUserInfor } from "@/actions/user"
 
 
 
@@ -679,7 +681,7 @@ class MessageProcessor {
 // ENHANCED VOICEFLOW HANDLER - WITH FULL MESSAGE TYPE SUPPORT
 // ============================================================================
 
-class VoiceflowHandler {
+class VoiceflowHandler { //TODO
   static async handle(context: ProcessingContext): Promise<ProcessingResult> {
     Logger.info("🎙️ === VOICEFLOW HANDLER (ENHANCED WITH ALL MESSAGE TYPES) ===")
 
@@ -687,6 +689,9 @@ class VoiceflowHandler {
       if (await this.isRateLimited(context)) {
         throw new Error("Rate limit exceeded for Voiceflow processing")
       }
+      const user = await onUserInfor()
+      const userid = user.data?.id
+      const businessid = await getBusinessIdForUser(userid||"wow")
 
       const contextData = await this.gatherContext(context)
 
@@ -694,7 +699,7 @@ class VoiceflowHandler {
       const businessVariables = await RetryManager.withRetry(
         () =>
           fetchEnhancedBusinessVariables(
-            context.automation.businessId,
+            businessid,
             context.automation.id,
             context.automation.businessWorkflowConfig?.id || null,
             {
