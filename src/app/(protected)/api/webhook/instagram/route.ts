@@ -27,9 +27,6 @@ import { storeConversationMessage } from "@/actions/chats/queries"
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
 import { verifyInstagramWebhook } from "@/utils/instagram"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
-import { getBusinessIdForUser } from "@/actions/businfo/queries"
-import { onUserInfor } from "@/actions/user"
-
 
 
 // ============================================================================
@@ -689,9 +686,7 @@ class VoiceflowHandler { //TODO
       if (await this.isRateLimited(context)) {
         throw new Error("Rate limit exceeded for Voiceflow processing")
       }
-      const user = await onUserInfor()
-      const userid = user.data?.id
-      const businessid = await getBusinessIdForUser(userid||"wow")
+     
 
       const contextData = await this.gatherContext(context)
 
@@ -699,7 +694,7 @@ class VoiceflowHandler { //TODO
       const businessVariables = await RetryManager.withRetry(
         () =>
           fetchEnhancedBusinessVariables(
-            businessid,
+            context.automation.businessId,
             context.automation.id,
             context.automation.businessWorkflowConfig?.id || null,
             {
