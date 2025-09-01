@@ -261,7 +261,7 @@ async function handleSubscriptionProtection(request: NextRequest, userId: string
   
   // Check TEAM routes
   if (pathname.startsWith("/team")) {
-    const hasTeamAccess = await hasAccess(userId, "TEAM")
+    const hasTeamAccess = await hasAccess(userId, "ENTERPRISE")
     
     if (!hasTeamAccess) {
       return NextResponse.redirect(new URL("/upgrade?plan=team", request.url))
