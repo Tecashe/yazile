@@ -46,7 +46,7 @@ export default async function AdminDashboard() {
               <AutomationStats />
             </div>
 
-            <RecentUsers initialUsers={recentUsers} />
+            {/* <RecentUsers initialUsers={recentUsers} /> */}
 
             {/* New Message Templates Component */}
             <MessageTemplates />

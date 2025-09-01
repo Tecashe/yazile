@@ -60,7 +60,7 @@ export function useFeatureAccess() {
     
     // Check if user's plan meets the required level
     if (requiredPlan === "PRO") {
-      return ["PRO", "TEAM"].includes(subscription.plan)
+      return ["PRO", "ENTERPRISE"].includes(subscription.plan)
     }
     
     if (requiredPlan === "ENTERPRISE") {
