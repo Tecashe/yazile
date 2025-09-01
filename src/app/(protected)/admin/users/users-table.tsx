@@ -24,7 +24,7 @@ interface User {
   id: string
   name: string
   email: string
-  plan: "FREE" | "PRO" | "TEAM"
+  plan: "FREE" | "PRO" | "ENTERPRISE"
   createdAt: string
   integrations: number
   automations: number
