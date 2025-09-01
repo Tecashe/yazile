@@ -49,7 +49,7 @@ import { useSubscription } from "@/contexts/subscription-context"
 export function useFeatureAccess() {
   const { subscription, isLoading } = useSubscription()
   
-  const hasAccess = (requiredPlan: "PRO" | "TEAM") => {
+  const hasAccess = (requiredPlan: "PRO" | "ENTERPRISE") => {
     if (isLoading) return false
     if (!subscription) return false
     
@@ -63,8 +63,8 @@ export function useFeatureAccess() {
       return ["PRO", "TEAM"].includes(subscription.plan)
     }
     
-    if (requiredPlan === "TEAM") {
-      return subscription.plan === "TEAM"
+    if (requiredPlan === "ENTERPRISE") {
+      return subscription.plan === "ENTERPRISE"
     }
     
     return false
@@ -73,7 +73,7 @@ export function useFeatureAccess() {
   return {
     isLoading,
     isPro: hasAccess("PRO"),
-    isTeam: hasAccess("TEAM"),
+    isTeam: hasAccess("ENTERPRISE"),
     plan: subscription?.plan || "FREE",
     status: subscription?.status,
   }
