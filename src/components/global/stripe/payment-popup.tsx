@@ -1037,7 +1037,7 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
                   </Button>
                 </div>
                 <div className="text-center py-8">
-                  <p className="text-zinc-400 mb-4">You're on the best plan available!</p>
+                  <p className="text-zinc-400 mb-4">You&apos;re on the best plan available!</p>
                   <Button
                     onClick={handleManageSubscription}
                     variant="outline"
