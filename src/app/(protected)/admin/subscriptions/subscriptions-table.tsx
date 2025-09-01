@@ -23,7 +23,7 @@ type Subscription = {
   userId: string | null
   userName: string
   userEmail: string | undefined
-  plan: "PRO" | "FREE" | "TEAM"
+  plan: "PRO" | "FREE" | "ENTERPRISE"
   status: string
   startDate: string
   updatedAt: string
@@ -63,7 +63,7 @@ export function SubscriptionsTable() {
     return new Date(dateString).toLocaleDateString()
   }
 
-  const handleUpdatePlan = async (id: string, currentPlan: "PRO" | "FREE"| "TEAM") => {
+  const handleUpdatePlan = async (id: string, currentPlan: "PRO" | "FREE"| "ENTERPRISE") => {
     try {
       const newPlan = currentPlan === "PRO" ? "FREE" : "PRO"
       await updateSubscriptionPlan(id, newPlan)
