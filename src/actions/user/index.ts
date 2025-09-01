@@ -116,16 +116,16 @@ export const onSubscribe = async (session_id: string) => {
 export const onUserInfor = async () => {
   const user = await onCurrentUser()
 
-  console.log("Clerk user ID:", user.id)
-  console.log("Looking for user with clerkId:", user.id)
+  // console.log("Clerk user ID:", user.id)
+  // console.log("Looking for user with clerkId:", user.id)
   
   try {
     const profile = await findUser(user.id)
-    console.log("Profile found:", profile)
+    // console.log("Profile found:", profile)
     
     if (profile) {
-      console.log("Profile ID (database UUID):", profile.id)
-      console.log("Profile clerkId:", profile.clerkId)
+      // console.log("Profile ID (database UUID):", profile.id)
+      // console.log("Profile clerkId:", profile.clerkId)
       
       // Return only serializable data
       return {
@@ -140,8 +140,8 @@ export const onUserInfor = async () => {
       }
     }
 
-    console.log("No profile found for clerkId:", user.id)
-    console.log("User might need to be created in database")
+    // console.log("No profile found for clerkId:", user.id)
+    // console.log("User might need to be created in database")
     
     return { status: 404, error: "User not found in database" }
     

@@ -100,10 +100,9 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
 
 // Define price IDs for your subscription plans
 export const SUBSCRIPTION_PRICES = {
-  // MONTHLY: process.env.STRIPE_PRICE_MONTHLY || "price_monthly_id",
-  // YEARLY: process.env.STRIPE_PRICE_YEARLY || "price_yearly_id",
-  MONTHLY: process.env.STRIPE_SUBSCRIPTION_PRICE_ID || "price_monthly_id",
-  YEARLY: "$200",
+  MONTHLY: process.env.STRIPE_PRICE_MONTHLY || "price_monthly_id",
+  YEARLY: process.env.STRIPE_PRICE_YEARLY || "price_yearly_id",
+  
 }
 
 // Create a checkout session for subscription
