@@ -511,7 +511,7 @@ export async function fetchEnhancedBusinessVariables(
       has_crm_integration: tenantData.crmCredentials ? "true" : "false",
       stripe_configured: tenantData.stripeCredentials ? "true" : "false",
 
-      session_id: conversationContext?.senderId || "", // This is what your API blocks will use
+      session_id: userid || "", // This is what your API blocks will use
       user_id: conversationContext?.senderId || "",
       this_user: userid||"",
       
