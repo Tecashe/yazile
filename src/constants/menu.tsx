@@ -286,8 +286,6 @@ import { v4 as uuid } from "uuid"
 import {
   Home,
   Users,
-  MessageCircle,
-  Bot,
   Zap,
   Send,
   Cpu,
