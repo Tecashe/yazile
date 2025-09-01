@@ -802,7 +802,7 @@ enum NurturingStepType {
 enum SUBSCRIPTION_PLAN {
   FREE
   PRO
-  TEAM
+  ENTERPRISE
 }
 
 enum SUBSCRIPTION_STATUS {
