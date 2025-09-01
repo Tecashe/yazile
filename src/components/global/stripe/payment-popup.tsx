@@ -883,8 +883,21 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
   const { toast } = useToast()
   const { subscription, refetchSubscription } = useSubscription()
 
-  // Determine current plan
-  const currentPlan = subscription?.plan.toLowerCase() || "free"
+  // Determine current plan by mapping context plan to UI plan IDs
+  const mapPlanToId = (plan: string): string => {
+    switch (plan?.toUpperCase()) {
+      case 'FREE':
+        return 'free'
+      case 'PRO':
+        return 'pro'
+      case 'ENTERPRISE':
+        return 'enterprise'
+      default:
+        return 'free'
+    }
+  }
+
+  const currentPlan = mapPlanToId(subscription?.plan || 'FREE')
   const currentPlanOrder = PLANS.find(plan => plan.id === currentPlan)?.order ?? 0
 
   // Filter plans to only show upgrade/downgrade options (exclude current plan)
@@ -1024,7 +1037,7 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
                   </Button>
                 </div>
                 <div className="text-center py-8">
-                  <p className="text-zinc-400 mb-4">You&apos;re on the best plan available!</p>
+                  <p className="text-zinc-400 mb-4">You're on the best plan available!</p>
                   <Button
                     onClick={handleManageSubscription}
                     variant="outline"
