@@ -3,9 +3,62 @@ import { getBusinessForWebhook } from "@/actions/businfo"
 import { getUserFromBusiness } from "@/actions/businfo/queries"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
-import { decrypt, decryptCredentials } from "@/lib/encrypt"
+import { decryptCredentials } from "@/lib/encrypt"
 import axios from "axios"
 import { client } from "@/lib/prisma" // Assuming you have prisma client
+
+
+
+const INSTAGRAM_LIMITS = {
+  MESSAGE_LIMIT: 2000,           // Instagram text message limit
+  QUICK_REPLY_LIMIT: 13,         // Instagram quick reply limit
+  QUICK_REPLY_TITLE_LIMIT: 20,   // Instagram quick reply title limit
+  BUTTON_LIMIT: 3,               // Instagram button template limit
+  BUTTON_TITLE_LIMIT: 20,        // Instagram button title limit
+  CAROUSEL_LIMIT: 10,            // Instagram carousel cards limit
+  CAROUSEL_TITLE_LIMIT: 80,      // Instagram carousel title limit
+  CAROUSEL_SUBTITLE_LIMIT: 80,   // Instagram carousel subtitle limit
+  PAYLOAD_LIMIT: 1000,           // Instagram payload limit
+  MEDIA_SIZE_LIMIT: 8 * 1024 * 1024, // 8MB media limit
+} as const;
+
+// Enhanced interfaces aligned with Instagram capabilities
+interface InstagramAlignedButton {
+  title: string;
+  payload: string;
+  url?: string;  // For web_url buttons
+}
+
+interface InstagramAlignedQuickReply {
+  content_type: "text";
+  title: string;
+  payload: string;
+}
+
+interface InstagramAlignedCarouselElement {
+  title: string;
+  subtitle?: string;
+  image_url?: string;
+  buttons?: InstagramAlignedButton[];
+}
+
+interface InstagramAlignedMessage {
+  text: string;
+  quickReplies?: InstagramAlignedQuickReply[];
+  buttons?: InstagramAlignedButton[];
+  carousel?: InstagramAlignedCarouselElement[];
+  attachment?: {
+    type: 'image' | 'video' | 'audio' | 'file';
+    url: string;
+    caption?: string;
+  };
+  // Instagram-specific metadata
+  requiresHumanHandoff?: boolean;
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  sentiment?: "positive" | "neutral" | "negative";
+  complexity?: "simple" | "medium" | "complex";
+}
+
 
 
 
@@ -1011,338 +1064,720 @@ export async function fetchEnhancedBusinessVariablesE(
   }
 }
 
+
+
+// ============================================================================
+// INSTAGRAM COMPATIBILITY CHECKER
+// ============================================================================
+
+class InstagramCompatibilityChecker {
+  /**
+   * Checks if media URL is compatible with Instagram
+   */
+  static isMediaCompatible(url: string, type: string): boolean {
+    const supportedImageFormats = ['.jpg', '.jpeg', '.png', '.gif'];
+    const supportedVideoFormats = ['.mp4', '.avi', '.mov'];
+    const supportedAudioFormats = ['.mp3', '.wav', '.ogg'];
+    
+    const urlLower = url.toLowerCase();
+    
+    switch (type) {
+      case 'image':
+        return supportedImageFormats.some(format => urlLower.includes(format));
+      case 'video':
+        return supportedVideoFormats.some(format => urlLower.includes(format));
+      case 'audio':
+        return supportedAudioFormats.some(format => urlLower.includes(format));
+      default:
+        return true; // Allow files by default
+    }
+  }
+
+  /**
+   * Validates button structure for Instagram compliance
+   */
+  static validateButton(button: any): InstagramAlignedButton | null {
+    let title = "";
+    let payload = "";
+    let url = undefined;
+
+    // Extract title with comprehensive fallback
+    if (button.name) title = button.name;
+    else if (button.title) title = button.title;
+    else if (button.text) title = button.text;
+    else if (button.label) title = button.label;
+    else title = "Option";
+
+    // Clean and validate title
+    title = title.trim();
+    if (!title || title.length === 0) title = "Select";
+    if (title.length > INSTAGRAM_LIMITS.BUTTON_TITLE_LIMIT) {
+      title = title.substring(0, INSTAGRAM_LIMITS.BUTTON_TITLE_LIMIT - 3) + "...";
+    }
+
+    // Extract payload with comprehensive fallback
+    if (button.request?.type === "intent" && button.request.payload?.intent?.name) {
+      payload = button.request.payload.intent.name;
+    } else if (button.request?.type === "text") {
+      payload = typeof button.request.payload === "string" 
+        ? button.request.payload 
+        : button.name || title;
+    } else if (button.request?.payload?.label) {
+      payload = button.request.payload.label;
+    } else if (button.payload) {
+      payload = typeof button.payload === "string" ? button.payload : JSON.stringify(button.payload);
+    } else if (button.value) {
+      payload = button.value;
+    } else {
+      payload = button.name || title;
+    }
+
+    // Handle URL for web buttons
+    if (button.url || button.link) {
+      url = button.url || button.link;
+    }
+
+    // Validate payload length
+    if (payload.length > INSTAGRAM_LIMITS.PAYLOAD_LIMIT) {
+      payload = payload.substring(0, INSTAGRAM_LIMITS.PAYLOAD_LIMIT);
+    }
+
+    return { title, payload, url };
+  }
+}
+
+
 // ============================================================================
 // VOICEFLOW RESPONSE PROCESSOR
 // ============================================================================
 
 
-export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
-  text: string
-  quickReplies?: { title: string; payload: string }[]
-  buttons?: Array<{ title: string; payload: string; url?: string }>
-  carousel?: Array<{
-    title: string
-    description?: string
-    image?: string
-    buttons?: Array<{ title: string; payload: string; url?: string }>
-  }>
-  attachment?: {
-    type: 'image' | 'video' | 'audio' | 'file'
-    url: string
-    caption?: string
-  }
-  requiresHumanHandoff?: boolean
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-  sentiment?: "positive" | "neutral" | "negative"
-  complexity?: "simple" | "medium" | "complex"
-} {
-  let result = ""
-  const quickReplies: { title: string; payload: string }[] = []
-  const buttons: Array<{ title: string; payload: string; url?: string }> = []
-  const carousel: Array<{
-    title: string
-    description?: string
-    image?: string
-    buttons?: Array<{ title: string; payload: string; url?: string }>
-  }> = []
-  let attachment: {
-    type: 'image' | 'video' | 'audio' | 'file'
-    url: string
-    caption?: string
-  } | undefined = undefined
-  let requiresHumanHandoff = false
-  let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
-  let sentiment: "positive" | "neutral" | "negative" = "neutral"
-  let complexity: "simple" | "medium" | "complex" = "medium"
+// export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): {
+//   text: string
+//   quickReplies?: { title: string; payload: string }[]
+//   buttons?: Array<{ title: string; payload: string; url?: string }>
+//   carousel?: Array<{
+//     title: string
+//     description?: string
+//     image?: string
+//     buttons?: Array<{ title: string; payload: string; url?: string }>
+//   }>
+//   attachment?: {
+//     type: 'image' | 'video' | 'audio' | 'file'
+//     url: string
+//     caption?: string
+//   }
+//   requiresHumanHandoff?: boolean
+//   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+//   sentiment?: "positive" | "neutral" | "negative"
+//   complexity?: "simple" | "medium" | "complex"
+// } {
+//   let result = ""
+//   const quickReplies: { title: string; payload: string }[] = []
+//   const buttons: Array<{ title: string; payload: string; url?: string }> = []
+//   const carousel: Array<{
+//     title: string
+//     description?: string
+//     image?: string
+//     buttons?: Array<{ title: string; payload: string; url?: string }>
+//   }> = []
+//   let attachment: {
+//     type: 'image' | 'video' | 'audio' | 'file'
+//     url: string
+//     caption?: string
+//   } | undefined = undefined
+//   let requiresHumanHandoff = false
+//   let priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM"
+//   let sentiment: "positive" | "neutral" | "negative" = "neutral"
+//   let complexity: "simple" | "medium" | "complex" = "medium"
+
+//   for (const trace of traces) {
+//     switch (trace.type) {
+//       case "speak":
+//       case "text":
+//         if ("message" in trace.payload) {
+//           const message = trace.payload.message
+//           result += message + "\n"
+
+//           // Analyze complexity
+//           if (message.length > 200 || message.split(".").length > 3) {
+//             complexity = "complex"
+//           } else if (message.length < 50) {
+//             complexity = "simple"
+//           }
+//         }
+//         break
+
+//       case "choice":
+//         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
+//           trace.payload.buttons.forEach((button: VoiceflowButton) => {
+//             // Ensure we always have a valid title
+//             let title = button.name || "Option"
+//             title = title.trim()
+//             if (title.length === 0) {
+//               title = "Select"
+//             }
+
+//             if (title.length > CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT) {
+//               title = title.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
+//             }
+
+            
+//               let payload: string
+
+//               if (button.request?.type === "intent" && 
+//                   typeof button.request.payload === "object" && 
+//                   button.request.payload !== null && 
+//                   'intent' in button.request.payload && 
+//                   button.request.payload.intent?.name) {
+//                 payload = button.request.payload.intent.name
+//               } else if (button.request?.type === "text") {
+//                 payload = typeof button.request.payload === "string" 
+//                   ? button.request.payload 
+//                   : button.name || title
+//               } else if (typeof button.request?.payload === "object" && 
+//                         button.request.payload !== null && 
+//                         'label' in button.request.payload && 
+//                         typeof button.request.payload.label === "string") {
+//                 payload = button.request.payload.label
+//               } else {
+//                 // Handle both string payload and fallback cases
+//                 payload = typeof button.request?.payload === "string" 
+//                   ? button.request.payload 
+//                   : button.name || title
+//               }
+
+//             const buttonData = {
+//               title,
+//               payload: String(payload).substring(0, 1000), // Instagram payload limit
+//               url: button.url
+//             }
+
+//             quickReplies.push({
+//               title: buttonData.title,
+//               payload: buttonData.payload
+//             })
+
+//             buttons.push(buttonData)
+//           })
+//         }
+//         break
+
+//       case "carousel":
+//         if ("cards" in trace.payload && Array.isArray(trace.payload.cards)) {
+//           trace.payload.cards.forEach((card: any) => {
+//             const carouselItem: {
+//               title: string
+//               description?: string
+//               image?: string
+//               buttons?: Array<{ title: string; payload: string; url?: string }>
+//             } = {
+//               title: (card.title || "Card").substring(0, 80), // Instagram title limit
+//               description: card.description?.text || card.description,
+//               image: card.imageUrl || card.image
+//             }
+
+//             // Process card buttons if they exist
+//             if (card.buttons && Array.isArray(card.buttons)) {
+//               carouselItem.buttons = card.buttons.slice(0, 3).map((btn: any) => {
+//                 let payload: string
+//                 if (btn.request?.type === "intent" && btn.request.payload?.intent?.name) {
+//                   payload = btn.request.payload.intent.name
+//                 } else if (btn.request?.type === "text") {
+//                   payload = btn.request.payload || btn.name
+//                 } else if (btn.request?.payload?.label) {
+//                   payload = btn.request.payload.label
+//                 } else {
+//                   payload = btn.request?.payload || btn.name || "button_click"
+//                 }
+
+//                 return {
+//                   title: (btn.name || btn.title || "Buttonsss").substring(0, 20),
+//                   payload: String(payload).substring(0, 1000),
+//                   url: btn.url
+//                 }
+//               })
+//             }
+
+//             carousel.push(carouselItem)
+//           })
+//         }
+//         break
+
+//       // Add support for cardV2 trace type
+//       case "cardV2":
+//         if (trace.payload) {
+//           if (trace.payload.title) {
+//             result += `*${trace.payload.title}*\n`
+//           }
+//           if (trace.payload.description?.text) {
+//             result += `${trace.payload.description.text}\n`
+//           }
+          
+//           // Handle cardV2 buttons
+//           if (trace.payload.buttons && Array.isArray(trace.payload.buttons)) {
+//             trace.payload.buttons.forEach((button: any) => {
+//               const title = (button.name || "Option").substring(0, 20)
+              
+//               let payload: string
+//               if (button.request?.type === "intent" && button.request.payload?.intent?.name) {
+//                 payload = button.request.payload.intent.name
+//               } else if (button.request?.payload?.label) {
+//                 payload = button.request.payload.label
+//               } else {
+//                 payload = button.request?.payload || button.name || title
+//               }
+
+//               const buttonData = {
+//                 title,
+//                 payload: String(payload).substring(0, 1000)
+//               }
+
+//               quickReplies.push(buttonData)
+//               buttons.push(buttonData)
+//             })
+//           }
+//         }
+//         break
+
+//       case "visual":
+//         if ("image" in trace.payload) {
+//           attachment = {
+//             type: 'image',
+//             url: trace.payload.image,
+//             caption: trace.payload.caption
+//           }
+//           result += `📷 Image: ${trace.payload.image}\n`
+//         }
+//         break
+
+//       case "media":
+//         if ("url" in trace.payload) {
+//           let mediaType: 'image' | 'video' | 'audio' | 'file' = 'file'
+//           const url = trace.payload.url.toLowerCase()
+          
+//           if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') || url.includes('.gif')) {
+//             mediaType = 'image'
+//           } else if (url.includes('.mp4') || url.includes('.avi') || url.includes('.mov')) {
+//             mediaType = 'video'
+//           } else if (url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg')) {
+//             mediaType = 'audio'
+//           }
+
+//           attachment = {
+//             type: mediaType,
+//             url: trace.payload.url,
+//             caption: trace.payload.caption || trace.payload.title
+//           }
+//         }
+//         break
+
+//       case "card":
+//         if (trace.payload) {
+//           if ("title" in trace.payload) {
+//             result += `*${trace.payload.title}*\n`
+//           }
+//           if ("description" in trace.payload) {
+//             result += `${trace.payload.description}\n`
+//           }
+//         }
+//         break
+
+//       case "end":
+//         result += "\nHello, what brings you today, how can I help you?"
+//         break
+
+//       case "handoff":
+//         requiresHumanHandoff = true
+//         priority = "HIGH"
+//         if ("reason" in trace.payload) {
+//           result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+//         }
+//         break
+
+//       case "priority":
+//         if ("level" in trace.payload) {
+//           priority = trace.payload.level
+//         }
+//         break
+
+//       case "sentiment":
+//         if ("value" in trace.payload) {
+//           sentiment = trace.payload.value
+//         }
+//         break
+
+//       case "path":
+//         if ("path" in trace.payload) {
+//           Logger.debug(`Path trace detected: ${trace.payload.path}`)
+//         }
+//         break
+
+//       case "debug":
+//         Logger.debug("Voiceflow debug:", trace.payload)
+//         break
+
+//       case "knowledgeBase":
+//         Logger.debug("Ignoring knowledgeBase trace - workflow responses only")
+//         break
+
+//       default:
+//         Logger.warning(`Unhandled trace type: ${trace.type}`, trace)
+//         break
+//     }
+//   }
+
+//   // If we only got knowledge base traces and no actual workflow content
+//   if (!result.trim() && buttons.length === 0 && carousel.length === 0 && !attachment) {
+//     Logger.warning("No workflow content found - only knowledge base traces detected")
+//     return {
+//       text: "",
+//       quickReplies: undefined,
+//       buttons: undefined,
+//       carousel: undefined,
+//       attachment: undefined,
+//       requiresHumanHandoff: false,
+//       priority: "LOW",
+//       sentiment: "neutral",
+//       complexity: "simple",
+//     }
+//   }
+
+//   // Auto-detect sentiment
+//   if (sentiment === "neutral") {
+//     const text = result.toLowerCase()
+//     if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
+//       sentiment = "negative"
+//     } else if (
+//       text.includes("great") ||
+//       text.includes("excellent") ||
+//       text.includes("wonderful") ||
+//       text.includes("thank")
+//     ) {
+//       sentiment = "positive"
+//     }
+//   }
+
+//   // Trim to Instagram limits
+//   let finalText = result.trim()
+//   if (finalText.length > CONFIG.INSTAGRAM.MESSAGE_LIMIT) {
+//     finalText = finalText.substring(0, CONFIG.INSTAGRAM.MESSAGE_LIMIT - 3) + "..."
+//   }
+
+//   const limitedQuickReplies = quickReplies.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
+//   const limitedButtons = buttons.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
+
+//   return {
+//     text: finalText,
+//     quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
+//     buttons: limitedButtons.length > 0 ? limitedButtons : undefined,
+//     carousel: carousel.length > 0 ? carousel : undefined,
+//     attachment,
+//     requiresHumanHandoff,
+//     priority,
+//     sentiment,
+//     complexity,
+//   }
+// }
+
+export function processEnhancedVoiceflowResponse(traces: VoiceflowTrace[]): InstagramAlignedMessage {
+  let result = "";
+  const quickReplies: InstagramAlignedQuickReply[] = [];
+  const buttons: InstagramAlignedButton[] = [];
+  const carousel: InstagramAlignedCarouselElement[] = [];
+  let attachment: InstagramAlignedMessage['attachment'] = undefined;
+  let requiresHumanHandoff = false;
+  let priority: InstagramAlignedMessage['priority'] = "MEDIUM";
+  let sentiment: InstagramAlignedMessage['sentiment'] = "neutral";
+  let complexity: InstagramAlignedMessage['complexity'] = "medium";
+
+  // Processing flags
+  let hasWorkflowContent = false;
+  let fallbackText = "";
+
+  console.log("🔍 Processing Voiceflow traces for Instagram:", traces.length);
 
   for (const trace of traces) {
+    console.log(`📋 Processing trace type: ${trace.type}`);
+    
     switch (trace.type) {
       case "speak":
       case "text":
         if ("message" in trace.payload) {
-          const message = trace.payload.message
-          result += message + "\n"
+          const message = trace.payload.message;
+          result += message + "\n";
+          hasWorkflowContent = true;
 
-          // Analyze complexity
+          // Analyze complexity based on message content
           if (message.length > 200 || message.split(".").length > 3) {
-            complexity = "complex"
+            complexity = "complex";
           } else if (message.length < 50) {
-            complexity = "simple"
+            complexity = "simple";
           }
         }
-        break
+        break;
 
       case "choice":
         if ("buttons" in trace.payload && Array.isArray(trace.payload.buttons)) {
-          trace.payload.buttons.forEach((button: VoiceflowButton) => {
-            // Ensure we always have a valid title
-            let title = button.name || "Option"
-            title = title.trim()
-            if (title.length === 0) {
-              title = "Select"
-            }
-
-            if (title.length > CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT) {
-              title = title.substring(0, CONFIG.INSTAGRAM.QUICK_REPLY_TITLE_LIMIT - 3) + "..."
-            }
-
+          hasWorkflowContent = true;
+          
+          trace.payload.buttons.forEach((button: VoiceflowButton, index: number) => {
+            const validatedButton = InstagramCompatibilityChecker.validateButton(button);
             
-              let payload: string
-
-              if (button.request?.type === "intent" && 
-                  typeof button.request.payload === "object" && 
-                  button.request.payload !== null && 
-                  'intent' in button.request.payload && 
-                  button.request.payload.intent?.name) {
-                payload = button.request.payload.intent.name
-              } else if (button.request?.type === "text") {
-                payload = typeof button.request.payload === "string" 
-                  ? button.request.payload 
-                  : button.name || title
-              } else if (typeof button.request?.payload === "object" && 
-                        button.request.payload !== null && 
-                        'label' in button.request.payload && 
-                        typeof button.request.payload.label === "string") {
-                payload = button.request.payload.label
-              } else {
-                // Handle both string payload and fallback cases
-                payload = typeof button.request?.payload === "string" 
-                  ? button.request.payload 
-                  : button.name || title
-              }
-
-            const buttonData = {
-              title,
-              payload: String(payload).substring(0, 1000), // Instagram payload limit
-              url: button.url
+            if (validatedButton) {
+              console.log(`✅ Button ${index + 1} validated:`, validatedButton);
+              
+              // Add to both arrays for maximum compatibility
+              buttons.push(validatedButton);
+              quickReplies.push({
+                content_type: "text",
+                title: validatedButton.title,
+                payload: validatedButton.payload
+              });
+            } else {
+              console.warn(`❌ Button ${index + 1} failed validation:`, button);
             }
-
-            quickReplies.push({
-              title: buttonData.title,
-              payload: buttonData.payload
-            })
-
-            buttons.push(buttonData)
-          })
+          });
         }
-        break
+        break;
 
       case "carousel":
         if ("cards" in trace.payload && Array.isArray(trace.payload.cards)) {
-          trace.payload.cards.forEach((card: any) => {
-            const carouselItem: {
-              title: string
-              description?: string
-              image?: string
-              buttons?: Array<{ title: string; payload: string; url?: string }>
-            } = {
-              title: (card.title || "Card").substring(0, 80), // Instagram title limit
-              description: card.description?.text || card.description,
-              image: card.imageUrl || card.image
+          hasWorkflowContent = true;
+          
+          trace.payload.cards.forEach((card: any, cardIndex: number) => {
+            const carouselItem: InstagramAlignedCarouselElement = {
+              title: (card.title || "Card").substring(0, INSTAGRAM_LIMITS.CAROUSEL_TITLE_LIMIT),
+              subtitle: card.description?.text?.substring(0, INSTAGRAM_LIMITS.CAROUSEL_SUBTITLE_LIMIT) || 
+                       card.description?.substring(0, INSTAGRAM_LIMITS.CAROUSEL_SUBTITLE_LIMIT),
+              image_url: card.imageUrl || card.image
+            };
+
+            // Validate image URL if present
+            if (carouselItem.image_url && 
+                !InstagramCompatibilityChecker.isMediaCompatible(carouselItem.image_url, 'image')) {
+              console.warn(`⚠️  Carousel card ${cardIndex + 1} has unsupported image format`);
+              // Keep the URL but log warning
             }
 
-            // Process card buttons if they exist
+            // Process carousel buttons with Instagram limits
             if (card.buttons && Array.isArray(card.buttons)) {
-              carouselItem.buttons = card.buttons.slice(0, 3).map((btn: any) => {
-                let payload: string
-                if (btn.request?.type === "intent" && btn.request.payload?.intent?.name) {
-                  payload = btn.request.payload.intent.name
-                } else if (btn.request?.type === "text") {
-                  payload = btn.request.payload || btn.name
-                } else if (btn.request?.payload?.label) {
-                  payload = btn.request.payload.label
+              carouselItem.buttons = [];
+              
+              card.buttons.slice(0, INSTAGRAM_LIMITS.BUTTON_LIMIT).forEach((btn: any, btnIndex: number) => {
+                const validatedButton = InstagramCompatibilityChecker.validateButton(btn);
+                
+                if (validatedButton) {
+                  carouselItem.buttons!.push(validatedButton);
+                  console.log(`✅ Carousel card ${cardIndex + 1}, button ${btnIndex + 1} validated`);
                 } else {
-                  payload = btn.request?.payload || btn.name || "button_click"
+                  console.warn(`❌ Carousel card ${cardIndex + 1}, button ${btnIndex + 1} failed validation`);
                 }
-
-                return {
-                  title: (btn.name || btn.title || "Buttonsss").substring(0, 20),
-                  payload: String(payload).substring(0, 1000),
-                  url: btn.url
-                }
-              })
+              });
             }
 
-            carousel.push(carouselItem)
-          })
+            carousel.push(carouselItem);
+          });
         }
-        break
+        break;
 
-      // Add support for cardV2 trace type
       case "cardV2":
         if (trace.payload) {
+          hasWorkflowContent = true;
+          
           if (trace.payload.title) {
-            result += `*${trace.payload.title}*\n`
+            result += `*${trace.payload.title}*\n`;
           }
           if (trace.payload.description?.text) {
-            result += `${trace.payload.description.text}\n`
+            result += `${trace.payload.description.text}\n`;
           }
           
-          // Handle cardV2 buttons
+          // Handle cardV2 buttons with Instagram validation
           if (trace.payload.buttons && Array.isArray(trace.payload.buttons)) {
-            trace.payload.buttons.forEach((button: any) => {
-              const title = (button.name || "Option").substring(0, 20)
+            trace.payload.buttons.forEach((button: any, index: number) => {
+              const validatedButton = InstagramCompatibilityChecker.validateButton(button);
               
-              let payload: string
-              if (button.request?.type === "intent" && button.request.payload?.intent?.name) {
-                payload = button.request.payload.intent.name
-              } else if (button.request?.payload?.label) {
-                payload = button.request.payload.label
-              } else {
-                payload = button.request?.payload || button.name || title
+              if (validatedButton) {
+                buttons.push(validatedButton);
+                quickReplies.push({
+                  content_type: "text",
+                  title: validatedButton.title,
+                  payload: validatedButton.payload
+                });
+                console.log(`✅ CardV2 button ${index + 1} validated`);
               }
-
-              const buttonData = {
-                title,
-                payload: String(payload).substring(0, 1000)
-              }
-
-              quickReplies.push(buttonData)
-              buttons.push(buttonData)
-            })
+            });
           }
         }
-        break
+        break;
 
       case "visual":
         if ("image" in trace.payload) {
-          attachment = {
-            type: 'image',
-            url: trace.payload.image,
-            caption: trace.payload.caption
+          hasWorkflowContent = true;
+          
+          if (InstagramCompatibilityChecker.isMediaCompatible(trace.payload.image, 'image')) {
+            attachment = {
+              type: 'image',
+              url: trace.payload.image,
+              caption: trace.payload.caption
+            };
+            console.log("✅ Image attachment validated for Instagram");
+          } else {
+            console.warn("⚠️  Image format may not be supported by Instagram");
+            // Still include it but add to fallback text
+            fallbackText += `📷 Image: ${trace.payload.image}\n`;
           }
-          result += `📷 Image: ${trace.payload.image}\n`
         }
-        break
+        break;
 
       case "media":
         if ("url" in trace.payload) {
-          let mediaType: 'image' | 'video' | 'audio' | 'file' = 'file'
-          const url = trace.payload.url.toLowerCase()
+          hasWorkflowContent = true;
           
+          let mediaType: 'image' | 'video' | 'audio' | 'file' = 'file';
+          const url = trace.payload.url.toLowerCase();
+          
+          // Determine media type
           if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') || url.includes('.gif')) {
-            mediaType = 'image'
+            mediaType = 'image';
           } else if (url.includes('.mp4') || url.includes('.avi') || url.includes('.mov')) {
-            mediaType = 'video'
+            mediaType = 'video';
           } else if (url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg')) {
-            mediaType = 'audio'
+            mediaType = 'audio';
           }
 
-          attachment = {
-            type: mediaType,
-            url: trace.payload.url,
-            caption: trace.payload.caption || trace.payload.title
+          // Validate compatibility
+          if (InstagramCompatibilityChecker.isMediaCompatible(trace.payload.url, mediaType)) {
+            attachment = {
+              type: mediaType,
+              url: trace.payload.url,
+              caption: trace.payload.caption || trace.payload.title
+            };
+            console.log(`✅ ${mediaType} attachment validated for Instagram`);
+          } else {
+            console.warn(`⚠️  ${mediaType} format may not be supported by Instagram`);
+            fallbackText += `📎 Media: ${trace.payload.url}\n`;
           }
         }
-        break
+        break;
 
       case "card":
         if (trace.payload) {
+          hasWorkflowContent = true;
           if ("title" in trace.payload) {
-            result += `*${trace.payload.title}*\n`
+            result += `*${trace.payload.title}*\n`;
           }
           if ("description" in trace.payload) {
-            result += `${trace.payload.description}\n`
+            result += `${trace.payload.description}\n`;
           }
         }
-        break
+        break;
 
       case "end":
-        result += "\nHello, what brings you today, how can I help you?"
-        break
+        hasWorkflowContent = true;
+        result += "\nHello, what brings you today, how can I help you?";
+        break;
 
       case "handoff":
-        requiresHumanHandoff = true
-        priority = "HIGH"
+        hasWorkflowContent = true;
+        requiresHumanHandoff = true;
+        priority = "HIGH";
         if ("reason" in trace.payload) {
-          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`
+          result += `\n[Escalating to human agent: ${trace.payload.reason}]\n`;
         }
-        break
+        break;
 
       case "priority":
         if ("level" in trace.payload) {
-          priority = trace.payload.level
+          priority = trace.payload.level;
         }
-        break
+        break;
 
       case "sentiment":
         if ("value" in trace.payload) {
-          sentiment = trace.payload.value
+          sentiment = trace.payload.value;
         }
-        break
+        break;
 
+      // Instagram doesn't support these - handle gracefully
       case "path":
-        if ("path" in trace.payload) {
-          Logger.debug(`Path trace detected: ${trace.payload.path}`)
-        }
-        break
+        console.log(`📍 Path trace ignored for Instagram: ${trace.payload.path}`);
+        break;
 
       case "debug":
-        Logger.debug("Voiceflow debug:", trace.payload)
-        break
+        console.log("🐛 Debug trace ignored for Instagram:", trace.payload);
+        break;
 
       case "knowledgeBase":
-        Logger.debug("Ignoring knowledgeBase trace - workflow responses only")
-        break
+        console.log("📚 Knowledge base trace ignored - workflow responses only");
+        break;
 
       default:
-        Logger.warning(`Unhandled trace type: ${trace.type}`, trace)
-        break
+        console.warn(`⚠️  Unhandled trace type for Instagram: ${trace.type}`, trace);
+        break;
     }
   }
 
-  // If we only got knowledge base traces and no actual workflow content
-  if (!result.trim() && buttons.length === 0 && carousel.length === 0 && !attachment) {
-    Logger.warning("No workflow content found - only knowledge base traces detected")
+  // Handle case where only knowledge base or unsupported content was found
+  if (!hasWorkflowContent) {
+    console.warn("⚠️  No Instagram-compatible workflow content found");
     return {
       text: "",
-      quickReplies: undefined,
-      buttons: undefined,
-      carousel: undefined,
-      attachment: undefined,
       requiresHumanHandoff: false,
       priority: "LOW",
       sentiment: "neutral",
       complexity: "simple",
-    }
+    };
   }
 
-  // Auto-detect sentiment
+  // Auto-detect sentiment if not explicitly set
   if (sentiment === "neutral") {
-    const text = result.toLowerCase()
-    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately")) {
-      sentiment = "negative"
-    } else if (
-      text.includes("great") ||
-      text.includes("excellent") ||
-      text.includes("wonderful") ||
-      text.includes("thank")
-    ) {
-      sentiment = "positive"
+    const text = (result + fallbackText).toLowerCase();
+    if (text.includes("sorry") || text.includes("apologize") || text.includes("unfortunately") || 
+        text.includes("problem") || text.includes("error")) {
+      sentiment = "negative";
+    } else if (text.includes("great") || text.includes("excellent") || text.includes("wonderful") || 
+              text.includes("thank") || text.includes("perfect") || text.includes("awesome")) {
+      sentiment = "positive";
     }
   }
 
-  // Trim to Instagram limits
-  let finalText = result.trim()
-  if (finalText.length > CONFIG.INSTAGRAM.MESSAGE_LIMIT) {
-    finalText = finalText.substring(0, CONFIG.INSTAGRAM.MESSAGE_LIMIT - 3) + "..."
+  // Combine main result with fallback text
+  let finalText = (result + fallbackText).trim();
+  
+  // Apply Instagram text limits
+  if (finalText.length > INSTAGRAM_LIMITS.MESSAGE_LIMIT) {
+    finalText = finalText.substring(0, INSTAGRAM_LIMITS.MESSAGE_LIMIT - 3) + "...";
+    console.warn("⚠️  Text truncated to fit Instagram limits");
   }
 
-  const limitedQuickReplies = quickReplies.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
-  const limitedButtons = buttons.slice(0, CONFIG.INSTAGRAM.QUICK_REPLY_LIMIT)
+  // Apply Instagram limits to arrays
+  const limitedQuickReplies = quickReplies.slice(0, INSTAGRAM_LIMITS.QUICK_REPLY_LIMIT);
+  const limitedButtons = buttons.slice(0, INSTAGRAM_LIMITS.BUTTON_LIMIT);
+  const limitedCarousel = carousel.slice(0, INSTAGRAM_LIMITS.CAROUSEL_LIMIT);
+
+  // Log final result
+  console.log("✅ Instagram-aligned processing complete:", {
+    textLength: finalText.length,
+    quickRepliesCount: limitedQuickReplies.length,
+    buttonsCount: limitedButtons.length,
+    carouselCount: limitedCarousel.length,
+    hasAttachment: !!attachment
+  });
 
   return {
     text: finalText,
     quickReplies: limitedQuickReplies.length > 0 ? limitedQuickReplies : undefined,
     buttons: limitedButtons.length > 0 ? limitedButtons : undefined,
-    carousel: carousel.length > 0 ? carousel : undefined,
+    carousel: limitedCarousel.length > 0 ? limitedCarousel : undefined,
     attachment,
     requiresHumanHandoff,
     priority,
     sentiment,
     complexity,
-  }
+  };
 }
+
 
 
 // ============================================================================
@@ -1724,5 +2159,75 @@ export function getVoiceflowHealth(): {
     healthScore: circuitBreaker.getHealthScore(),
     circuitBreakerState: circuitBreaker.getState(),
     cacheStats: cacheManager.getCacheStats(),
+  }
+}
+
+
+
+
+
+
+
+// ============================================================================
+// DEBUGGING AND TESTING UTILITIES
+// ============================================================================
+
+export class InstagramVoiceflowDebugger {
+  /**
+   * Test the entire pipeline with sample data
+   */
+  static testInstagramAlignment(): void {
+    console.log("🧪 Testing Instagram-Voiceflow alignment...");
+    
+    const sampleTraces: VoiceflowTrace[] = [
+      {
+        type: "text",
+        payload: { message: "Hello! How can I help you today?" }
+      },
+      {
+        type: "choice",
+        payload: {
+          buttons: [
+            { name: "Get Started", request: { payload: { intent: { name: "get_started" } } } },
+            { name: "Contact Support", request: { payload: "contact_support" } },
+            { name: "Learn More", url: "https://example.com" }
+          ]
+        }
+      }
+    ];
+
+    const result = processEnhancedVoiceflowResponse(sampleTraces);
+    console.log("🎯 Test result:", JSON.stringify(result, null, 2));
+  }
+
+  /**
+   * Validate Instagram limits compliance
+   */
+  static validateInstagramCompliance(message: InstagramAlignedMessage): boolean {
+    const issues: string[] = [];
+
+    if (message.text.length > INSTAGRAM_LIMITS.MESSAGE_LIMIT) {
+      issues.push(`Text too long: ${message.text.length}/${INSTAGRAM_LIMITS.MESSAGE_LIMIT}`);
+    }
+
+    if (message.quickReplies && message.quickReplies.length > INSTAGRAM_LIMITS.QUICK_REPLY_LIMIT) {
+      issues.push(`Too many quick replies: ${message.quickReplies.length}/${INSTAGRAM_LIMITS.QUICK_REPLY_LIMIT}`);
+    }
+
+    if (message.buttons && message.buttons.length > INSTAGRAM_LIMITS.BUTTON_LIMIT) {
+      issues.push(`Too many buttons: ${message.buttons.length}/${INSTAGRAM_LIMITS.BUTTON_LIMIT}`);
+    }
+
+    if (message.carousel && message.carousel.length > INSTAGRAM_LIMITS.CAROUSEL_LIMIT) {
+      issues.push(`Too many carousel cards: ${message.carousel.length}/${INSTAGRAM_LIMITS.CAROUSEL_LIMIT}`);
+    }
+
+    if (issues.length > 0) {
+      console.error("❌ Instagram compliance issues:", issues);
+      return false;
+    }
+
+    console.log("✅ Instagram compliance validated");
+    return true;
   }
 }

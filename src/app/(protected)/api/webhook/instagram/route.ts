@@ -628,7 +628,7 @@ function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowRespo
       if (card.buttons && card.buttons.length > 0) {
         element.buttons = card.buttons.slice(0, 3).map((button) => {
           const buttonTitle =  button.name || "ButtonE"
-          const buttonPayload = button.payload || button.name || "button_clickede"
+          const buttonPayload = button.payload || button.name || "button_clicked"
           
           return {
             type: button.url ? "web_url" as const : "postback" as const,
