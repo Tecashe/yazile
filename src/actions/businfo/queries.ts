@@ -327,3 +327,20 @@ export const getUserFromBusiness = async (businessId: string) => {
   })
 }
 
+// Add to your queries.ts
+export const getBusinessByAutomationId = async (automationId: string) => {
+  return await client.business.findFirst({
+    where: { 
+      automationId: automationId 
+    },
+    select: {
+      id: true,
+      businessName: true,
+      businessType: true,
+      businessDescription: true,
+      website: true,
+      responseLanguage: true,
+      userId: true,
+    }
+  })
+}

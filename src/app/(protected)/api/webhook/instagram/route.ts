@@ -27,6 +27,7 @@ import { storeConversationMessage } from "@/actions/chats/queries"
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
 import { verifyInstagramWebhook } from "@/utils/instagram"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
+import { getBusinessByAutomationId } from "@/actions/businfo/queries"
 
 
 // ============================================================================
@@ -688,31 +689,70 @@ class VoiceflowHandler { //TODO
       }
      
 
+      // const contextData = await this.gatherContext(context)
+
+      // // Fetch enhanced business variables with retry
+      // const businessVariables = await RetryManager.withRetry(
+      //   () =>
+      //     fetchEnhancedBusinessVariables(
+      //       context.automation.businessId,
+      //       context.automation.id,
+      //       context.automation.businessWorkflowConfig?.id || null,
+      //       {
+      //         pageId: context.data.pageId,
+      //         senderId: context.data.senderId,
+      //         userMessage: context.userMessage,
+      //         isNewUser: contextData.conversationHistory.length === 0,
+      //         customerType:
+      //           contextData.conversationHistory.length >= 10
+      //             ? "VIP"
+      //             : contextData.conversationHistory.length > 0
+      //               ? "RETURNING"
+      //               : "NEW",
+      //         messageHistory: contextData.conversationHistory,
+      //       },
+      //     ),
+      //   "Fetch business variables",
+      // )
+
       const contextData = await this.gatherContext(context)
 
-      // Fetch enhanced business variables with retry
-      const businessVariables = await RetryManager.withRetry(
-        () =>
-          fetchEnhancedBusinessVariables(
-            context.automation.businessId,
-            context.automation.id,
-            context.automation.businessWorkflowConfig?.id || null,
-            {
-              pageId: context.data.pageId,
-              senderId: context.data.senderId,
-              userMessage: context.userMessage,
-              isNewUser: contextData.conversationHistory.length === 0,
-              customerType:
-                contextData.conversationHistory.length >= 10
-                  ? "VIP"
-                  : contextData.conversationHistory.length > 0
-                    ? "RETURNING"
-                    : "NEW",
-              messageHistory: contextData.conversationHistory,
-            },
-          ),
-        "Fetch business variables",
-      )
+// Get business using automationId since business.automationId links to automation.id
+Logger.info(`🔍 Looking up business for automation: ${context.automation.id}`)
+
+const business = await getBusinessByAutomationId(context.automation.id)
+
+if (!business) {
+  Logger.error(`❌ No business found for automation: ${context.automation.id}`)
+  throw new Error(`No business linked to automation: ${context.automation.id}`)
+}
+
+const businessId = business.id
+Logger.info(`✅ Found business: ${businessId}`)
+
+// Now proceed with the business variables
+const businessVariables = await RetryManager.withRetry(
+  () =>
+    fetchEnhancedBusinessVariables(
+      businessId, // Now we have the correct businessId
+      context.automation.id,
+      context.automation.businessWorkflowConfig?.id || null,
+      {
+        pageId: context.data.pageId,
+        senderId: context.data.senderId,
+        userMessage: context.userMessage,
+        isNewUser: contextData.conversationHistory.length === 0,
+        customerType:
+          contextData.conversationHistory.length >= 10
+            ? "VIP"
+            : contextData.conversationHistory.length > 0
+            ? "RETURNING"
+            : "NEW",
+        messageHistory: contextData.conversationHistory,
+      },
+    ),
+  "Fetch business variables",
+)
 
       const response = await this.processVoiceflowWithRetry(context, contextData, businessVariables)
 
