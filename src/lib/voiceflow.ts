@@ -3,7 +3,7 @@ import { getBusinessForWebhook } from "@/actions/businfo"
 import { getUserFromBusiness } from "@/actions/businfo/queries"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
-import { decrypt } from "@/lib/encryption"
+import { decrypt, decryptCredentials } from "@/lib/encrypt"
 import axios from "axios"
 import { client } from "@/lib/prisma" // Assuming you have prisma client
 
@@ -384,24 +384,26 @@ async function fetchTenantIntegrations(businessId: string, userId: string): Prom
     let stripeCredentials = null
     let crmCredentials = null
 
+    
     for (const integration of tenant.integrations) {
       try {
-        const decryptedCredentials = JSON.parse(decrypt(integration.credentialsHash))
-        
+        // Use decryptCredentials function which handles the encrypted:iv format
+        const decryptedCredentials = decryptCredentials(integration.credentialsHash)
+                
         integrations.push({
           id: integration.id,
           type: integration.type,
           name: integration.name,
           credentials: decryptedCredentials
         })
-
+        
         // Separate Stripe and CRM credentials for easy access
         if (integration.type === 'STRIPE') {
           stripeCredentials = decryptedCredentials
         } else if (['HUBSPOT', 'SALESFORCE', 'PIPEDRIVE'].includes(integration.type)) {
           crmCredentials = decryptedCredentials
         }
-
+        
         Logger.info(`🔐 Decrypted credentials for ${integration.type}: ${integration.name}`)
       } catch (error) {
         Logger.error(`Failed to decrypt credentials for integration ${integration.id}:`, error)
