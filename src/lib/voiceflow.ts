@@ -1,11 +1,12 @@
 
 import { getBusinessForWebhook } from "@/actions/businfo"
+import { getUserFromBusiness } from "@/actions/businfo/queries"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
 import { decrypt } from "@/lib/encryption"
 import axios from "axios"
 import { client } from "@/lib/prisma" // Assuming you have prisma client
-import { onUserInfor } from "@/actions/user"
+
 
 
 
@@ -435,8 +436,6 @@ export async function fetchEnhancedBusinessVariables(
   Logger.info("🔍 Fetching enhanced business variables with multi-tenant support...")
 
   try {
-    const user = await onUserInfor()
-    const userid = user.data?.id
     // Get business profile and traditional business data in parallel
     const [profileResult, businessResult] = await Promise.allSettled([
       getBusinessProfileForAutomation(automationId),
@@ -468,8 +467,13 @@ export async function fetchEnhancedBusinessVariables(
       Logger.warning("Business data fetch failed, using profile data only")
     }
 
+    // Then in fetchEnhancedBusinessVariables:
+    const businessUser = await getUserFromBusiness(businessId)
+    const userid = businessUser?.userId || businessUser?.User?.id
+    
+
     // NEW: Fetch tenant integrations
-    const tenantData = await fetchTenantIntegrations(businessId, userid || "wow")
+    const tenantData = await fetchTenantIntegrations(businessId, userid ||"" )
 
     
 

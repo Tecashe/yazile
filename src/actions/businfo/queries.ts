@@ -309,3 +309,21 @@ export const getUserBusinessWithId = async (clerkId: string) => {
     }
   })
 }
+
+
+// Add this to your queries.ts
+export const getUserFromBusiness = async (businessId: string) => {
+  return await client.business.findUnique({
+    where: { id: businessId },
+    select: {
+      userId: true,
+      User: {
+        select: {
+          id: true,
+          clerkId: true,
+        }
+      }
+    }
+  })
+}
+
