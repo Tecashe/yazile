@@ -1,7 +1,7 @@
 //lib/integration-service.ts
 import { client } from '@/lib/prisma'
 import { encrypt, decrypt, hashCredentials } from '@/lib/encrypt'
-import { Integrations, IntegrationType } from '@prisma/client'
+import {  IntegrationType } from '@prisma/client'
 
 export async function getIntegration(tenantId: string, type: IntegrationType) {
   return await client.integration.findFirst({

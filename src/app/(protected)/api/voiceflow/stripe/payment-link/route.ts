@@ -111,16 +111,7 @@ export async function POST(request: NextRequest) {
       })
     })
 
-    // // Update Voiceflow session with payment info
-    // await updateVoiceflowSession(vfSessionId, {
-    //   variables: JSON.stringify({
-    //     paymentLinkId: paymentLink.id,
-    //     paymentUrl: paymentLink.url,
-    //     amount,
-    //     currency
-    //   })
-    // })
-
+  
     // Log successful API call
     await logApiCall({
       tenantId,

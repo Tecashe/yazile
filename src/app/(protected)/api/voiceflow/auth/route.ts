@@ -1,6 +1,5 @@
 // /api/voiceflow/auth/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
 import { validateVoiceflowRequest } from '@/lib/voiceflow-auth'
 import { getTenantBySessionId } from '@/lib/tenant-service'
 

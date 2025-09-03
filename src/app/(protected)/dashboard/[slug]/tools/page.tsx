@@ -1,3 +1,1543 @@
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Badge } from "@/components/ui/badge"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog"
+// import { Alert, AlertDescription } from "@/components/ui/alert"
+// import { Separator } from "@/components/ui/separator"
+// import {
+//   CreditCard,
+//   Users,
+//   Calendar,
+//   Mail,
+//   MessageSquare,
+//   ShoppingCart,
+//   BarChart3,
+//   Webhook,
+//   Settings,
+//   CheckCircle,
+//   AlertCircle,
+//   Plus,
+//   Trash2,
+//   Eye,
+//   EyeOff,
+//   Zap,
+//   Building2,
+//   Phone,
+//   Globe,
+//   Database,
+//   Lock,
+// } from "lucide-react"
+
+// // Integration categories and their available services
+// const INTEGRATION_CATEGORIES = {
+//   ecommerce: {
+//     title: "E-commerce & Payments",
+//     description: "Payment processing, order management, and e-commerce platforms",
+//     icon: CreditCard,
+//     color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+//     integrations: [
+//       {
+//         id: "stripe",
+//         name: "Stripe",
+//         type: "STRIPE",
+//         description: "Accept payments, create payment links, manage subscriptions",
+//         icon: CreditCard,
+//         fields: [
+//           { key: "publishable_key", label: "Publishable Key", type: "text", required: true },
+//           { key: "secret_key", label: "Secret Key", type: "password", required: true },
+//           { key: "webhook_secret", label: "Webhook Secret", type: "password", required: false },
+//         ],
+//         endpoints: ["Create Payment Link", "Verify Payment Status", "Process Refund", "Get Customer Details"],
+//       },
+//       {
+//         id: "shopify",
+//         name: "Shopify",
+//         type: "SHOPIFY",
+//         description: "Sync products, manage orders, track inventory",
+//         icon: ShoppingCart,
+//         fields: [
+//           {
+//             key: "shop_domain",
+//             label: "Shop Domain",
+//             type: "text",
+//             required: true,
+//             placeholder: "your-shop.myshopify.com",
+//           },
+//           { key: "access_token", label: "Access Token", type: "password", required: true },
+//           { key: "api_version", label: "API Version", type: "text", required: false, placeholder: "2023-10" },
+//         ],
+//         endpoints: ["Get Product Info", "Check Inventory", "Create Order", "Update Order Status"],
+//       },
+//     ],
+//   },
+//   crm: {
+//     title: "CRM & Sales",
+//     description: "Customer relationship management and sales automation",
+//     icon: Users,
+//     color: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+//     integrations: [
+//       {
+//         id: "hubspot",
+//         name: "HubSpot",
+//         type: "HUBSPOT",
+//         description: "Manage contacts, deals, and customer interactions",
+//         icon: Users,
+//         fields: [
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//           { key: "portal_id", label: "Portal ID", type: "text", required: true },
+//         ],
+//         endpoints: ["Create Contact", "Update Deal Stage", "Log Activity", "Get Contact Info"],
+//       },
+//       {
+//         id: "salesforce",
+//         name: "Salesforce",
+//         type: "SALESFORCE",
+//         description: "Enterprise CRM integration for leads and opportunities",
+//         icon: Building2,
+//         fields: [
+//           { key: "client_id", label: "Client ID", type: "text", required: true },
+//           { key: "client_secret", label: "Client Secret", type: "password", required: true },
+//           { key: "username", label: "Username", type: "text", required: true },
+//           { key: "password", label: "Password", type: "password", required: true },
+//           { key: "security_token", label: "Security Token", type: "password", required: true },
+//         ],
+//         endpoints: ["Create Lead", "Update Opportunity", "Search Accounts", "Log Call Activity"],
+//       },
+//       {
+//         id: "pipedrive",
+//         name: "Pipedrive",
+//         type: "PIPEDRIVE",
+//         description: "Simple CRM for managing your sales pipeline",
+//         icon: BarChart3,
+//         fields: [
+//           { key: "api_token", label: "API Token", type: "password", required: true },
+//           { key: "company_domain", label: "Company Domain", type: "text", required: true, placeholder: "yourcompany" },
+//         ],
+//         endpoints: ["Add Person", "Create Deal", "Update Pipeline", "Get Activities"],
+//       },
+//     ],
+//   },
+//   communication: {
+//     title: "Communication & Marketing",
+//     description: "Email marketing, SMS, and communication platforms",
+//     icon: Mail,
+//     color: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+//     integrations: [
+//       {
+//         id: "mailchimp",
+//         name: "Mailchimp",
+//         type: "MAILCHIMP",
+//         description: "Email marketing and audience management",
+//         icon: Mail,
+//         fields: [
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//           { key: "server_prefix", label: "Server Prefix", type: "text", required: true, placeholder: "us1" },
+//         ],
+//         endpoints: ["Add Subscriber", "Send Campaign", "Get List Stats", "Update Contact"],
+//       },
+//       {
+//         id: "sendgrid",
+//         name: "SendGrid",
+//         type: "SENDGRID",
+//         description: "Transactional email delivery service",
+//         icon: MessageSquare,
+//         fields: [{ key: "api_key", label: "API Key", type: "password", required: true }],
+//         endpoints: ["Send Email", "Add to List", "Get Email Stats", "Validate Email"],
+//       },
+//       {
+//         id: "twilio",
+//         name: "Twilio",
+//         type: "TWILIO",
+//         description: "SMS and voice communication platform",
+//         icon: Phone,
+//         fields: [
+//           { key: "account_sid", label: "Account SID", type: "text", required: true },
+//           { key: "auth_token", label: "Auth Token", type: "password", required: true },
+//           {
+//             key: "phone_number",
+//             label: "Twilio Phone Number",
+//             type: "text",
+//             required: true,
+//             placeholder: "+1234567890",
+//           },
+//         ],
+//         endpoints: ["Send SMS", "Make Call", "Get Message Status", "Lookup Phone Number"],
+//       },
+//     ],
+//   },
+//   scheduling: {
+//     title: "Scheduling & Booking",
+//     description: "Appointment booking and calendar management",
+//     icon: Calendar,
+//     color: "bg-orange-500/10 border-orange-500/20 text-orange-400",
+//     integrations: [
+//       {
+//         id: "calendly",
+//         name: "Calendly",
+//         type: "CALENDLY",
+//         description: "Automated scheduling and booking platform",
+//         icon: Calendar,
+//         fields: [
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//           { key: "organization_uri", label: "Organization URI", type: "text", required: true },
+//         ],
+//         endpoints: ["Create Event", "Get Availability", "Cancel Booking", "Get Event Details"],
+//       },
+//       {
+//         id: "acuity",
+//         name: "Acuity Scheduling",
+//         type: "ACUITY",
+//         description: "Professional appointment scheduling software",
+//         icon: Calendar,
+//         fields: [
+//           { key: "user_id", label: "User ID", type: "text", required: true },
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//         ],
+//         endpoints: ["Book Appointment", "Check Availability", "Get Appointments", "Update Appointment"],
+//       },
+//     ],
+//   },
+//   automation: {
+//     title: "Automation & Webhooks",
+//     description: "Workflow automation and custom integrations",
+//     icon: Zap,
+//     color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+//     integrations: [
+//       {
+//         id: "zapier",
+//         name: "Zapier",
+//         type: "ZAPIER",
+//         description: "Connect apps and automate workflows",
+//         icon: Zap,
+//         fields: [{ key: "webhook_url", label: "Webhook URL", type: "text", required: true }],
+//         endpoints: ["Trigger Zap", "Send Data", "Execute Workflow"],
+//       },
+//       {
+//         id: "webhook",
+//         name: "Custom Webhook",
+//         type: "WEBHOOK",
+//         description: "Custom webhook endpoints for any service",
+//         icon: Webhook,
+//         fields: [
+//           { key: "webhook_url", label: "Webhook URL", type: "text", required: true },
+//           { key: "secret_key", label: "Secret Key", type: "password", required: false },
+//           { key: "headers", label: "Custom Headers (JSON)", type: "textarea", required: false },
+//         ],
+//         endpoints: ["Send POST Request", "Send GET Request", "Custom API Call"],
+//       },
+//     ],
+//   },
+// }
+
+// interface Integration {
+//   id: string
+//   name: string
+//   type: string
+//   isActive: boolean
+//   lastSyncAt?: string
+//   config?: any
+// }
+
+// interface IntegrationField {
+//   key: string
+//   label: string
+//   type: string
+//   required: boolean
+//   placeholder?: string
+// }
+
+// export default function IntegrationsPage() {
+//   const [activeCategory, setActiveCategory] = useState("ecommerce")
+//   const [connectedIntegrations, setConnectedIntegrations] = useState<Integration[]>([])
+//   const [isLoading, setIsLoading] = useState(false)
+//   const [selectedIntegration, setSelectedIntegration] = useState<any>(null)
+//   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({})
+//   const [formData, setFormData] = useState<Record<string, string>>({})
+//   const [error, setError] = useState<string | null>(null)
+//   const [success, setSuccess] = useState<string | null>(null)
+
+//   // Load connected integrations on mount
+//   useEffect(() => {
+//     loadConnectedIntegrations()
+//   }, [])
+
+//   const loadConnectedIntegrations = async () => {
+//     try {
+//       setIsLoading(true)
+//       const response = await fetch("/api/integrations")
+//       if (response.ok) {
+//         const data = await response.json()
+//         setConnectedIntegrations(data.integrations || [])
+//       }
+//     } catch (error) {
+//       console.error("Failed to load integrations:", error)
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   const handleConnect = async (integration: any) => {
+//     try {
+//       setIsLoading(true)
+//       setError(null)
+
+//       // Validate required fields
+//       const missingFields = integration.fields
+//         .filter((field: IntegrationField) => field.required && !formData[field.key])
+//         .map((field: IntegrationField) => field.label)
+
+//       if (missingFields.length > 0) {
+//         setError(`Please fill in required fields: ${missingFields.join(", ")}`)
+//         return
+//       }
+
+//       // Prepare credentials object
+//       const credentials: Record<string, string> = {}
+//       integration.fields.forEach((field: IntegrationField) => {
+//         if (formData[field.key]) {
+//           credentials[field.key] = formData[field.key]
+//         }
+//       })
+
+//       const response = await fetch("/api/integrations", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           type: integration.type,
+//           name: integration.name,
+//           credentials,
+//         }),
+//       })
+
+//       if (response.ok) {
+//         setSuccess(`${integration.name} connected successfully!`)
+//         setFormData({})
+//         setSelectedIntegration(null)
+//         loadConnectedIntegrations()
+//       } else {
+//         const errorData = await response.json()
+//         setError(errorData.error || "Failed to connect integration")
+//       }
+//     } catch (error) {
+//       setError("An unexpected error occurred")
+//       console.error("Integration connection error:", error)
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   const handleDisconnect = async (integrationId: string) => {
+//     try {
+//       setIsLoading(true)
+//       const response = await fetch(`/api/integrations/${integrationId}`, {
+//         method: "DELETE",
+//       })
+
+//       if (response.ok) {
+//         setSuccess("Integration disconnected successfully")
+//         loadConnectedIntegrations()
+//       } else {
+//         setError("Failed to disconnect integration")
+//       }
+//     } catch (error) {
+//       setError("An unexpected error occurred")
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   const isConnected = (integrationType: string) => {
+//     return connectedIntegrations.some((integration) => integration.type === integrationType && integration.isActive)
+//   }
+
+//   const getConnectedIntegration = (integrationType: string) => {
+//     return connectedIntegrations.find((integration) => integration.type === integrationType && integration.isActive)
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-background text-foreground p-6">
+//       <div className="max-w-7xl mx-auto space-y-8">
+//         {/* Header */}
+//         <div className="space-y-4">
+//           <div className="flex items-center gap-3">
+//             <div className="p-2 rounded-lg bg-primary/10">
+//               <Settings className="h-6 w-6 text-primary" />
+//             </div>
+//             <div>
+//               <h1 className="text-3xl font-bold text-balance">Integrations</h1>
+//               <p className="text-muted-foreground">Connect your business tools to automate Instagram DM workflows</p>
+//             </div>
+//           </div>
+
+//           {/* Stats */}
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//             <Card className="bg-card/50 border-border">
+//               <CardContent className="p-4">
+//                 <div className="flex items-center gap-3">
+//                   <CheckCircle className="h-5 w-5 text-emerald-400" />
+//                   <div>
+//                     <p className="text-sm text-muted-foreground">Connected</p>
+//                     <p className="text-2xl font-bold">{connectedIntegrations.length}</p>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//             <Card className="bg-card/50 border-border">
+//               <CardContent className="p-4">
+//                 <div className="flex items-center gap-3">
+//                   <Database className="h-5 w-5 text-blue-400" />
+//                   <div>
+//                     <p className="text-sm text-muted-foreground">Available</p>
+//                     <p className="text-2xl font-bold">
+//                       {Object.values(INTEGRATION_CATEGORIES).reduce((acc, cat) => acc + cat.integrations.length, 0)}
+//                     </p>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//             <Card className="bg-card/50 border-border">
+//               <CardContent className="p-4">
+//                 <div className="flex items-center gap-3">
+//                   <Lock className="h-5 w-5 text-purple-400" />
+//                   <div>
+//                     <p className="text-sm text-muted-foreground">Security</p>
+//                     <p className="text-sm font-medium text-emerald-400">AES-256 Encrypted</p>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </div>
+//         </div>
+
+//         {/* Alerts */}
+//         {error && (
+//           <Alert className="border-destructive/20 bg-destructive/10">
+//             <AlertCircle className="h-4 w-4" />
+//             <AlertDescription className="text-destructive">{error}</AlertDescription>
+//           </Alert>
+//         )}
+
+//         {success && (
+//           <Alert className="border-emerald-500/20 bg-emerald-500/10">
+//             <CheckCircle className="h-4 w-4" />
+//             <AlertDescription className="text-emerald-400">{success}</AlertDescription>
+//           </Alert>
+//         )}
+
+//         {/* Category Tabs */}
+//         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="space-y-6">
+//           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-muted/50">
+//             {Object.entries(INTEGRATION_CATEGORIES).map(([key, category]) => {
+//               const Icon = category.icon
+//               return (
+//                 <TabsTrigger
+//                   key={key}
+//                   value={key}
+//                   className="flex items-center gap-2 data-[state=active]:bg-background"
+//                 >
+//                   <Icon className="h-4 w-4" />
+//                   <span className="hidden sm:inline">{category.title.split(" ")[0]}</span>
+//                 </TabsTrigger>
+//               )
+//             })}
+//           </TabsList>
+
+//           {/* Integration Cards */}
+//           {Object.entries(INTEGRATION_CATEGORIES).map(([categoryKey, category]) => (
+//             <TabsContent key={categoryKey} value={categoryKey} className="space-y-6">
+//               <div className="space-y-4">
+//                 <div className="flex items-center gap-3">
+//                   <div className={`p-2 rounded-lg ${category.color}`}>
+//                     <category.icon className="h-5 w-5" />
+//                   </div>
+//                   <div>
+//                     <h2 className="text-xl font-semibold">{category.title}</h2>
+//                     <p className="text-sm text-muted-foreground">{category.description}</p>
+//                   </div>
+//                 </div>
+
+//                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//                   {category.integrations.map((integration) => {
+//                     const connected = isConnected(integration.type)
+//                     const connectedIntegration = getConnectedIntegration(integration.type)
+//                     const Icon = integration.icon
+
+//                     return (
+//                       <Card
+//                         key={integration.id}
+//                         className={`relative transition-all duration-200 hover:shadow-lg ${
+//                           connected
+//                             ? "bg-emerald-500/5 border-emerald-500/20"
+//                             : "bg-card/50 border-border hover:border-primary/30"
+//                         }`}
+//                       >
+//                         <CardHeader className="pb-3">
+//                           <div className="flex items-start justify-between">
+//                             <div className="flex items-center gap-3">
+//                               <div className={`p-2 rounded-lg ${category.color}`}>
+//                                 <Icon className="h-5 w-5" />
+//                               </div>
+//                               <div>
+//                                 <CardTitle className="text-lg">{integration.name}</CardTitle>
+//                                 {connected && (
+//                                   <Badge
+//                                     variant="secondary"
+//                                     className="mt-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+//                                   >
+//                                     <CheckCircle className="h-3 w-3 mr-1" />
+//                                     Connected
+//                                   </Badge>
+//                                 )}
+//                               </div>
+//                             </div>
+//                           </div>
+//                           <CardDescription className="text-sm">{integration.description}</CardDescription>
+//                         </CardHeader>
+
+//                         <CardContent className="space-y-4">
+//                           {/* Available Endpoints */}
+//                           <div>
+//                             <p className="text-sm font-medium mb-2">Available Actions:</p>
+//                             <div className="flex flex-wrap gap-1">
+//                               {integration.endpoints.slice(0, 3).map((endpoint, idx) => (
+//                                 <Badge key={idx} variant="outline" className="text-xs">
+//                                   {endpoint}
+//                                 </Badge>
+//                               ))}
+//                               {integration.endpoints.length > 3 && (
+//                                 <Badge variant="outline" className="text-xs">
+//                                   +{integration.endpoints.length - 3} more
+//                                 </Badge>
+//                               )}
+//                             </div>
+//                           </div>
+
+//                           <Separator />
+
+//                           {/* Action Buttons */}
+//                           <div className="flex gap-2">
+//                             {connected ? (
+//                               <>
+//                                 <Button
+//                                   variant="outline"
+//                                   size="sm"
+//                                   onClick={() => handleDisconnect(connectedIntegration!.id)}
+//                                   disabled={isLoading}
+//                                   className="flex-1"
+//                                 >
+//                                   <Trash2 className="h-4 w-4 mr-2" />
+//                                   Disconnect
+//                                 </Button>
+//                                 <Button
+//                                   variant="outline"
+//                                   size="sm"
+//                                   onClick={() => setSelectedIntegration(integration)}
+//                                   className="flex-1"
+//                                 >
+//                                   <Settings className="h-4 w-4 mr-2" />
+//                                   Configure
+//                                 </Button>
+//                               </>
+//                             ) : (
+//                               <Dialog>
+//                                 <DialogTrigger asChild>
+//                                   <Button
+//                                     className="w-full"
+//                                     onClick={() => {
+//                                       setSelectedIntegration(integration)
+//                                       setFormData({})
+//                                       setError(null)
+//                                       setSuccess(null)
+//                                     }}
+//                                   >
+//                                     <Plus className="h-4 w-4 mr-2" />
+//                                     Connect
+//                                   </Button>
+//                                 </DialogTrigger>
+//                                 <DialogContent className="max-w-md bg-card border-border">
+//                                   <DialogHeader>
+//                                     <DialogTitle className="flex items-center gap-2">
+//                                       <Icon className="h-5 w-5" />
+//                                       Connect {integration.name}
+//                                     </DialogTitle>
+//                                     <DialogDescription>
+//                                       Enter your {integration.name} credentials to enable automation
+//                                     </DialogDescription>
+//                                   </DialogHeader>
+
+//                                   <div className="space-y-4">
+//                                     {integration.fields.map((field: IntegrationField) => (
+//                                       <div key={field.key} className="space-y-2">
+//                                         <Label htmlFor={field.key} className="flex items-center gap-2">
+//                                           {field.label}
+//                                           {field.required && <span className="text-destructive">*</span>}
+//                                         </Label>
+//                                         {field.type === "textarea" ? (
+//                                           <Textarea
+//                                             id={field.key}
+//                                             placeholder={field.placeholder}
+//                                             value={formData[field.key] || ""}
+//                                             onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+//                                             className="bg-background border-border"
+//                                           />
+//                                         ) : (
+//                                           <div className="relative">
+//                                             <Input
+//                                               id={field.key}
+//                                               type={
+//                                                 field.type === "password" && !showCredentials[field.key]
+//                                                   ? "password"
+//                                                   : "text"
+//                                               }
+//                                               placeholder={field.placeholder}
+//                                               value={formData[field.key] || ""}
+//                                               onChange={(e) =>
+//                                                 setFormData({ ...formData, [field.key]: e.target.value })
+//                                               }
+//                                               className="bg-background border-border pr-10"
+//                                             />
+//                                             {field.type === "password" && (
+//                                               <Button
+//                                                 type="button"
+//                                                 variant="ghost"
+//                                                 size="sm"
+//                                                 className="absolute right-0 top-0 h-full px-3"
+//                                                 onClick={() =>
+//                                                   setShowCredentials({
+//                                                     ...showCredentials,
+//                                                     [field.key]: !showCredentials[field.key],
+//                                                   })
+//                                                 }
+//                                               >
+//                                                 {showCredentials[field.key] ? (
+//                                                   <EyeOff className="h-4 w-4" />
+//                                                 ) : (
+//                                                   <Eye className="h-4 w-4" />
+//                                                 )}
+//                                               </Button>
+//                                             )}
+//                                           </div>
+//                                         )}
+//                                       </div>
+//                                     ))}
+
+//                                     <div className="flex gap-2 pt-4">
+//                                       <Button
+//                                         variant="outline"
+//                                         className="flex-1 bg-transparent"
+//                                         onClick={() => setSelectedIntegration(null)}
+//                                       >
+//                                         Cancel
+//                                       </Button>
+//                                       <Button
+//                                         className="flex-1"
+//                                         onClick={() => handleConnect(integration)}
+//                                         disabled={isLoading}
+//                                       >
+//                                         {isLoading ? "Connecting..." : "Connect"}
+//                                       </Button>
+//                                     </div>
+//                                   </div>
+//                                 </DialogContent>
+//                               </Dialog>
+//                             )}
+//                           </div>
+//                         </CardContent>
+//                       </Card>
+//                     )
+//                   })}
+//                 </div>
+//               </div>
+//             </TabsContent>
+//           ))}
+//         </Tabs>
+
+//         {/* API Endpoints Info */}
+//         <Card className="bg-card/30 border-border">
+//           <CardHeader>
+//             <CardTitle className="flex items-center gap-2">
+//               <Globe className="h-5 w-5" />
+//               API Endpoints
+//             </CardTitle>
+//             <CardDescription>
+//               These endpoints will be available for your Voiceflow workflows once integrations are connected
+//             </CardDescription>
+//           </CardHeader>
+//           <CardContent>
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+//               <div className="space-y-2">
+//                 <p className="font-medium text-primary">Payment Processing</p>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">
+//                   POST /api/integrations/stripe/create-payment-link
+//                 </code>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">
+//                   GET /api/integrations/stripe/verify-payment
+//                 </code>
+//               </div>
+//               <div className="space-y-2">
+//                 <p className="font-medium text-primary">CRM Operations</p>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">
+//                   POST /api/integrations/hubspot/create-contact
+//                 </code>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">PUT /api/integrations/hubspot/update-deal</code>
+//               </div>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     </div>
+//   )
+// }
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Badge } from "@/components/ui/badge"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog"
+// import { Alert, AlertDescription } from "@/components/ui/alert"
+// import { Separator } from "@/components/ui/separator"
+// import {
+//   CreditCard,
+//   Users,
+//   Calendar,
+//   Mail,
+//   MessageSquare,
+//   ShoppingCart,
+//   BarChart3,
+//   Webhook,
+//   Settings,
+//   CheckCircle,
+//   AlertCircle,
+//   Plus,
+//   Trash2,
+//   Eye,
+//   EyeOff,
+//   Zap,
+//   Building2,
+//   Phone,
+//   Globe,
+//   Database,
+//   Lock,
+// } from "lucide-react"
+
+// // Integration categories and their available services
+// const INTEGRATION_CATEGORIES = {
+//   ecommerce: {
+//     title: "E-commerce & Payments",
+//     description: "Payment processing, order management, and e-commerce platforms",
+//     icon: CreditCard,
+//     color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+//     integrations: [
+//       {
+//         id: "stripe",
+//         name: "Stripe",
+//         type: "STRIPE",
+//         description: "Accept payments, create payment links, manage subscriptions",
+//         icon: CreditCard,
+//         fields: [
+//           { key: "publishable_key", label: "Publishable Key", type: "text", required: true },
+//           { key: "secret_key", label: "Secret Key", type: "password", required: true },
+//           { key: "webhook_secret", label: "Webhook Secret", type: "password", required: false },
+//         ],
+//         capabilities: [
+//           {
+//             id: "create_payment_link",
+//             name: "Create Payment Links",
+//             description: "Generate secure payment links for customers",
+//             endpoint: "POST /api/voiceflow/stripe/create-payment-link",
+//             voiceflowCall: {
+//               method: "POST",
+//               url: "{{your-domain}}/api/voiceflow/stripe/create-payment-link",
+//               headers: {
+//                 "Content-Type": "application/json",
+//                 "x-api-key": "{{VOICEFLOW_API_KEY}}",
+//               },
+//               body: {
+//                 tenantId: "{{tenant_id}}",
+//                 sessionId: "{{session_id}}",
+//                 amount: 2999,
+//                 currency: "usd",
+//                 productName: "Premium Plan",
+//                 userEmail: "{{user_email}}",
+//                 metadata: {},
+//               },
+//             },
+//           },
+//           {
+//             id: "verify_payment",
+//             name: "Verify Payment Status",
+//             description: "Check if a payment has been completed",
+//             endpoint: "POST /api/voiceflow/stripe/verify-payment",
+//             voiceflowCall: {
+//               method: "POST",
+//               url: "{{your-domain}}/api/voiceflow/stripe/verify-payment",
+//               headers: {
+//                 "Content-Type": "application/json",
+//                 "x-api-key": "{{VOICEFLOW_API_KEY}}",
+//               },
+//               body: {
+//                 tenantId: "{{tenant_id}}",
+//                 sessionId: "{{session_id}}",
+//                 paymentId: "{{payment_link_id}}",
+//               },
+//             },
+//           },
+//         ],
+//       },
+//       {
+//         id: "shopify",
+//         name: "Shopify",
+//         type: "SHOPIFY",
+//         description: "Sync products, manage orders, track inventory",
+//         icon: ShoppingCart,
+//         fields: [
+//           {
+//             key: "shop_domain",
+//             label: "Shop Domain",
+//             type: "text",
+//             required: true,
+//             placeholder: "your-shop.myshopify.com",
+//           },
+//           { key: "access_token", label: "Access Token", type: "password", required: true },
+//           { key: "api_version", label: "API Version", type: "text", required: false, placeholder: "2023-10" },
+//         ],
+//         capabilities: [],
+//       },
+//     ],
+//   },
+//   crm: {
+//     title: "CRM & Sales",
+//     description: "Customer relationship management and sales automation",
+//     icon: Users,
+//     color: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+//     integrations: [
+//       {
+//         id: "hubspot",
+//         name: "HubSpot",
+//         type: "HUBSPOT",
+//         description: "Manage contacts, deals, and customer interactions",
+//         icon: Users,
+//         fields: [
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//           { key: "portal_id", label: "Portal ID", type: "text", required: true },
+//         ],
+//         capabilities: [
+//           {
+//             id: "create_contact",
+//             name: "Create Contact",
+//             description: "Add new contacts to your CRM",
+//             endpoint: "POST /api/voiceflow/hubspot/create-contact",
+//             voiceflowCall: {
+//               method: "POST",
+//               url: "{{your-domain}}/api/voiceflow/hubspot/create-contact",
+//               headers: {
+//                 "Content-Type": "application/json",
+//                 "x-api-key": "{{VOICEFLOW_API_KEY}}",
+//               },
+//               body: {
+//                 tenantId: "{{tenant_id}}",
+//                 sessionId: "{{session_id}}",
+//                 email: "{{user_email}}",
+//                 firstName: "{{first_name}}",
+//                 lastName: "{{last_name}}",
+//                 phone: "{{phone_number}}",
+//                 company: "{{company_name}}",
+//               },
+//             },
+//           },
+//         ],
+//       },
+//       {
+//         id: "salesforce",
+//         name: "Salesforce",
+//         type: "SALESFORCE",
+//         description: "Enterprise CRM integration for leads and opportunities",
+//         icon: Building2,
+//         fields: [
+//           { key: "client_id", label: "Client ID", type: "text", required: true },
+//           { key: "client_secret", label: "Client Secret", type: "password", required: true },
+//           { key: "username", label: "Username", type: "text", required: true },
+//           { key: "password", label: "Password", type: "password", required: true },
+//           { key: "security_token", label: "Security Token", type: "password", required: true },
+//         ],
+//         capabilities: [],
+//       },
+//       {
+//         id: "pipedrive",
+//         name: "Pipedrive",
+//         type: "PIPEDRIVE",
+//         description: "Simple CRM for managing your sales pipeline",
+//         icon: BarChart3,
+//         fields: [
+//           { key: "api_token", label: "API Token", type: "password", required: true },
+//           { key: "company_domain", label: "Company Domain", type: "text", required: true, placeholder: "yourcompany" },
+//         ],
+//         capabilities: [],
+//       },
+//     ],
+//   },
+//   communication: {
+//     title: "Communication & Marketing",
+//     description: "Email marketing, SMS, and communication platforms",
+//     icon: Mail,
+//     color: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+//     integrations: [
+//       {
+//         id: "mailchimp",
+//         name: "Mailchimp",
+//         type: "MAILCHIMP",
+//         description: "Email marketing and audience management",
+//         icon: Mail,
+//         fields: [
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//           { key: "server_prefix", label: "Server Prefix", type: "text", required: true, placeholder: "us1" },
+//         ],
+//         capabilities: [],
+//       },
+//       {
+//         id: "sendgrid",
+//         name: "SendGrid",
+//         type: "SENDGRID",
+//         description: "Transactional email delivery service",
+//         icon: MessageSquare,
+//         fields: [{ key: "api_key", label: "API Key", type: "password", required: true }],
+//         capabilities: [
+//           {
+//             id: "send_email",
+//             name: "Send Email",
+//             description: "Send transactional emails to customers",
+//             endpoint: "POST /api/voiceflow/sendgrid/send-email",
+//             voiceflowCall: {
+//               method: "POST",
+//               url: "{{your-domain}}/api/voiceflow/sendgrid/send-email",
+//               headers: {
+//                 "Content-Type": "application/json",
+//                 "x-api-key": "{{VOICEFLOW_API_KEY}}",
+//               },
+//               body: {
+//                 tenantId: "{{tenant_id}}",
+//                 sessionId: "{{session_id}}",
+//                 to: "{{user_email}}",
+//                 subject: "Welcome to our service!",
+//                 htmlContent: "<h1>Welcome!</h1><p>Thank you for signing up.</p>",
+//                 textContent: "Welcome! Thank you for signing up.",
+//               },
+//             },
+//           },
+//         ],
+//       },
+//       {
+//         id: "twilio",
+//         name: "Twilio",
+//         type: "TWILIO",
+//         description: "SMS and voice communication platform",
+//         icon: Phone,
+//         fields: [
+//           { key: "account_sid", label: "Account SID", type: "text", required: true },
+//           { key: "auth_token", label: "Auth Token", type: "password", required: true },
+//           {
+//             key: "phone_number",
+//             label: "Twilio Phone Number",
+//             type: "text",
+//             required: true,
+//             placeholder: "+1234567890",
+//           },
+//         ],
+//         capabilities: [],
+//       },
+//     ],
+//   },
+//   scheduling: {
+//     title: "Scheduling & Booking",
+//     description: "Appointment booking and calendar management",
+//     icon: Calendar,
+//     color: "bg-orange-500/10 border-orange-500/20 text-orange-400",
+//     integrations: [
+//       {
+//         id: "calendly",
+//         name: "Calendly",
+//         type: "CALENDLY",
+//         description: "Automated scheduling and booking platform",
+//         icon: Calendar,
+//         fields: [
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//           { key: "organization_uri", label: "Organization URI", type: "text", required: true },
+//         ],
+//         capabilities: [
+//           {
+//             id: "create_event",
+//             name: "Schedule Meeting",
+//             description: "Book appointments automatically",
+//             endpoint: "POST /api/voiceflow/calendly/create-event",
+//             voiceflowCall: {
+//               method: "POST",
+//               url: "{{your-domain}}/api/voiceflow/calendly/create-event",
+//               headers: {
+//                 "Content-Type": "application/json",
+//                 "x-api-key": "{{VOICEFLOW_API_KEY}}",
+//               },
+//               body: {
+//                 tenantId: "{{tenant_id}}",
+//                 sessionId: "{{session_id}}",
+//                 eventTypeUri: "{{event_type_uri}}",
+//                 inviteeEmail: "{{user_email}}",
+//                 inviteeName: "{{user_name}}",
+//                 startTime: "{{preferred_time}}",
+//                 timezone: "{{user_timezone}}",
+//               },
+//             },
+//           },
+//         ],
+//       },
+//       {
+//         id: "acuity",
+//         name: "Acuity Scheduling",
+//         type: "ACUITY",
+//         description: "Professional appointment scheduling software",
+//         icon: Calendar,
+//         fields: [
+//           { key: "user_id", label: "User ID", type: "text", required: true },
+//           { key: "api_key", label: "API Key", type: "password", required: true },
+//         ],
+//         capabilities: [],
+//       },
+//     ],
+//   },
+//   automation: {
+//     title: "Automation & Webhooks",
+//     description: "Workflow automation and custom integrations",
+//     icon: Zap,
+//     color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+//     integrations: [
+//       {
+//         id: "zapier",
+//         name: "Zapier",
+//         type: "ZAPIER",
+//         description: "Connect apps and automate workflows",
+//         icon: Zap,
+//         fields: [{ key: "webhook_url", label: "Webhook URL", type: "text", required: true }],
+//         capabilities: [],
+//       },
+//       {
+//         id: "webhook",
+//         name: "Custom Webhook",
+//         type: "WEBHOOK",
+//         description: "Custom webhook endpoints for any service",
+//         icon: Webhook,
+//         fields: [
+//           { key: "webhook_url", label: "Webhook URL", type: "text", required: true },
+//           { key: "secret_key", label: "Secret Key", type: "password", required: false },
+//           { key: "headers", label: "Custom Headers (JSON)", type: "textarea", required: false },
+//         ],
+//         capabilities: [],
+//       },
+//     ],
+//   },
+// }
+
+// interface Integration {
+//   id: string
+//   name: string
+//   type: string
+//   isActive: boolean
+//   lastSyncAt?: string
+//   config?: any
+// }
+
+// interface IntegrationField {
+//   key: string
+//   label: string
+//   type: string
+//   required: boolean
+//   placeholder?: string
+// }
+
+// interface Capability {
+//   id: string
+//   name: string
+//   description: string
+//   endpoint: string
+//   voiceflowCall: {
+//     method: string
+//     url: string
+//     headers: Record<string, string>
+//     body: Record<string, string>
+//   }
+// }
+
+// export default function IntegrationsPage() {
+//   const [activeCategory, setActiveCategory] = useState("ecommerce")
+//   const [connectedIntegrations, setConnectedIntegrations] = useState<Integration[]>([])
+//   const [isLoading, setIsLoading] = useState(false)
+//   const [selectedIntegration, setSelectedIntegration] = useState<any>(null)
+//   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({})
+//   const [formData, setFormData] = useState<Record<string, string>>({})
+//   const [error, setError] = useState<string | null>(null)
+//   const [success, setSuccess] = useState<string | null>(null)
+
+//   // Load connected integrations on mount
+//   useEffect(() => {
+//     loadConnectedIntegrations()
+//   }, [])
+
+//   const loadConnectedIntegrations = async () => {
+//     try {
+//       setIsLoading(true)
+//       const response = await fetch("/api/integrations")
+//       if (response.ok) {
+//         const data = await response.json()
+//         setConnectedIntegrations(data.integrations || [])
+//       }
+//     } catch (error) {
+//       console.error("Failed to load integrations:", error)
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   const handleConnect = async (integration: any) => {
+//     try {
+//       setIsLoading(true)
+//       setError(null)
+
+//       // Validate required fields
+//       const missingFields = integration.fields
+//         .filter((field: IntegrationField) => field.required && !formData[field.key])
+//         .map((field: IntegrationField) => field.label)
+
+//       if (missingFields.length > 0) {
+//         setError(`Please fill in required fields: ${missingFields.join(", ")}`)
+//         return
+//       }
+
+//       // Prepare credentials object
+//       const credentials: Record<string, string> = {}
+//       integration.fields.forEach((field: IntegrationField) => {
+//         if (formData[field.key]) {
+//           credentials[field.key] = formData[field.key]
+//         }
+//       })
+
+//       const response = await fetch("/api/integrations", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           type: integration.type,
+//           name: integration.name,
+//           credentials,
+//         }),
+//       })
+
+//       if (response.ok) {
+//         setSuccess(`${integration.name} connected successfully!`)
+//         setFormData({})
+//         setSelectedIntegration(null)
+//         loadConnectedIntegrations()
+//       } else {
+//         const errorData = await response.json()
+//         setError(errorData.error || "Failed to connect integration")
+//       }
+//     } catch (error) {
+//       setError("An unexpected error occurred")
+//       console.error("Integration connection error:", error)
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   const handleDisconnect = async (integrationId: string) => {
+//     try {
+//       setIsLoading(true)
+//       const response = await fetch(`/api/integrations/${integrationId}`, {
+//         method: "DELETE",
+//       })
+
+//       if (response.ok) {
+//         setSuccess("Integration disconnected successfully")
+//         loadConnectedIntegrations()
+//       } else {
+//         setError("Failed to disconnect integration")
+//       }
+//     } catch (error) {
+//       setError("An unexpected error occurred")
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   const isConnected = (integrationType: string) => {
+//     return connectedIntegrations.some((integration) => integration.type === integrationType && integration.isActive)
+//   }
+
+//   const getConnectedIntegration = (integrationType: string) => {
+//     return connectedIntegrations.find((integration) => integration.type === integrationType && integration.isActive)
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-background text-foreground p-6">
+//       <div className="max-w-7xl mx-auto space-y-8">
+//         {/* Header */}
+//         <div className="space-y-4">
+//           <div className="flex items-center gap-3">
+//             <div className="p-2 rounded-lg bg-primary/10">
+//               <Settings className="h-6 w-6 text-primary" />
+//             </div>
+//             <div>
+//               <h1 className="text-3xl font-bold text-balance">Integrations</h1>
+//               <p className="text-muted-foreground">Connect your business tools to automate Instagram DM workflows</p>
+//             </div>
+//           </div>
+
+//           {/* Stats */}
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//             <Card className="bg-card/50 border-border">
+//               <CardContent className="p-4">
+//                 <div className="flex items-center gap-3">
+//                   <CheckCircle className="h-5 w-5 text-emerald-400" />
+//                   <div>
+//                     <p className="text-sm text-muted-foreground">Connected</p>
+//                     <p className="text-2xl font-bold">{connectedIntegrations.length}</p>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//             <Card className="bg-card/50 border-border">
+//               <CardContent className="p-4">
+//                 <div className="flex items-center gap-3">
+//                   <Database className="h-5 w-5 text-blue-400" />
+//                   <div>
+//                     <p className="text-sm text-muted-foreground">Available</p>
+//                     <p className="text-2xl font-bold">
+//                       {Object.values(INTEGRATION_CATEGORIES).reduce((acc, cat) => acc + cat.integrations.length, 0)}
+//                     </p>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//             <Card className="bg-card/50 border-border">
+//               <CardContent className="p-4">
+//                 <div className="flex items-center gap-3">
+//                   <Lock className="h-5 w-5 text-purple-400" />
+//                   <div>
+//                     <p className="text-sm text-muted-foreground">Security</p>
+//                     <p className="text-sm font-medium text-emerald-400">AES-256 Encrypted</p>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </div>
+//         </div>
+
+//         {/* Alerts */}
+//         {error && (
+//           <Alert className="border-destructive/20 bg-destructive/10">
+//             <AlertCircle className="h-4 w-4" />
+//             <AlertDescription className="text-destructive">{error}</AlertDescription>
+//           </Alert>
+//         )}
+
+//         {success && (
+//           <Alert className="border-emerald-500/20 bg-emerald-500/10">
+//             <CheckCircle className="h-4 w-4" />
+//             <AlertDescription className="text-emerald-400">{success}</AlertDescription>
+//           </Alert>
+//         )}
+
+//         {/* Category Tabs */}
+//         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="space-y-6">
+//           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-muted/50">
+//             {Object.entries(INTEGRATION_CATEGORIES).map(([key, category]) => {
+//               const Icon = category.icon
+//               return (
+//                 <TabsTrigger
+//                   key={key}
+//                   value={key}
+//                   className="flex items-center gap-2 data-[state=active]:bg-background"
+//                 >
+//                   <Icon className="h-4 w-4" />
+//                   <span className="hidden sm:inline">{category.title.split(" ")[0]}</span>
+//                 </TabsTrigger>
+//               )
+//             })}
+//           </TabsList>
+
+//           {/* Integration Cards */}
+//           {Object.entries(INTEGRATION_CATEGORIES).map(([categoryKey, category]) => (
+//             <TabsContent key={categoryKey} value={categoryKey} className="space-y-6">
+//               <div className="space-y-4">
+//                 <div className="flex items-center gap-3">
+//                   <div className={`p-2 rounded-lg ${category.color}`}>
+//                     <category.icon className="h-5 w-5" />
+//                   </div>
+//                   <div>
+//                     <h2 className="text-xl font-semibold">{category.title}</h2>
+//                     <p className="text-sm text-muted-foreground">{category.description}</p>
+//                   </div>
+//                 </div>
+
+//                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//                   {category.integrations.map((integration) => {
+//                     const connected = isConnected(integration.type)
+//                     const connectedIntegration = getConnectedIntegration(integration.type)
+//                     const Icon = integration.icon
+
+//                     return (
+//                       <Card
+//                         key={integration.id}
+//                         className={`relative transition-all duration-200 hover:shadow-lg ${
+//                           connected
+//                             ? "bg-emerald-500/5 border-emerald-500/20"
+//                             : "bg-card/50 border-border hover:border-primary/30"
+//                         }`}
+//                       >
+//                         <CardHeader className="pb-3">
+//                           <div className="flex items-start justify-between">
+//                             <div className="flex items-center gap-3">
+//                               <div className={`p-2 rounded-lg ${category.color}`}>
+//                                 <Icon className="h-5 w-5" />
+//                               </div>
+//                               <div>
+//                                 <CardTitle className="text-lg">{integration.name}</CardTitle>
+//                                 {connected && (
+//                                   <Badge
+//                                     variant="secondary"
+//                                     className="mt-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+//                                   >
+//                                     <CheckCircle className="h-3 w-3 mr-1" />
+//                                     Connected
+//                                   </Badge>
+//                                 )}
+//                               </div>
+//                             </div>
+//                           </div>
+//                           <CardDescription className="text-sm">{integration.description}</CardDescription>
+//                         </CardHeader>
+
+//                         <CardContent className="space-y-4">
+//                           {/* Available Endpoints */}
+//                           <div>
+//                             <p className="text-sm font-medium mb-2">Available Actions:</p>
+//                             <div className="flex flex-wrap gap-1">
+//                               {integration.capabilities.slice(0, 3).map((capability: Capability, idx) => (
+//                                 <Badge key={idx} variant="outline" className="text-xs">
+//                                   {capability.name}
+//                                 </Badge>
+//                               ))}
+//                               {integration.capabilities.length > 3 && (
+//                                 <Badge variant="outline" className="text-xs">
+//                                   +{integration.capabilities.length - 3} more
+//                                 </Badge>
+//                               )}
+//                             </div>
+//                           </div>
+
+//                           <Separator />
+
+//                           {/* Action Buttons */}
+//                           <div className="flex gap-2">
+//                             {connected ? (
+//                               <>
+//                                 <Button
+//                                   variant="outline"
+//                                   size="sm"
+//                                   onClick={() => handleDisconnect(connectedIntegration!.id)}
+//                                   disabled={isLoading}
+//                                   className="flex-1"
+//                                 >
+//                                   <Trash2 className="h-4 w-4 mr-2" />
+//                                   Disconnect
+//                                 </Button>
+//                                 <Button
+//                                   variant="outline"
+//                                   size="sm"
+//                                   onClick={() => setSelectedIntegration(integration)}
+//                                   className="flex-1"
+//                                 >
+//                                   <Settings className="h-4 w-4 mr-2" />
+//                                   Configure
+//                                 </Button>
+//                               </>
+//                             ) : (
+//                               <Dialog>
+//                                 <DialogTrigger asChild>
+//                                   <Button
+//                                     className="w-full"
+//                                     onClick={() => {
+//                                       setSelectedIntegration(integration)
+//                                       setFormData({})
+//                                       setError(null)
+//                                       setSuccess(null)
+//                                     }}
+//                                   >
+//                                     <Plus className="h-4 w-4 mr-2" />
+//                                     Connect
+//                                   </Button>
+//                                 </DialogTrigger>
+//                                 <DialogContent className="max-w-md bg-card border-border">
+//                                   <DialogHeader>
+//                                     <DialogTitle className="flex items-center gap-2">
+//                                       <Icon className="h-5 w-5" />
+//                                       Connect {integration.name}
+//                                     </DialogTitle>
+//                                     <DialogDescription>
+//                                       Enter your {integration.name} credentials to enable automation
+//                                     </DialogDescription>
+//                                   </DialogHeader>
+
+//                                   <div className="space-y-4">
+//                                     {integration.fields.map((field: IntegrationField) => (
+//                                       <div key={field.key} className="space-y-2">
+//                                         <Label htmlFor={field.key} className="flex items-center gap-2">
+//                                           {field.label}
+//                                           {field.required && <span className="text-destructive">*</span>}
+//                                         </Label>
+//                                         {field.type === "textarea" ? (
+//                                           <Textarea
+//                                             id={field.key}
+//                                             placeholder={field.placeholder}
+//                                             value={formData[field.key] || ""}
+//                                             onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+//                                             className="bg-background border-border"
+//                                           />
+//                                         ) : (
+//                                           <div className="relative">
+//                                             <Input
+//                                               id={field.key}
+//                                               type={
+//                                                 field.type === "password" && !showCredentials[field.key]
+//                                                   ? "password"
+//                                                   : "text"
+//                                               }
+//                                               placeholder={field.placeholder}
+//                                               value={formData[field.key] || ""}
+//                                               onChange={(e) =>
+//                                                 setFormData({ ...formData, [field.key]: e.target.value })
+//                                               }
+//                                               className="bg-background border-border pr-10"
+//                                             />
+//                                             {field.type === "password" && (
+//                                               <Button
+//                                                 type="button"
+//                                                 variant="ghost"
+//                                                 size="sm"
+//                                                 className="absolute right-0 top-0 h-full px-3"
+//                                                 onClick={() =>
+//                                                   setShowCredentials({
+//                                                     ...showCredentials,
+//                                                     [field.key]: !showCredentials[field.key],
+//                                                   })
+//                                                 }
+//                                               >
+//                                                 {showCredentials[field.key] ? (
+//                                                   <EyeOff className="h-4 w-4" />
+//                                                 ) : (
+//                                                   <Eye className="h-4 w-4" />
+//                                                 )}
+//                                               </Button>
+//                                             )}
+//                                           </div>
+//                                         )}
+//                                       </div>
+//                                     ))}
+
+//                                     <div className="flex gap-2 pt-4">
+//                                       <Button
+//                                         variant="outline"
+//                                         className="flex-1 bg-transparent"
+//                                         onClick={() => setSelectedIntegration(null)}
+//                                       >
+//                                         Cancel
+//                                       </Button>
+//                                       <Button
+//                                         className="flex-1"
+//                                         onClick={() => handleConnect(integration)}
+//                                         disabled={isLoading}
+//                                       >
+//                                         {isLoading ? "Connecting..." : "Connect"}
+//                                       </Button>
+//                                     </div>
+//                                   </div>
+//                                 </DialogContent>
+//                               </Dialog>
+//                             )}
+//                           </div>
+//                         </CardContent>
+//                       </Card>
+//                     )
+//                   })}
+//                 </div>
+//               </div>
+//             </TabsContent>
+//           ))}
+//         </Tabs>
+
+//         {/* API Endpoints Info */}
+//         <Card className="bg-card/30 border-border">
+//           <CardHeader>
+//             <CardTitle className="flex items-center gap-2">
+//               <Globe className="h-5 w-5" />
+//               API Endpoints
+//             </CardTitle>
+//             <CardDescription>
+//               These endpoints will be available for your Voiceflow workflows once integrations are connected
+//             </CardDescription>
+//           </CardHeader>
+//           <CardContent>
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+//               <div className="space-y-2">
+//                 <p className="font-medium text-primary">Payment Processing</p>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">
+//                   POST /api/integrations/stripe/create-payment-link
+//                 </code>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">
+//                   GET /api/integrations/stripe/verify-payment
+//                 </code>
+//               </div>
+//               <div className="space-y-2">
+//                 <p className="font-medium text-primary">CRM Operations</p>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">
+//                   POST /api/integrations/hubspot/create-contact
+//                 </code>
+//                 <code className="block bg-muted/50 p-2 rounded text-xs">PUT /api/integrations/hubspot/update-deal</code>
+//               </div>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -18,6 +1558,7 @@ import {
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import {
   CreditCard,
   Users,
@@ -25,8 +1566,6 @@ import {
   Mail,
   MessageSquare,
   ShoppingCart,
-  BarChart3,
-  Webhook,
   Settings,
   CheckCircle,
   AlertCircle,
@@ -40,204 +1579,449 @@ import {
   Globe,
   Database,
   Lock,
+  Code,
+  Copy,
+  Check,
 } from "lucide-react"
 
-// Integration categories and their available services
 const INTEGRATION_CATEGORIES = {
   ecommerce: {
     title: "E-commerce & Payments",
-    description: "Payment processing, order management, and e-commerce platforms",
-    icon: CreditCard,
-    color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+    description: "Process payments, manage orders, and handle customer transactions seamlessly",
+    icon: ShoppingCart,
+    color: "bg-emerald-500/10 text-emerald-400",
     integrations: [
       {
         id: "stripe",
         name: "Stripe",
         type: "STRIPE",
-        description: "Accept payments, create payment links, manage subscriptions",
+        description:
+          "Accept payments, create payment links, and manage subscriptions with the world's leading payment processor",
         icon: CreditCard,
         fields: [
-          { key: "publishable_key", label: "Publishable Key", type: "text", required: true },
-          { key: "secret_key", label: "Secret Key", type: "password", required: true },
-          { key: "webhook_secret", label: "Webhook Secret", type: "password", required: false },
+          { key: "secretKey", label: "Secret Key", type: "password", required: true, placeholder: "sk_test_..." },
+          { key: "publishableKey", label: "Publishable Key", type: "text", required: true, placeholder: "pk_test_..." },
         ],
-        endpoints: ["Create Payment Link", "Verify Payment Status", "Process Refund", "Get Customer Details"],
+        capabilities: [
+          {
+            id: "create_payment_link",
+            name: "Create Payment Links",
+            description: "Generate secure payment links for products or services",
+          },
+          {
+            id: "verify_payment",
+            name: "Verify Payments",
+            description: "Check payment status and confirm successful transactions",
+          },
+          {
+            id: "manage_subscriptions",
+            name: "Manage Subscriptions",
+            description: "Create, update, and cancel customer subscriptions",
+          },
+          {
+            id: "process_refunds",
+            name: "Process Refunds",
+            description: "Issue full or partial refunds for completed payments",
+          },
+        ],
+        endpoints: [
+          { method: "POST", path: "/api/voiceflow/stripe/create-payment-link", description: "Create payment link" },
+          { method: "GET", path: "/api/voiceflow/stripe/verify-payment", description: "Verify payment status" },
+        ],
+      },
+      {
+        id: "paypal",
+        name: "PayPal",
+        type: "PAYPAL",
+        description: "Accept PayPal payments and manage transactions with 400+ million active users worldwide",
+        icon: CreditCard,
+        fields: [
+          { key: "clientId", label: "Client ID", type: "text", required: true, placeholder: "Your PayPal Client ID" },
+          {
+            key: "clientSecret",
+            label: "Client Secret",
+            type: "password",
+            required: true,
+            placeholder: "Your PayPal Client Secret",
+          },
+          { key: "environment", label: "Environment", type: "select", required: true, options: ["sandbox", "live"] },
+        ],
+        capabilities: [
+          {
+            id: "create_payment",
+            name: "Create Payments",
+            description: "Generate PayPal payment requests for customers",
+          },
+          {
+            id: "verify_payment",
+            name: "Verify Payments",
+            description: "Confirm PayPal payment completion and status",
+          },
+        ],
+        endpoints: [
+          { method: "POST", path: "/api/voiceflow/paypal/create-payment", description: "Create PayPal payment" },
+        ],
       },
       {
         id: "shopify",
         name: "Shopify",
         type: "SHOPIFY",
-        description: "Sync products, manage orders, track inventory",
+        description: "Manage products, orders, and customer data from your Shopify store",
         icon: ShoppingCart,
         fields: [
           {
-            key: "shop_domain",
+            key: "shopDomain",
             label: "Shop Domain",
             type: "text",
             required: true,
             placeholder: "your-shop.myshopify.com",
           },
-          { key: "access_token", label: "Access Token", type: "password", required: true },
-          { key: "api_version", label: "API Version", type: "text", required: false, placeholder: "2023-10" },
+          { key: "accessToken", label: "Access Token", type: "password", required: true, placeholder: "shpat_..." },
         ],
-        endpoints: ["Get Product Info", "Check Inventory", "Create Order", "Update Order Status"],
+        capabilities: [
+          {
+            id: "get_products",
+            name: "Get Products",
+            description: "Retrieve product information and inventory levels",
+          },
+          { id: "create_order", name: "Create Orders", description: "Generate new orders directly from conversations" },
+          {
+            id: "update_inventory",
+            name: "Update Inventory",
+            description: "Modify product stock levels and availability",
+          },
+        ],
+        endpoints: [{ method: "GET", path: "/api/voiceflow/shopify/get-product", description: "Get product details" }],
       },
     ],
   },
   crm: {
-    title: "CRM & Sales",
-    description: "Customer relationship management and sales automation",
+    title: "CRM & Customer Management",
+    description: "Manage leads, contacts, and customer relationships to grow your business",
     icon: Users,
-    color: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+    color: "bg-blue-500/10 text-blue-400",
     integrations: [
       {
         id: "hubspot",
         name: "HubSpot",
         type: "HUBSPOT",
-        description: "Manage contacts, deals, and customer interactions",
+        description: "Manage contacts, deals, and customer interactions with the leading CRM platform",
         icon: Users,
         fields: [
-          { key: "api_key", label: "API Key", type: "password", required: true },
-          { key: "portal_id", label: "Portal ID", type: "text", required: true },
+          { key: "accessToken", label: "Access Token", type: "password", required: true, placeholder: "pat-na1-..." },
         ],
-        endpoints: ["Create Contact", "Update Deal Stage", "Log Activity", "Get Contact Info"],
+        capabilities: [
+          {
+            id: "create_contact",
+            name: "Create Contacts",
+            description: "Add new leads and customers to your CRM automatically",
+          },
+          {
+            id: "update_contact",
+            name: "Update Contacts",
+            description: "Modify existing contact information and properties",
+          },
+          {
+            id: "create_deal",
+            name: "Create Deals",
+            description: "Generate new sales opportunities from conversations",
+          },
+          {
+            id: "log_activity",
+            name: "Log Activities",
+            description: "Record customer interactions and engagement history",
+          },
+        ],
+        endpoints: [
+          { method: "POST", path: "/api/voiceflow/hubspot/create-contact", description: "Create new contact" },
+        ],
       },
       {
         id: "salesforce",
         name: "Salesforce",
         type: "SALESFORCE",
-        description: "Enterprise CRM integration for leads and opportunities",
+        description: "Integrate with the world's #1 CRM to manage leads, opportunities, and customer data",
         icon: Building2,
         fields: [
-          { key: "client_id", label: "Client ID", type: "text", required: true },
-          { key: "client_secret", label: "Client Secret", type: "password", required: true },
-          { key: "username", label: "Username", type: "text", required: true },
-          { key: "password", label: "Password", type: "password", required: true },
-          { key: "security_token", label: "Security Token", type: "password", required: true },
+          {
+            key: "instanceUrl",
+            label: "Instance URL",
+            type: "text",
+            required: true,
+            placeholder: "https://yourinstance.salesforce.com",
+          },
+          {
+            key: "accessToken",
+            label: "Access Token",
+            type: "password",
+            required: true,
+            placeholder: "Your access token",
+          },
         ],
-        endpoints: ["Create Lead", "Update Opportunity", "Search Accounts", "Log Call Activity"],
-      },
-      {
-        id: "pipedrive",
-        name: "Pipedrive",
-        type: "PIPEDRIVE",
-        description: "Simple CRM for managing your sales pipeline",
-        icon: BarChart3,
-        fields: [
-          { key: "api_token", label: "API Token", type: "password", required: true },
-          { key: "company_domain", label: "Company Domain", type: "text", required: true, placeholder: "yourcompany" },
+        capabilities: [
+          {
+            id: "create_lead",
+            name: "Create Leads",
+            description: "Capture new leads directly from Instagram conversations",
+          },
+          {
+            id: "create_opportunity",
+            name: "Create Opportunities",
+            description: "Generate sales opportunities from qualified leads",
+          },
+          { id: "update_records", name: "Update Records", description: "Modify existing Salesforce records and data" },
         ],
-        endpoints: ["Add Person", "Create Deal", "Update Pipeline", "Get Activities"],
+        endpoints: [],
       },
     ],
   },
   communication: {
-    title: "Communication & Marketing",
-    description: "Email marketing, SMS, and communication platforms",
-    icon: Mail,
-    color: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+    title: "Communication & Messaging",
+    description: "Send messages, emails, and notifications across multiple platforms",
+    icon: MessageSquare,
+    color: "bg-purple-500/10 text-purple-400",
     integrations: [
       {
-        id: "mailchimp",
-        name: "Mailchimp",
-        type: "MAILCHIMP",
-        description: "Email marketing and audience management",
-        icon: Mail,
+        id: "slack",
+        name: "Slack",
+        type: "SLACK",
+        description: "Send messages and notifications to your team channels and direct messages",
+        icon: MessageSquare,
         fields: [
-          { key: "api_key", label: "API Key", type: "password", required: true },
-          { key: "server_prefix", label: "Server Prefix", type: "text", required: true, placeholder: "us1" },
+          { key: "botToken", label: "Bot Token", type: "password", required: true, placeholder: "xoxb-..." },
+          {
+            key: "signingSecret",
+            label: "Signing Secret",
+            type: "password",
+            required: true,
+            placeholder: "Your signing secret",
+          },
         ],
-        endpoints: ["Add Subscriber", "Send Campaign", "Get List Stats", "Update Contact"],
+        capabilities: [
+          { id: "send_message", name: "Send Messages", description: "Post messages to channels or direct messages" },
+          {
+            id: "create_channel",
+            name: "Create Channels",
+            description: "Set up new channels for customer discussions",
+          },
+          { id: "invite_users", name: "Invite Users", description: "Add team members to relevant conversations" },
+        ],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/slack/send-message", description: "Send Slack message" }],
+      },
+      {
+        id: "discord",
+        name: "Discord",
+        type: "DISCORD",
+        description: "Engage with your community through Discord servers and channels",
+        icon: MessageSquare,
+        fields: [
+          {
+            key: "botToken",
+            label: "Bot Token",
+            type: "password",
+            required: true,
+            placeholder: "Your Discord bot token",
+          },
+          { key: "guildId", label: "Server ID", type: "text", required: true, placeholder: "Your Discord server ID" },
+        ],
+        capabilities: [
+          { id: "send_message", name: "Send Messages", description: "Post messages to Discord channels" },
+          { id: "create_embed", name: "Create Embeds", description: "Send rich embedded messages with formatting" },
+          { id: "manage_roles", name: "Manage Roles", description: "Assign or remove roles from community members" },
+        ],
+        endpoints: [
+          { method: "POST", path: "/api/voiceflow/discord/send-message", description: "Send Discord message" },
+        ],
       },
       {
         id: "sendgrid",
         name: "SendGrid",
         type: "SENDGRID",
-        description: "Transactional email delivery service",
-        icon: MessageSquare,
-        fields: [{ key: "api_key", label: "API Key", type: "password", required: true }],
-        endpoints: ["Send Email", "Add to List", "Get Email Stats", "Validate Email"],
+        description: "Send transactional emails, newsletters, and automated email sequences",
+        icon: Mail,
+        fields: [
+          { key: "apiKey", label: "API Key", type: "password", required: true, placeholder: "SG...." },
+          {
+            key: "fromEmail",
+            label: "From Email",
+            type: "email",
+            required: true,
+            placeholder: "noreply@yourdomain.com",
+          },
+        ],
+        capabilities: [
+          { id: "send_email", name: "Send Emails", description: "Send personalized emails to customers and leads" },
+          {
+            id: "send_template",
+            name: "Send Templates",
+            description: "Use pre-designed email templates for consistency",
+          },
+          { id: "manage_lists", name: "Manage Lists", description: "Add contacts to email marketing lists" },
+        ],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/sendgrid/send-email", description: "Send email" }],
       },
       {
         id: "twilio",
         name: "Twilio",
         type: "TWILIO",
-        description: "SMS and voice communication platform",
+        description: "Send SMS messages and make voice calls to customers worldwide",
         icon: Phone,
         fields: [
-          { key: "account_sid", label: "Account SID", type: "text", required: true },
-          { key: "auth_token", label: "Auth Token", type: "password", required: true },
+          { key: "accountSid", label: "Account SID", type: "text", required: true, placeholder: "AC..." },
+          { key: "authToken", label: "Auth Token", type: "password", required: true, placeholder: "Your auth token" },
+          { key: "phoneNumber", label: "Phone Number", type: "tel", required: true, placeholder: "+1234567890" },
+        ],
+        capabilities: [
+          { id: "send_sms", name: "Send SMS", description: "Send text messages to customer phone numbers" },
+          { id: "make_call", name: "Make Calls", description: "Initiate voice calls for important notifications" },
           {
-            key: "phone_number",
-            label: "Twilio Phone Number",
-            type: "text",
-            required: true,
-            placeholder: "+1234567890",
+            id: "verify_phone",
+            name: "Verify Phone",
+            description: "Send verification codes for phone number validation",
           },
         ],
-        endpoints: ["Send SMS", "Make Call", "Get Message Status", "Lookup Phone Number"],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/twilio/send-sms", description: "Send SMS message" }],
       },
     ],
   },
   scheduling: {
-    title: "Scheduling & Booking",
-    description: "Appointment booking and calendar management",
+    title: "Scheduling & Meetings",
+    description: "Book appointments, schedule meetings, and manage calendar events",
     icon: Calendar,
-    color: "bg-orange-500/10 border-orange-500/20 text-orange-400",
+    color: "bg-orange-500/10 text-orange-400",
     integrations: [
       {
         id: "calendly",
         name: "Calendly",
         type: "CALENDLY",
-        description: "Automated scheduling and booking platform",
+        description: "Schedule meetings and appointments with automatic calendar integration",
         icon: Calendar,
         fields: [
-          { key: "api_key", label: "API Key", type: "password", required: true },
-          { key: "organization_uri", label: "Organization URI", type: "text", required: true },
+          {
+            key: "accessToken",
+            label: "Access Token",
+            type: "password",
+            required: true,
+            placeholder: "Your Calendly access token",
+          },
         ],
-        endpoints: ["Create Event", "Get Availability", "Cancel Booking", "Get Event Details"],
+        capabilities: [
+          {
+            id: "create_booking",
+            name: "Create Bookings",
+            description: "Schedule appointments directly from conversations",
+          },
+          {
+            id: "check_availability",
+            name: "Check Availability",
+            description: "View available time slots for scheduling",
+          },
+          { id: "cancel_booking", name: "Cancel Bookings", description: "Cancel or reschedule existing appointments" },
+        ],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/calendly/create-booking", description: "Create booking" }],
       },
       {
-        id: "acuity",
-        name: "Acuity Scheduling",
-        type: "ACUITY",
-        description: "Professional appointment scheduling software",
+        id: "zoom",
+        name: "Zoom",
+        type: "ZOOM",
+        description: "Create and manage video meetings for customer consultations and support",
         icon: Calendar,
         fields: [
-          { key: "user_id", label: "User ID", type: "text", required: true },
-          { key: "api_key", label: "API Key", type: "password", required: true },
+          {
+            key: "accessToken",
+            label: "Access Token",
+            type: "password",
+            required: true,
+            placeholder: "Your Zoom access token",
+          },
+          {
+            key: "refreshToken",
+            label: "Refresh Token",
+            type: "password",
+            required: true,
+            placeholder: "Your refresh token",
+          },
         ],
-        endpoints: ["Book Appointment", "Check Availability", "Get Appointments", "Update Appointment"],
+        capabilities: [
+          { id: "create_meeting", name: "Create Meetings", description: "Generate Zoom meetings with custom settings" },
+          {
+            id: "schedule_webinar",
+            name: "Schedule Webinars",
+            description: "Set up webinars for product demonstrations",
+          },
+          { id: "manage_recordings", name: "Manage Recordings", description: "Access and share meeting recordings" },
+        ],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/zoom/create-meeting", description: "Create Zoom meeting" }],
       },
     ],
   },
-  automation: {
-    title: "Automation & Webhooks",
-    description: "Workflow automation and custom integrations",
+  productivity: {
+    title: "Productivity & Automation",
+    description: "Automate workflows, manage tasks, and boost team productivity",
     icon: Zap,
-    color: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+    color: "bg-pink-500/10 text-pink-400",
     integrations: [
       {
-        id: "zapier",
-        name: "Zapier",
-        type: "ZAPIER",
-        description: "Connect apps and automate workflows",
-        icon: Zap,
-        fields: [{ key: "webhook_url", label: "Webhook URL", type: "text", required: true }],
-        endpoints: ["Trigger Zap", "Send Data", "Execute Workflow"],
+        id: "notion",
+        name: "Notion",
+        type: "NOTION",
+        description: "Create pages, update databases, and manage your workspace content",
+        icon: Database,
+        fields: [
+          { key: "accessToken", label: "Access Token", type: "password", required: true, placeholder: "secret_..." },
+        ],
+        capabilities: [
+          { id: "create_page", name: "Create Pages", description: "Generate new pages and documents automatically" },
+          {
+            id: "update_database",
+            name: "Update Database",
+            description: "Add and modify database entries from conversations",
+          },
+          {
+            id: "search_content",
+            name: "Search Content",
+            description: "Find and retrieve information from your workspace",
+          },
+        ],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/notion/create-page", description: "Create Notion page" }],
       },
       {
-        id: "webhook",
-        name: "Custom Webhook",
-        type: "WEBHOOK",
-        description: "Custom webhook endpoints for any service",
-        icon: Webhook,
+        id: "airtable",
+        name: "Airtable",
+        type: "AIRTABLE",
+        description: "Manage databases, track projects, and organize customer information",
+        icon: Database,
         fields: [
-          { key: "webhook_url", label: "Webhook URL", type: "text", required: true },
-          { key: "secret_key", label: "Secret Key", type: "password", required: false },
-          { key: "headers", label: "Custom Headers (JSON)", type: "textarea", required: false },
+          { key: "apiKey", label: "API Key", type: "password", required: true, placeholder: "key..." },
+          { key: "baseId", label: "Base ID", type: "text", required: true, placeholder: "app..." },
         ],
-        endpoints: ["Send POST Request", "Send GET Request", "Custom API Call"],
+        capabilities: [
+          { id: "create_record", name: "Create Records", description: "Add new entries to your Airtable bases" },
+          { id: "update_record", name: "Update Records", description: "Modify existing data and information" },
+          { id: "search_records", name: "Search Records", description: "Find and retrieve specific database entries" },
+        ],
+        endpoints: [],
+      },
+      {
+        id: "mailchimp",
+        name: "Mailchimp",
+        type: "MAILCHIMP",
+        description: "Manage email lists, create campaigns, and track marketing performance",
+        icon: Mail,
+        fields: [
+          { key: "apiKey", label: "API Key", type: "password", required: true, placeholder: "Your Mailchimp API key" },
+          { key: "serverPrefix", label: "Server Prefix", type: "text", required: true, placeholder: "us1, us2, etc." },
+        ],
+        capabilities: [
+          { id: "add_subscriber", name: "Add Subscribers", description: "Add contacts to email marketing lists" },
+          {
+            id: "create_campaign",
+            name: "Create Campaigns",
+            description: "Set up automated email marketing campaigns",
+          },
+          { id: "track_analytics", name: "Track Analytics", description: "Monitor email performance and engagement" },
+        ],
+        endpoints: [{ method: "POST", path: "/api/voiceflow/mailchimp/add-subscriber", description: "Add subscriber" }],
       },
     ],
   },
@@ -250,6 +2034,7 @@ interface Integration {
   isActive: boolean
   lastSyncAt?: string
   config?: any
+  capabilities?: string[]
 }
 
 interface IntegrationField {
@@ -269,8 +2054,10 @@ export default function IntegrationsPage() {
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [enabledCapabilities, setEnabledCapabilities] = useState<Record<string, boolean>>({})
+  const [showApiDocs, setShowApiDocs] = useState<Record<string, boolean>>({})
+  const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null)
 
-  // Load connected integrations on mount
   useEffect(() => {
     loadConnectedIntegrations()
   }, [])
@@ -295,7 +2082,6 @@ export default function IntegrationsPage() {
       setIsLoading(true)
       setError(null)
 
-      // Validate required fields
       const missingFields = integration.fields
         .filter((field: IntegrationField) => field.required && !formData[field.key])
         .map((field: IntegrationField) => field.label)
@@ -305,7 +2091,6 @@ export default function IntegrationsPage() {
         return
       }
 
-      // Prepare credentials object
       const credentials: Record<string, string> = {}
       integration.fields.forEach((field: IntegrationField) => {
         if (formData[field.key]) {
@@ -362,6 +2147,23 @@ export default function IntegrationsPage() {
     }
   }
 
+  const handleCapabilityToggle = (integrationId: string, capabilityId: string, enabled: boolean) => {
+    setEnabledCapabilities((prev) => ({
+      ...prev,
+      [`${integrationId}_${capabilityId}`]: enabled,
+    }))
+  }
+
+  const copyToClipboard = async (text: string, endpointId: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedEndpoint(endpointId)
+      setTimeout(() => setCopiedEndpoint(null), 2000)
+    } catch (err) {
+      console.error("Failed to copy:", err)
+    }
+  }
+
   const isConnected = (integrationType: string) => {
     return connectedIntegrations.some((integration) => integration.type === integrationType && integration.isActive)
   }
@@ -373,7 +2175,6 @@ export default function IntegrationsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -385,7 +2186,6 @@ export default function IntegrationsPage() {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="bg-card/50 border-border">
               <CardContent className="p-4">
@@ -425,7 +2225,6 @@ export default function IntegrationsPage() {
           </div>
         </div>
 
-        {/* Alerts */}
         {error && (
           <Alert className="border-destructive/20 bg-destructive/10">
             <AlertCircle className="h-4 w-4" />
@@ -440,7 +2239,6 @@ export default function IntegrationsPage() {
           </Alert>
         )}
 
-        {/* Category Tabs */}
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-muted/50">
             {Object.entries(INTEGRATION_CATEGORIES).map(([key, category]) => {
@@ -458,7 +2256,6 @@ export default function IntegrationsPage() {
             })}
           </TabsList>
 
-          {/* Integration Cards */}
           {Object.entries(INTEGRATION_CATEGORIES).map(([categoryKey, category]) => (
             <TabsContent key={categoryKey} value={categoryKey} className="space-y-6">
               <div className="space-y-4">
@@ -472,7 +2269,7 @@ export default function IntegrationsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {category.integrations.map((integration) => {
                     const connected = isConnected(integration.type)
                     const connectedIntegration = getConnectedIntegration(integration.type)
@@ -511,26 +2308,96 @@ export default function IntegrationsPage() {
                         </CardHeader>
 
                         <CardContent className="space-y-4">
-                          {/* Available Endpoints */}
-                          <div>
-                            <p className="text-sm font-medium mb-2">Available Actions:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {integration.endpoints.slice(0, 3).map((endpoint, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {endpoint}
-                                </Badge>
-                              ))}
-                              {integration.endpoints.length > 3 && (
+                          {connected && integration.capabilities && (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium">AI Agent Capabilities:</p>
                                 <Badge variant="outline" className="text-xs">
-                                  +{integration.endpoints.length - 3} more
+                                  {
+                                    integration.capabilities.filter(
+                                      (cap: any) =>
+                                        enabledCapabilities[`${connectedIntegration?.id}_${cap.id}`] !== false,
+                                    ).length
+                                  }{" "}
+                                  enabled
                                 </Badge>
+                              </div>
+                              <div className="space-y-2 max-h-32 overflow-y-auto">
+                                {integration.capabilities.map((capability: any) => (
+                                  <div
+                                    key={capability.id}
+                                    className="flex items-start gap-3 p-2 rounded-lg bg-muted/30"
+                                  >
+                                    <Switch
+                                      checked={
+                                        enabledCapabilities[`${connectedIntegration?.id}_${capability.id}`] !== false
+                                      }
+                                      onCheckedChange={(enabled) =>
+                                        handleCapabilityToggle(connectedIntegration?.id || "", capability.id, enabled)
+                                      }
+                                      className="mt-0.5"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium">{capability.name}</p>
+                                      <p className="text-xs text-muted-foreground">{capability.description}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {connected && integration.endpoints && (
+                            <div className="space-y-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  setShowApiDocs({
+                                    ...showApiDocs,
+                                    [integration.id]: !showApiDocs[integration.id],
+                                  })
+                                }
+                                className="w-full"
+                              >
+                                <Code className="h-4 w-4 mr-2" />
+                                {showApiDocs[integration.id] ? "Hide" : "Show"} API Documentation
+                              </Button>
+
+                              {showApiDocs[integration.id] && (
+                                <div className="space-y-3 p-3 rounded-lg bg-muted/20 border">
+                                  <p className="text-sm font-medium text-primary">Voiceflow API Endpoints:</p>
+                                  {integration.endpoints.map((endpoint, idx) => (
+                                    <div key={idx} className="space-y-2 p-3 rounded bg-background/50 border">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className="text-xs font-mono">
+                                            {endpoint.method}
+                                          </Badge>
+                                          <code className="text-xs">{endpoint.path}</code>
+                                        </div>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => copyToClipboard(endpoint.path, `${integration.id}_${idx}`)}
+                                        >
+                                          {copiedEndpoint === `${integration.id}_${idx}` ? (
+                                            <Check className="h-3 w-3" />
+                                          ) : (
+                                            <Copy className="h-3 w-3" />
+                                          )}
+                                        </Button>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">{endpoint.description}</p>
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
-                          </div>
+                          )}
 
                           <Separator />
 
-                          {/* Action Buttons */}
                           <div className="flex gap-2">
                             {connected ? (
                               <>
@@ -668,7 +2535,6 @@ export default function IntegrationsPage() {
           ))}
         </Tabs>
 
-        {/* API Endpoints Info */}
         <Card className="bg-card/30 border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
