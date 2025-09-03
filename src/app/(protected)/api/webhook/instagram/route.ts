@@ -319,6 +319,86 @@ class RetryManager {
 // WEBHOOK VALIDATOR
 // ============================================================================
 
+// class WebhookValidator {
+//   static extractData(payload: any): WebhookData | null {
+//     try {
+//       if (payload?.entry?.[0]?.messaging) {
+//         const messaging = payload.entry[0].messaging[0]
+
+//         if (messaging.read || messaging.delivery) {
+//           Logger.debug("Ignoring read receipt or delivery confirmation")
+//           return null
+//         }
+
+//         if (messaging.message) {
+//           const isEcho = messaging.message?.is_echo === true
+
+//           if (!messaging.message.text) {
+//             Logger.debug("Ignoring non-text message")
+//             return null
+//           }
+
+//           return {
+//             pageId: payload.entry[0].id,
+//             senderId: messaging.sender.id,
+//             recipientId: messaging.recipient.id,
+//             userMessage: messaging.message.text,
+//             messageId: messaging.message.mid,
+//             messageType: "DM",
+//             isEcho,
+//           }
+//         }
+
+//         if (messaging.postback) {
+//           return {
+//             pageId: payload.entry[0].id,
+//             senderId: messaging.sender.id,
+//             recipientId: messaging.recipient.id,
+//             userMessage: messaging.postback.payload || messaging.postback.title || "Button clicked",
+//             messageId: `postback_${Date.now()}`,
+//             messageType: "DM",
+//             isEcho: false,
+//           }
+//         }
+//       } else if (payload?.entry?.[0]?.changes && payload.entry[0].changes[0].field === "comments") {
+//         const changeValue = payload.entry[0].changes[0].value
+
+//         if (!changeValue.text) {
+//           Logger.debug("Ignoring comment without text")
+//           return null
+//         }
+
+//         return {
+//           pageId: payload.entry[0].id,
+//           senderId: changeValue.from.id,
+//           userMessage: changeValue.text,
+//           commentId: changeValue.id,
+//           messageType: "COMMENT",
+//           isEcho: false,
+//         }
+//       }
+//     } catch (error) {
+//       Logger.error("Failed to extract webhook data", error)
+//     }
+
+//     return null
+//   }
+
+//   static isSpecialWebhook(payload: any): string | null {
+//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "deauthorizations") {
+//       return "deauth"
+//     }
+//     if (payload?.object === "instagram" && payload?.entry?.[0]?.changes?.[0]?.field === "data_deletion") {
+//       return "data_deletion"
+//     }
+//     if (payload?.entry?.[0]?.messaging?.[0]?.read || payload?.entry?.[0]?.messaging?.[0]?.delivery) {
+//       return "receipt"
+//     }
+//     return null
+//   }
+// }
+
+// ENHANCED: Webhook validator to handle postback events
 class WebhookValidator {
   static extractData(payload: any): WebhookData | null {
     try {
@@ -330,6 +410,7 @@ class WebhookValidator {
           return null
         }
 
+        // Handle regular messages
         if (messaging.message) {
           const isEcho = messaging.message?.is_echo === true
 
@@ -349,6 +430,7 @@ class WebhookValidator {
           }
         }
 
+        // CRITICAL: Handle postback events (button clicks)
         if (messaging.postback) {
           return {
             pageId: payload.entry[0].id,
@@ -399,10 +481,104 @@ class WebhookValidator {
 }
 
 
+
+
 // ============================================================================
 // ENHANCED VOICEFLOW RESPONSE TRANSFORMER
 // ============================================================================
 
+// function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowResponse): {
+//   text: string
+//   quickReplies?: InstagramQuickReply[]
+//   buttons?: InstagramButton[]
+//   carousel?: InstagramGenericElement[]
+//   attachment?: InstagramAttachment
+// } {
+//   const result: any = {
+//     text: voiceflowResponse.text || ""
+//   }
+
+//   // Transform quick replies
+//   if (voiceflowResponse.quickReplies && voiceflowResponse.quickReplies.length > 0) {
+//     result.quickReplies = voiceflowResponse.quickReplies.slice(0, 13).map((reply) => ({
+//       content_type: "text" as const,
+//       title: String(reply.name || "").substring(0, 20) || "Option",
+//       payload: String(reply.payload || reply.name || "").substring(0, 1000)
+//     }))
+//   }
+
+//   // Transform buttons for button template
+//   if (voiceflowResponse.buttons && voiceflowResponse.buttons.length > 0) {
+//     result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button) => ({
+//       type: button.url ? "web_url" as const : "postback" as const,
+//       title: String(button.name || "").substring(0, 20) || "Button",
+//       url: button.url,
+//       payload: button.url ? undefined : String(button.payload || button.name || "").substring(0, 1000)
+//     }))
+//   }
+
+//   // Transform carousel
+//   if (voiceflowResponse.carousel && voiceflowResponse.carousel.length > 0) {
+//     result.carousel = voiceflowResponse.carousel.slice(0, 10).map((card) => {
+//       const element: InstagramGenericElement = {
+//         title: String(card.title || "").substring(0, 80) || "Card",
+//         subtitle: card.subtitle ? String(card.subtitle).substring(0, 80) : undefined,
+//         image_url: card.imageUrl || undefined
+//       }
+
+//       if (card.buttons && card.buttons.length > 0) {
+//         element.buttons = card.buttons.slice(0, 3).map((button) => ({
+//           type: button.url ? "web_url" as const : "postback" as const,
+//           title: String(button.name || "").substring(0, 20) || "Button",
+//           url: button.url,
+//           payload: button.url ? undefined : String(button.payload || button.name || "").substring(0, 1000)
+//         }))
+//       }
+
+//       return element
+//     })
+//   }
+
+//   // Handle custom attachments
+//   if (voiceflowResponse.attachment) {
+//     result.attachment = voiceflowResponse.attachment
+//   }
+
+//   return result
+// }
+
+// // Legacy function for backward compatibility - now uses enhanced transformer
+// function transformButtonsToInstagram(
+//   buttons?: { name: string; payload: string | object | any }[],
+// ): { name: string; payload: string }[] | undefined {
+//   if (!buttons || buttons.length === 0) return undefined
+
+//   return buttons.slice(0, 11).map((button) => {
+//     const buttonName = String(button.name || "").substring(0, 20) || "Option"
+//     let buttonPayload: string
+
+//     if (typeof button.payload === "string") {
+//       buttonPayload = button.payload.substring(0, 1000)
+//     } else if (button.payload === null || button.payload === undefined) {
+//       buttonPayload = buttonName
+//     } else {
+//       try {
+//         buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
+//       } catch (e) {
+//         buttonPayload = String(button.payload).substring(0, 1000)
+//       }
+//     }
+
+//     return {
+//       name: buttonName,
+//       payload: buttonPayload,
+//     }
+//   })
+// }
+
+
+
+// ENHANCED: Voiceflow response transformer with proper button handling
 function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowResponse): {
   text: string
   quickReplies?: InstagramQuickReply[]
@@ -418,19 +594,26 @@ function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowRespo
   if (voiceflowResponse.quickReplies && voiceflowResponse.quickReplies.length > 0) {
     result.quickReplies = voiceflowResponse.quickReplies.slice(0, 13).map((reply) => ({
       content_type: "text" as const,
-      title: String(reply.name || "").substring(0, 20) || "Option",
+      title: String(reply.name  || "").substring(0, 20) || "Option",
       payload: String(reply.payload || reply.name || "").substring(0, 1000)
     }))
   }
 
-  // Transform buttons for button template
+  // CRITICAL FIX: Transform buttons with proper title handling
   if (voiceflowResponse.buttons && voiceflowResponse.buttons.length > 0) {
-    result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button) => ({
-      type: button.url ? "web_url" as const : "postback" as const,
-      title: String(button.name || "").substring(0, 20) || "Button",
-      url: button.url,
-      payload: button.url ? undefined : String(button.payload || button.name || "").substring(0, 1000)
-    }))
+    result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button) => {
+      // Extract title from multiple possible sources
+      const buttonTitle = button.name  || "Button"
+      const buttonPayload = button.payload  || button.name || "button_clicked"
+      
+      return {
+        type: button.url ? "web_url" as const : "postback" as const,
+        title: String(buttonTitle).substring(0, 20),
+        name: String(buttonTitle).substring(0, 20), // Keep name for compatibility
+        url: button.url,
+        payload: button.url ? undefined : String(buttonPayload).substring(0, 1000)
+      }
+    })
   }
 
   // Transform carousel
@@ -439,16 +622,21 @@ function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowRespo
       const element: InstagramGenericElement = {
         title: String(card.title || "").substring(0, 80) || "Card",
         subtitle: card.subtitle ? String(card.subtitle).substring(0, 80) : undefined,
-        image_url: card.imageUrl || undefined
+        image_url: card.imageUrl  || undefined
       }
 
       if (card.buttons && card.buttons.length > 0) {
-        element.buttons = card.buttons.slice(0, 3).map((button) => ({
-          type: button.url ? "web_url" as const : "postback" as const,
-          title: String(button.name || "").substring(0, 20) || "Button",
-          url: button.url,
-          payload: button.url ? undefined : String(button.payload || button.name || "").substring(0, 1000)
-        }))
+        element.buttons = card.buttons.slice(0, 3).map((button) => {
+          const buttonTitle =  button.name || "ButtonE"
+          const buttonPayload = button.payload || button.name || "button_clicked"
+          
+          return {
+            type: button.url ? "web_url" as const : "postback" as const,
+            title: String(buttonTitle).substring(0, 20),
+            url: button.url,
+            payload: button.url ? undefined : String(buttonPayload).substring(0, 1000)
+          }
+        })
       }
 
       return element
@@ -463,34 +651,21 @@ function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowRespo
   return result
 }
 
-// Legacy function for backward compatibility - now uses enhanced transformer
-function transformButtonsToInstagram(
-  buttons?: { name: string; payload: string | object | any }[],
-): { name: string; payload: string }[] | undefined {
-  if (!buttons || buttons.length === 0) return undefined
 
-  return buttons.slice(0, 11).map((button) => {
-    const buttonName = String(button.name || "").substring(0, 20) || "Option"
-    let buttonPayload: string
 
-    if (typeof button.payload === "string") {
-      buttonPayload = button.payload.substring(0, 1000)
-    } else if (button.payload === null || button.payload === undefined) {
-      buttonPayload = buttonName
-    } else {
-      try {
-        buttonPayload = JSON.stringify(button.payload).substring(0, 1000)
-      } catch (e) {
-        buttonPayload = String(button.payload).substring(0, 1000)
-      }
-    }
 
-    return {
-      name: buttonName,
-      payload: buttonPayload,
-    }
-  })
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1523,3 +1698,32 @@ class ResponseSender {
     )
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
