@@ -4,7 +4,7 @@ import { getUserFromBusiness } from "@/actions/businfo/queries"
 import { getBusinessProfileForAutomation } from "@/actions/webhook/business-profile"
 import type { VoiceflowVariables } from "@/types/voiceflow"
 import { decryptCredentials } from "@/lib/encrypt"
-import axios from "axios"
+import axios, { AxiosError, AxiosResponse } from "axios"
 import { client } from "@/lib/prisma" // Assuming you have prisma client
 
 
@@ -2229,5 +2229,159 @@ export class InstagramVoiceflowDebugger {
 
     console.log("✅ Instagram compliance validated");
     return true;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+export async function sendDMs(
+  userId: string,
+  receiverId: string,
+  message: InstagramAlignedMessage,
+  token: string,
+  messageType: "DM" | "COMMENT" = "DM",
+  commentId?: string
+): Promise<AxiosResponse> {
+  console.log("🚀 Sending Instagram-aligned message:", {
+    messageType,
+    hasText: !!message.text,
+    hasButtons: !!message.buttons?.length,
+    hasQuickReplies: !!message.quickReplies?.length,
+    hasCarousel: !!message.carousel?.length,
+    hasAttachment: !!message.attachment
+  });
+
+  const messagePayload: Record<string, any> = {
+    recipient: { id: messageType === "DM" ? receiverId : commentId || receiverId },
+    messaging_type: "RESPONSE",
+  };
+
+  try {
+    // Priority 1: Carousel (most engaging)
+    if (message.carousel && message.carousel.length > 0) {
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: message.carousel.map(card => {
+              const element: any = {
+                title: card.title,
+                subtitle: card.subtitle,
+              };
+
+              if (card.image_url) {
+                element.image_url = card.image_url;
+              }
+
+              if (card.buttons && card.buttons.length > 0) {
+                element.buttons = card.buttons.map(btn => ({
+                  type: btn.url ? "web_url" : "postback",
+                  title: btn.title,
+                  url: btn.url,
+                  payload: btn.url ? undefined : btn.payload
+                }));
+              }
+
+              return element;
+            })
+          }
+        }
+      };
+    }
+    // Priority 2: Button template (if we have buttons and text)
+    else if (message.buttons && message.buttons.length > 0 && message.text) {
+      messagePayload.message = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text: message.text,
+            buttons: message.buttons.map(btn => ({
+              type: btn.url ? "web_url" : "postback",
+              title: btn.title,
+              url: btn.url,
+              payload: btn.url ? undefined : btn.payload
+            }))
+          }
+        }
+      };
+    }
+    // Priority 3: Media attachment with optional caption
+    else if (message.attachment) {
+      if (message.attachment.type === 'image') {
+        messagePayload.message = {
+          attachment: {
+            type: "image",
+            payload: {
+              url: message.attachment.url,
+              is_reusable: true
+            }
+          }
+        };
+        
+        // Send caption as separate message if present
+        if (message.attachment.caption) {
+          // This would require a separate API call
+          console.log("📝 Image caption would be sent separately:", message.attachment.caption);
+        }
+      } else {
+        // Handle other media types
+        messagePayload.message = {
+          attachment: {
+            type: message.attachment.type,
+            payload: {
+              url: message.attachment.url,
+              is_reusable: true
+            }
+          }
+        };
+      }
+    }
+    // Priority 4: Text with quick replies
+    else {
+      messagePayload.message = { text: message.text || "Hello! How can I help you?" };
+      
+      if (message.quickReplies && message.quickReplies.length > 0) {
+        messagePayload.message.quick_replies = message.quickReplies;
+      }
+    }
+
+    console.log("📤 Final Instagram payload:", JSON.stringify(messagePayload, null, 2));
+
+    // Send the message
+    const response = await axios.post(
+      `${process.env.INSTAGRAM_BASE_URL}/v21.0/${userId}/messages`, 
+      messagePayload, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
+
+    console.log("✅ Instagram message sent successfully:", response.status);
+    return response;
+
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error("❌ Instagram message send failed:", axiosError.response?.data || axiosError.message);
+    
+    if (axiosError.response?.data) {
+      console.error("📋 Instagram API error details:", JSON.stringify(axiosError.response.data, null, 2));
+    }
+    
+    throw error;
   }
 }

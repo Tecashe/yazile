@@ -21,13 +21,125 @@ import {
   getEnhancedVoiceflowResponse,
 } from "@/lib/voiceflow"
 import { analyzeLead } from "@/lib/lead-qualification"
-import { sendDMs, sendPrivateMessages, transformVoiceflowToInstagram } from "@/lib/fetch"
+import {  sendPrivateMessages, transformVoiceflowToInstagram } from "@/lib/fetch"
+import {sendDMs} from "@/lib/voiceflow"
 import { client } from "@/lib/prisma"
 import { storeConversationMessage } from "@/actions/chats/queries"
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
 import { verifyInstagramWebhook } from "@/utils/instagram"
 import { trackMessageForSentiment } from "@/lib/sentiment-tracker"
 import { getBusinessByAutomationId } from "@/actions/businfo/queries"
+import axios, { AxiosResponse, AxiosError } from "axios"
+
+
+
+/// added interfaces to be removed
+
+const INSTAGRAM_LIMITS = {
+  MESSAGE_LIMIT: 2000,           // Instagram text message limit
+  QUICK_REPLY_LIMIT: 13,         // Instagram quick reply limit
+  QUICK_REPLY_TITLE_LIMIT: 20,   // Instagram quick reply title limit
+  BUTTON_LIMIT: 3,               // Instagram button template limit
+  BUTTON_TITLE_LIMIT: 20,        // Instagram button title limit
+  CAROUSEL_LIMIT: 10,            // Instagram carousel cards limit
+  CAROUSEL_TITLE_LIMIT: 80,      // Instagram carousel title limit
+  CAROUSEL_SUBTITLE_LIMIT: 80,   // Instagram carousel subtitle limit
+  PAYLOAD_LIMIT: 1000,           // Instagram payload limit
+  MEDIA_SIZE_LIMIT: 8 * 1024 * 1024, // 8MB media limit
+} as const;
+
+// Enhanced interfaces aligned with Instagram capabilities
+interface InstagramAlignedButton {
+  title: string;
+  payload: string;
+  url?: string;  // For web_url buttons
+}
+
+interface InstagramAlignedQuickReply {
+  content_type: "text";
+  title: string;
+  payload: string;
+}
+
+interface InstagramAlignedCarouselElement {
+  title: string;
+  subtitle?: string;
+  image_url?: string;
+  buttons?: InstagramAlignedButton[];
+}
+
+interface InstagramAlignedMessage {
+  text: string;
+  quickReplies?: InstagramAlignedQuickReply[];
+  buttons?: InstagramAlignedButton[];
+  carousel?: InstagramAlignedCarouselElement[];
+  attachment?: {
+    type: 'image' | 'video' | 'audio' | 'file';
+    url: string;
+    caption?: string;
+  };
+  // Instagram-specific metadata
+  requiresHumanHandoff?: boolean;
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  sentiment?: "positive" | "neutral" | "negative";
+  complexity?: "simple" | "medium" | "complex";
+}
+
+// Enhanced interfaces to handle all possible Voiceflow structures
+interface VoiceflowButton {
+  // Common properties across different Voiceflow versions
+  name?: string;
+  title?: string;
+  text?: string;
+  label?: string;
+  
+  // Payload variations
+  payload?: string | object;
+  value?: string;
+  request?: {
+    type?: string;
+    payload?: {
+      intent?: {
+        name?: string;
+      };
+      query?: string;
+    };
+  };
+  
+  // URL for web buttons
+  url?: string;
+  link?: string;
+  
+  // Legacy support
+  id?: string;
+  type?: string;
+}
+
+interface EnhancedVoiceflowResponse {
+  text?: string;
+  quickReplies?: Array<{
+    name?: string;
+    title?: string;
+    payload?: string;
+    value?: string;
+  }>;
+  buttons?: VoiceflowButton[];
+  carousel?: Array<{
+    title: string;
+    subtitle?: string;
+    imageUrl?: string;
+    image_url?: string;
+    buttons?: VoiceflowButton[];
+  }>;
+  attachment?: any;
+  variables?: Record<string, any>;
+  
+  // Handle Voiceflow trace types
+  traces?: Array<{
+    type: string;
+    payload?: any;
+  }>;
+}
 
 
 // ============================================================================
@@ -579,7 +691,7 @@ class WebhookValidator {
 
 
 // ENHANCED: Voiceflow response transformer with proper button handling
-function transformVoiceflowResponseToInstagram(voiceflowResponse: VoiceflowResponse): {
+function transformVoiceflowResponseToInstagrame(voiceflowResponse: VoiceflowResponse): {
   text: string
   quickReplies?: InstagramQuickReply[]
   buttons?: InstagramButton[]
@@ -1456,8 +1568,6 @@ export async function POST(req: NextRequest) {
 // ENHANCED RESPONSE SENDER - USING UPDATED MESSAGE FUNCTIONS
 // ============================================================================
 
-
-
 class ResponseSender {
   static async send(context: ProcessingContext, voiceflowResponse: VoiceflowResponse): Promise<void> {
     Logger.info(`📤 Sending enhanced response with ${voiceflowResponse.text ? 'text' : 'template'}...`)
@@ -1488,16 +1598,44 @@ class ResponseSender {
 
         if (context.data.messageType === "DM") {
           Logger.debug("Sending enhanced DM using updated sendDMs function")
+          // Ensure the transformed object matches InstagramAlignedMessage type
+          const alignedMessage: InstagramAlignedMessage = {
+            text: transformed.text,
+            quickReplies: transformed.quickReplies?.map(qr => ({
+              content_type: "text" as const,
+              title: qr.title,
+              payload: qr.payload || qr.title
+            })),
+            buttons: transformed.buttons?.map(btn => ({
+              title: btn.title,
+              payload: btn.payload || btn.title,
+              url: btn.url
+            })),
+            carousel: transformed.carousel?.map(element => ({
+              title: element.title,
+              subtitle: element.subtitle,
+              image_url: element.image_url,
+              buttons: element.buttons?.map(btn => ({
+                title: btn.title,
+                payload: btn.payload || btn.title,
+                url: btn.url
+              }))
+            })),
+            attachment: transformed.attachment && 
+              ['image', 'video', 'audio', 'file'].includes(transformed.attachment.type) ? {
+              type: transformed.attachment.type as 'image' | 'video' | 'audio' | 'file',
+              url: (transformed.attachment as any).url || '',
+              caption: (transformed.attachment as any).caption
+            } : undefined
+          }
+          
           result = await TimeoutManager.withTimeout(
             sendDMs(
               context.data.pageId,
               context.data.senderId,
-              transformed.text,
+              alignedMessage,
               token,
-              transformed.quickReplies,
-              transformed.buttons,
-              transformed.carousel,
-              transformed.attachment
+              "DM"
             ),
             10000,
             "Enhanced DM send",
@@ -1545,6 +1683,7 @@ class ResponseSender {
     )
   }
 
+
   // ============================================================================
   // ADDITIONAL UTILITY METHODS
   // ============================================================================
@@ -1552,178 +1691,655 @@ class ResponseSender {
   /**
    * Send a quick message without full context processing
    */
-  static async sendQuick(
-    messageType: "DM" | "COMMENT",
-    pageId: string,
-    targetId: string, // receiverId for DM, commentId for COMMENT
-    voiceflowResponse: VoiceflowResponse,
-    token: string
-  ): Promise<void> {
-    Logger.info(`📤 Sending quick ${messageType} message...`)
+  // static async sendQuick(
+  //   messageType: "DM" | "COMMENT",
+  //   pageId: string,
+  //   targetId: string, // receiverId for DM, commentId for COMMENT
+  //   voiceflowResponse: VoiceflowResponse,
+  //   token: string
+  // ): Promise<void> {
+  //   Logger.info(`📤 Sending quick ${messageType} message...`)
 
-    const transformed = transformVoiceflowToInstagram(voiceflowResponse)
+  //   const transformed = transformVoiceflowResponseToInstagram(voiceflowResponse);
 
-    try {
-      let result
+  //   try {
+  //     let result
 
-      if (messageType === "DM") {
-        result = await sendDMs(
-          pageId,
-          targetId,
-          transformed.text,
-          token,
-          transformed.quickReplies,
-          transformed.buttons,
-          transformed.carousel,
-          transformed.attachment
-        )
-      } else if (messageType === "COMMENT") {
-        result = await sendPrivateMessages(
-          pageId,
-          targetId,
-          transformed.text,
-          token,
-          transformed.quickReplies,
-          transformed.buttons,
-          transformed.carousel,
-          transformed.attachment
-        )
-      }
+  //     if (messageType === "DM") {
+  //       // Ensure the transformed object matches InstagramAlignedMessage type
+  //       const alignedMessage: InstagramAlignedMessage = {
+  //         text: transformed.text,
+  //         quickReplies: transformed.quickReplies,
+  //         buttons: transformed.buttons?.map(btn => ({
+  //           ...btn,
+  //           payload: btn.payload || btn.title // Ensure payload is never undefined
+  //         })),
+  //         carousel: transformed.carousel,
+  //         attachment: transformed.attachment
+  //       }
+        
+  //       result = await sendDMs(
+  //         pageId,
+  //         targetId,
+  //         alignedMessage,
+  //         token,
+  //         "DM"
+  //       )
+  //     } else if (messageType === "COMMENT") {
+  //       result = await sendPrivateMessages(
+  //         pageId,
+  //         targetId,
+  //         transformed.text,
+  //         token,
+  //         transformed.quickReplies,
+  //         transformed.buttons,
+  //         transformed.carousel,
+  //         transformed.attachment
+  //       )
+  //     }
 
-      if (result?.status !== 200) {
-        throw new Error(`Quick send failed with status: ${result?.status}`)
-      }
+  //     if (result?.status !== 200) {
+  //       throw new Error(`Quick send failed with status: ${result?.status}`)
+  //     }
 
-      Logger.success(`✅ Quick ${messageType} sent successfully`)
-    } catch (error) {
-      Logger.error(`❌ Quick ${messageType} send failed:`, error)
-      throw error
-    }
-  }
+  //     Logger.success(`✅ Quick ${messageType} sent successfully`)
+  //   } catch (error) {
+  //     Logger.error(`❌ Quick ${messageType} send failed:`, error)
+  //     throw error
+  //   }
+  // }
 
-  /**
-   * Transform and preview what would be sent (useful for debugging)
-   */
-  static previewTransformation(voiceflowResponse: VoiceflowResponse) {
-    return transformVoiceflowToInstagram(voiceflowResponse)
-  }
+  // /**
+  //  * Transform and preview what would be sent (useful for debugging)
+  //  */
+  // static previewTransformation(voiceflowResponse: VoiceflowResponse) {
+  //   return transformVoiceflowToInstagram(voiceflowResponse)
+  // }
 
-  /**
-   * Send with custom retry configuration
-   */
-  static async sendWithCustomRetry(
-    context: ProcessingContext, 
-    voiceflowResponse: VoiceflowResponse,
-    maxRetries: number = 3,
-    timeoutMs: number = 10000
-  ): Promise<void> {
-    Logger.info(`📤 Sending response with custom retry (${maxRetries} attempts, ${timeoutMs}ms timeout)...`)
+  // /**
+  //  * Send with custom retry configuration
+  //  */
+  // static async sendWithCustomRetry(
+  //   context: ProcessingContext, 
+  //   voiceflowResponse: VoiceflowResponse,
+  //   maxRetries: number = 3,
+  //   timeoutMs: number = 10000
+  // ): Promise<void> {
+  //   Logger.info(`📤 Sending response with custom retry (${maxRetries} attempts, ${timeoutMs}ms timeout)...`)
 
-    const transformed = transformVoiceflowToInstagram(voiceflowResponse)
-    const textContent = transformed.text || "template_message"
+  //   const transformed = transformVoiceflowToInstagram(voiceflowResponse)
+  //   const textContent = transformed.text || "template_message"
     
-    // Check for duplicates
-    const isDuplicate = await checkDuplicateResponse(
-      context.data.pageId,
-      context.data.senderId,
-      textContent,
-      context.data.messageType,
-    )
+  //   // Check for duplicates
+  //   const isDuplicate = await checkDuplicateResponse(
+  //     context.data.pageId,
+  //     context.data.senderId,
+  //     textContent,
+  //     context.data.messageType,
+  //   )
 
-    if (isDuplicate) {
-      Logger.warning("Duplicate response detected, skipping send to avoid spam")
-      return
+  //   if (isDuplicate) {
+  //     Logger.warning("Duplicate response detected, skipping send to avoid spam")
+  //     return
+  //   }
+
+  //   const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+  //   await RetryManager.withRetry(
+  //     async () => {
+  //       let result
+  //       if (context.data.messageType === "DM") {
+  //         // Ensure the transformed object matches InstagramAlignedMessage type
+  //         const alignedMessage: InstagramAlignedMessage = {
+  //           text: transformed.text,
+  //           quickReplies: transformed.quickReplies,
+  //           buttons: transformed.buttons?.map(btn => ({
+  //             ...btn,
+  //             payload: btn.payload || btn.title // Ensure payload is never undefined
+  //           })),
+  //           carousel: transformed.carousel,
+  //           attachment: transformed.attachment
+  //         }
+          
+  //         result = await TimeoutManager.withTimeout(
+  //           sendDMs(
+  //             context.data.pageId,
+  //             context.data.senderId,
+  //             alignedMessage,
+  //             token,
+  //             "DM",
+  //             undefined // commentId parameter (not needed for DMs)
+  //           ),
+  //           timeoutMs,
+  //           "Custom retry DM send",
+  //         )
+  //       } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
+  //         result = await TimeoutManager.withTimeout(
+  //           sendPrivateMessages(
+  //             context.data.pageId,
+  //             context.data.commentId,
+  //             transformed.text,
+  //             token,
+  //             transformed.quickReplies,
+  //             transformed.buttons,
+  //             transformed.carousel,
+  //             transformed.attachment
+  //           ),
+  //           timeoutMs,
+  //           "Custom retry Comment send",
+  //         )
+  //       }
+
+  //       if (result?.status !== 200) {
+  //         throw new Error(`Custom retry send failed with status: ${result?.status}`)
+  //       }
+
+  //       Logger.success(`✅ Custom retry response sent successfully`)
+
+  //       // Mark response as sent
+  //       await Promise.allSettled([
+  //         markResponseAsSent(
+  //           context.data.pageId,
+  //           context.data.senderId,
+  //           textContent,
+  //           context.data.messageType,
+  //           context.automation.id,
+  //         ),
+  //         trackResponses(context.automation.id, context.data.messageType),
+  //       ])
+
+  //       return result
+  //     },
+  //     "Custom retry message sending",
+  //     maxRetries,
+  //   )
+  // }
+}
+
+// class ResponseSender {
+//   static async send(context: ProcessingContext, voiceflowResponse: VoiceflowResponse): Promise<void> {
+//     Logger.info(`📤 Sending enhanced response with ${voiceflowResponse.text ? 'text' : 'template'}...`)
+
+//     // Transform Voiceflow response to Instagram format using the updated function
+//     const transformed = transformVoiceflowToInstagram(voiceflowResponse)
+
+//     // Check for duplicates based on text content
+//     const textContent = transformed.text || "template_message"
+//     const isDuplicate = await checkDuplicateResponse(
+//       context.data.pageId,
+//       context.data.senderId,
+//       textContent,
+//       context.data.messageType,
+//     )
+
+//     if (isDuplicate) {
+//       Logger.warning("Duplicate response detected, skipping send to avoid spam")
+//       return
+//     }
+
+//     const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     // Use retry mechanism for sending enhanced messages
+//     await RetryManager.withRetry(
+//       async () => {
+//         let result
+
+//         if (context.data.messageType === "DM") {
+//           Logger.debug("Sending enhanced DM using updated sendDMs function")
+//           result = await TimeoutManager.withTimeout(
+//             sendDMs(
+//               context.data.pageId,
+//               context.data.senderId,
+//               transformed.quickReplies,
+//               token,
+//               transformed.quickReplies,
+//               transformed.buttons,
+//               transformed.carousel,
+//               transformed.attachment
+//             ),
+//             10000,
+//             "Enhanced DM send",
+//           )
+//         } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
+//           Logger.debug("Sending enhanced private message using updated sendPrivateMessages function")
+//           result = await TimeoutManager.withTimeout(
+//             sendPrivateMessages(
+//               context.data.pageId,
+//               context.data.commentId,
+//               transformed.text,
+//               token,
+//               transformed.quickReplies,
+//               transformed.buttons,
+//               transformed.carousel,
+//               transformed.attachment
+//             ),
+//             10000,
+//             "Enhanced Comment send",
+//           )
+//         }
+
+//         if (result?.status !== 200) {
+//           throw new Error(`Enhanced send failed with status: ${result?.status}`)
+//         }
+
+//         Logger.success(`✅ Enhanced response sent successfully`)
+
+//         // Mark response as sent
+//         await Promise.allSettled([
+//           markResponseAsSent(
+//             context.data.pageId,
+//             context.data.senderId,
+//             textContent,
+//             context.data.messageType,
+//             context.automation.id,
+//           ),
+//           trackResponses(context.automation.id, context.data.messageType),
+//         ])
+
+//         return result
+//       },
+//       "Enhanced message sending",
+//       CONFIG.RETRY.MAX_ATTEMPTS,
+//     )
+//   }
+
+
+//   // ============================================================================
+//   // ADDITIONAL UTILITY METHODS
+//   // ============================================================================
+
+//   /**
+//    * Send a quick message without full context processing
+//    */
+//   static async sendQuick(
+//     messageType: "DM" | "COMMENT",
+//     pageId: string,
+//     targetId: string, // receiverId for DM, commentId for COMMENT
+//     voiceflowResponse: VoiceflowResponse,
+//     token: string
+//   ): Promise<void> {
+//     Logger.info(`📤 Sending quick ${messageType} message...`)
+
+//     // const transformed = transformVoiceflowToInstagram(voiceflowResponse)
+//     const transformed = transformVoiceflowResponseToInstagram(voiceflowResponse);
+
+//     try {
+//       let result
+
+//       if (messageType === "DM") {
+//         result = await sendDMs(
+//           pageId,
+//           targetId,
+//           transformed.text,
+//           token,
+//           transformed.quickReplies,
+//           transformed.buttons,
+//           transformed.carousel,
+//           transformed.attachment
+//         )
+//       } else if (messageType === "COMMENT") {
+//         result = await sendPrivateMessages(
+//           pageId,
+//           targetId,
+//           transformed.text,
+//           token,
+//           transformed.quickReplies,
+//           transformed.buttons,
+//           transformed.carousel,
+//           transformed.attachment
+//         )
+//       }
+
+//       if (result?.status !== 200) {
+//         throw new Error(`Quick send failed with status: ${result?.status}`)
+//       }
+
+//       Logger.success(`✅ Quick ${messageType} sent successfully`)
+//     } catch (error) {
+//       Logger.error(`❌ Quick ${messageType} send failed:`, error)
+//       throw error
+//     }
+//   }
+
+//   /**
+//    * Transform and preview what would be sent (useful for debugging)
+//    */
+//   static previewTransformation(voiceflowResponse: VoiceflowResponse) {
+//     return transformVoiceflowToInstagram(voiceflowResponse)
+//   }
+
+//   /**
+//    * Send with custom retry configuration
+//    */
+//   static async sendWithCustomRetry(
+//     context: ProcessingContext, 
+//     voiceflowResponse: VoiceflowResponse,
+//     maxRetries: number = 3,
+//     timeoutMs: number = 10000
+//   ): Promise<void> {
+//     Logger.info(`📤 Sending response with custom retry (${maxRetries} attempts, ${timeoutMs}ms timeout)...`)
+
+//     const transformed = transformVoiceflowToInstagram(voiceflowResponse)
+//     const textContent = transformed.text || "template_message"
+    
+//     // Check for duplicates
+//     const isDuplicate = await checkDuplicateResponse(
+//       context.data.pageId,
+//       context.data.senderId,
+//       textContent,
+//       context.data.messageType,
+//     )
+
+//     if (isDuplicate) {
+//       Logger.warning("Duplicate response detected, skipping send to avoid spam")
+//       return
+//     }
+
+//     const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
+
+//     await RetryManager.withRetry(
+//       async () => {
+//         let result
+//         if (context.data.messageType === "DM") {
+//           result = await TimeoutManager.withTimeout(
+//             sendDMs(
+//               context.data.pageId,
+//               context.data.senderId,
+//               transformed.text,
+//               token,
+//               transformed.quickReplies,
+//               transformed.buttons,
+//               // transformed.carousel,
+//               // transformed.attachment
+//             ),
+//             timeoutMs,
+//             "Custom retry DM send",
+//           )
+//         } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
+//           result = await TimeoutManager.withTimeout(
+//             sendPrivateMessages(
+//               context.data.pageId,
+//               context.data.commentId,
+//               transformed.text,
+//               token,
+//               transformed.quickReplies,
+//               transformed.buttons,
+//               transformed.carousel,
+//               transformed.attachment
+//             ),
+//             timeoutMs,
+//             "Custom retry Comment send",
+//           )
+//         }
+
+//         if (result?.status !== 200) {
+//           throw new Error(`Custom retry send failed with status: ${result?.status}`)
+//         }
+
+//         Logger.success(`✅ Custom retry response sent successfully`)
+
+//         // Mark response as sent
+//         await Promise.allSettled([
+//           markResponseAsSent(
+//             context.data.pageId,
+//             context.data.senderId,
+//             textContent,
+//             context.data.messageType,
+//             context.automation.id,
+//           ),
+//           trackResponses(context.automation.id, context.data.messageType),
+//         ])
+
+//         return result
+//       },
+//       "Custom retry message sending",
+//       maxRetries,
+//     )
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////
+
+
+
+
+
+
+
+
+// ============================================================================
+// COMPREHENSIVE VOICEFLOW-INSTAGRAM BUTTON INTEGRATION SOLUTION
+// ============================================================================
+
+
+
+// ============================================================================
+// SMART BUTTON PROPERTY EXTRACTOR
+// ============================================================================
+
+class VoiceflowButtonExtractor {
+  /**
+   * Intelligently extracts button title from various Voiceflow structures
+   */
+  static extractTitle(button: VoiceflowButton): string {
+    // Priority order for title extraction
+    const titleCandidates = [
+      button.title,
+      button.name,
+      button.label,
+      button.text,
+      button.request?.payload?.intent?.name,
+      button.id,
+      "Option" // Final fallback
+    ];
+
+    for (const candidate of titleCandidates) {
+      if (candidate && typeof candidate === 'string' && candidate.trim().length > 0) {
+        return candidate.trim();
+      }
     }
 
-    const token = context.automation?.User?.integrations?.[0]?.token || process.env.DEFAULT_PAGE_TOKEN!
-
-    await RetryManager.withRetry(
-      async () => {
-        let result
-
-        if (context.data.messageType === "DM") {
-          result = await TimeoutManager.withTimeout(
-            sendDMs(
-              context.data.pageId,
-              context.data.senderId,
-              transformed.text,
-              token,
-              transformed.quickReplies,
-              transformed.buttons,
-              transformed.carousel,
-              transformed.attachment
-            ),
-            timeoutMs,
-            "Custom retry DM send",
-          )
-        } else if (context.data.messageType === "COMMENT" && context.data.commentId) {
-          result = await TimeoutManager.withTimeout(
-            sendPrivateMessages(
-              context.data.pageId,
-              context.data.commentId,
-              transformed.text,
-              token,
-              transformed.quickReplies,
-              transformed.buttons,
-              transformed.carousel,
-              transformed.attachment
-            ),
-            timeoutMs,
-            "Custom retry Comment send",
-          )
-        }
-
-        if (result?.status !== 200) {
-          throw new Error(`Custom retry send failed with status: ${result?.status}`)
-        }
-
-        Logger.success(`✅ Custom retry response sent successfully`)
-
-        // Mark response as sent
-        await Promise.allSettled([
-          markResponseAsSent(
-            context.data.pageId,
-            context.data.senderId,
-            textContent,
-            context.data.messageType,
-            context.automation.id,
-          ),
-          trackResponses(context.automation.id, context.data.messageType),
-        ])
-
-        return result
-      },
-      "Custom retry message sending",
-      maxRetries,
-    )
+    return "Option";
   }
+
+  /**
+   * Intelligently extracts button payload from various Voiceflow structures
+   */
+  static extractPayload(button: VoiceflowButton): string {
+    // Priority order for payload extraction
+    if (button.payload) {
+      if (typeof button.payload === 'string') {
+        return button.payload;
+      }
+      if (typeof button.payload === 'object') {
+        return JSON.stringify(button.payload);
+      }
+    }
+
+    if (button.value && typeof button.value === 'string') {
+      return button.value;
+    }
+
+    if (button.request?.payload?.intent?.name) {
+      return button.request.payload.intent.name;
+    }
+
+    if (button.request?.payload?.query) {
+      return button.request.payload.query;
+    }
+
+    // Fallback to title-based payload
+    return this.extractTitle(button).toLowerCase().replace(/\s+/g, '_');
+  }
+
+  /**
+   * Determines if button should be web_url or postback
+   */
+  static extractButtonType(button: VoiceflowButton): 'web_url' | 'postback' {
+    return (button.url || button.link) ? 'web_url' : 'postback';
+  }
+
+  /**
+   * Extracts URL for web buttons
+   */
+  static extractUrl(button: VoiceflowButton): string | undefined {
+    return button.url || button.link;
+  }
+}
+
+// ============================================================================
+// ENHANCED VOICEFLOW RESPONSE TRANSFORMER
+// ============================================================================
+
+function transformVoiceflowResponseToInstagram(voiceflowResponse: EnhancedVoiceflowResponse): {
+  text: string;
+  quickReplies?: InstagramQuickReply[];
+  buttons?: InstagramButton[];
+  carousel?: InstagramGenericElement[];
+  attachment?: InstagramAttachment;
+} {
+  const result: any = {
+    text: voiceflowResponse.text || ""
+  };
+
+  // Handle Voiceflow traces if present (for newer Voiceflow versions)
+  if (voiceflowResponse.traces && voiceflowResponse.traces.length > 0) {
+    for (const trace of voiceflowResponse.traces) {
+      if (trace.type === 'choice' && trace.payload?.buttons) {
+        voiceflowResponse.buttons = trace.payload.buttons;
+      }
+      if (trace.type === 'text' && trace.payload?.message) {
+        result.text = trace.payload.message;
+      }
+    }
+  }
+
+  // Transform quick replies with enhanced extraction
+  if (voiceflowResponse.quickReplies && voiceflowResponse.quickReplies.length > 0) {
+    result.quickReplies = voiceflowResponse.quickReplies.slice(0, 13).map((reply) => {
+      const title = reply.title || reply.name || "Option";
+      const payload = reply.payload || reply.value || title;
+      
+      return {
+        content_type: "text" as const,
+        title: String(title).substring(0, 20),
+        payload: String(payload).substring(0, 1000)
+      };
+    });
+  }
+
+  // ENHANCED: Transform buttons with comprehensive property extraction
+  if (voiceflowResponse.buttons && voiceflowResponse.buttons.length > 0) {
+    result.buttons = voiceflowResponse.buttons.slice(0, 3).map((button) => {
+      const title = VoiceflowButtonExtractor.extractTitle(button);
+      const payload = VoiceflowButtonExtractor.extractPayload(button);
+      const buttonType = VoiceflowButtonExtractor.extractButtonType(button);
+      const url = VoiceflowButtonExtractor.extractUrl(button);
+
+      const instagramButton: InstagramButton = {
+        type: buttonType,
+        title: title.substring(0, 20),
+        // name: title.substring(0, 20) // Keep for compatibility
+      };
+
+      if (buttonType === 'web_url' && url) {
+        instagramButton.url = url;
+      } else {
+        instagramButton.payload = payload.substring(0, 1000);
+      }
+
+      return instagramButton;
+    });
+  }
+
+  // Transform carousel with enhanced button handling
+  if (voiceflowResponse.carousel && voiceflowResponse.carousel.length > 0) {
+    result.carousel = voiceflowResponse.carousel.slice(0, 10).map((card) => {
+      const element: InstagramGenericElement = {
+        title: String(card.title || "").substring(0, 80) || "Card",
+        subtitle: card.subtitle ? String(card.subtitle).substring(0, 80) : undefined,
+        image_url: card.imageUrl || card.image_url || undefined
+      };
+
+      if (card.buttons && card.buttons.length > 0) {
+        element.buttons = card.buttons.slice(0, 3).map((button) => {
+          const title = VoiceflowButtonExtractor.extractTitle(button);
+          const payload = VoiceflowButtonExtractor.extractPayload(button);
+          const buttonType = VoiceflowButtonExtractor.extractButtonType(button);
+          const url = VoiceflowButtonExtractor.extractUrl(button);
+
+          const instagramButton: InstagramButton = {
+            type: buttonType,
+            title: title.substring(0, 20)
+          };
+
+          if (buttonType === 'web_url' && url) {
+            instagramButton.url = url;
+          } else {
+            instagramButton.payload = payload.substring(0, 1000);
+          }
+
+          return instagramButton;
+        });
+      }
+
+      return element;
+    });
+  }
+
+  // Handle custom attachments
+  if (voiceflowResponse.attachment) {
+    result.attachment = voiceflowResponse.attachment;
+  }
+
+  return result;
 }
 
 
 
 
+// ============================================================================
+// USAGE EXAMPLE IN YOUR EXISTING VOICEFLOW HANDLER
+// ============================================================================
 
+// Update your existing VoiceflowHandler to use the enhanced transformer:
+/*
+const voiceflowResult = await getEnhancedVoiceflowResponse(...);
 
+// Debug the response structure
+VoiceflowInstagramDebugger.debugVoiceflowResponse(voiceflowResult.response);
 
+// Transform using enhanced function
+const transformedResponse = transformVoiceflowResponseToInstagram(voiceflowResult.response);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Send using enhanced function
+await ResponseSender.send(context, transformedResponse);
+*/
