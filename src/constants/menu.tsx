@@ -298,6 +298,7 @@ import {
   Cog,
   Route,
   Merge,
+  LucideCreditCard,
 } from "lucide-react"
 import type React from "react"
 
@@ -386,14 +387,14 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
 
   {
     id: uuid(),
-    label: "Integrations",
+    label: "Social Integrations",
     description: "Connect and manage external services",
     items: [
       {
         id: uuid(),
-        label: "Social Integrations",
+        label: "Integrations",
         icon: icon(Cpu, "text-slate-600"),
-        description: "Browse and connect new integrations to expand functionality",
+        description: "Connect social integrations whose interactions with your clients you want automated",
       },
       {
         id: uuid(),
@@ -429,14 +430,14 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
        {
         id: uuid(),
         label: "Tools",
-        icon: icon(Award, "text-yellow-600"),
-        description: "Track business opportunities and potential revenue streams",
+        icon: icon(Cog, "text-yellow-600"),
+        description: "Connect tools that you use everyday to automate processes",
       },
       {
         id: uuid(),
         label: "Billing",
-        icon: icon(Cog, "text-gray-600"),
-        description: "Configure account settings, preferences, and security options",
+        icon: icon(LucideCreditCard, "text-gray-600"),
+        description: "Configure your billing plans and payment options",
       },
     ],
   },
