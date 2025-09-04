@@ -391,7 +391,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
     items: [
       {
         id: uuid(),
-        label: "Integrations",
+        label: "Social Integrations",
         icon: icon(Cpu, "text-slate-600"),
         description: "Browse and connect new integrations to expand functionality",
       },
