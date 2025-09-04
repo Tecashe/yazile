@@ -1614,6 +1614,7 @@ model WebhookLog {
 
 // Enums
 enum IntegrationType {
+  AIRTABLE
   STRIPE
   HUBSPOT
   SALESFORCE

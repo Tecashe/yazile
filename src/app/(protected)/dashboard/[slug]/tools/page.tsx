@@ -1528,7 +1528,7 @@ const INTEGRATION_CATEGORIES = {
             name: "Create Campaigns",
             description: "Set up automated email marketing campaigns",
           },
-          { id: "track_analytics", name: "Track Analytics", description: "Monitor email performance and engagement" },
+          { id: "track_analytics", name: "Track Anlytics", description: "Monitor email performance and engagement" },
         ],
         endpoints: [{ method: "POST", path: "/api/voiceflow/mailchimp/add-subscriber", description: "Add subscriber" }],
         testable: true,
