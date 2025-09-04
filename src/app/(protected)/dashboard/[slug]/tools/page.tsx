@@ -3657,7 +3657,7 @@ export default function IntegrationsPage() {
                   {/* Hover tooltip */}
                   <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
                     <div className="bg-popover text-popover-foreground px-3 py-2 rounded-md shadow-lg border text-xs whitespace-nowrap">
-                      {isEnabled ? 'Click to disable' : 'Click to enable'} this capability
+                      {isEnabled ? 'Disable' : 'Enable'}
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-popover"></div>
                     </div>
                   </div>
@@ -4107,7 +4107,7 @@ export default function IntegrationsPage() {
             ))}
           </Tabs>
 
-          <Card className="bg-card/30 border-border">
+          {/* <Card className="bg-card/30 border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5" />
@@ -4152,7 +4152,7 @@ export default function IntegrationsPage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>
