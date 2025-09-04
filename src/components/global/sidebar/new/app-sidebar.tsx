@@ -524,9 +524,7 @@ export function AppSidebar({ slug }: Props) {
                           <Plus className="h-4 w-4 opacity-60 hover:opacity-100 transition-opacity" />
                         </SidebarGroupAction>
                       </TooltipTrigger>
-                      <TooltipContent side="right">
-                        <p>Add new {group.label.toLowerCase()} item</p>
-                      </TooltipContent>
+                      
                     </Tooltip>
                   </SidebarGroupLabel>
                 </TooltipTrigger>
