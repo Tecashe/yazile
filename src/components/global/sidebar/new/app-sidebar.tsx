@@ -532,7 +532,7 @@ export function AppSidebar({ slug }: Props) {
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-xs">
                   <p className="font-medium">{group.label}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+                  {/* <p className="text-sm text-muted-foreground mt-1">{group.description}</p> */}
                 </TooltipContent>
               </Tooltip>
               <SidebarGroupContent>

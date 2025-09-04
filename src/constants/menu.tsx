@@ -389,18 +389,6 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
     label: "Integrations",
     description: "Connect and manage external services",
     items: [
-      // {
-      //   id: uuid(),
-      //   label: "WhatsApp",
-      //   icon: icon(Send, "text-green-600"),
-      //   description: "Connect and manage your WhatsApp Business integration",
-      // },
-      // {
-      //   id: uuid(),
-      //   label: "Connections",
-      //   icon: icon(Route, "text-cyan-600"),
-      //   description: "Manage all your connected platforms and services",
-      // },
       {
         id: uuid(),
         label: "Integrations",
@@ -438,15 +426,15 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
       //   icon: icon(DollarSign, "text-green-700"),
       //   description: "Manage your subscription, billing, and pricing plans",
       // },
-      // {
-      //   id: uuid(),
-      //   label: "Opportunities",
-      //   icon: icon(Award, "text-yellow-600"),
-      //   description: "Track business opportunities and potential revenue streams",
-      // },
+       {
+        id: uuid(),
+        label: "Tools",
+        icon: icon(Award, "text-yellow-600"),
+        description: "Track business opportunities and potential revenue streams",
+      },
       {
         id: uuid(),
-        label: "Settings",
+        label: "Billing",
         icon: icon(Cog, "text-gray-600"),
         description: "Configure account settings, preferences, and security options",
       },
