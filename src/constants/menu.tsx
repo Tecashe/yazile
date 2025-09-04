@@ -299,6 +299,7 @@ import {
   Route,
   Merge,
   LucideCreditCard,
+  WrenchIcon,
 } from "lucide-react"
 import type React from "react"
 
@@ -430,7 +431,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
        {
         id: uuid(),
         label: "Tools",
-        icon: icon(Cog, "text-yellow-600"),
+        icon: icon(WrenchIcon, "text-yellow-600"),
         description: "Connect tools that you use everyday to automate processes",
       },
       {
