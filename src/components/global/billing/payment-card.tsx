@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { PLANS } from '@/constants/pages'
+
 import { cn } from '@/lib/utils'
 import { CircleCheck } from 'lucide-react'
 import React from 'react'
@@ -58,15 +58,7 @@ const PaymentCard = ({ current, label, landing }: Props) => {
           <p className="text-xl mb-2">Free</p>
         )}
 
-        {PLANS[label === 'PRO' ? 1 : 0].features.map((i) => (
-          <p
-            key={i}
-            className="mt-2 text-muted-foreground flex gap-2 "
-          >
-            <CircleCheck className="text-indigo-500" />
-            {i}
-          </p>
-        ))}
+       
 
         {landing ? (
           <Button
