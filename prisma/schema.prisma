@@ -1474,6 +1474,8 @@ model Tenant {
   @@index([isActive])
 }
 
+
+
 model Integration {
   id       String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId String          @db.Uuid
@@ -1493,6 +1495,9 @@ model Integration {
 
   // Configuration
   config String? // JSON configuration specific to integration type
+
+  capabilities String? @default("{}") // JSON object storing capability toggles
+
 
   // Metadata
   lastSyncAt  DateTime?

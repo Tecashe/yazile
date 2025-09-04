@@ -1,3 +1,4 @@
+
 // "use client"
 
 // import { useState, useEffect } from "react"
@@ -19,6 +20,7 @@
 // import { Alert, AlertDescription } from "@/components/ui/alert"
 // import { Separator } from "@/components/ui/separator"
 // import { Switch } from "@/components/ui/switch"
+// import { Progress } from "@/components/ui/progress"
 // import {
 //   CreditCard,
 //   Users,
@@ -38,10 +40,12 @@
 //   Phone,
 //   Globe,
 //   Database,
-//   Lock,
 //   Code,
 //   Copy,
 //   Check,
+//   Loader2,
+//   Activity,
+//   AlertTriangle,
 // } from "lucide-react"
 
 // const INTEGRATION_CATEGORIES = {
@@ -88,6 +92,7 @@
 //           { method: "POST", path: "/api/voiceflow/stripe/create-payment-link", description: "Create payment link" },
 //           { method: "GET", path: "/api/voiceflow/stripe/verify-payment", description: "Verify payment status" },
 //         ],
+//         testable: true,
 //       },
 //       {
 //         id: "paypal",
@@ -121,6 +126,7 @@
 //         endpoints: [
 //           { method: "POST", path: "/api/voiceflow/paypal/create-payment", description: "Create PayPal payment" },
 //         ],
+//         testable: true,
 //       },
 //       {
 //         id: "shopify",
@@ -152,6 +158,7 @@
 //           },
 //         ],
 //         endpoints: [{ method: "GET", path: "/api/voiceflow/shopify/get-product", description: "Get product details" }],
+//         testable: true,
 //       },
 //     ],
 //   },
@@ -195,6 +202,7 @@
 //         endpoints: [
 //           { method: "POST", path: "/api/voiceflow/hubspot/create-contact", description: "Create new contact" },
 //         ],
+//         testable: true,
 //       },
 //       {
 //         id: "salesforce",
@@ -232,6 +240,7 @@
 //           { id: "update_records", name: "Update Records", description: "Modify existing Salesforce records and data" },
 //         ],
 //         endpoints: [],
+//         testable: false,
 //       },
 //     ],
 //   },
@@ -267,6 +276,7 @@
 //           { id: "invite_users", name: "Invite Users", description: "Add team members to relevant conversations" },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/slack/send-message", description: "Send Slack message" }],
+//         testable: true,
 //       },
 //       {
 //         id: "discord",
@@ -292,6 +302,7 @@
 //         endpoints: [
 //           { method: "POST", path: "/api/voiceflow/discord/send-message", description: "Send Discord message" },
 //         ],
+//         testable: true,
 //       },
 //       {
 //         id: "sendgrid",
@@ -319,6 +330,7 @@
 //           { id: "manage_lists", name: "Manage Lists", description: "Add contacts to email marketing lists" },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/sendgrid/send-email", description: "Send email" }],
+//         testable: true,
 //       },
 //       {
 //         id: "twilio",
@@ -341,6 +353,7 @@
 //           },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/twilio/send-sms", description: "Send SMS message" }],
+//         testable: true,
 //       },
 //     ],
 //   },
@@ -379,6 +392,7 @@
 //           { id: "cancel_booking", name: "Cancel Bookings", description: "Cancel or reschedule existing appointments" },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/calendly/create-booking", description: "Create booking" }],
+//         testable: true,
 //       },
 //       {
 //         id: "zoom",
@@ -412,6 +426,7 @@
 //           { id: "manage_recordings", name: "Manage Recordings", description: "Access and share meeting recordings" },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/zoom/create-meeting", description: "Create Zoom meeting" }],
+//         testable: true,
 //       },
 //     ],
 //   },
@@ -444,6 +459,7 @@
 //           },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/notion/create-page", description: "Create Notion page" }],
+//         testable: true,
 //       },
 //       {
 //         id: "airtable",
@@ -461,6 +477,7 @@
 //           { id: "search_records", name: "Search Records", description: "Find and retrieve specific database entries" },
 //         ],
 //         endpoints: [],
+//         testable: false,
 //       },
 //       {
 //         id: "mailchimp",
@@ -482,6 +499,7 @@
 //           { id: "track_analytics", name: "Track Analytics", description: "Monitor email performance and engagement" },
 //         ],
 //         endpoints: [{ method: "POST", path: "/api/voiceflow/mailchimp/add-subscriber", description: "Add subscriber" }],
+//         testable: true,
 //       },
 //     ],
 //   },
@@ -493,8 +511,12 @@
 //   type: string
 //   isActive: boolean
 //   lastSyncAt?: string
-//   config?: any
-//   capabilities?: string[]
+//   lastErrorAt?: string
+//   lastError?: string
+//   syncCount?: number
+//   errorCount?: number
+//   hasValidToken?: boolean
+//   tokenExpiresAt?: string
 // }
 
 // interface IntegrationField {
@@ -503,6 +525,16 @@
 //   type: string
 //   required: boolean
 //   placeholder?: string
+//   options?: string[]
+// }
+
+// type IntegrationState = "idle" | "connecting" | "connected" | "error" | "testing"
+
+// interface IntegrationStatus {
+//   state: IntegrationState
+//   progress: number
+//   message: string
+//   health?: "healthy" | "warning" | "error"
 // }
 
 // export default function IntegrationsPage() {
@@ -518,6 +550,9 @@
 //   const [showApiDocs, setShowApiDocs] = useState<Record<string, boolean>>({})
 //   const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null)
 
+//   const [integrationStatus, setIntegrationStatus] = useState<Record<string, IntegrationStatus>>({})
+//   const [testingIntegration, setTestingIntegration] = useState<string | null>(null)
+
 //   useEffect(() => {
 //     loadConnectedIntegrations()
 //   }, [])
@@ -525,10 +560,22 @@
 //   const loadConnectedIntegrations = async () => {
 //     try {
 //       setIsLoading(true)
-//       const response = await fetch("/api/integrations")
+//       const response = await fetch("/api/dashboard/integrations")
 //       if (response.ok) {
 //         const data = await response.json()
 //         setConnectedIntegrations(data.integrations || [])
+
+//         // Initialize integration status
+//         const statusMap: Record<string, IntegrationStatus> = {}
+//         data.integrations?.forEach((integration: Integration) => {
+//           statusMap[integration.type] = {
+//             state: integration.isActive ? "connected" : "error",
+//             progress: 100,
+//             message: integration.isActive ? "Connected and ready" : integration.lastError || "Connection error",
+//             health: integration.errorCount && integration.errorCount > 0 ? "warning" : "healthy",
+//           }
+//         })
+//         setIntegrationStatus(statusMap)
 //       }
 //     } catch (error) {
 //       console.error("Failed to load integrations:", error)
@@ -539,8 +586,17 @@
 
 //   const handleConnect = async (integration: any) => {
 //     try {
-//       setIsLoading(true)
 //       setError(null)
+
+//       // Update status to connecting
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           state: "connecting",
+//           progress: 0,
+//           message: "Validating credentials...",
+//         },
+//       }))
 
 //       const missingFields = integration.fields
 //         .filter((field: IntegrationField) => field.required && !formData[field.key])
@@ -548,8 +604,26 @@
 
 //       if (missingFields.length > 0) {
 //         setError(`Please fill in required fields: ${missingFields.join(", ")}`)
+//         setIntegrationStatus((prev) => ({
+//           ...prev,
+//           [integration.type]: {
+//             state: "error",
+//             progress: 0,
+//             message: "Missing required fields",
+//           },
+//         }))
 //         return
 //       }
+
+//       // Progress: Preparing credentials
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           state: "connecting",
+//           progress: 25,
+//           message: "Preparing credentials...",
+//         },
+//       }))
 
 //       const credentials: Record<string, string> = {}
 //       integration.fields.forEach((field: IntegrationField) => {
@@ -558,7 +632,17 @@
 //         }
 //       })
 
-//       const response = await fetch("/api/integrations", {
+//       // Progress: Connecting to service
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           state: "connecting",
+//           progress: 50,
+//           message: "Connecting to service...",
+//         },
+//       }))
+
+//       const response = await fetch("/api/dashboard/integrations", {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -571,31 +655,74 @@
 //       })
 
 //       if (response.ok) {
-//         setSuccess(`${integration.name} connected successfully!`)
-//         setFormData({})
-//         setSelectedIntegration(null)
-//         loadConnectedIntegrations()
+//         // Progress: Finalizing
+//         setIntegrationStatus((prev) => ({
+//           ...prev,
+//           [integration.type]: {
+//             state: "connecting",
+//             progress: 90,
+//             message: "Finalizing connection...",
+//           },
+//         }))
+
+//         setTimeout(() => {
+//           setIntegrationStatus((prev) => ({
+//             ...prev,
+//             [integration.type]: {
+//               state: "connected",
+//               progress: 100,
+//               message: "Connected successfully",
+//               health: "healthy",
+//             },
+//           }))
+//           setSuccess(`${integration.name} connected successfully!`)
+//           setFormData({})
+//           setSelectedIntegration(null)
+//           loadConnectedIntegrations()
+//         }, 500)
 //       } else {
 //         const errorData = await response.json()
 //         setError(errorData.error || "Failed to connect integration")
+//         setIntegrationStatus((prev) => ({
+//           ...prev,
+//           [integration.type]: {
+//             state: "error",
+//             progress: 0,
+//             message: errorData.error || "Connection failed",
+//           },
+//         }))
 //       }
 //     } catch (error) {
 //       setError("An unexpected error occurred")
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           state: "error",
+//           progress: 0,
+//           message: "Unexpected error occurred",
+//         },
+//       }))
 //       console.error("Integration connection error:", error)
-//     } finally {
-//       setIsLoading(false)
 //     }
 //   }
 
-//   const handleDisconnect = async (integrationId: string) => {
+//   const handleDisconnect = async (integrationId: string, integrationType: string) => {
 //     try {
 //       setIsLoading(true)
-//       const response = await fetch(`/api/integrations/${integrationId}`, {
+//       const response = await fetch(`/api/dashboard/integrations/${integrationId}`, {
 //         method: "DELETE",
 //       })
 
 //       if (response.ok) {
 //         setSuccess("Integration disconnected successfully")
+//         setIntegrationStatus((prev) => ({
+//           ...prev,
+//           [integrationType]: {
+//             state: "idle",
+//             progress: 0,
+//             message: "Not connected",
+//           },
+//         }))
 //         loadConnectedIntegrations()
 //       } else {
 //         setError("Failed to disconnect integration")
@@ -607,11 +734,72 @@
 //     }
 //   }
 
-//   const handleCapabilityToggle = (integrationId: string, capabilityId: string, enabled: boolean) => {
+//   const testIntegrationHealth = async (integration: any, connectedIntegration: Integration) => {
+//     try {
+//       setTestingIntegration(integration.type)
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           ...prev[integration.type],
+//           state: "testing",
+//           message: "Testing connection...",
+//         },
+//       }))
+
+//       // Simulate health check - in production, this would call actual test endpoints
+//       await new Promise((resolve) => setTimeout(resolve, 2000))
+
+//       const isHealthy = Math.random() > 0.2 // 80% success rate for demo
+
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           state: "connected",
+//           progress: 100,
+//           message: isHealthy ? "Connection healthy" : "Connection issues detected",
+//           health: isHealthy ? "healthy" : "warning",
+//         },
+//       }))
+//     } catch (error) {
+//       setIntegrationStatus((prev) => ({
+//         ...prev,
+//         [integration.type]: {
+//           state: "connected",
+//           progress: 100,
+//           message: "Health check failed",
+//           health: "error",
+//         },
+//       }))
+//     } finally {
+//       setTestingIntegration(null)
+//     }
+//   }
+
+//   const handleCapabilityToggle = async (integrationId: string, capabilityId: string, enabled: boolean) => {
 //     setEnabledCapabilities((prev) => ({
 //       ...prev,
 //       [`${integrationId}_${capabilityId}`]: enabled,
 //     }))
+
+//     // Update integration capabilities in backend
+//     try {
+//       await fetch(`/api/dashboard/integrations/${integrationId}`, {
+//         method: "PATCH",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           config: {
+//             enabledCapabilities: {
+//               ...enabledCapabilities,
+//               [`${integrationId}_${capabilityId}`]: enabled,
+//             },
+//           },
+//         }),
+//       })
+//     } catch (error) {
+//       console.error("Failed to update capabilities:", error)
+//     }
 //   }
 
 //   const copyToClipboard = async (text: string, endpointId: string) => {
@@ -632,400 +820,498 @@
 //     return connectedIntegrations.find((integration) => integration.type === integrationType && integration.isActive)
 //   }
 
+//   const getIntegrationStatus = (integrationType: string): IntegrationStatus => {
+//     return (
+//       integrationStatus[integrationType] || {
+//         state: "idle",
+//         progress: 0,
+//         message: "Not connected",
+//       }
+//     )
+//   }
+
+//   const getHealthBadge = (health?: string) => {
+//     switch (health) {
+//       case "healthy":
+//         return (
+//           <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+//             <CheckCircle className="h-3 w-3 mr-1" />
+//             Healthy
+//           </Badge>
+//         )
+//       case "warning":
+//         return (
+//           <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+//             <AlertTriangle className="h-3 w-3 mr-1" />
+//             Warning
+//           </Badge>
+//         )
+//       case "error":
+//         return (
+//           <Badge variant="secondary" className="bg-red-500/10 text-red-400 border-red-500/20">
+//             <AlertCircle className="h-3 w-3 mr-1" />
+//             Error
+//           </Badge>
+//         )
+//       default:
+//         return null
+//     }
+//   }
+
 //   return (
-//     <div className="min-h-screen bg-background text-foreground p-6">
-//       <div className="max-w-7xl mx-auto space-y-8">
-//         <div className="space-y-4">
-//           <div className="flex items-center gap-3">
-//             <div className="p-2 rounded-lg bg-primary/10">
-//               <Settings className="h-6 w-6 text-primary" />
-//             </div>
-//             <div>
-//               <h1 className="text-3xl font-bold text-balance">Integrations</h1>
-//               <p className="text-muted-foreground">Connect your business tools to automate Instagram DM workflows</p>
+//     <div className="min-h-screen bg-background">
+//       <div className="container mx-auto px-4 py-8 max-w-7xl">
+//         <div className="space-y-8">
+//           <div className="space-y-4">
+//             <div className="flex items-center gap-3">
+//               <div className="p-3 rounded-xl bg-primary/10">
+//                 <Zap className="h-6 w-6 text-primary" />
+//               </div>
+//               <div>
+//                 <h1 className="text-3xl font-bold text-balance">Integration Hub</h1>
+//                 <p className="text-muted-foreground text-pretty">
+//                   Connect your favorite tools to automate Instagram DM workflows with AI
+//                 </p>
+//               </div>
 //             </div>
 //           </div>
 
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//             <Card className="bg-card/50 border-border">
-//               <CardContent className="p-4">
-//                 <div className="flex items-center gap-3">
-//                   <CheckCircle className="h-5 w-5 text-emerald-400" />
-//                   <div>
-//                     <p className="text-sm text-muted-foreground">Connected</p>
-//                     <p className="text-2xl font-bold">{connectedIntegrations.length}</p>
+//           {error && (
+//             <Alert className="border-destructive/20 bg-destructive/5">
+//               <AlertCircle className="h-4 w-4" />
+//               <AlertDescription className="text-destructive">{error}</AlertDescription>
+//             </Alert>
+//           )}
+
+//           {success && (
+//             <Alert className="border-emerald-500/20 bg-emerald-500/5">
+//               <CheckCircle className="h-4 w-4 text-emerald-500" />
+//               <AlertDescription className="text-emerald-600">{success}</AlertDescription>
+//             </Alert>
+//           )}
+
+//           <Tabs value={activeCategory} onValueChange={setActiveCategory} className="space-y-6">
+//             <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-muted/50">
+//               {Object.entries(INTEGRATION_CATEGORIES).map(([key, category]) => {
+//                 const Icon = category.icon
+//                 return (
+//                   <TabsTrigger
+//                     key={key}
+//                     value={key}
+//                     className="flex items-center gap-2 data-[state=active]:bg-background"
+//                   >
+//                     <Icon className="h-4 w-4" />
+//                     <span className="hidden sm:inline">{category.title.split(" ")[0]}</span>
+//                   </TabsTrigger>
+//                 )
+//               })}
+//             </TabsList>
+
+//             {Object.entries(INTEGRATION_CATEGORIES).map(([categoryKey, category]) => (
+//               <TabsContent key={categoryKey} value={categoryKey} className="space-y-6">
+//                 <div className="space-y-4">
+//                   <div className="flex items-center gap-3">
+//                     <div className={`p-2 rounded-lg ${category.color}`}>
+//                       <category.icon className="h-5 w-5" />
+//                     </div>
+//                     <div>
+//                       <h2 className="text-xl font-semibold">{category.title}</h2>
+//                       <p className="text-sm text-muted-foreground">{category.description}</p>
+//                     </div>
 //                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-//             <Card className="bg-card/50 border-border">
-//               <CardContent className="p-4">
-//                 <div className="flex items-center gap-3">
-//                   <Database className="h-5 w-5 text-blue-400" />
-//                   <div>
-//                     <p className="text-sm text-muted-foreground">Available</p>
-//                     <p className="text-2xl font-bold">
-//                       {Object.values(INTEGRATION_CATEGORIES).reduce((acc, cat) => acc + cat.integrations.length, 0)}
-//                     </p>
-//                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-//             <Card className="bg-card/50 border-border">
-//               <CardContent className="p-4">
-//                 <div className="flex items-center gap-3">
-//                   <Lock className="h-5 w-5 text-purple-400" />
-//                   <div>
-//                     <p className="text-sm text-muted-foreground">Security</p>
-//                     <p className="text-sm font-medium text-emerald-400">AES-256 Encrypted</p>
-//                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         </div>
 
-//         {error && (
-//           <Alert className="border-destructive/20 bg-destructive/10">
-//             <AlertCircle className="h-4 w-4" />
-//             <AlertDescription className="text-destructive">{error}</AlertDescription>
-//           </Alert>
-//         )}
+//                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//                     {category.integrations.map((integration) => {
+//                       const connected = isConnected(integration.type)
+//                       const connectedIntegration = getConnectedIntegration(integration.type)
+//                       const status = getIntegrationStatus(integration.type)
+//                       const Icon = integration.icon
 
-//         {success && (
-//           <Alert className="border-emerald-500/20 bg-emerald-500/10">
-//             <CheckCircle className="h-4 w-4" />
-//             <AlertDescription className="text-emerald-400">{success}</AlertDescription>
-//           </Alert>
-//         )}
-
-//         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="space-y-6">
-//           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-muted/50">
-//             {Object.entries(INTEGRATION_CATEGORIES).map(([key, category]) => {
-//               const Icon = category.icon
-//               return (
-//                 <TabsTrigger
-//                   key={key}
-//                   value={key}
-//                   className="flex items-center gap-2 data-[state=active]:bg-background"
-//                 >
-//                   <Icon className="h-4 w-4" />
-//                   <span className="hidden sm:inline">{category.title.split(" ")[0]}</span>
-//                 </TabsTrigger>
-//               )
-//             })}
-//           </TabsList>
-
-//           {Object.entries(INTEGRATION_CATEGORIES).map(([categoryKey, category]) => (
-//             <TabsContent key={categoryKey} value={categoryKey} className="space-y-6">
-//               <div className="space-y-4">
-//                 <div className="flex items-center gap-3">
-//                   <div className={`p-2 rounded-lg ${category.color}`}>
-//                     <category.icon className="h-5 w-5" />
-//                   </div>
-//                   <div>
-//                     <h2 className="text-xl font-semibold">{category.title}</h2>
-//                     <p className="text-sm text-muted-foreground">{category.description}</p>
-//                   </div>
-//                 </div>
-
-//                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-//                   {category.integrations.map((integration) => {
-//                     const connected = isConnected(integration.type)
-//                     const connectedIntegration = getConnectedIntegration(integration.type)
-//                     const Icon = integration.icon
-
-//                     return (
-//                       <Card
-//                         key={integration.id}
-//                         className={`relative transition-all duration-200 hover:shadow-lg ${
-//                           connected
-//                             ? "bg-emerald-500/5 border-emerald-500/20"
-//                             : "bg-card/50 border-border hover:border-primary/30"
-//                         }`}
-//                       >
-//                         <CardHeader className="pb-3">
-//                           <div className="flex items-start justify-between">
-//                             <div className="flex items-center gap-3">
-//                               <div className={`p-2 rounded-lg ${category.color}`}>
-//                                 <Icon className="h-5 w-5" />
-//                               </div>
-//                               <div>
-//                                 <CardTitle className="text-lg">{integration.name}</CardTitle>
-//                                 {connected && (
-//                                   <Badge
-//                                     variant="secondary"
-//                                     className="mt-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-//                                   >
-//                                     <CheckCircle className="h-3 w-3 mr-1" />
-//                                     Connected
-//                                   </Badge>
-//                                 )}
-//                               </div>
-//                             </div>
-//                           </div>
-//                           <CardDescription className="text-sm">{integration.description}</CardDescription>
-//                         </CardHeader>
-
-//                         <CardContent className="space-y-4">
-//                           {connected && integration.capabilities && (
-//                             <div className="space-y-3">
-//                               <div className="flex items-center justify-between">
-//                                 <p className="text-sm font-medium">AI Agent Capabilities:</p>
-//                                 <Badge variant="outline" className="text-xs">
-//                                   {
-//                                     integration.capabilities.filter(
-//                                       (cap: any) =>
-//                                         enabledCapabilities[`${connectedIntegration?.id}_${cap.id}`] !== false,
-//                                     ).length
-//                                   }{" "}
-//                                   enabled
-//                                 </Badge>
-//                               </div>
-//                               <div className="space-y-2 max-h-32 overflow-y-auto">
-//                                 {integration.capabilities.map((capability: any) => (
-//                                   <div
-//                                     key={capability.id}
-//                                     className="flex items-start gap-3 p-2 rounded-lg bg-muted/30"
-//                                   >
-//                                     <Switch
-//                                       checked={
-//                                         enabledCapabilities[`${connectedIntegration?.id}_${capability.id}`] !== false
-//                                       }
-//                                       onCheckedChange={(enabled) =>
-//                                         handleCapabilityToggle(connectedIntegration?.id || "", capability.id, enabled)
-//                                       }
-//                                       className="mt-0.5"
-//                                     />
-//                                     <div className="flex-1 min-w-0">
-//                                       <p className="text-sm font-medium">{capability.name}</p>
-//                                       <p className="text-xs text-muted-foreground">{capability.description}</p>
-//                                     </div>
+//                       return (
+//                         <Card
+//                           key={integration.id}
+//                           className={`relative transition-all duration-200 hover:shadow-lg ${
+//                             connected
+//                               ? "bg-emerald-500/5 border-emerald-500/20"
+//                               : "bg-card/50 border-border hover:border-primary/30"
+//                           }`}
+//                         >
+//                           <CardHeader className="pb-3">
+//                             <div className="flex items-start justify-between">
+//                               <div className="flex items-center gap-3">
+//                                 <div className={`p-2 rounded-lg ${category.color}`}>
+//                                   <Icon className="h-5 w-5" />
+//                                 </div>
+//                                 <div>
+//                                   <CardTitle className="text-lg">{integration.name}</CardTitle>
+//                                   <div className="flex items-center gap-2 mt-1">
+//                                     {connected && (
+//                                       <Badge
+//                                         variant="secondary"
+//                                         className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+//                                       >
+//                                         <CheckCircle className="h-3 w-3 mr-1" />
+//                                         Connected
+//                                       </Badge>
+//                                     )}
+//                                     {connected && getHealthBadge(status.health)}
 //                                   </div>
-//                                 ))}
+//                                 </div>
 //                               </div>
 //                             </div>
-//                           )}
+//                             <CardDescription className="text-sm">{integration.description}</CardDescription>
+//                           </CardHeader>
 
-//                           {connected && integration.endpoints && (
-//                             <div className="space-y-3">
-//                               <Button
-//                                 variant="outline"
-//                                 size="sm"
-//                                 onClick={() =>
-//                                   setShowApiDocs({
-//                                     ...showApiDocs,
-//                                     [integration.id]: !showApiDocs[integration.id],
-//                                   })
-//                                 }
-//                                 className="w-full"
-//                               >
-//                                 <Code className="h-4 w-4 mr-2" />
-//                                 {showApiDocs[integration.id] ? "Hide" : "Show"} API Documentation
-//                               </Button>
+//                           <CardContent className="space-y-4">
+//                             {status.state !== "idle" && (
+//                               <div className="space-y-2">
+//                                 <div className="flex items-center justify-between text-sm">
+//                                   <span className="text-muted-foreground">Status</span>
+//                                   <span
+//                                     className={`font-medium ${
+//                                       status.state === "connected"
+//                                         ? "text-emerald-400"
+//                                         : status.state === "error"
+//                                           ? "text-red-400"
+//                                           : "text-blue-400"
+//                                     }`}
+//                                   >
+//                                     {status.message}
+//                                   </span>
+//                                 </div>
+//                                 {status.state === "connecting" && <Progress value={status.progress} className="h-2" />}
+//                               </div>
+//                             )}
 
-//                               {showApiDocs[integration.id] && (
-//                                 <div className="space-y-3 p-3 rounded-lg bg-muted/20 border">
-//                                   <p className="text-sm font-medium text-primary">Voiceflow API Endpoints:</p>
-//                                   {integration.endpoints.map((endpoint, idx) => (
-//                                     <div key={idx} className="space-y-2 p-3 rounded bg-background/50 border">
-//                                       <div className="flex items-center justify-between">
-//                                         <div className="flex items-center gap-2">
-//                                           <Badge variant="outline" className="text-xs font-mono">
-//                                             {endpoint.method}
-//                                           </Badge>
-//                                           <code className="text-xs">{endpoint.path}</code>
-//                                         </div>
-//                                         <Button
-//                                           variant="ghost"
-//                                           size="sm"
-//                                           onClick={() => copyToClipboard(endpoint.path, `${integration.id}_${idx}`)}
-//                                         >
-//                                           {copiedEndpoint === `${integration.id}_${idx}` ? (
-//                                             <Check className="h-3 w-3" />
-//                                           ) : (
-//                                             <Copy className="h-3 w-3" />
-//                                           )}
-//                                         </Button>
+//                             {connected && integration.capabilities && (
+//                               <div className="space-y-3">
+//                                 <div className="flex items-center justify-between">
+//                                   <p className="text-sm font-medium">AI Agent Capabilities:</p>
+//                                   <Badge variant="outline" className="text-xs">
+//                                     {
+//                                       integration.capabilities.filter(
+//                                         (cap: any) =>
+//                                           enabledCapabilities[`${connectedIntegration?.id}_${cap.id}`] !== false,
+//                                       ).length
+//                                     }{" "}
+//                                     enabled
+//                                   </Badge>
+//                                 </div>
+//                                 <div className="space-y-2 max-h-32 overflow-y-auto">
+//                                   {integration.capabilities.map((capability: any) => (
+//                                     <div
+//                                       key={capability.id}
+//                                       className="flex items-start gap-3 p-2 rounded-lg bg-muted/30"
+//                                     >
+//                                       <Switch
+//                                         checked={
+//                                           enabledCapabilities[`${connectedIntegration?.id}_${capability.id}`] !== false
+//                                         }
+//                                         onCheckedChange={(enabled) =>
+//                                           handleCapabilityToggle(connectedIntegration?.id || "", capability.id, enabled)
+//                                         }
+//                                         className="mt-0.5"
+//                                       />
+//                                       <div className="flex-1 min-w-0">
+//                                         <p className="text-sm font-medium">{capability.name}</p>
+//                                         <p className="text-xs text-muted-foreground">{capability.description}</p>
 //                                       </div>
-//                                       <p className="text-xs text-muted-foreground">{endpoint.description}</p>
 //                                     </div>
 //                                   ))}
 //                                 </div>
-//                               )}
-//                             </div>
-//                           )}
+//                               </div>
+//                             )}
 
-//                           <Separator />
-
-//                           <div className="flex gap-2">
-//                             {connected ? (
-//                               <>
+//                             {connected && integration.endpoints && (
+//                               <div className="space-y-3">
 //                                 <Button
 //                                   variant="outline"
 //                                   size="sm"
-//                                   onClick={() => handleDisconnect(connectedIntegration!.id)}
-//                                   disabled={isLoading}
-//                                   className="flex-1"
+//                                   onClick={() =>
+//                                     setShowApiDocs({
+//                                       ...showApiDocs,
+//                                       [integration.id]: !showApiDocs[integration.id],
+//                                     })
+//                                   }
+//                                   className="w-full"
 //                                 >
-//                                   <Trash2 className="h-4 w-4 mr-2" />
-//                                   Disconnect
+//                                   <Code className="h-4 w-4 mr-2" />
+//                                   {showApiDocs[integration.id] ? "Hide" : "Show"} API Documentation
 //                                 </Button>
-//                                 <Button
-//                                   variant="outline"
-//                                   size="sm"
-//                                   onClick={() => setSelectedIntegration(integration)}
-//                                   className="flex-1"
-//                                 >
-//                                   <Settings className="h-4 w-4 mr-2" />
-//                                   Configure
-//                                 </Button>
-//                               </>
-//                             ) : (
-//                               <Dialog>
-//                                 <DialogTrigger asChild>
+
+//                                 {showApiDocs[integration.id] && (
+//                                   <div className="space-y-3 p-3 rounded-lg bg-muted/20 border">
+//                                     <p className="text-sm font-medium text-primary">Voiceflow API Endpoints:</p>
+//                                     {integration.endpoints.map((endpoint, idx) => (
+//                                       <div key={idx} className="space-y-2 p-3 rounded bg-background/50 border">
+//                                         <div className="flex items-center justify-between">
+//                                           <div className="flex items-center gap-2">
+//                                             <Badge variant="outline" className="text-xs font-mono">
+//                                               {endpoint.method}
+//                                             </Badge>
+//                                             <code className="text-xs">{endpoint.path}</code>
+//                                           </div>
+//                                           <Button
+//                                             variant="ghost"
+//                                             size="sm"
+//                                             onClick={() => copyToClipboard(endpoint.path, `${integration.id}_${idx}`)}
+//                                           >
+//                                             {copiedEndpoint === `${integration.id}_${idx}` ? (
+//                                               <Check className="h-3 w-3" />
+//                                             ) : (
+//                                               <Copy className="h-3 w-3" />
+//                                             )}
+//                                           </Button>
+//                                         </div>
+//                                         <p className="text-xs text-muted-foreground">{endpoint.description}</p>
+//                                       </div>
+//                                     ))}
+//                                   </div>
+//                                 )}
+//                               </div>
+//                             )}
+
+//                             <Separator />
+
+//                             <div className="flex gap-2">
+//                               {connected ? (
+//                                 <>
 //                                   <Button
-//                                     className="w-full"
-//                                     onClick={() => {
-//                                       setSelectedIntegration(integration)
-//                                       setFormData({})
-//                                       setError(null)
-//                                       setSuccess(null)
-//                                     }}
+//                                     variant="outline"
+//                                     size="sm"
+//                                     onClick={() => handleDisconnect(connectedIntegration!.id, integration.type)}
+//                                     disabled={isLoading}
+//                                     className="flex-1"
 //                                   >
-//                                     <Plus className="h-4 w-4 mr-2" />
-//                                     Connect
+//                                     <Trash2 className="h-4 w-4 mr-2" />
+//                                     Disconnect
 //                                   </Button>
-//                                 </DialogTrigger>
-//                                 <DialogContent className="max-w-md bg-card border-border">
-//                                   <DialogHeader>
-//                                     <DialogTitle className="flex items-center gap-2">
-//                                       <Icon className="h-5 w-5" />
-//                                       Connect {integration.name}
-//                                     </DialogTitle>
-//                                     <DialogDescription>
-//                                       Enter your {integration.name} credentials to enable automation
-//                                     </DialogDescription>
-//                                   </DialogHeader>
+//                                   {integration.testable && (
+//                                     <Button
+//                                       variant="outline"
+//                                       size="sm"
+//                                       onClick={() => testIntegrationHealth(integration, connectedIntegration!)}
+//                                       disabled={testingIntegration === integration.type}
+//                                       className="flex-1"
+//                                     >
+//                                       {testingIntegration === integration.type ? (
+//                                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+//                                       ) : (
+//                                         <Activity className="h-4 w-4 mr-2" />
+//                                       )}
+//                                       Test Health
+//                                     </Button>
+//                                   )}
+//                                   <Button
+//                                     variant="outline"
+//                                     size="sm"
+//                                     onClick={() => setSelectedIntegration(integration)}
+//                                     className="flex-1"
+//                                   >
+//                                     <Settings className="h-4 w-4 mr-2" />
+//                                     Configure
+//                                   </Button>
+//                                 </>
+//                               ) : (
+//                                 <Dialog>
+//                                   <DialogTrigger asChild>
+//                                     <Button
+//                                       className="w-full"
+//                                       onClick={() => {
+//                                         setSelectedIntegration(integration)
+//                                         setFormData({})
+//                                         setError(null)
+//                                         setSuccess(null)
+//                                       }}
+//                                       disabled={status.state === "connecting"}
+//                                     >
+//                                       {status.state === "connecting" ? (
+//                                         <>
+//                                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+//                                           Connecting...
+//                                         </>
+//                                       ) : (
+//                                         <>
+//                                           <Plus className="h-4 w-4 mr-2" />
+//                                           Connect
+//                                         </>
+//                                       )}
+//                                     </Button>
+//                                   </DialogTrigger>
+//                                   <DialogContent className="max-w-md bg-card border-border">
+//                                     <DialogHeader>
+//                                       <DialogTitle className="flex items-center gap-2">
+//                                         <Icon className="h-5 w-5" />
+//                                         Connect {integration.name}
+//                                       </DialogTitle>
+//                                       <DialogDescription>
+//                                         Enter your {integration.name} credentials to enable automation
+//                                       </DialogDescription>
+//                                     </DialogHeader>
 
-//                                   <div className="space-y-4">
-//                                     {integration.fields.map((field: IntegrationField) => (
-//                                       <div key={field.key} className="space-y-2">
-//                                         <Label htmlFor={field.key} className="flex items-center gap-2">
-//                                           {field.label}
-//                                           {field.required && <span className="text-destructive">*</span>}
-//                                         </Label>
-//                                         {field.type === "textarea" ? (
-//                                           <Textarea
-//                                             id={field.key}
-//                                             placeholder={field.placeholder}
-//                                             value={formData[field.key] || ""}
-//                                             onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-//                                             className="bg-background border-border"
-//                                           />
-//                                         ) : (
-//                                           <div className="relative">
-//                                             <Input
+//                                     <div className="space-y-4">
+//                                       {integration.fields.map((field: IntegrationField) => (
+//                                         <div key={field.key} className="space-y-2">
+//                                           <Label htmlFor={field.key} className="flex items-center gap-2">
+//                                             {field.label}
+//                                             {field.required && <span className="text-destructive">*</span>}
+//                                           </Label>
+//                                           {field.type === "textarea" ? (
+//                                             <Textarea
 //                                               id={field.key}
-//                                               type={
-//                                                 field.type === "password" && !showCredentials[field.key]
-//                                                   ? "password"
-//                                                   : "text"
-//                                               }
 //                                               placeholder={field.placeholder}
 //                                               value={formData[field.key] || ""}
 //                                               onChange={(e) =>
 //                                                 setFormData({ ...formData, [field.key]: e.target.value })
 //                                               }
-//                                               className="bg-background border-border pr-10"
+//                                               className="bg-background border-border"
 //                                             />
-//                                             {field.type === "password" && (
-//                                               <Button
-//                                                 type="button"
-//                                                 variant="ghost"
-//                                                 size="sm"
-//                                                 className="absolute right-0 top-0 h-full px-3"
-//                                                 onClick={() =>
-//                                                   setShowCredentials({
-//                                                     ...showCredentials,
-//                                                     [field.key]: !showCredentials[field.key],
-//                                                   })
+//                                           ) : field.type === "select" ? (
+//                                             <select
+//                                               id={field.key}
+//                                               value={formData[field.key] || ""}
+//                                               onChange={(e) =>
+//                                                 setFormData({ ...formData, [field.key]: e.target.value })
+//                                               }
+//                                               className="w-full px-3 py-2 bg-background border border-border rounded-md"
+//                                             >
+//                                               <option value="">Select {field.label}</option>
+//                                               {field.options?.map((option) => (
+//                                                 <option key={option} value={option}>
+//                                                   {option}
+//                                                 </option>
+//                                               ))}
+//                                             </select>
+//                                           ) : (
+//                                             <div className="relative">
+//                                               <Input
+//                                                 id={field.key}
+//                                                 type={
+//                                                   field.type === "password" && !showCredentials[field.key]
+//                                                     ? "password"
+//                                                     : field.type === "email"
+//                                                       ? "email"
+//                                                       : field.type === "tel"
+//                                                         ? "tel"
+//                                                         : "text"
 //                                                 }
-//                                               >
-//                                                 {showCredentials[field.key] ? (
-//                                                   <EyeOff className="h-4 w-4" />
-//                                                 ) : (
-//                                                   <Eye className="h-4 w-4" />
-//                                                 )}
-//                                               </Button>
-//                                             )}
-//                                           </div>
-//                                         )}
-//                                       </div>
-//                                     ))}
+//                                                 placeholder={field.placeholder}
+//                                                 value={formData[field.key] || ""}
+//                                                 onChange={(e) =>
+//                                                   setFormData({ ...formData, [field.key]: e.target.value })
+//                                                 }
+//                                                 className="bg-background border-border pr-10"
+//                                               />
+//                                               {field.type === "password" && (
+//                                                 <Button
+//                                                   type="button"
+//                                                   variant="ghost"
+//                                                   size="sm"
+//                                                   className="absolute right-0 top-0 h-full px-3"
+//                                                   onClick={() =>
+//                                                     setShowCredentials({
+//                                                       ...showCredentials,
+//                                                       [field.key]: !showCredentials[field.key],
+//                                                     })
+//                                                   }
+//                                                 >
+//                                                   {showCredentials[field.key] ? (
+//                                                     <EyeOff className="h-4 w-4" />
+//                                                   ) : (
+//                                                     <Eye className="h-4 w-4" />
+//                                                   )}
+//                                                 </Button>
+//                                               )}
+//                                             </div>
+//                                           )}
+//                                         </div>
+//                                       ))}
 
-//                                     <div className="flex gap-2 pt-4">
-//                                       <Button
-//                                         variant="outline"
-//                                         className="flex-1 bg-transparent"
-//                                         onClick={() => setSelectedIntegration(null)}
-//                                       >
-//                                         Cancel
-//                                       </Button>
-//                                       <Button
-//                                         className="flex-1"
-//                                         onClick={() => handleConnect(integration)}
-//                                         disabled={isLoading}
-//                                       >
-//                                         {isLoading ? "Connecting..." : "Connect"}
-//                                       </Button>
+//                                       <div className="flex gap-2 pt-4">
+//                                         <Button
+//                                           variant="outline"
+//                                           className="flex-1 bg-transparent"
+//                                           onClick={() => setSelectedIntegration(null)}
+//                                         >
+//                                           Cancel
+//                                         </Button>
+//                                         <Button
+//                                           className="flex-1"
+//                                           onClick={() => handleConnect(integration)}
+//                                           disabled={status.state === "connecting"}
+//                                         >
+//                                           {status.state === "connecting" ? (
+//                                             <>
+//                                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+//                                               Connecting...
+//                                             </>
+//                                           ) : (
+//                                             "Connect"
+//                                           )}
+//                                         </Button>
+//                                       </div>
 //                                     </div>
-//                                   </div>
-//                                 </DialogContent>
-//                               </Dialog>
-//                             )}
-//                           </div>
-//                         </CardContent>
-//                       </Card>
-//                     )
-//                   })}
+//                                   </DialogContent>
+//                                 </Dialog>
+//                               )}
+//                             </div>
+//                           </CardContent>
+//                         </Card>
+//                       )
+//                     })}
+//                   </div>
+//                 </div>
+//               </TabsContent>
+//             ))}
+//           </Tabs>
+
+//           <Card className="bg-card/30 border-border">
+//             <CardHeader>
+//               <CardTitle className="flex items-center gap-2">
+//                 <Globe className="h-5 w-5" />
+//                 API Endpoints Overview
+//               </CardTitle>
+//               <CardDescription>
+//                 Production-ready endpoints for your Voiceflow workflows. All endpoints include authentication, logging,
+//                 and error handling.
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent>
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+//                 <div className="space-y-2">
+//                   <p className="font-medium text-primary">Payment Processing</p>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">
+//                     POST /api/voiceflow/stripe/create-payment-link
+//                   </code>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">
+//                     GET /api/voiceflow/stripe/verify-payment
+//                   </code>
+//                 </div>
+//                 <div className="space-y-2">
+//                   <p className="font-medium text-primary">CRM Operations</p>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">
+//                     POST /api/voiceflow/hubspot/create-contact
+//                   </code>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">
+//                     POST /api/voiceflow/salesforce/create-lead
+//                   </code>
+//                 </div>
+//                 <div className="space-y-2">
+//                   <p className="font-medium text-primary">Communication</p>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">POST /api/voiceflow/slack/send-message</code>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">POST /api/voiceflow/sendgrid/send-email</code>
+//                 </div>
+//                 <div className="space-y-2">
+//                   <p className="font-medium text-primary">Scheduling</p>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">
+//                     POST /api/voiceflow/calendly/create-booking
+//                   </code>
+//                   <code className="block bg-muted/50 p-2 rounded text-xs">POST /api/voiceflow/zoom/create-meeting</code>
 //                 </div>
 //               </div>
-//             </TabsContent>
-//           ))}
-//         </Tabs>
-
-//         <Card className="bg-card/30 border-border">
-//           <CardHeader>
-//             <CardTitle className="flex items-center gap-2">
-//               <Globe className="h-5 w-5" />
-//               API Endpoints
-//             </CardTitle>
-//             <CardDescription>
-//               These endpoints will be available for your Voiceflow workflows once integrations are connected
-//             </CardDescription>
-//           </CardHeader>
-//           <CardContent>
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-//               <div className="space-y-2">
-//                 <p className="font-medium text-primary">Payment Processing</p>
-//                 <code className="block bg-muted/50 p-2 rounded text-xs">
-//                   POST /api/integrations/stripe/create-payment-link
-//                 </code>
-//                 <code className="block bg-muted/50 p-2 rounded text-xs">
-//                   GET /api/integrations/stripe/verify-payment
-//                 </code>
-//               </div>
-//               <div className="space-y-2">
-//                 <p className="font-medium text-primary">CRM Operations</p>
-//                 <code className="block bg-muted/50 p-2 rounded text-xs">
-//                   POST /api/integrations/hubspot/create-contact
-//                 </code>
-//                 <code className="block bg-muted/50 p-2 rounded text-xs">PUT /api/integrations/hubspot/update-deal</code>
-//               </div>
-//             </div>
-//           </CardContent>
-//         </Card>
+//             </CardContent>
+//           </Card>
+//         </div>
 //       </div>
 //     </div>
 //   )
@@ -1079,6 +1365,7 @@ import {
   Activity,
   AlertTriangle,
 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 const INTEGRATION_CATEGORIES = {
   ecommerce: {
@@ -1528,7 +1815,7 @@ const INTEGRATION_CATEGORIES = {
             name: "Create Campaigns",
             description: "Set up automated email marketing campaigns",
           },
-          { id: "track_analytics", name: "Track Anlytics", description: "Monitor email performance and engagement" },
+          { id: "track_analytics", name: "Track Analytics", description: "Monitor email performance and engagement" },
         ],
         endpoints: [{ method: "POST", path: "/api/voiceflow/mailchimp/add-subscriber", description: "Add subscriber" }],
         testable: true,
@@ -1549,6 +1836,7 @@ interface Integration {
   errorCount?: number
   hasValidToken?: boolean
   tokenExpiresAt?: string
+  capabilities?: string | Record<string, boolean>
 }
 
 interface IntegrationField {
@@ -1815,22 +2103,40 @@ export default function IntegrationsPage() {
 
     // Update integration capabilities in backend
     try {
-      await fetch(`/api/dashboard/integrations/${integrationId}`, {
+      const response = await fetch(`/api/dashboard/integrations/${integrationId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          config: {
-            enabledCapabilities: {
-              ...enabledCapabilities,
-              [`${integrationId}_${capabilityId}`]: enabled,
-            },
+          capabilities: {
+            [capabilityId]: enabled,
           },
         }),
       })
+
+      if (!response.ok) {
+        throw new Error("Failed to update capabilities")
+      }
+
+      // Show success feedback
+      toast({
+        title: "Capability Updated",
+        description: `${capabilityId} has been ${enabled ? "enabled" : "disabled"} for your AI agent.`,
+      })
     } catch (error) {
       console.error("Failed to update capabilities:", error)
+      // Revert the UI change on error
+      setEnabledCapabilities((prev) => ({
+        ...prev,
+        [`${integrationId}_${capabilityId}`]: !enabled,
+      }))
+
+      toast({
+        title: "Update Failed",
+        description: "Failed to update capability. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -1889,6 +2195,35 @@ export default function IntegrationsPage() {
         return null
     }
   }
+
+  useEffect(() => {
+    const loadCapabilities = () => {
+      const capabilities: Record<string, boolean> = {}
+
+      connectedIntegrations.forEach((integration) => {
+        if (integration.capabilities) {
+          try {
+            const parsedCapabilities =
+              typeof integration.capabilities === "string"
+                ? JSON.parse(integration.capabilities)
+                : integration.capabilities
+
+            Object.entries(parsedCapabilities).forEach(([capId, enabled]) => {
+              capabilities[`${integration.id}_${capId}`] = enabled as boolean
+            })
+          } catch (error) {
+            console.error("Failed to parse capabilities for integration:", integration.id, error)
+          }
+        }
+      })
+
+      setEnabledCapabilities(capabilities)
+    }
+
+    if (connectedIntegrations.length > 0) {
+      loadCapabilities()
+    }
+  }, [connectedIntegrations])
 
   return (
     <div className="min-h-screen bg-background">

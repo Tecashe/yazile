@@ -185,11 +185,11 @@ export function VoiceflowApiDocs({ capabilities, integrationName }: VoiceflowApi
                             size="sm"
                             onClick={() => {
                               const curlCommand = `curl -X ${capability.voiceflowCall.method} \\
-  "${capability.voiceflowCall.url}" \\
-  ${Object.entries(capability.voiceflowCall.headers)
-    .map(([key, value]) => `-H "${key}: ${value}"`)
-    .join(" \\\n  ")} \\
-  -d '${JSON.stringify(capability.voiceflowCall.body)}'`
+                              "${capability.voiceflowCall.url}" \\
+                              ${Object.entries(capability.voiceflowCall.headers)
+                                .map(([key, value]) => `-H "${key}: ${value}"`)
+                                .join(" \\\n  ")} \\
+                              -d '${JSON.stringify(capability.voiceflowCall.body)}'`
                               copyToClipboard(curlCommand, `curl-${capability.id}`)
                             }}
                           >
@@ -202,11 +202,11 @@ export function VoiceflowApiDocs({ capabilities, integrationName }: VoiceflowApi
                         </div>
                         <pre className="whitespace-pre-wrap">
                           {`curl -X ${capability.voiceflowCall.method} \\
-  "${capability.voiceflowCall.url}" \\
-  ${Object.entries(capability.voiceflowCall.headers)
-    .map(([key, value]) => `-H "${key}: ${value}"`)
-    .join(" \\\n  ")} \\
-  -d '${JSON.stringify(capability.voiceflowCall.body)}'`}
+                          "${capability.voiceflowCall.url}" \\
+                          ${Object.entries(capability.voiceflowCall.headers)
+                            .map(([key, value]) => `-H "${key}: ${value}"`)
+                            .join(" \\\n  ")} \\
+                          -d '${JSON.stringify(capability.voiceflowCall.body)}'`}
                         </pre>
                       </div>
                     </div>
