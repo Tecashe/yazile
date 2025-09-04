@@ -11,72 +11,39 @@ datasource db {
 }
 
 model User {
-  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerkId             String              @unique
-  email               String              @unique
-  firstname           String?
-  lastname            String?
-  phone               String?             @unique
-  phoneVerified       Boolean             @default(false)
-  isAdmin             Boolean             @default(false)
-  isInfluencer        Boolean             @default(false)
-  isABusiness         Boolean             @default(false)
-  createdAt           DateTime            @default(now())
-  subscription        Subscription?
-  integrations        Integrations[]
-  automations         Automation[]
-  businessHours       BusinessHours?
-  businesses          Business[]
-  marketingInfo       MarketingInfo[]
-  scheduledContent    ScheduledContent[]
-  auditLogs           AuditLog[]
-  sentMessages        ChatMessage[]       @relation("SentMessages")
-  receivedMessages    ChatMessage[]       @relation("ReceivedMessages")
-  notifications       UserNotification[]
-  emails              Email[]
-  uploadedAttachments ChatAttachment[]    @relation("UploadedAttachments")
-  receivedAttachments ChatAttachment[]    @relation("ReceivedAttachments")
-  invoices            Invoice[]           @relation("UserInvoices")
-  payments            Payment[]           @relation("UserPayments")
-  referralCodes       ReferralCode[]      @relation("UserReferralCodes")
-  referrals           Referral[]          @relation("UserReferrals")
-  referredBy          Referral[]          @relation("ReferredUsers")
-  commissionPayouts   CommissionPayout[]  @relation("UserCommissionPayouts")
-  referredByCode      String?
-  affiliate           AffiliateUser?
-  affiliateReferrals  AffiliateReferral[] @relation("referredUser")
-  whatsAppBusinesses  WhatsAppBusiness[]
-  whatsAppRules       WhatsAppRule[]
-  whatsAppTemplates   WhatsAppTemplate[]
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId          String             @unique
+  email            String             @unique
+  firstname        String?
+  lastname         String?
+  phone            String?            @unique
+  phoneVerified    Boolean            @default(false)
+  isAdmin          Boolean            @default(false)
+  isInfluencer     Boolean            @default(false)
+  isABusiness      Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  subscription     Subscription?
+  integrations     Integrations[]
+  automations      Automation[]
+  businessHours    BusinessHours?
+  businesses       Business[]
+  marketingInfo    MarketingInfo[]
+  scheduledContent ScheduledContent[]
+  auditLogs        AuditLog[]
+  sentMessages     ChatMessage[]      @relation("SentMessages")
+  receivedMessages ChatMessage[]      @relation("ReceivedMessages")
+  notifications    UserNotification[]
+  emails           Email[]
+  referredByCode   String?
+  tenant           Tenant?
 
   leads                 Lead[]
   leadScoringRules      LeadScoringRule[]
   leadQualificationRule LeadQualificationRule[]
   leadNurturingSequence LeadNurturingSequence[]
   crmIntegration        CrmIntegration[]
-  n8nConnection         N8nConnection[]
   n8nWorkflows          N8nWorkflow[]
   leadTag               LeadTag[]
-  userWorkflow          UserWorkflow[]
-  customWorkflowRequest CustomWorkflowRequest[]
-
-  influencers         Influencer[]
-  campaigns           Campaign[]
-  influencerLists     InfluencerList[]
-  influencerImports   InfluencerImport[]
-  portalSettings      PortalSettings[]
-  aiDiscoverySettings AIDiscoverySettings?
-  dataSourceSettings  DataSourceSettings?
-
-  importHistory        ImportHistory[]
-  instagramCredentials InstagramCredentials?
-
-  businessProfile             BusinessProfile?
-  businessProfilesDescription BusinessProfileDescription[]
-  savedSearches               SavedSearch[]
-  chatParticipations          CollabChatParticipant[]
-
-  onboardingProgress OnboardingProgress?
 
   handoffSettings HandoffSettings?
   handoffs        HumanHandoff[]
@@ -89,14 +56,40 @@ model User {
   revenueMetrics       RevenueMetrics[]
   revenueOpportunities RevenueOpportunity[]
 
-  businessWorkflowConfigs BusinessWorkflowConfig[]
-
   generalNotifications GeneralNotification[]
 
   webhookNotifications Notification[]
   alerts               Alert[]
+}
 
-  adminWorkflowAssignments AdminWorkflowAssignment[]
+enum AutomationGoalType {
+  PAYMENT_PROCESSING
+  ECOMMERCE_INTEGRATION
+  APPOINTMENT_BOOKING
+  CUSTOMER_SUPPORT
+  LEAD_QUALIFICATION
+  CONTENT_DELIVERY
+  REVIEWS_FEEDBACK
+  PERSONALIZED_MARKETING
+}
+
+model AutomationGoal {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  goalType     AutomationGoalType
+  isActive     Boolean            @default(true)
+  priority     Int                @default(1) // 1 = highest priority
+  customConfig Json? // Store custom configuration for each goal
+
+  // Relationships
+  businessId String   @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, goalType]) // Prevent duplicate goals for same business
+  @@index([businessId])
+  @@index([goalType])
 }
 
 model ScheduledContent {
@@ -131,51 +124,24 @@ model MarketingInfo {
 }
 
 model Business {
-  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String?
-  businessName              String
-  businessType              String
-  businessDescription       String
-  industry                  String
-  automationSetupComplete   Boolean   @default(false)
-  automationSetupDate       DateTime?
-  automationAdditionalNotes String?
-  automationGoals           Json?
-  customerJourney           Json?
-  features                  Json?
-  businessTypeData          Json?
-  websiteAnalysis           Json?
-  targetAudience            String
-  website                   String
-  instagramHandle           String
-  whatsappNumber            String? 
-  pinterestHandle           String? 
-  twitterHandle             String? 
-  facebookPageId            String?
-  linkedinProfileId         String?
-  tiktokHandle              String?
-  welcomeMessage            String
-  responseLanguage          String
-  businessHours             String
-  autoReplyEnabled          Boolean
-  promotionMessage          String
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
-  User                      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                    String?   @db.Uuid
+  id                  String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String?
+  businessName        String
+  businessType        String
+  businessDescription String
+  automationId        String? @unique @db.Uuid
 
-  learningTopics      String[]
-  growthChallenges    String[]
-  goalStatement       String?
-  logo                String?
-  location            String?
-  size                String?
-  influencerRatings   InfluencerRating[]
-  campaigns           Campaign[]
-  opportunities       Opportunity[]
-  savedSearches       SavedSearch[]
-  chatParticipations  CollabChatParticipant[]
-  onboardingCompleted Boolean                 @default(false)
+  website String
+
+  responseLanguage String
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  automation Automation? @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  User       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String?     @db.Uuid
+
+  automationGoals AutomationGoal[]
 
   handoffs         HumanHandoff[]
   agentAssignments AgentBusinessAssignment[]
@@ -184,7 +150,8 @@ model Business {
 
   generalNotifications GeneralNotification[]
 
-  workflowConfigs BusinessWorkflowConfig[]
+  @@index([userId])
+  @@index([automationId])
 }
 
 model Integrations {
@@ -231,38 +198,33 @@ model Integrations {
 }
 
 model Automation {
-  id                          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                        String                      @default("New Automation")
-  createdAt                   DateTime                    @default(now())
-  isFallback                  Boolean                     @default(false)
-  active                      Boolean                     @default(false)
-  platform                    INTEGRATIONS                @default(INSTAGRAM) // Added to specify which platform this automation is for
-  trigger                     Trigger[]
-  businessProfilesDescription BusinessProfileDescription?
-  listenMode                  String                      @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
-  listener                    Listener?
-  posts                       Post[]
-  leads                       Lead[]
-  dms                         Dms[]
-  messages                    Message[]
-  conversations               Conversation[]
-  User                        User?                       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                      String?                     @db.Uuid
-  keywords                    Keyword[]
-  scheduledPosts              ScheduledContent[]
-  handoffs                    HumanHandoff[]
-  responseMetrics             ResponseMetrics[]
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String             @default("New Automation")
+  createdAt       DateTime           @default(now())
+  isFallback      Boolean            @default(false)
+  active          Boolean            @default(false)
+  platform        INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
+  trigger         Trigger[]
+  listenMode      String             @default("KEYWORDS") // "KEYWORDS" | "ALL_MESSAGES"
+  listener        Listener?
+  posts           Post[]
+  leads           Lead[]
+  dms             Dms[]
+  messages        Message[]
+  conversations   Conversation[]
+  User            User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String?            @db.Uuid
+  keywords        Keyword[]
+  scheduledPosts  ScheduledContent[]
+  handoffs        HumanHandoff[]
+  responseMetrics ResponseMetrics[]
 
   fallbackMessage String?
   buttons         Json? // Store as JSON array
 
-  messageTrackers   MessageTracker[]
-  sentimentAnalyses SentimentAnalysis[]
-
-  workflowExecutionLogs WorkflowExecutionLog[]
-
-  businessWorkflowConfigId String?                 @db.Uuid // NEW: Link to BusinessWorkflowConfig
-  businessWorkflowConfig   BusinessWorkflowConfig? @relation(fields: [businessWorkflowConfigId], references: [id], onDelete: SetNull)
+  messageTrackers             MessageTracker[]
+  sentimentAnalyses           SentimentAnalysis[]
+  businessProfilesDescription Business?
 }
 
 model Message {
@@ -518,6 +480,35 @@ model Email {
   updatedAt    DateTime       @updatedAt
 }
 
+model EmailCampaign {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  description  String?
+  templateId   String         @db.Uuid
+  template     EmailTemplate  @relation(fields: [templateId], references: [id])
+  status       CampaignStatus @default(DRAFT)
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  emails       Email[]
+}
+
+enum EmailStatus {
+  SCHEDULED
+  SENT
+  FAILED
+  OPENED
+  CLICKED
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  COMPLETED
+  CANCELLED
+}
 
 // Lead Qualification Models
 model Lead {
@@ -647,7 +638,6 @@ enum LeadStatus {
 }
 
 /////////////////////
-
 
 // CRM Integration Models
 model CrmIntegration {
@@ -809,11 +799,10 @@ enum NurturingStepType {
   CRM_UPDATE
 }
 
-
 enum SUBSCRIPTION_PLAN {
   FREE
   PRO
-  TEAM
+  ENTERPRISE
 }
 
 enum SUBSCRIPTION_STATUS {
@@ -986,9 +975,6 @@ model ProcessedMessage {
   @@index([processCount]) // NEW: Index for analytics queries
 }
 
-// Add these NEW models to your existing schema.prisma file
-
-// Multi-tenant Human Handoff Models
 model HumanHandoff {
   id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId           String           @db.Uuid
@@ -1241,7 +1227,6 @@ model SentimentAnalysis {
   @@index([sentiment])
 }
 
-
 model PremiumAnalytics {
   id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId                String   @db.Uuid
@@ -1417,7 +1402,6 @@ model Alert {
   @@index([createdAt])
 }
 
-
 model GeneralNotification {
   id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId     String  @db.Uuid
@@ -1467,17 +1451,197 @@ enum GeneralNotificationType {
   BUSINESS_UPDATE
 }
 
-model AdminWorkflowAssignment {
-  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  adminUserId         String                @db.Uuid
-  adminUser           User                  @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
-  requestId           String                @db.Uuid
-  request             CustomWorkflowRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  assignedAt          DateTime              @default(now())
-  estimatedCompletion DateTime?
-  actualCompletion    DateTime?
-  notes               String?               @db.Text
+///////////
 
-  @@index([adminUserId])
-  @@index([requestId])
+model Tenant {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid // Reference to your existing User model
+  name      String // Business/Organization name
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain    String? // Optional custom domain
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  integrations      Integration[]
+  voiceflowSessions VoiceflowSession[]
+  webhookLogs       WebhookLog[]
+
+  // Indexes
+  @@unique([userId])
+  @@index([userId])
+  @@index([isActive])
+}
+
+
+
+model Integration {
+  id       String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String          @db.Uuid
+  type     IntegrationType
+  name     String // Display name for the integration
+  isActive Boolean         @default(true)
+
+  // Encrypted credentials
+  encryptedCredentials String // JSON string of encrypted API keys/tokens
+  credentialsHash      String // Hash for integrity checking
+
+  // OAuth specific fields
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  scopes         String? // JSON array of scopes
+
+  // Configuration
+  config String? // JSON configuration specific to integration type
+
+  capabilities String? @default("{}") // JSON object storing capability toggles
+
+
+  // Metadata
+  lastSyncAt  DateTime?
+  lastErrorAt DateTime?
+  lastError   String?
+  syncCount   Int       @default(0)
+  errorCount  Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  apiLogs ApiLog[]
+
+  // Indexes
+  @@unique([tenantId, type])
+  @@index([tenantId])
+  @@index([type])
+  @@index([isActive])
+}
+
+model VoiceflowSession {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  sessionId String  @db.Uuid // Voiceflow session ID
+  userId    String? // Instagram user ID or other platform user ID
+  platform  String  @default("instagram") // instagram, whatsapp, etc.
+
+  // Session data
+  variables String? // JSON string of session variables
+  context   String? // JSON string of conversation context
+  lastStep  String? // Current step in the flow
+
+  // Status tracking
+  status       SessionStatus @default(ACTIVE)
+  startedAt    DateTime      @default(now())
+  lastActiveAt DateTime      @default(now())
+  endedAt      DateTime?
+
+  // Relations
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  apiLogs ApiLog[]
+
+  // Indexes
+  @@unique([sessionId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([status])
+  @@index([lastActiveAt])
+}
+
+model ApiLog {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String? @db.Uuid
+  integrationId String? @db.Uuid
+  sessionId     String? @db.Uuid
+
+  // Request details
+  endpoint       String
+  method         String
+  requestHeaders String? // JSON
+  requestBody    String? // JSON
+
+  // Response details
+  statusCode      Int
+  responseHeaders String? // JSON
+  responseBody    String? // JSON (truncated for large responses)
+
+  // Timing
+  duration  Int? // Response time in milliseconds
+  timestamp DateTime @default(now())
+
+  // Error handling
+  error      String?
+  retryCount Int     @default(0)
+
+  // Relations
+  integration Integration?      @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+  session     VoiceflowSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([tenantId])
+  @@index([integrationId])
+  @@index([sessionId])
+  @@index([timestamp])
+  @@index([statusCode])
+}
+
+model WebhookLog {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String @db.Uuid
+  source    String // stripe, hubspot, etc.
+  eventType String // payment.succeeded, contact.created, etc.
+
+  // Webhook data
+  headers   String? // JSON
+  payload   String // JSON
+  signature String? // Webhook signature for verification
+
+  // Processing
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  error       String?
+  retryCount  Int       @default(0)
+
+  timestamp DateTime @default(now())
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([tenantId])
+  @@index([source])
+  @@index([eventType])
+  @@index([processed])
+  @@index([timestamp])
+}
+
+// Enums
+enum IntegrationType {
+  AIRTABLE
+  STRIPE
+  HUBSPOT
+  SALESFORCE
+  PIPEDRIVE
+  MAILCHIMP
+  SENDGRID
+  TWILIO
+  SLACK
+  ZAPIER
+  WEBHOOK
+  CALENDLY
+  DISCORD
+  NOTION
+  PAYPAL
+  ZOOM
+  SHOPIFY
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  EXPIRED
+  ERROR
 }
