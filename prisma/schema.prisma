@@ -1629,6 +1629,7 @@ enum IntegrationType {
   NOTION
   PAYPAL
   ZOOM
+  SHOPIFY
 }
 
 enum SessionStatus {
