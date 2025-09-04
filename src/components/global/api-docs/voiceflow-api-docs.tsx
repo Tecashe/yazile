@@ -61,7 +61,7 @@ export function VoiceflowApiDocs({ capabilities, integrationName }: VoiceflowApi
             </p>
             <div className="bg-background p-3 rounded border font-mono text-sm">
               <div className="flex items-center justify-between">
-                <span>"x-api-key": "your-voiceflow-api-key"</span>
+                <span>&ldquo;x-api-key&rdquo;: &ldquo;your-voiceflow-api-key&rdquo;</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -127,7 +127,7 @@ export function VoiceflowApiDocs({ capabilities, integrationName }: VoiceflowApi
                         {Object.entries(capability.voiceflowCall.headers).map(([key, value]) => (
                           <div key={key} className="flex items-center justify-between">
                             <span>
-                              "{key}": "{value}"
+                              &ldquo;{key}&rdquo;: &ldquo;{value}&rdquo;
                             </span>
                             <Button
                               variant="ghost"

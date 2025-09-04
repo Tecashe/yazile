@@ -1624,6 +1624,11 @@ enum IntegrationType {
   SLACK
   ZAPIER
   WEBHOOK
+  CALENDLY
+  DISCORD
+  NOTION
+  PAYPAL
+  ZOOM
 }
 
 enum SessionStatus {
