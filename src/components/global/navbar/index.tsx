@@ -967,7 +967,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { usePathname } from "next/navigation"
-import { Search, Cog } from "lucide-react"
+import { Search, Cog, HelpCircleIcon, PlusCircleIcon, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
@@ -1089,6 +1089,24 @@ const Navbar = ({ slug }: Props) => {
               <a href={`/dashboard/${slug}/settings`}>
                 <Cog className="h-4 w-4" />
                 <span className="sr-only">Settings</span>
+              </a>
+            </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <a href={`/dashboard/${slug}/settings`}>
+                <HelpCircleIcon className="h-4 w-4" />
+                <span className="sr-only">Help</span>
+              </a>
+            </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <a href={`/dashboard/${slug}/settings`}>
+                <PlusCircleIcon className="h-4 w-4" />
+                <span className="sr-only">add</span>
+              </a>
+            </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <a href={`/dashboard/${slug}/settings`}>
+                <Bell className="h-4 w-4" />
+                <span className="sr-only">Notifications</span>
               </a>
             </Button>
           </div>
