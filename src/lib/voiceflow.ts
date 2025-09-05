@@ -2007,7 +2007,7 @@ export async function sendDMs(
             text: message.text,
             buttons: message.buttons.map((btn) => ({
               type: btn.url ? "web_url" : "postback",
-              title: btn.title,
+              title: btn.payload,
               url: btn.url,
               payload: btn.url ? undefined : btn.payload,
             })),
