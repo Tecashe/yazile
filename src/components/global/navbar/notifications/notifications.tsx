@@ -746,7 +746,7 @@ export function NotificationPanel({ isOpen, onClose }: {
               </div>
               <p className="text-center font-medium mb-1">No notifications yet</p>
               <p className="text-sm text-center text-muted-foreground/70">
-                You'll see notifications here when something important happens.
+                You&apos;ll see notifications here when something important happens.
               </p>
             </div>
           ) : (
