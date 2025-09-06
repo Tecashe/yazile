@@ -517,8 +517,8 @@ export function NotificationBell({ onClick }: { onClick?: () => void }) {
   const { unreadCount } = useNotificationContext()
   
   return (
-    
-    <Button variant="ghost" size="icon" asChild
+
+    <button
       onClick={onClick}
       className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 group"
       aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
@@ -526,7 +526,7 @@ export function NotificationBell({ onClick }: { onClick?: () => void }) {
       
       <Bell className="h-4 w-4" />
       <NotificationBadge />
-    </Button>
+    </button>
   )
 }
 
