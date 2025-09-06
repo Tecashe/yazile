@@ -499,82 +499,52 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import Loader from "../loader"
 import { useCreateAutomation } from "@/hooks/use-automations"
-import { v4 } from "uuid"
 import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Check, Zap } from "lucide-react"
 
 const CreateAutomation = () => {
-  const mutationId = useMemo(() => v4(), [])
   const router = useRouter()
   const pathname = usePathname()
   const [showSuccess, setShowSuccess] = useState(false)
 
-  const { isPending, mutate } = useCreateAutomation(mutationId)
+  // Use the hook without passing any mutation ID - let it handle its own state
+  const { isPending, mutate } = useCreateAutomation()
 
   const handleCreateAutomation = () => {
     const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
     const slug = slugMatch ? slugMatch[1] : ""
-    
-    // Debug: Log the current pathname and extracted slug
-    console.log("Current pathname:", pathname)
-    console.log("Extracted slug:", slug)
 
-    // Create a unique ID for this automation
-    const newAutomationId = `temp-${Date.now()}`
-
-    mutate(
-      {
-        name: "Untitled",
-        id: newAutomationId,
-        createdAt: new Date().toISOString(),
-        keywords: [],
-        active: false,
-        listener: null,
-      },
-      {
-        onSuccess: (data: any) => {
-          // Debug: Log the response data structure
-          console.log("Success! Response data:", data)
-          console.log("Looking for ID at data?.data?.id:", data?.data?.id)
-          console.log("Alternative: data?.id:", data?.id)
-          
-          // Show success animation
-          setShowSuccess(true)
+    // Just call mutate without any data - let the backend handle defaults
+    mutate(undefined, {
+      onSuccess: (data: { res: { id: any } }) => {
+        // Show success animation
+        setShowSuccess(true)
+        
+        // Get the automation ID from response
+        const automationId = data?.res?.id
+        
+        if (automationId && slug) {
+          // Short success animation, then redirect
           setTimeout(() => {
-            setShowSuccess(false)
-          }, 2000)
-
-          // Get the automation ID from the correct location in the response
-          const automationId = data?.res?.id
-          
-          if (automationId && slug) {
-            const redirectUrl = `/dashboard/${slug}/automations/${automationId}`
-            console.log("Redirecting to:", redirectUrl)
-            
-            setTimeout(() => {
-              router.push(redirectUrl)
-            }, 1000)
-          } else {
-            console.warn("Cannot redirect - missing data:", {
-              automationId,
-              slug,
-              fullData: data
-            })
-          }
-        },
-        // onError: (error) => {
-        //   console.error("Failed to create automation:", error)
-        //   // Re-enable this to see if mutations are failing
-        // },
+            router.push(`/dashboard/${slug}/automations/${automationId}`)
+          }, 1500) // Reduced time for better UX
+        }
+        
+        // Hide success animation after redirect
+        setTimeout(() => {
+          setShowSuccess(false)
+        }, 2000)
       },
-    )
+      onError: (error: any) => {
+        console.error("Failed to create automation:", error)
+        setShowSuccess(false)
+      },
+    })
   }
-
-  const particles = useMemo(() => Array.from({ length: 20 }), [])
 
   return (
     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -587,10 +557,10 @@ const CreateAutomation = () => {
           {showSuccess ? (
             <motion.div
               key="success"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              className="flex items-center justify-center"
             >
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
@@ -600,24 +570,6 @@ const CreateAutomation = () => {
               >
                 <Check className="text-white" size={24} />
               </motion.div>
-              {particles.map((_, index) => (
-                <motion.div
-                  key={index}
-                  className="absolute w-1 h-1 bg-yellow-300 rounded-full"
-                  initial={{
-                    x: 0,
-                    y: 0,
-                    opacity: 1,
-                  }}
-                  animate={{
-                    x: Math.random() * 100 - 50,
-                    y: Math.random() * 100 - 50,
-                    opacity: 0,
-                    scale: Math.random() * 3 + 1,
-                  }}
-                  transition={{ duration: 1, delay: index * 0.02 }}
-                />
-              ))}
             </motion.div>
           ) : (
             <motion.div
