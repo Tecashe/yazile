@@ -971,6 +971,7 @@ import { Search, Cog, HelpCircleIcon, PlusCircleIcon, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
+import CreateAutomation from "../create-automation"
 
 type Props = {
   slug: string
@@ -1109,6 +1110,7 @@ const Navbar = ({ slug }: Props) => {
                 <span className="sr-only">Notifications</span>
               </a>
             </Button>
+             <CreateAutomation />
           </div>
         </div>
       </header>

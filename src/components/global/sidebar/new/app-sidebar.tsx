@@ -414,7 +414,7 @@
 
 import React from "react"
 
-import { Plus, GitBranch } from "lucide-react"
+import { Plus } from "lucide-react"
 import { NavMain } from "./nav-main"
 import { NavUser } from "./nav-user"
 import { PlanSwitcher } from "./team-switcher"
@@ -500,8 +500,8 @@ export function AppSidebar({ slug }: Props) {
   const transformedMenu = transformMenuData(slug, pathname)
 
   const userData = {
-    name: user?.fullName || "User",
-    email: user?.primaryEmailAddress?.emailAddress || "user@example.com",
+    name: user?.fullName || "Personal",
+    email: user?.primaryEmailAddress?.emailAddress || "user@yazzil.com",
     avatar: user?.imageUrl || "/placeholder.svg",
   }
 
