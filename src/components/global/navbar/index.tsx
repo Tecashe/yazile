@@ -1342,7 +1342,7 @@ const Navbar = ({ slug }: Props) => {
                 <div className="px-2 py-1.5">
                   <div className="flex items-center gap-2 mb-2">
                     <Lightbulb className="h-4 w-4 text-amber-500" />
-                    <span className="font-medium text-sm">Help for this page</span>
+                    <span className="font-medium text-sm">Get help</span>
                   </div>
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href={contextualHelp.href} className="block">
