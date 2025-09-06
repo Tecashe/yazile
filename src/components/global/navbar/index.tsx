@@ -972,6 +972,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import CreateAutomation from "../create-automation"
+import { NotificationCenter } from "./notifications/notifications"
 
 type Props = {
   slug: string
@@ -1111,6 +1112,7 @@ const Navbar = ({ slug }: Props) => {
               </a>
             </Button>
              <CreateAutomation />
+             <NotificationCenter />
           </div>
         </div>
       </header>

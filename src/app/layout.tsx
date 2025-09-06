@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import './globals.css'
-import { Analytics } from '@vercel/analytics/next';
 import ReactQueryProvider from '@/providers/react-query-provider'
 
 
@@ -14,6 +13,7 @@ import {
 import { ThemeProvider } from "@/components/providers/theme-provider"
 // import { Toaster } from "@/components/ui/toaster"
 import {Toaster} from "sonner"
+import { NotificationProvider } from "@/contexts/notification-context";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -30,6 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
+      <NotificationProvider>
       <html lang="en" suppressHydrationWarning>
         <body suppressHydrationWarning className={inter.className}
         
@@ -46,10 +47,11 @@ export default function RootLayout({
                 {children}
               </ReactQueryProvider>
             </ReduxProvider>
-          <Toaster />
+           <Toaster position="top-right" />
           </ThemeProvider>
           </body>
       </html>
+      </NotificationProvider>
     </ClerkProvider>
     
   );

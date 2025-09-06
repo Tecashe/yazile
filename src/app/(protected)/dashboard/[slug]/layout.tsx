@@ -1,6 +1,7 @@
 
 import { UserChat } from "./_components/chats/chats"
 import { verifyDashboardAccess } from "@/lib/auth"
+import { NotificationProvider } from '@/contexts/notification-context'
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import { AppSidebar } from "@/components/global/sidebar/new/app-sidebar"
 import type React from "react"
@@ -33,6 +34,7 @@ const Layout = async ({ children, params }: Props) => {
               {children}
             </main>
             </SubscriptionProvider>
+            
             <UserChat userId={user.id} userName={user.fullName} />
           </div>
         </SidebarInset>

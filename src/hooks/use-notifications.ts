@@ -282,150 +282,233 @@
 // }
 
 
-import { useState, useEffect } from 'react'
-import { useQueryAutomations } from '@/hooks/user-queries'
-import { Notification } from '@/types/notifications'
-
-export const useNotifications = () => {
-  const { data } = useQueryAutomations()
-  const [notifications, setNotifications] = useState<Notification[]>([])
-
-  // Function to map Instagram data to notification format
-  const mapInstagramDataToNotifications = (data: any): Notification[] => {
-    return (
-      data?.data.map((item: any, index: number) => {
-        const keywordMessages = item.keywords.map(
-          (keyword: any) =>
-            `You've received new messages for the keyword "${keyword.word}" in this automation.`
-        )
-
-        return {
-          id: `notif-${index}`,
-          type: 'engagement',
-          user: {
-            id: item.userId || `user-${index}`,
-            username: item.name,
-            avatar: `https://i.pravatar.cc/150?img=${index + 1}`, // Placeholder avatar
-          },
-          action: `New engagements detected`,
-          content: keywordMessages.join(' '),
-          read: false,
-          timestamp: new Date(item.createdAt).toLocaleString(),
-        }
-      }) || []
-    )
-  }
-
-  // Update notifications whenever Instagram data changes
-  useEffect(() => {
-    if (data) {
-      // Log the data to understand its structure
-      // console.log('Received data from useQueryAutomations:', data)
-
-      const newNotifications = mapInstagramDataToNotifications(data)
-      setNotifications(newNotifications)
-    }
-  }, [data])
-
-  const addNotification = (notification: Notification) => {
-    setNotifications((prev) => [notification, ...prev])
-  }
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
-    )
-  }
-
-  const clearAll = () => {
-    setNotifications([])
-  }
-
-  return { notifications, addNotification, markAsRead, clearAll }
-}
-
-
-// import { useState, useEffect } from 'react';
-// import { useQueryAutomations } from '@/hooks/user-queries';
-// import { Notification } from '@/types/notifications';
-
-// // Fetch Instagram user details
-// const fetchInstagramUserDetails = async (userId, accessToken) => {
-
-//   try {
-//     const response = await fetch(
-//       `https://graph.instagram.com/${userId}?fields=id,username,profile_picture_url&access_token=${accessToken}`
-//     );
-//     const data = await response.json();
-//     return {
-//       username: data.username || '@Unknown',
-//       avatar: data.profile_picture_url || 'https://i.pravatar.cc/150?img=placeholder',
-//     };
-//   } catch (error) {
-//     console.error('Error fetching Instagram user details:', error);
-//     return { username: '@Unknown', avatar: 'https://i.pravatar.cc/150?img=placeholder' };
-//   }
-// };
+// import { useState, useEffect } from 'react'
+// import { useQueryAutomations } from '@/hooks/user-queries'
+// import { Notification } from '@/types/notifications'
 
 // export const useNotifications = () => {
-//   const { data } = useQueryAutomations();
-//   const [notifications, setNotifications] = useState<Notification[]>([]);
-//   const [accessToken, setAccessToken] = useState('YOUR_ACCESS_TOKEN'); // Replace with your Instagram access token
+//   const { data } = useQueryAutomations()
+//   const [notifications, setNotifications] = useState<Notification[]>([])
 
 //   // Function to map Instagram data to notification format
-//   const mapInstagramDataToNotifications = async (data: any): Promise<Notification[]> => {
-//     return Promise.all(
-//       data?.data.map(async (item: any, index: number) => {
-//         const userDetails = await fetchInstagramUserDetails(item.userId, accessToken);
-
+//   const mapInstagramDataToNotifications = (data: any): Notification[] => {
+//     return (
+//       data?.data.map((item: any, index: number) => {
 //         const keywordMessages = item.keywords.map(
 //           (keyword: any) =>
-//             `You've received new messages for the keyword "${keyword.word}" in automation "${item.name}".`
-//         );
+//             `You've received new messages for the keyword "${keyword.word}" in this automation.`
+//         )
 
 //         return {
 //           id: `notif-${index}`,
 //           type: 'engagement',
 //           user: {
 //             id: item.userId || `user-${index}`,
-//             username: userDetails.username,
-//             avatar: userDetails.avatar,
+//             username: item.name,
+//             avatar: `https://i.pravatar.cc/150?img=${index + 1}`, // Placeholder avatar
 //           },
-//           action: `New engagements detected in automation "${item.name}"`,
+//           action: `New engagements detected`,
 //           content: keywordMessages.join(' '),
 //           read: false,
 //           timestamp: new Date(item.createdAt).toLocaleString(),
-//         };
+//         }
 //       }) || []
-//     );
-//   };
+//     )
+//   }
 
 //   // Update notifications whenever Instagram data changes
 //   useEffect(() => {
-//     const updateNotifications = async () => {
-//       if (data) {
-//         console.log('Received data from useQueryAutomations:', data);
-//         const newNotifications = await mapInstagramDataToNotifications(data);
-//         setNotifications(newNotifications);
-//       }
-//     };
+//     if (data) {
+//       // Log the data to understand its structure
+//       // console.log('Received data from useQueryAutomations:', data)
 
-//     updateNotifications();
-//   }, [data, accessToken]);
+//       const newNotifications = mapInstagramDataToNotifications(data)
+//       setNotifications(newNotifications)
+//     }
+//   }, [data])
 
 //   const addNotification = (notification: Notification) => {
-//     setNotifications((prev) => [notification, ...prev]);
-//   };
+//     setNotifications((prev) => [notification, ...prev])
+//   }
 
 //   const markAsRead = (id: string) => {
 //     setNotifications((prev) =>
 //       prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
-//     );
-//   };
+//     )
+//   }
 
 //   const clearAll = () => {
-//     setNotifications([]);
-//   };
+//     setNotifications([])
+//   }
 
-//   return { notifications, addNotification, markAsRead, clearAll };
-// };
+//   return { notifications, addNotification, markAsRead, clearAll }
+// }
+
+// hooks/use-notifications.ts
+import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
+import { pusherClient } from '@/lib/pusher'
+import { toast } from 'sonner'
+
+export interface Notification {
+  id: string
+  type: string
+  title: string
+  message: string
+  metadata?: any
+  actionUrl?: string
+  isRead: boolean
+  createdAt: string
+  business?: {
+    id: string
+    name: string
+    businessName: string
+  }
+}
+
+export function useNotifications() {
+  const { user } = useUser()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  // Subscribe to real-time notifications
+  useEffect(() => {
+    if (!user?.id) return
+
+    const channel = pusherClient.subscribe(`user-${user.id}`)
+
+    // Listen for new notifications
+    channel.bind('notification', (notification: Notification) => {
+      setNotifications(prev => [notification, ...prev])
+      
+      // Show toast notification
+      toast.success(notification.title, {
+        description: notification.message,
+        action: notification.actionUrl ? {
+          label: 'View',
+          onClick: () => window.location.href = notification.actionUrl!
+        } : undefined,
+      })
+    })
+
+    // Listen for unread count updates
+    channel.bind('unread-count', (data: { count: number }) => {
+      setUnreadCount(data.count)
+    })
+
+    // Cleanup on unmount
+    return () => {
+      channel.unbind_all()
+      pusherClient.unsubscribe(`user-${user.id}`)
+    }
+  }, [user?.id])
+
+  // Fetch initial notifications
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/notifications?limit=20')
+        const data = await response.json()
+        
+        setNotifications(data.notifications || [])
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNotifications()
+  }, [user?.id])
+
+  // Fetch unread count
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch('/api/notifications/unread-count')
+        const data = await response.json()
+        setUnreadCount(data.count || 0)
+      } catch (error) {
+        console.error('Failed to fetch unread count:', error)
+      }
+    }
+
+    fetchUnreadCount()
+  }, [user?.id])
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await fetch(`/api/notifications/${notificationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark-read' })
+      })
+
+      setNotifications(prev =>
+        prev.map(n => 
+          n.id === notificationId ? { ...n, isRead: true } : n
+        )
+      )
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      await fetch('/api/notifications/mark-all-read', {
+        method: 'POST'
+      })
+
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, isRead: true }))
+      )
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error)
+    }
+  }
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE'
+      })
+
+      setNotifications(prev =>
+        prev.filter(n => n.id !== notificationId)
+      )
+    } catch (error) {
+      console.error('Failed to delete notification:', error)
+    }
+  }
+
+  const loadMoreNotifications = async (page: number = 2) => {
+    try {
+      const response = await fetch(`/api/notifications?page=${page}&limit=20`)
+      const data = await response.json()
+      
+      setNotifications(prev => [...prev, ...data.notifications])
+      return data.hasMore
+    } catch (error) {
+      console.error('Failed to load more notifications:', error)
+      return false
+    }
+  }
+
+  return {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    loadMoreNotifications,
+  }
+}
+
