@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     })
 
   
-    // Log successful API ca
+    // Log successful API call
     await logApiCall({
       tenantId,
       integrationId,
