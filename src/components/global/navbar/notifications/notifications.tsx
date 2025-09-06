@@ -497,6 +497,7 @@
 import React, { useState } from 'react'
 import {X, Check, CheckCheck, Trash2, ExternalLink, Loader2, Bell } from 'lucide-react'
 import { useNotificationContext } from '@/contexts/notification-context'
+import { Button } from "@/components/ui/button"
 
 // Notification Badge Component
 export function NotificationBadge() {
@@ -516,15 +517,16 @@ export function NotificationBell({ onClick }: { onClick?: () => void }) {
   const { unreadCount } = useNotificationContext()
   
   return (
-    <button
+    
+    <Button variant="ghost" size="icon" asChild
       onClick={onClick}
       className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200 group"
       aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
     >
-      {/* <Bell className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" /> */}
-      <Bell/>
+      
+      <Bell className="h-4 w-4" />
       <NotificationBadge />
-    </button>
+    </Button>
   )
 }
 
