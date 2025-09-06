@@ -253,7 +253,7 @@ import { useToast } from "@/hooks/use-toast"
 let socketInstance: Socket | null = null
 
 // Socket.io server URL - use environment variable
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://your-vercel-domain.vercel.app"
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_URL
 
 export function useSocket(userId: string | undefined) {
   const [isConnected, setIsConnected] = useState(false)
@@ -269,7 +269,7 @@ export function useSocket(userId: string | undefined) {
           console.log(`Connecting to Socket.io server at ${SOCKET_SERVER_URL}`)
 
           socketInstance = io(SOCKET_SERVER_URL, {
-            path: "/api/socket", // Add this for Vercel
+            path: "/api/socket",
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,

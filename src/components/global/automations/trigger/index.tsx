@@ -624,7 +624,7 @@ const Trigger = ({ id }: Props) => {
       trigger={
         <motion.div
           className="group relative overflow-hidden rounded-xl mt-4 w-full"
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
         >
           <div className="absolute inset-0 bg-light-blue opacity-20 rounded-xl"></div>
@@ -632,7 +632,7 @@ const Trigger = ({ id }: Props) => {
           <div className="relative m-[2px] bg-background-90 rounded-lg p-5">
             <div className="flex items-center justify-center gap-3">
               <PlusCircle className="h-5 w-5 text-[#768BDD]" />
-              <p className="text-[#768BDD] font-bold">Create Automation</p>
+              <p className="text-[#768BDD] font-bold">Configure automation</p>
             </div>
           </div>
         </motion.div>

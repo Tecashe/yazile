@@ -440,6 +440,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         icon: icon(LucideCreditCard, "text-gray-600"),
         description: "Configure your billing plans and payment options",
       },
+      {
+        id: uuid(),
+        label: "Settings",
+        icon: icon(Cog, "text-gray-600"),
+        description: "Setup your business information",
+      },
     ],
   },
 ]
