@@ -1099,20 +1099,8 @@ const Navbar = ({ slug }: Props) => {
                 <span className="sr-only">Help</span>
               </a>
             </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <a href={`/dashboard/${slug}/settings`}>
-                <PlusCircleIcon className="h-4 w-4" />
-                <span className="sr-only">add</span>
-              </a>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <a href={`/dashboard/${slug}/settings`}>
-                <Bell className="h-4 w-4" />
-                <span className="sr-only">Notifications</span>
-              </a>
-            </Button>
-             <CreateAutomation />
              <NotificationCenter />
+             <CreateAutomation />
           </div>
         </div>
       </header>
