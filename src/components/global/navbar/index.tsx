@@ -1300,7 +1300,7 @@ const Navbar = ({ slug }: Props) => {
             </div>
           </div>
 
-          {/* Search Bar */}
+          Search Bar
           <div className="hidden lg:flex items-center space-x-2">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1316,10 +1316,10 @@ const Navbar = ({ slug }: Props) => {
           {/* Action Buttons */}
           <div className="flex items-center space-x-2">
             {/* Search Button (Mobile) */}
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSearchOpen(true)}>
+            {/* <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSearchOpen(true)}>
               <Search className="h-4 w-4" />
               <span className="sr-only">Search</span>
-            </Button>
+            </Button> */}
             
             {/* Settings Button */}
             <Button variant="ghost" size="icon" asChild>
@@ -1328,122 +1328,6 @@ const Navbar = ({ slug }: Props) => {
                 <span className="sr-only">Settings</span>
               </Link>
             </Button>
-
-            {/* Enhanced Help Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <HelpCircleIcon className="h-4 w-4" />
-                  <span className="sr-only">Help & Support</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72">
-                {/* Contextual Help */}
-                <div className="px-2 py-1.5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="h-4 w-4 text-amber-500" />
-                    <span className="font-medium text-sm">Get help</span>
-                  </div>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href={contextualHelp.href} className="block">
-                      <div>
-                        <div className="font-medium">{contextualHelp.title}</div>
-                        <div className="text-sm text-muted-foreground">{contextualHelp.description}</div>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-
-                <DropdownMenuSeparator />
-
-                {/* General Help Options */}
-                <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${slug}/help`} className="cursor-pointer">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Documentation Center
-                  </Link>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${slug}/help/getting-started`} className="cursor-pointer">
-                    <PlayCircle className="mr-2 h-4 w-4" />
-                    Getting Started Guide
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${slug}/help/video-tutorials`} className="cursor-pointer">
-                    <PlayCircle className="mr-2 h-4 w-4" />
-                    Video Tutorials
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${slug}/help/faq`} className="cursor-pointer">
-                    <FileText className="mr-2 h-4 w-4" />
-                    FAQ
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem onClick={startTour} className="cursor-pointer">
-                  <Lightbulb className="mr-2 h-4 w-4" />
-                  Take a Product Tour
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                {/* Support Options */}
-                <DropdownMenuItem asChild>
-                  <a href="https://www.yazzil.com/help/contact" target="_blank" rel="noopener noreferrer" className="cursor-pointer">
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Contact Support
-                    <ExternalLink className="ml-auto h-3 w-3" />
-                  </a>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <a href="mailto:support@yourapp.com" className="cursor-pointer">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Email Support
-                    <ExternalLink className="ml-auto h-3 w-3" />
-                  </a>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                {/* Quick Links */}
-                <div className="px-2 py-1">
-                  <div className="text-xs text-muted-foreground mb-1">Quick Links</div>
-                  <div className="flex flex-col space-y-1">
-                    <Button
-                      variant="ghost" 
-                      size="sm" 
-                      className="justify-start h-auto py-1 px-2 text-xs"
-                      onClick={() => navigateToHelp('instagram-setup')}
-                    >
-                      Instagram Setup
-                    </Button>
-                    <Button
-                      variant="ghost" 
-                      size="sm" 
-                      className="justify-start h-auto py-1 px-2 text-xs"
-                      onClick={() => navigateToHelp('automation-best-practices')}
-                    >
-                      Automation Best Practices
-                    </Button>
-                    <Button
-                      variant="ghost" 
-                      size="sm" 
-                      className="justify-start h-auto py-1 px-2 text-xs"
-                      onClick={() => navigateToHelp('troubleshooting')}
-                    >
-                      Troubleshooting
-                    </Button>
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* Notifications and Create Automation */}
             <NotificationCenter />
             <CreateAutomation />
