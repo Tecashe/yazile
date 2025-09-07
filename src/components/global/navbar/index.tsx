@@ -1124,31 +1124,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 import { usePathname, useRouter } from "next/navigation"
-import { 
-  Search, 
-  Cog, 
-  HelpCircleIcon, 
-  PlusCircleIcon, 
-  Bell, 
-  BookOpen, 
-  PlayCircle, 
-  MessageSquare, 
-  FileText,
-  Lightbulb,
-  Mail,
-  ExternalLink 
-} from "lucide-react"
+import { Cog } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
 import Link from "next/link"
 import CreateAutomation from "../create-automation"
 import { NotificationCenter } from "./notifications/notifications"
@@ -1159,8 +1137,7 @@ type Props = {
 
 const Navbar = ({ slug }: Props) => {
   const pathname = usePathname()
-  const router = useRouter()
-  const [searchOpen, setSearchOpen] = useState(false)
+  
 
   // Enhanced page info extraction
   const getPageInfo = () => {
@@ -1210,59 +1187,7 @@ const Navbar = ({ slug }: Props) => {
 
   const breadcrumbs = generateBreadcrumbs()
 
-  // Get contextual help based on current page
-  const getContextualHelp = () => {
-    const currentPage = segments[segments.length - 1] || 'dashboard'
-    
-    const helpMap: Record<string, { title: string; description: string; href: string }> = {
-      'dashboard': {
-        title: 'Dashboard Overview',
-        description: 'Learn about your automation metrics and performance',
-        href: `/dashboard/${slug}/help/dashboard`
-      },
-      'automations': {
-        title: 'Automation Management',
-        description: 'How to create and manage your Instagram DM automations',
-        href: `/dashboard/${slug}/help/automations`
-      },
-      'integrations': {
-        title: 'Integration Setup',
-        description: 'Connect your CRM, payment systems, and other tools',
-        href: `/dashboard/${slug}/help/integrations`
-      },
-      'analytics': {
-        title: 'Analytics & Reporting',
-        description: 'Understanding your automation performance metrics',
-        href: `/dashboard/${slug}/help/analytics`
-      },
-      'settings': {
-        title: 'Account Settings',
-        description: 'Manage your profile and preferences',
-        href: `/dashboard/${slug}/help/settings`
-      },
-    }
-
-    return helpMap[currentPage] || {
-      title: 'General Help',
-      description: 'Get help with this feature',
-      href: `/dashboard/${slug}/help`
-    }
-  }
-
-  const contextualHelp = getContextualHelp()
-
-  // Start guided tour function (you'll need to implement this with a tour library)
-  const startTour = () => {
-    // Implementation would depend on your chosen tour library
-    // For now, just show an alert
-    alert("Guided tour coming soon! This will walk you through the key features.")
-  }
-
-  // Handle help article navigation
-  const navigateToHelp = (section: string) => {
-    router.push(`/dashboard/${slug}/help/${section}`)
-  }
-
+  
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -1294,41 +1219,17 @@ const Navbar = ({ slug }: Props) => {
               </BreadcrumbList>
             </Breadcrumb>
 
-            {/* Mobile: Show only current page */}
             <div className="md:hidden">
               <h1 className="font-semibold text-lg">{displayName}</h1>
             </div>
           </div>
-
-          Search Bar
-          <div className="hidden lg:flex items-center space-x-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search help articles..."
-                className="pl-8 w-64 bg-muted/50 border-border/50 cursor-pointer"
-                onClick={() => setSearchOpen(true)}
-                readOnly
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
           <div className="flex items-center space-x-2">
-            {/* Search Button (Mobile) */}
-            {/* <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSearchOpen(true)}>
-              <Search className="h-4 w-4" />
-              <span className="sr-only">Search</span>
-            </Button> */}
-            
-            {/* Settings Button */}
             <Button variant="ghost" size="icon" asChild>
               <Link href={`/dashboard/${slug}/settings`}>
                 <Cog className="h-4 w-4" />
                 <span className="sr-only">Settings</span>
               </Link>
             </Button>
-            {/* Notifications and Create Automation */}
             <NotificationCenter />
             <CreateAutomation />
           </div>
