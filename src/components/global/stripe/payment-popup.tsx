@@ -1072,7 +1072,7 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
                     ))}
                   </Tabs>
 
-                  {/* Manage Subscription */}
+                  {/* Manage Subscriptn */}
                   {subscription && subscription.plan !== "FREE" && (
                     <div className="pt-6 border-t border-zinc-800">
                       <Button
