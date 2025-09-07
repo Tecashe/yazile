@@ -4881,7 +4881,7 @@ export default function IntegrationsPage() {
     const configData: Record<string, string> = {}
     integration.fields.forEach((field: IntegrationField) => {
       if (field.type === 'password') {
-        configData[field.key] = '••••••••••••' // Masked password
+        configData[field.key] = '••••••••••••••••••••••••••••••••••••' // Masked password
       } else {
         // For non-password fields, we might have the data available
         configData[field.key] = ''
@@ -4905,7 +4905,7 @@ export default function IntegrationsPage() {
       const updatedCredentials: Record<string, string> = {}
       integration.fields.forEach((field: IntegrationField) => {
         const value = configFormData[field.key]
-        if (value && value !== '••••••••••••') {
+        if (value && value !== '••••••••••••••••••••••••••••••••••••') {
           updatedCredentials[field.key] = value
         }
       })
@@ -5033,7 +5033,7 @@ export default function IntegrationsPage() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to update capabilities")
+        throw new Error("Failed to update setting")
       }
 
       // Show success feedback
@@ -5042,7 +5042,7 @@ export default function IntegrationsPage() {
         description: `${capabilityId.replace(/_/g, ' ')} has been ${enabled ? "enabled" : "disabled"} for your AI agent.`,
       })
     } catch (error) {
-      console.error("Failed to update capabilities:", error)
+      console.error("Failed to update setting:", error)
       // Revert the UI change on error
       setEnabledCapabilities((prev) => ({
         ...prev,
@@ -5051,7 +5051,7 @@ export default function IntegrationsPage() {
 
       toast({
         title: "Update Failed",
-        description: "Failed to update capability. Please try again.",
+        description: "Failed to update setting. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -5535,9 +5535,9 @@ export default function IntegrationsPage() {
                               </div>
                             )}
 
-                            {connected && renderCapabilities(integration, connectedIntegration!)}
+                            {/* {connected && renderCapabilities(integration, connectedIntegration!)} */}
 
-                            {connected && integration.endpoints && integration.endpoints.length > 0 && (
+                            {/* {connected && integration.endpoints && integration.endpoints.length > 0 && (
                               <div className="space-y-3">
                                 <Button
                                   variant="outline"
@@ -5584,7 +5584,7 @@ export default function IntegrationsPage() {
                                   </div>
                                 )}
                               </div>
-                            )}
+                            )} */}
 
                             <Separator />
 

@@ -814,6 +814,7 @@ enum SUBSCRIPTION_STATUS {
   TRIALING
 }
 
+// prisma/schema.prisma - Updated Subscription model
 model Subscription {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   User      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -824,14 +825,22 @@ model Subscription {
   plan   SUBSCRIPTION_PLAN   @default(FREE)
   status SUBSCRIPTION_STATUS @default(ACTIVE)
 
-  // Stripe specific fields
-  customerId               String?   @unique
-  stripeSubscriptionId     String?   @unique
+  // Customer ID (shared between Stripe and Lemon Squeezy)
+  customerId String? @unique
+
+  // Stripe specific fields (keep for migration)
+  stripeSubscriptionId     String? @unique
   stripePriceId            String?
   stripeCurrentPeriodStart DateTime?
   stripeCurrentPeriodEnd   DateTime?
 
-  // Payment method info
+  // Lemon Squeezy specific fields
+  lemonSqueezySubscriptionId     String? @unique
+  lemonSqueezyVariantId          String?
+  lemonSqueezyCurrentPeriodStart DateTime?
+  lemonSqueezyCurrentPeriodEnd   DateTime?
+
+  // Payment method info (mainly for Stripe, but can be used for reference)
   paymentMethodId    String?
   paymentMethodType  String?
   paymentMethodLast4 String?
@@ -843,8 +852,14 @@ model Subscription {
   // Cancellation fields
   cancelAtPeriodEnd Boolean   @default(false)
   canceledAt        DateTime?
-}
 
+  // Additional Lemon Squeezy fields
+  productName   String? // e.g., "Pro Plan"
+  variantName   String? // e.g., "Monthly", "Yearly"
+  price         String? // e.g., "$49.99"
+  interval      String? // e.g., "month", "year"
+  intervalCount Int?    @default(1) // e.g., 1 for every month, 3 for every 3 months
+}
 /////NEWESSST
 
 model TriggerExecution {
