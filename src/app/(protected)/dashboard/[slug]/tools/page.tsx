@@ -5535,7 +5535,7 @@ export default function IntegrationsPage() {
                               </div>
                             )}
 
-                            {/* {connected && renderCapabilities(integration, connectedIntegration!)} */}
+                            {connected && renderCapabilities(integration, connectedIntegration!)}
 
                             {/* {connected && integration.endpoints && integration.endpoints.length > 0 && (
                               <div className="space-y-3">
