@@ -1671,7 +1671,6 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ActiveIndicator } from "../indicators/active-indicator"
 import { InactiveIndicator } from "../indicators/inactive-indicator"
-import Image from "next/image"
 import {
   Sparkles,
   Zap,
@@ -1686,13 +1685,17 @@ import {
   TrendingUp,
   AlertTriangle,
   Activity,
-  Images,
+  Image as ImageIcon,
+  Calendar,
+  Play,
+  Pause,
 } from "lucide-react"
 import AutomationStats from "./automation-stats"
 import AutomationChats from "./automationChats"
 import { motion, AnimatePresence } from "framer-motion"
 import { getAutomationSentimentStats } from "@/lib/sentiment-tracker"
 import { DetailedSentimentModal } from "./sentiment/detailed-sentiment-modal"
+import Image from "next/image"
 
 type Keyword = {
   id: string
@@ -1710,6 +1713,16 @@ type Listener = {
   commentCount: number
 }
 
+type AttachedPost = {
+  id: string
+  postid?: string
+  media: string
+  mediaType: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM"
+  caption?: string
+  isScheduled?: boolean
+  scheduledDate?: string
+}
+
 interface Automation {
   id: string
   name: string
@@ -1717,16 +1730,7 @@ interface Automation {
   keywords: Keyword[]
   createdAt: Date
   listener: Listener | null
-  posts?: Array<{
-    id: string
-    media?: string
-    caption?: string
-  }>
-  scheduledPosts?: Array<{
-    id: string
-    mediaUrl?: string
-    caption?: string
-  }>
+  attachedPosts?: AttachedPost[]
   _isOptimistic?: boolean
 }
 
@@ -1747,7 +1751,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showChats, setShowChats] = useState(false)
-  const [showImages, setShowImages] = useState(false)
+  const [showAttachedPosts, setShowAttachedPosts] = useState(false)
 
   const [sentimentData, setSentimentData] = useState([
     { name: "Positive", value: 0, color: "#10B981" },
@@ -1784,16 +1788,22 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
     return { status: "Neutral", color: "text-yellow-600", icon: Activity }
   }
 
+  const getMediaIcon = (mediaType: string) => {
+    switch (mediaType) {
+      case "VIDEO":
+        return <Play className="w-3 h-3" />
+      case "CAROUSEL_ALBUM":
+        return <ImageIcon className="w-3 h-3" />
+      default:
+        return <ImageIcon className="w-3 h-3" />
+    }
+  }
+
   const sentimentStatus = getSentimentStatus()
   const StatusIcon = sentimentStatus.icon
-
-  // Get all images from posts and scheduled posts
-  const allImages = [
-    ...(automation.posts?.map(post => post.media).filter(Boolean) || []),
-    ...(automation.scheduledPosts?.map(post => post.mediaUrl).filter(Boolean) || [])
-  ]
-
-  const hasImages = allImages.length > 0
+  const attachedPostsCount = automation.attachedPosts?.length || 0
+  const publishedPosts = automation.attachedPosts?.filter(post => !post.isScheduled) || []
+  const scheduledPosts = automation.attachedPosts?.filter(post => post.isScheduled) || []
 
   return (
     <Card
@@ -1857,24 +1867,65 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
 
         <AutomationStats automation={automation} />
 
-        {/* Images Section */}
-        {!isOptimisticState && hasImages && (
+        {/* Attached Posts Section */}
+        {!isOptimisticState && attachedPostsCount > 0 && (
           <div className="mt-6 border-t border-[#545454] pt-4">
             <button
-              className="w-full flex items-center justify-between p-2 rounded-lg border border-[#545454]/50 bg-transparent transition-colors duration-300"
-              onClick={() => setShowImages(!showImages)}
+              className="w-full flex items-center justify-between p-3 rounded-lg border border-[#545454]/50 bg-transparent hover:bg-[#1D1D1D]/30 transition-colors duration-300"
+              onClick={() => setShowAttachedPosts(!showAttachedPosts)}
             >
               <div className="flex items-center">
                 <div className="mr-3 w-8 h-8 rounded-full border border-[#545454] flex items-center justify-center bg-gradient-to-br from-[#2A2A2A] to-[#1D1D1D]">
-                  <Images size={16} className="text-purple-400" />
+                  <ImageIcon size={16} className="text-purple-400" />
                 </div>
-                <span className="font-medium">Attached Images</span>
-                <Badge className="ml-2 bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                  {allImages.length} images
-                </Badge>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">Attached Posts</span>
+                  <div className="flex items-center space-x-2 mt-1">
+                    {publishedPosts.length > 0 && (
+                      <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs">
+                        {publishedPosts.length} Published
+                      </Badge>
+                    )}
+                    {scheduledPosts.length > 0 && (
+                      <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-xs">
+                        {scheduledPosts.length} Scheduled
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                {showImages ? (
+              <div className="flex items-center space-x-2">
+                {/* Preview thumbnails */}
+                <div className="flex -space-x-1">
+                  {automation.attachedPosts?.slice(0, 3).map((post, index) => (
+                    <div
+                      key={post.id}
+                      className="relative w-6 h-6 rounded-full border-2 border-background overflow-hidden"
+                      style={{ zIndex: 3 - index }}
+                    >
+                      <Image
+                        src={post.media || "/placeholder.svg"}
+                        alt="Post preview"
+                        fill
+                        sizes="24px"
+                        className="object-cover"
+                      />
+                      {post.isScheduled && (
+                        <div className="absolute inset-0 bg-yellow-500/20 flex items-center justify-center">
+                          <Clock className="w-2 h-2 text-yellow-400" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {attachedPostsCount > 3 && (
+                    <div className="w-6 h-6 rounded-full bg-[#2A2A2A] border-2 border-background flex items-center justify-center">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        +{attachedPostsCount - 3}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {showAttachedPosts ? (
                   <ChevronUp size={20} className="text-[#9B9CA0]" />
                 ) : (
                   <ChevronDown size={20} className="text-[#9B9CA0]" />
@@ -1885,7 +1936,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
         )}
 
         <AnimatePresence>
-          {showImages && hasImages && (
+          {showAttachedPosts && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{
@@ -1906,29 +1957,108 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
                 transition={{ delay: 0.1, duration: 0.3 }}
                 className="border border-[#545454]/50 rounded-lg p-4 mt-3 bg-[#1D1D1D]/30"
               >
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {allImages.map((imageUrl, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                        transition: { delay: index * 0.05 },
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      className="relative aspect-square rounded-lg overflow-hidden shadow-md group cursor-pointer"
-                    >
-                      <Image
-                        fill
-                        sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, 16vw"
-                        src={imageUrl||"https://image.com"}
-                        alt={`Attached image ${index + 1}`}
-                        className="object-cover transition-all duration-300 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </motion.div>
-                  ))}
+                <div className="space-y-4">
+                  {/* Published Posts */}
+                  {publishedPosts.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-blue-400 mb-3 flex items-center">
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Published Posts ({publishedPosts.length})
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {publishedPosts.map((post) => (
+                          <div
+                            key={post.id}
+                            className="relative aspect-square rounded-lg overflow-hidden group border border-[#545454]/30"
+                          >
+                            <Image
+                              src={post.media || "/placeholder.svg"}
+                              alt={post.caption || "Published post"}
+                              fill
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                              className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                            
+                            {/* Media type indicator */}
+                            <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1">
+                              {getMediaIcon(post.mediaType)}
+                            </div>
+
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                              <div className="text-center p-2">
+                                <p className="text-white text-xs line-clamp-2">
+                                  {post.caption || "No caption"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Scheduled Posts */}
+                  {scheduledPosts.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-yellow-400 mb-3 flex items-center">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Scheduled Posts ({scheduledPosts.length})
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {scheduledPosts.map((post) => (
+                          <div
+                            key={post.id}
+                            className="relative aspect-square rounded-lg overflow-hidden group border border-yellow-500/30"
+                          >
+                            <Image
+                              src={post.media || "/placeholder.svg"}
+                              alt={post.caption || "Scheduled post"}
+                              fill
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                              className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                            
+                            {/* Scheduled indicator */}
+                            <div className="absolute top-2 left-2 bg-yellow-500/80 rounded-full p-1">
+                              <Clock className="w-3 h-3 text-white" />
+                            </div>
+
+                            {/* Media type indicator */}
+                            <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1">
+                              {getMediaIcon(post.mediaType)}
+                            </div>
+
+                            {/* Date badge */}
+                            {post.scheduledDate && (
+                              <div className="absolute bottom-2 left-2 bg-black/80 rounded px-2 py-1">
+                                <p className="text-yellow-400 text-xs font-medium">
+                                  {new Date(post.scheduledDate).toLocaleDateString()}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                              <div className="text-center p-2">
+                                <p className="text-white text-xs line-clamp-2">
+                                  {post.caption || "No caption"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty state */}
+                  {attachedPostsCount === 0 && (
+                    <div className="text-center py-8">
+                      <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No posts attached to this automation</p>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>

@@ -468,7 +468,7 @@ export default function PricingPage() {
               />
               <PricingCard
                 title="Pro"
-                price={9.99}
+                price={29.99}
                 description="For power users and professionals looking to scale their Instagram engagement."
                 features={[
                   "AI-powered Intelligent replies",
@@ -485,7 +485,7 @@ export default function PricingPage() {
               />
               <PricingCard
                 title="Enterprise"
-                price={200}
+                price={99.99}
                 description="Enterprise-grade solutions for large businesses with complex Instagram automation needs."
                 features={[
                   "Everything in Pro",
