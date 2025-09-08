@@ -1686,10 +1686,6 @@ import {
   TrendingUp,
   AlertTriangle,
   Activity,
-  Instagram,
-  Calendar,
-  Heart,
-  MessageCircle,
   Images,
 } from "lucide-react"
 import AutomationStats from "./automation-stats"
@@ -1714,23 +1710,6 @@ type Listener = {
   commentCount: number
 }
 
-// Add Post and ScheduledPost types based on the PostButton component
-type Post = {
-  id: string
-  postid: string
-  media: string
-  mediaType?: string
-  caption?: string
-}
-
-type ScheduledPost = {
-  id: string
-  mediaUrl: string
-  caption?: string
-  scheduledDate: string
-  status: string
-}
-
 interface Automation {
   id: string
   name: string
@@ -1738,8 +1717,16 @@ interface Automation {
   keywords: Keyword[]
   createdAt: Date
   listener: Listener | null
-  posts?: Post[]  // Add posts array
-  scheduledPosts?: ScheduledPost[]  // Add scheduled posts array
+  posts?: Array<{
+    id: string
+    media?: string
+    caption?: string
+  }>
+  scheduledPosts?: Array<{
+    id: string
+    mediaUrl?: string
+    caption?: string
+  }>
   _isOptimistic?: boolean
 }
 
@@ -1760,7 +1747,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showChats, setShowChats] = useState(false)
-  const [showPosts, setShowPosts] = useState(false)
+  const [showImages, setShowImages] = useState(false)
 
   const [sentimentData, setSentimentData] = useState([
     { name: "Positive", value: 0, color: "#10B981" },
@@ -1800,11 +1787,13 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
   const sentimentStatus = getSentimentStatus()
   const StatusIcon = sentimentStatus.icon
 
-  // Calculate total posts
-  const publishedPostsCount = automation.posts?.length || 0
-  const scheduledPostsCount = automation.scheduledPosts?.length || 0
-  const totalPostsCount = publishedPostsCount + scheduledPostsCount
-  const hasAnyPosts = totalPostsCount > 0
+  // Get all images from posts and scheduled posts
+  const allImages = [
+    ...(automation.posts?.map(post => post.media).filter(Boolean) || []),
+    ...(automation.scheduledPosts?.map(post => post.mediaUrl).filter(Boolean) || [])
+  ]
+
+  const hasImages = allImages.length > 0
 
   return (
     <Card
@@ -1868,37 +1857,24 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
 
         <AutomationStats automation={automation} />
 
-        {/* Attached Posts Section */}
-        {!isOptimisticState && hasAnyPosts && (
+        {/* Images Section */}
+        {!isOptimisticState && hasImages && (
           <div className="mt-6 border-t border-[#545454] pt-4">
             <button
               className="w-full flex items-center justify-between p-2 rounded-lg border border-[#545454]/50 bg-transparent transition-colors duration-300"
-              onClick={() => setShowPosts(!showPosts)}
+              onClick={() => setShowImages(!showImages)}
             >
               <div className="flex items-center">
                 <div className="mr-3 w-8 h-8 rounded-full border border-[#545454] flex items-center justify-center bg-gradient-to-br from-[#2A2A2A] to-[#1D1D1D]">
                   <Images size={16} className="text-purple-400" />
                 </div>
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">Attached Posts</span>
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    {publishedPostsCount > 0 && (
-                      <Badge className="bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                        <Instagram size={12} className="mr-1" />
-                        {publishedPostsCount} published
-                      </Badge>
-                    )}
-                    {scheduledPostsCount > 0 && (
-                      <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                        <Calendar size={12} className="mr-1" />
-                        {scheduledPostsCount} scheduled
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+                <span className="font-medium">Attached Images</span>
+                <Badge className="ml-2 bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                  {allImages.length} images
+                </Badge>
               </div>
               <div>
-                {showPosts ? (
+                {showImages ? (
                   <ChevronUp size={20} className="text-[#9B9CA0]" />
                 ) : (
                   <ChevronDown size={20} className="text-[#9B9CA0]" />
@@ -1909,7 +1885,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
         )}
 
         <AnimatePresence>
-          {showPosts && hasAnyPosts && (
+          {showImages && hasImages && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{
@@ -1930,106 +1906,29 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
                 transition={{ delay: 0.1, duration: 0.3 }}
                 className="border border-[#545454]/50 rounded-lg p-4 mt-3 bg-[#1D1D1D]/30"
               >
-                <div className="space-y-4">
-                  {/* Published Posts */}
-                  {publishedPostsCount > 0 && (
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Instagram size={16} className="text-blue-400" />
-                          Published Posts
-                        </h4>
-                        <Badge variant="outline" className="text-xs">
-                          {publishedPostsCount} Posts
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                        {automation.posts?.map((post, index) => (
-                          <motion.div
-                            key={post.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{
-                              opacity: 1,
-                              scale: 1,
-                              transition: { delay: index * 0.05 },
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                            className="relative aspect-square rounded-lg overflow-hidden shadow-md group cursor-pointer"
-                          >
-                            <Image
-                              fill
-                              sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, 16vw"
-                              src={post.media || "/placeholder.svg"}
-                              alt="Published post"
-                              className="object-cover transition-all duration-300 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="flex items-center gap-2 text-xs">
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-3 w-3 text-red-400" />
-                                  <span className="text-white">1.2k</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <MessageCircle className="h-3 w-3 text-blue-400" />
-                                  <span className="text-white">48</span>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Scheduled Posts */}
-                  {scheduledPostsCount > 0 && (
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Calendar size={16} className="text-purple-400" />
-                          Scheduled Posts
-                        </h4>
-                        <Badge variant="outline" className="text-xs flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {scheduledPostsCount} Posts
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                        {automation.scheduledPosts?.map((post, index) => (
-                          <motion.div
-                            key={post.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{
-                              opacity: 1,
-                              scale: 1,
-                              transition: { delay: (index + publishedPostsCount) * 0.05 },
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                            className="relative aspect-square rounded-lg overflow-hidden shadow-md group cursor-pointer"
-                          >
-                            <Image
-                              fill
-                              sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, 16vw"
-                              src={post.mediaUrl || "/placeholder.svg"}
-                              alt="Scheduled post"
-                              className="object-cover transition-all duration-300 group-hover:scale-110"
-                            />
-                            <div className="absolute top-2 right-2 z-10">
-                              <Badge variant="secondary" className="bg-background/80 flex items-center gap-1 text-xs px-1 py-0">
-                                <Clock className="h-3 w-3" />
-                                {new Date(post.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              </Badge>
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <p className="text-white text-xs line-clamp-1">{post.caption}</p>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {allImages.map((imageUrl, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                        transition: { delay: index * 0.05 },
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      className="relative aspect-square rounded-lg overflow-hidden shadow-md group cursor-pointer"
+                    >
+                      <Image
+                        fill
+                        sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, 16vw"
+                        src={imageUrl||"https://image.com"}
+                        alt={`Attached image ${index + 1}`}
+                        className="object-cover transition-all duration-300 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
             </motion.div>
