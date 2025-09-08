@@ -1,5 +1,5 @@
 
-// app/api/webhooks/stripe/route.ts
+// app/api/webhook/stripe/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { stripe, mapStripeStatusToEnum } from "@/lib/stripe"
 import { upsertSubscription } from "@/lib/subscription"

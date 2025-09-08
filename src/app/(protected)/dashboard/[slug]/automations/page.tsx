@@ -44,7 +44,7 @@ const Page = () => {
         <div className="space-y-6">
           {/* Key Metrics - Simplified */}
           {!isLoading && automations.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <Card className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -63,14 +63,6 @@ const Page = () => {
                 </div>
               </Card>
               
-              <Card className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Success Rate</p>
-                    <p className="text-2xl font-semibold">94%</p>
-                  </div>
-                </div>
-              </Card>
             </div>
           )}
 

@@ -1867,7 +1867,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
 
         <AutomationStats automation={automation} />
 
-        {/* Attached Posts Section */}
+        {/* Attached Posts Section */}Hello
         {!isOptimisticState && attachedPostsCount > 0 && (
           <div className="mt-6 border-t border-[#545454] pt-4">
             <button
