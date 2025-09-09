@@ -1,2187 +1,5 @@
 // "use client"
 
-// import React from "react"
-// import { useEffect, useState, useRef, useCallback } from "react"
-// import { motion, AnimatePresence } from "framer-motion"
-// import { useSpring, animated } from "react-spring"
-// import {
-//   Send,
-//   ArrowLeft,
-//   Smile,
-//   Paperclip,
-//   Mic,
-//   Trash2,
-//   Check,
-//   Sparkles,
-//   Zap,
-//   Loader2,
-//   Search,
-//   X,
-//   Bell,
-//   BellOff,
-//   Filter,
-//   MessageSquare,
-//   Pin,
-//   Star,
-//   MoreHorizontal,
-//   Phone,
-//   Video,
-//   Info,
-//   WifiOff,
-//   Wifi,
-// } from "lucide-react"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Textarea } from "@/components/ui/textarea"
-// import { Button } from "@/components/ui/button"
-// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-// import { ScrollArea } from "@/components/ui/scroll-area"
-// import { Input } from "@/components/ui/input"
-// import { Badge } from "@/components/ui/badge"
-// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-// import type { Conversation, Message } from "@/types/dashboard"
-// import data from "@emoji-mart/data"
-// import Picker from "@emoji-mart/react"
-// import ExampleConversations from "./exampleConvo"
-// import DeleteConfirmationModal from "./confirmDelete"
-// import { fetchChatsAndBusinessVariables, sendMessage } from "@/actions/messageAction/messageAction"
-// import { cn } from "@/lib/utils"
-// import FancyLoader from "./fancy-loader"
-
-// interface RawConversation {
-//   chatId: string
-//   pageId: string
-//   messages: Array<{
-//     id: string
-//     role: "user" | "assistant"
-//     content: string
-//     senderId: string
-//     createdAt: string
-//     read?: boolean
-//   }>
-// }
-
-// const BOT_NAME = "AiAssist"
-// const BOT_AVATAR = "/fancy-profile-pic.svg"
-
-// const BOT_ID = "17841444435951291"
-// const EXCLUDED_CHAT_ID = "17841444435951291"
-
-// interface AutomationChatsProps {
-//   automationId: string
-// }
-
-// interface BusinessVariables {
-//   [key: string]: string
-//   business_name: string
-//   welcome_message: string
-//   business_industry: string
-// }
-
-// const gradientBorder = "bg-gradient-to-r from-primary via-purple-500 to-secondary p-[2px] rounded-lg"
-// const fancyBackground = "bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1d1d1d]"
-
-// // Keyboard shortcuts helper
-// const KeyboardShortcut = ({ keys }: { keys: string[] }) => (
-//   <div className="flex items-center space-x-1">
-//     {keys.map((key, index) => (
-//       <React.Fragment key={index}>
-//         <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">
-//           {key}
-//         </kbd>
-//         {index < keys.length - 1 && <span className="text-gray-500">+</span>}
-//       </React.Fragment>
-//     ))}
-//   </div>
-// )
-
-// // Help modal component
-// const HelpModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-//   if (!isOpen) return null
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0 }}
-//       animate={{ opacity: 1 }}
-//       exit={{ opacity: 0 }}
-//       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-//       onClick={onClose}
-//     >
-//       <motion.div
-//         initial={{ scale: 0.9, opacity: 0 }}
-//         animate={{ scale: 1, opacity: 1 }}
-//         exit={{ scale: 0.9, opacity: 0 }}
-//         className="bg-background rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
-//         onClick={(e) => e.stopPropagation()}
-//       >
-//         <div className="flex justify-between items-center mb-4">
-//           <h2 className="text-xl font-bold">Keyboard Shortcuts</h2>
-//           <Button variant="ghost" size="icon" onClick={onClose}>
-//             <X className="h-5 w-5" />
-//           </Button>
-//         </div>
-
-//         <div className="space-y-4">
-//           <div className="grid grid-cols-2 gap-4">
-//             <div className="flex items-center justify-between">
-//               <span>New message</span>
-//               <KeyboardShortcut keys={["N"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>Search conversations</span>
-//               <KeyboardShortcut keys={["Ctrl", "K"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>Send message</span>
-//               <KeyboardShortcut keys={["Enter"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>New line in message</span>
-//               <KeyboardShortcut keys={["Shift", "Enter"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>Close conversation</span>
-//               <KeyboardShortcut keys={["Esc"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>Toggle sound</span>
-//               <KeyboardShortcut keys={["M"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>Mark all as read</span>
-//               <KeyboardShortcut keys={["Shift", "A"]} />
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <span>Help</span>
-//               <KeyboardShortcut keys={["?"]} />
-//             </div>
-//           </div>
-
-//           <div className="mt-6 pt-4 border-t">
-//             <h3 className="font-semibold mb-2">Tips</h3>
-//             <ul className="list-disc pl-5 space-y-2 text-sm">
-//               <li>Click on a conversation to open it</li>
-//               <li>Unread messages are highlighted with a red indicator</li>
-//               <li>Use quick replies for common responses</li>
-//               <li>Hover over messages to see the timestamp</li>
-//               <li>Use the search bar to find specific conversations</li>
-//             </ul>
-//           </div>
-//         </div>
-//       </motion.div>
-//     </motion.div>
-//   )
-// }
-
-// // Offline Status Banner component
-// const OfflineStatusBanner = ({ isOffline, onReconnect }: { isOffline: boolean; onReconnect: () => void }) => {
-//   if (!isOffline) return null
-
-//   return (
-//     <Alert variant="destructive" className="mb-4 border-red-400">
-//       <WifiOff className="h-4 w-4 mr-2" />
-//       <AlertTitle className="flex items-center text-red-500">
-//         You are offline
-//         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="ml-2">
-//           <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500">
-//             Offline Mode
-//           </Badge>
-//         </motion.div>
-//       </AlertTitle>
-//       <AlertDescription className="flex justify-between items-center mt-2">
-//         <span className="text-sm">Showing cached messages. New messages cant be sent.</span>
-//         <Button size="sm" variant="outline" className="ml-2" onClick={onReconnect}>
-//           <Wifi className="h-4 w-4 mr-2" />
-//           Try reconnecting
-//         </Button>
-//       </AlertDescription>
-//     </Alert>
-//   )
-// }
-
-// // Connection Restored Banner component
-// const ConnectionRestoredBanner = ({ show, onDismiss }: { show: boolean; onDismiss: () => void }) => {
-//   if (!show) return null
-
-//   return (
-//     <Alert className="mb-4 border-green-500 bg-green-500/10">
-//       <Wifi className="h-4 w-4 mr-2 text-green-500" />
-//       <AlertTitle className="flex items-center text-green-500">
-//         Youre back online
-//         <motion.div
-//           initial={{ opacity: 0, scale: 0.8 }}
-//           animate={{ opacity: 1, scale: 1 }}
-//           transition={{ type: "spring", stiffness: 200, damping: 10 }}
-//           className="ml-2"
-//         >
-//           <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500">
-//             Connected
-//           </Badge>
-//         </motion.div>
-//       </AlertTitle>
-//       <AlertDescription className="flex justify-between items-center mt-2">
-//         <span className="text-sm">Your messages are now syncing...</span>
-//         <Button size="sm" variant="outline" className="ml-2" onClick={onDismiss}>
-//           Dismiss
-//         </Button>
-//       </AlertDescription>
-//     </Alert>
-//   )
-// }
-
-// const ShimmeringBorder = ({ children }: { children: React.ReactNode }) => {
-//   const styles = useSpring({
-//     from: { backgroundPosition: "0% 50%" },
-//     to: { backgroundPosition: "100% 50%" },
-//     config: { duration: 5000 },
-//     loop: true,
-//   })
-
-//   return (
-//     <animated.div
-//       style={{
-//         ...styles,
-//         backgroundSize: "200% 200%",
-//       }}
-//       className={`${gradientBorder} p-[2px] rounded-lg`}
-//     >
-//       {children}
-//     </animated.div>
-//   )
-// }
-
-// // Add a dedicated UnreadChatsList component to better organize and display unread chats
-// const UnreadChatsList = ({
-//   conversations,
-//   onSelectConversation,
-// }: {
-//   conversations: Conversation[]
-//   onSelectConversation: (conversation: Conversation) => void
-// }) => {
-//   const unreadConversations = conversations.filter((conv) => conv.unreadCount > 0)
-
-//   if (unreadConversations.length === 0) {
-//     return null
-//   }
-
-//   return (
-//     <div className="mb-6">
-//       <h4 className="text-sm font-semibold mb-3 flex items-center">
-//         <span className="relative flex h-3 w-3 mr-2">
-//           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-//           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-//         </span>
-//         Unread Messages ({unreadConversations.length})
-//       </h4>
-//       <div className="space-y-2">
-//         {unreadConversations.map((conversation) => (
-//           <motion.div
-//             key={`unread-${conversation.id}`}
-//             initial={{ opacity: 0, y: 10 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.2 }}
-//             className="p-3 bg-background/80 border-l-4 border-red-500 rounded-lg shadow-md hover:bg-muted cursor-pointer transition-colors duration-200 flex items-center"
-//             onClick={() => onSelectConversation(conversation)}
-//           >
-//             <Avatar className="w-10 h-10 relative border-2 border-primary">
-//               <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${conversation.id}`} />
-//               <AvatarFallback>{conversation.id.slice(0, 2).toUpperCase()}</AvatarFallback>
-//               <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 transform translate-x-1/2 -translate-y-1/2"></span>
-//             </Avatar>
-//             <div className="ml-3 overflow-hidden flex-grow">
-//               <p className="font-medium text-sm text-foreground truncate">Client</p>
-//               <p className="text-xs text-muted-foreground truncate">
-//                 {conversation.messages.length > 0
-//                   ? conversation.messages[conversation.messages.length - 1].content
-//                   : "No messages"}
-//               </p>
-//             </div>
-//             <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">
-//               {conversation.unreadCount}
-//             </span>
-//           </motion.div>
-//         ))}
-//       </div>
-//     </div>
-//   )
-// }
-
-// // Add a visual notification indicator component
-// const NotificationIndicator = ({ show, onClick }: { show: boolean; onClick: () => void }) => {
-//   if (!show) return null
-
-//   return (
-//     <motion.div
-//       initial={{ scale: 0 }}
-//       animate={{ scale: [1, 1.2, 1] }}
-//       transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-//       className="fixed top-4 right-4 bg-red-500 text-white p-2 rounded-full shadow-lg z-50 cursor-pointer"
-//       onClick={onClick}
-//     >
-//       <motion.div
-//         animate={{ rotate: [0, 15, -15, 0] }}
-//         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.5, repeatDelay: 2 }}
-//       >
-//         <Bell className="h-6 w-6" />
-//       </motion.div>
-//     </motion.div>
-//   )
-// }
-
-// // Message time component
-// const MessageTime = ({ time }: { time: Date }) => {
-//   return (
-//     <span className="text-xs text-gray-400">{time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-//   )
-// }
-
-// // Typing indicator component
-// const TypingIndicator = () => {
-//   return (
-//     <div className="flex space-x-1 items-center p-2">
-//       <motion.div
-//         animate={{ y: [0, -5, 0] }}
-//         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.5, delay: 0 }}
-//         className="w-2 h-2 bg-primary rounded-full"
-//       />
-//       <motion.div
-//         animate={{ y: [0, -5, 0] }}
-//         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.5, delay: 0.2 }}
-//         className="w-2 h-2 bg-primary rounded-full"
-//       />
-//       <motion.div
-//         animate={{ y: [0, -5, 0] }}
-//         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.5, delay: 0.4 }}
-//         className="w-2 h-2 bg-primary rounded-full"
-//       />
-//     </div>
-//   )
-// }
-
-// const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
-//   const [conversations, setConversations] = useState<Conversation[]>([])
-//   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
-//   const [newMessage, setNewMessage] = useState("")
-//   const [isTyping, setIsTyping] = useState(false)
-//   const [isLoading, setIsLoading] = useState(true) // Start with loading true
-//   const [error, setError] = useState<string | null>(null)
-//   const [isRecording, setIsRecording] = useState(false)
-//   const [unreadChats, setUnreadChats] = useState<Set<string>>(new Set())
-//   const [token, setToken] = useState<string | null>(null)
-//   const [pageId, setPageId] = useState<string | null>(null)
-//   const [businessVariables, setBusinessVariables] = useState<BusinessVariables>({
-//     business_name: "",
-//     welcome_message: "",
-//     business_industry: "",
-//   })
-//   const [totalUnreadMessages, setTotalUnreadMessages] = useState(0)
-//   const [displayedConversations, setDisplayedConversations] = useState(4)
-//   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-//   const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null)
-//   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null)
-//   const scrollRef = useRef<HTMLDivElement>(null)
-//   const [displayedMessages, setDisplayedMessages] = useState<Message[]>([])
-//   const [unreadSeparatorIndex, setUnreadSeparatorIndex] = useState<number | null>(null)
-//   const [hasNewMessages, setHasNewMessages] = useState(false)
-//   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-//   const fetchAttemptsRef = useRef(0) // Track fetch attempts
-//   const [soundEnabled, setSoundEnabled] = useState(true)
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([])
-//   const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "recent">("all")
-//   const [showHelpModal, setShowHelpModal] = useState(false)
-//   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(new Set())
-//   const [starredConversations, setStarredConversations] = useState<Set<string>>(new Set())
-//   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-//   const [isSearchFocused, setIsSearchFocused] = useState(false)
-//   const searchInputRef = useRef<HTMLInputElement>(null)
-//   const messageInputRef = useRef<HTMLTextAreaElement>(null)
-//   const audioRef = useRef<HTMLAudioElement | null>(null)
-//   const lastMessageTimeRef = useRef<Record<string, number>>({})
-//   const [readConversations, setReadConversations] = useState<Set<string>>(new Set())
-  
-//   // New state for offline detection
-//   const [isOffline, setIsOffline] = useState(false)
-//   const [cachedConversations, setCachedConversations] = useState<Conversation[]>([])
-//   const [showReconnectedBanner, setShowReconnectedBanner] = useState(false)
-//   const networkStatusRef = useRef<{ online: boolean; lastOffline: number }>({
-//     online: true,
-//     lastOffline: 0,
-//   })
-
-//   // Load read conversations from localStorage on component mount
-//   useEffect(() => {
-//     // Only run on client-side
-//     if (typeof window !== "undefined") {
-//       try {
-//         const savedReadConversations = localStorage.getItem("readConversations")
-//         if (savedReadConversations) {
-//           const parsedData = JSON.parse(savedReadConversations)
-//           setReadConversations(new Set(parsedData))
-//         }
-        
-//         // Also try to load cached conversations
-//         const savedCachedConversations = localStorage.getItem("cachedConversations")
-//         if (savedCachedConversations) {
-//           const parsedConversations = JSON.parse(savedCachedConversations)
-          
-//           // Convert date strings back to Date objects
-//           const conversationsWithDates = parsedConversations.map((conv: any) => ({
-//             ...conv,
-//             createdAt: new Date(conv.createdAt),
-//             updatedAt: new Date(conv.updatedAt),
-//             messages: conv.messages.map((msg: any) => ({
-//               ...msg,
-//               createdAt: new Date(msg.createdAt)
-//             }))
-//           }))
-          
-//           setCachedConversations(conversationsWithDates)
-//         }
-//       } catch (e) {
-//         console.error("Error loading data from localStorage:", e)
-//       }
-//     }
-//   }, [])
-
-//   // Save read conversations to localStorage whenever it changes
-//   useEffect(() => {
-//     if (typeof window !== "undefined" && readConversations.size > 0) {
-//       try {
-//         localStorage.setItem("readConversations", JSON.stringify(Array.from(readConversations)))
-//       } catch (e) {
-//         console.error("Error saving read conversations to localStorage:", e)
-//       }
-//     }
-//   }, [readConversations])
-
-//   // Cache conversations whenever they change and we're online
-//   useEffect(() => {
-//     if (typeof window !== "undefined" && conversations.length > 0 && !isOffline) {
-//       try {
-//         localStorage.setItem("cachedConversations", JSON.stringify(conversations))
-//       } catch (e) {
-//         console.error("Error caching conversations to localStorage:", e)
-//       }
-//     }
-//   }, [conversations, isOffline])
-
-//   // Monitor online/offline status
-//   useEffect(() => {
-//     const handleOnline = () => {
-//       // Only show reconnected banner if we were previously offline
-//       if (!networkStatusRef.current.online) {
-//         setShowReconnectedBanner(true)
-//         setTimeout(() => fetchChats(), 500) // Refresh data after coming back online
-//       }
-//       setIsOffline(false)
-//       networkStatusRef.current.online = true
-//     }
-
-//     const handleOffline = () => {
-//       setIsOffline(true)
-//       networkStatusRef.current.online = false
-//       networkStatusRef.current.lastOffline = Date.now()
-      
-//       // If polling is active, pause it
-//       if (pollingIntervalRef.current) {
-//         clearInterval(pollingIntervalRef.current)
-//         pollingIntervalRef.current = null
-//       }
-//     }
-
-//     // Check current status
-//     if (typeof navigator !== 'undefined') {
-//       setIsOffline(!navigator.onLine)
-//       networkStatusRef.current.online = navigator.onLine
-//     }
-
-//     // Add event listeners for online/offline events
-//     window.addEventListener('online', handleOnline)
-//     window.addEventListener('offline', handleOffline)
-
-//     return () => {
-//       window.removeEventListener('online', handleOnline)
-//       window.removeEventListener('offline', handleOffline)
-//     }
-//   }, [])
-
-//   // Use cached conversations when offline
-//   useEffect(() => {
-//     if (isOffline && cachedConversations.length > 0) {
-//       setConversations(cachedConversations)
-//       setFilteredConversations(cachedConversations)
-//       setIsLoading(false)
-//     }
-//   }, [isOffline, cachedConversations])
-
-//   // Initialize audio element
-//   useEffect(() => {
-//     if (typeof window !== "undefined") {
-//       // Create a new audio element
-//       const audio = new Audio("/message-notification.mp3")
-
-//       // Preload the audio
-//       audio.load()
-
-//       // Store the audio element in the ref
-//       audioRef.current = audio
-
-//       // Add event listeners for debugging
-//       audio.addEventListener("play", () => console.log("Audio started playing"))
-//       audio.addEventListener("error", (e) => console.error("Audio error:", e))
-
-//       // Clean up function
-//       return () => {
-//         if (audioRef.current) {
-//           audioRef.current.pause()
-//           audioRef.current = null
-//         }
-//       }
-//     }
-//   }, [])
-
-//   // Play notification sound function
-//   const playNotificationSound = useCallback(() => {
-//     if (!soundEnabled || !audioRef.current) return
-
-//     try {
-//       // Reset the audio to the beginning
-//       audioRef.current.currentTime = 0
-
-//       // Play the sound
-//       const playPromise = audioRef.current.play()
-
-//       // Handle promise rejection (happens when browser prevents autoplay)
-//       if (playPromise !== undefined) {
-//         playPromise.catch((error) => {
-//           console.error("Audio play failed:", error)
-//           // Try again with user interaction
-//           document.addEventListener(
-//             "click",
-//             function playOnClick() {
-//               audioRef.current?.play().catch((e) => console.error("Play on click failed:", e))
-//               document.removeEventListener("click", playOnClick)
-//             },
-//             { once: true },
-//           )
-//         })
-//       }
-//     } catch (e) {
-//       console.error("Error playing sound:", e)
-//     }
-//   }, [soundEnabled])
-
-//   const getAvatarUrl = () => {
-//     return `https://source.unsplash.com/random/100x100?portrait&${Math.random()}`
-//   }
-
-//   // Function to try reconnecting manually
-//   const handleManualReconnect = () => {
-//     if (typeof navigator !== 'undefined' && navigator.onLine) {
-//       // We're already online according to the browser
-//       setIsOffline(false)
-//       fetchChats()
-      
-//       // Restart polling
-//       if (!pollingIntervalRef.current) {
-//         pollingIntervalRef.current = setInterval(() => {
-//           // Only poll if online
-//           if (navigator.onLine) {
-//             fetchChats(true) // preserve read status when polling
-//           }
-//         }, 5000)
-//       }
-//     } else {
-//       // Still offline, show a message
-//       setError("Still offline. Please check your internet connection.")
-//       setTimeout(() => setError(null), 3000)
-//     }
-//   }
-
-//   // Filter conversations based on search query and active filter
-//   useEffect(() => {
-//     if (!conversations.length) {
-//       setFilteredConversations([])
-//       return
-//     }
-
-//     let filtered = [...conversations]
-
-//     // Apply search filter
-//     if (searchQuery.trim()) {
-//       const query = searchQuery.toLowerCase()
-//       filtered = filtered.filter((conv) => {
-//         // Search in messages
-//         const hasMatchingMessage = conv.messages.some((msg) => msg.content.toLowerCase().includes(query))
-
-//         // Search in conversation ID or other properties
-//         const matchesId = conv.id.toLowerCase().includes(query)
-
-//         return hasMatchingMessage || matchesId
-//       })
-//     }
-
-//     // Apply category filter
-//     if (activeFilter === "unread") {
-//       filtered = filtered.filter((conv) => conv.unreadCount > 0)
-//     } else if (activeFilter === "recent") {
-//       // Sort by most recent and take top 5
-//       filtered = filtered.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 5)
-//     }
-
-//     // Sort pinned conversations to the top
-//     filtered.sort((a, b) => {
-//       if (pinnedConversations.has(a.id) && !pinnedConversations.has(b.id)) return -1
-//       if (!pinnedConversations.has(a.id) && pinnedConversations.has(b.id)) return 1
-//       return b.updatedAt.getTime() - a.updatedAt.getTime()
-//     })
-
-//     setFilteredConversations(filtered)
-//   }, [conversations, searchQuery, activeFilter, pinnedConversations])
-
-//   const fetchChats = useCallback(
-//     async (preserveReadStatus = false) => {
-//       // Skip fetching if we're offline
-//       if (isOffline) {
-//         console.log("Skipping fetch while offline")
-//         return
-//       }
-
-//       if (!automationId) {
-//         setError("Missing automation ID")
-//         setIsLoading(false)
-//         return
-//       }
-
-//       // Don't set error to null if we're preserving read status (polling)
-//       // This prevents UI flicker during background polling
-//       if (!preserveReadStatus) {
-//         setError(null)
-//       }
-
-//       try {
-//         // Increment fetch attempts
-//         fetchAttemptsRef.current += 1
-
-//         if (!preserveReadStatus) {
-//           console.log(`Fetching chats for automation ID: ${automationId}, attempt: ${fetchAttemptsRef.current}`)
-//         }
-
-//         const result = await fetchChatsAndBusinessVariables(automationId)
-
-//         // Reset fetch attempts on success
-//         fetchAttemptsRef.current = 0
-
-//         if (!result || typeof result !== "object") {
-//           throw new Error("Invalid response from server")
-//         }
-
-//         const { conversations, token, businessVariables } = result as {
-//           conversations: RawConversation[]
-//           token: string
-//           businessVariables: BusinessVariables
-//         }
-
-//         if (!Array.isArray(conversations)) {
-//           throw new Error("Conversations data is not in the expected format")
-//         }
-
-//         // Map of existing conversations to preserve read status
-//         const existingConversationsMap = new Map(
-//           preserveReadStatus
-//             ? conversations.map((conv) => [
-//                 conv.chatId,
-//                 conversations
-//                   .find((c) => c.chatId === conv.chatId)
-//                   ?.messages.map((m) => ({ id: m.id, read: m.read })) || [],
-//               ])
-//             : [],
-//         )
-
-//         const filteredConversations = conversations
-//           .filter((conv) => conv.chatId !== EXCLUDED_CHAT_ID)
-//           .map((conv): Conversation => {
-//             // Get existing message read statuses if preserving
-//             const existingMessages = preserveReadStatus ? existingConversationsMap.get(conv.chatId) || [] : []
-
-//             // Map messages and preserve read status for existing messages
-//             const mappedMessages = conv.messages.map((msg): Message => {
-//               const existingMsg = existingMessages.find((m) => m.id === msg.id)
-
-//               // If this conversation was manually marked as read in localStorage, mark all messages as read
-//               const isRead = readConversations.has(conv.chatId)
-//                 ? true
-//                 : existingMsg
-//                   ? existingMsg.read
-//                   : Boolean(msg.read)
-
-//               return {
-//                 id: msg.id,
-//                 role: msg.role,
-//                 content: msg.content,
-//                 senderId: msg.senderId,
-//                 createdAt: new Date(msg.createdAt),
-//                 read: isRead,
-//               }
-//             })
-
-//             return {
-//               id: conv.chatId,
-//               userId: conv.messages[0]?.senderId || conv.chatId,
-//               pageId: conv.pageId,
-//               messages: mappedMessages,
-//               createdAt: new Date(conv.messages[0]?.createdAt ?? Date.now()),
-//               updatedAt: new Date(conv.messages[conv.messages.length - 1]?.createdAt ?? Date.now()),
-//               unreadCount: readConversations.has(conv.chatId) ? 0 : mappedMessages.filter((msg) => !msg.read).length,
-//             //   Automation? 0 : mappedMessages.filter((msg) => !msg.read).length,
-//               Automation: null,
-//             }
-//           })
-
-//         // Check for new messages
-//         if (preserveReadStatus && conversations.length > 0) {
-//           const currentConversationsMap = new Map(conversations.map((conv) => [conv.chatId, conv.messages.length]))
-
-//           // Compare with previous state to detect new messages
-//           let hasNew = false
-//           let newMessageConversationId = null
-
-//           setConversations((prevConvs) => {
-//             prevConvs.forEach((prevConv) => {
-//               const newMsgCount = currentConversationsMap.get(prevConv.id) || 0
-//               const prevMsgCount = prevConv.messages.length
-
-//               if (newMsgCount > prevMsgCount) {
-//                 // Check if this is truly a new message (not just a refresh)
-//                 const lastMessageTime = lastMessageTimeRef.current[prevConv.id] || 0
-//                 const latestMessageTime = new Date(
-//                   conversations.find((c) => c.chatId === prevConv.id)?.messages[newMsgCount - 1]?.createdAt || 0,
-//                 ).getTime()
-
-//                 // Only consider it new if the message timestamp is newer than what we've seen
-//                 if (latestMessageTime > lastMessageTime) {
-//                   hasNew = true
-//                   newMessageConversationId = prevConv.id
-//                   lastMessageTimeRef.current[prevConv.id] = latestMessageTime
-//                 }
-//               }
-//             })
-//             return prevConvs
-//           })
-
-//           if (hasNew) {
-//             setHasNewMessages(true)
-
-//             // Only play sound if we're not currently viewing the conversation with new messages
-//             if (selectedConversation?.id !== newMessageConversationId) {
-//               playNotificationSound()
-//             }
-//           }
-//         }
-
-//         filteredConversations.sort((a, b) => {
-//           const lastMessageA = a.messages[a.messages.length - 1]
-//           const lastMessageB = b.messages[b.messages.length - 1]
-//           return new Date(lastMessageB.createdAt).getTime() - new Date(lastMessageA.createdAt).getTime()
-//         })
-
-//         // Update conversations state without affecting the selected conversation
-//         setConversations((prevConversations) => {
-//           // If we're preserving read status and have a selected conversation,
-//           // make sure we don't reset its read status
-//           if (preserveReadStatus && selectedConversation) {
-//             const updatedConversations = [...filteredConversations]
-//             const selectedIndex = updatedConversations.findIndex((c) => c.id === selectedConversation.id)
-
-//             if (selectedIndex !== -1) {
-//               // Keep the messages as read for the selected conversation
-//               updatedConversations[selectedIndex] = {
-//                 ...updatedConversations[selectedIndex],
-//                 messages: updatedConversations[selectedIndex].messages.map((m) => ({ ...m, read: true })),
-//                 unreadCount: 0,
-//               }
-//             }
-
-//             return updatedConversations
-//           }
-
-//           return filteredConversations
-//         })
-
-//         // Update unread chats set
-//         setUnreadChats(new Set(filteredConversations.filter((conv) => conv.unreadCount > 0).map((conv) => conv.id)))
-//         setTotalUnreadMessages(filteredConversations.reduce((total, conv) => total + conv.unreadCount, 0))
-
-//         if (filteredConversations.length > 0 && !pageId) {
-//           setPageId(filteredConversations[0].pageId)
-//         }
-
-//         if (token) {
-//           setToken(token)
-//         }
-
-//         if (businessVariables) {
-//           setBusinessVariables(businessVariables)
-//         }
-
-//         // Only update selected conversation if it exists in the new data
-//         // and we're not in the middle of a conversation
-//         if (selectedConversation) {
-//           const updatedSelectedConv = filteredConversations.find((conv) => conv.id === selectedConversation.id)
-//           if (updatedSelectedConv) {
-//             // Preserve the read status of messages in the selected conversation
-//             const updatedWithReadStatus = {
-//               ...updatedSelectedConv,
-//               messages: updatedSelectedConv.messages.map((msg) => ({
-//                 ...msg,
-//                 read: true,
-//               })),
-//               unreadCount: 0,
-//             }
-
-//             // Only update if there are new messages
-//             if (updatedSelectedConv.messages.length > selectedConversation.messages.length) {
-//               setSelectedConversation(updatedWithReadStatus)
-
-//               // Update displayed messages with new messages
-//               const newMessages = updatedSelectedConv.messages.slice(selectedConversation.messages.length)
-//               setDisplayedMessages((prev) => [...prev, ...newMessages.map((msg) => ({ ...msg, read: true }))])
-
-//               // Scroll to bottom when new messages arrive
-//               setTimeout(() => {
-//                 if (scrollRef.current) {
-//                   scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-//                 }
-//               }, 100)
-//             }
-//           }
-//         }
-
-//         // Set loading to false after successful fetch
-//         if (!preserveReadStatus) {
-//           setIsLoading(false)
-//         }
-//       } catch (error) {
-//         console.error("Error fetching chats:", error)
-
-//         // Check if the error is due to network connectivity
-//         if (!navigator.onLine) {
-//           setIsOffline(true)
-          
-//           // If we have cached conversations, use them
-//           if (cachedConversations.length > 0) {
-//             setConversations(cachedConversations)
-//             setFilteredConversations(cachedConversations)
-//             setIsLoading(false)
-//           } else {
-//             setError("You are offline. Please check your internet connection.")
-//           }
-          
-//           return
-//         }
-
-//         // Only show error after multiple attempts and not during background polling
-//         if (!preserveReadStatus && fetchAttemptsRef.current > 3) {
-//           setError(`Getting things ready... (Attempt ${fetchAttemptsRef.current})`)
-//         }
-
-//         // Exponential backoff for retries (max 10 seconds)
-//         const retryDelay = Math.min(2000 * Math.pow(1.5, fetchAttemptsRef.current - 1), 10000)
-
-//         // Retry after delay if online
-//         if (navigator.onLine) {
-//           setTimeout(() => {
-//             fetchChats(preserveReadStatus)
-//           }, retryDelay)
-//         }
-//       }
-//     },
-//     [automationId, selectedConversation, playNotificationSound, pageId, readConversations, isOffline, cachedConversations],
-// )
-
-//   useEffect(() =>
-// {
-//   // Initial fetch - only if online
-//   if (navigator.onLine) {
-//     fetchChats()
-//   } else {
-//     // We're offline at startup, show cached data if available
-//     setIsOffline(true)
-//     if (cachedConversations.length > 0) {
-//       setConversations(cachedConversations)
-//       setFilteredConversations(cachedConversations)
-//     }
-//     setIsLoading(false)
-//   }
-
-//   // Set up polling for real-time updates - only when online
-//   if (navigator.onLine) {
-//     pollingIntervalRef.current = setInterval(() => {
-//       // Only poll if component is mounted and we're online
-//       if (navigator.onLine) {
-//         fetchChats(true) // preserve read status when polling
-//       }
-//     }, 5000) // Poll every 5 seconds
-//   }
-
-//   // Clean up interval on unmount
-//   return () => {
-//       if (pollingIntervalRef.current) {
-//         clearInterval(pollingIntervalRef.current)
-//         pollingIntervalRef.current = null
-//       }
-//     }
-// }
-// , [fetchChats, cachedConversations])
-
-//   useEffect(() =>
-// {
-//   if (scrollRef.current) {
-//     scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-//   }
-// }
-// , [displayedMessages])
-
-//   // Keyboard shortcuts
-//   useEffect(() =>
-// {
-//   const handleKeyDown = (e: KeyboardEvent) => {
-//     // Don't trigger shortcuts when typing in input fields
-//     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-//       // Allow Escape key to close conversation even when in input
-//       if (e.key === "Escape" && selectedConversation) {
-//         e.preventDefault()
-//         setSelectedConversation(null)
-//         return
-//       }
-
-//       return
-//     }
-
-//     // Keyboard shortcuts
-//     switch (e.key) {
-//       case "n":
-//       case "N":
-//         // Focus message input if in conversation
-//         if (selectedConversation && messageInputRef.current) {
-//           e.preventDefault()
-//           messageInputRef.current.focus()
-//         }
-//         break
-
-//       case "k":
-//         if (e.ctrlKey || e.metaKey) {
-//           e.preventDefault()
-//           searchInputRef.current?.focus()
-//         }
-//         break
-
-//       case "Escape":
-//         if (selectedConversation) {
-//           e.preventDefault()
-//           setSelectedConversation(null)
-//         }
-//         break
-
-//       case "m":
-//       case "M":
-//         e.preventDefault()
-//         setSoundEnabled((prev) => !prev)
-//         break
-
-//       case "a":
-//       case "A":
-//         if (e.shiftKey) {
-//           e.preventDefault()
-//           markAllAsRead()
-//         }
-//         break
-
-//       case "?":
-//         e.preventDefault()
-//         setShowHelpModal(true)
-//         break
-//     }
-//   }
-
-//   document.addEventListener("keydown", handleKeyDown)
-//   return () => document.removeEventListener("keydown", handleKeyDown)
-// }
-// , [selectedConversation])
-
-// const handleSendMessage = async () => {
-//   if (!newMessage.trim() || !selectedConversation) return
-
-//   // Prevent sending if we're offline
-//   if (isOffline) {
-//     setError("Can't send messages while offline. Please check your connection.")
-//     setTimeout(() => setError(null), 3000)
-//     return
-//   }
-
-//   if (!token || !pageId) {
-//     setError("Missing authentication token or page ID")
-//     return
-//   }
-
-//   setIsTyping(true)
-//   setError(null)
-
-//   try {
-//     const userId = `${pageId}_${selectedConversation.userId}`
-//     const result = await sendMessage(newMessage, userId, pageId, automationId, token, businessVariables)
-
-//     if (result.success && result.userMessage) {
-//       const userMessage: Message = {
-//         id: Date.now().toString(),
-//         role: "user",
-//         content: result.userMessage.content,
-//         senderId: selectedConversation.userId,
-//         receiverId: pageId,
-//         createdAt: result.userMessage.timestamp,
-//         status: "sent",
-//         read: true,
-//       }
-
-//       setSelectedConversation((prev) => {
-//         if (!prev) return null
-//         const updatedMessages = [...prev.messages, userMessage]
-//         return { ...prev, messages: updatedMessages }
-//       })
-
-//       setConversations((prevConversations) => {
-//         const updatedConversations = prevConversations.map((conv) =>
-//           conv.id === selectedConversation.id ? { ...conv, messages: [...conv.messages, userMessage] } : conv,
-//         )
-
-//         return updatedConversations.sort((a, b) => {
-//           const lastMessageA = a.messages[a.messages.length - 1]
-//           const lastMessageB = b.messages[b.messages.length - 1]
-//           return new Date(lastMessageB.createdAt).getTime() - new Date(lastMessageA.createdAt).getTime()
-//         })
-//       })
-
-//       setNewMessage("")
-
-//       setDisplayedMessages((prev) => [...prev, userMessage])
-
-//       // Scroll to the bottom after sending a message
-//       if (scrollRef.current) {
-//         scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-//       }
-//     } else {
-//       console.error("Failed to send message:", result.message)
-//       setError(`Failed to send message: ${result.message || "Unknown error"}`)
-//     }
-//   } catch (error) {
-//     console.error("Error sending message:", error)
-
-//     // Check if this is a network error
-//     if (!navigator.onLine) {
-//       setIsOffline(true)
-//       setError("You are offline. Messages can't be sent until you reconnect.")
-//     } else {
-//       setError(`Error sending message: ${error instanceof Error ? error.message : "Unknown error"}`)
-//     }
-//   } finally {
-//     setIsTyping(false)
-//   }
-// }
-
-// const handleEmojiSelect = (emoji: any) => {
-//   setNewMessage((prev) => prev + emoji.native)
-//   setShowEmojiPicker(false)
-//   messageInputRef.current?.focus()
-// }
-
-// const handleVoiceMessage = () => {
-//   if (isOffline) {
-//     setError("Voice messages are not available while offline")
-//     setTimeout(() => setError(null), 3000)
-//     return
-//   }
-
-//   setIsRecording(!isRecording)
-// }
-
-// const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-//   if (isOffline) {
-//     setError("File uploads are not available while offline")
-//     setTimeout(() => setError(null), 3000)
-//     return
-//   }
-
-//   const file = event.target.files?.[0]
-//   if (file) {
-//     console.log("File selected:", file.name)
-//   }
-// }
-
-// const getFancyName = (userId: string) => {
-//   const names = ["Client", "Client", "Client"]
-//   return names[Math.floor(Math.random() * names.length)]
-// }
-
-// const markAllAsRead = () => {
-//   // Create a new set with all conversation IDs
-//   const allConversationIds = new Set(conversations.map((conv) => conv.id))
-//   setReadConversations(allConversationIds)
-
-//   // Update conversations to mark all as read
-//   setConversations((prevConversations) =>
-//     prevConversations.map((conv) => ({
-//       ...conv,
-//       messages: conv.messages.map((msg) => ({ ...msg, read: true })),
-//       unreadCount: 0,
-//     })),
-//   )
-
-//   // Clear unread chats
-//   setUnreadChats(new Set())
-//   setTotalUnreadMessages(0)
-//   setHasNewMessages(false)
-// }
-
-// const handleSelectConversation = (conversation: Conversation) => {
-//   // Add this conversation to the read conversations set
-//   setReadConversations((prev) => {
-//     const newSet = new Set(prev)
-//     newSet.add(conversation.id)
-//     return newSet
-//   })
-
-//   // Create a copy with all messages marked as read
-//   const conversationWithReadMessages = {
-//     ...conversation,
-//     messages: conversation.messages.map((msg) => ({ ...msg, read: true })),
-//     unreadCount: 0,
-//   }
-
-//   // Set the selected conversation first
-//   setSelectedConversation(conversationWithReadMessages)
-
-//   // Update unread chats
-//   setUnreadChats((prev) => {
-//     const newUnreadChats = new Set(prev)
-//     newUnreadChats.delete(conversation.id)
-//     return newUnreadChats
-//   })
-
-//   // Update total unread count
-//   setTotalUnreadMessages((prev) => Math.max(0, prev - (conversation.unreadCount ?? 0)))
-
-//   // Set displayed messages
-//   const lastMessages = conversation.messages.slice(-10)
-//   setDisplayedMessages(lastMessages.map((msg) => ({ ...msg, read: true })))
-
-//   // Find unread separator index
-//   const unreadIndex = lastMessages.findIndex((msg) => !msg.read)
-//   setUnreadSeparatorIndex(unreadIndex !== -1 ? unreadIndex : null)
-
-//   // Update conversations with read messages
-//   setConversations((prevConversations) =>
-//     prevConversations.map((conv) => (conv.id === conversation.id ? conversationWithReadMessages : conv)),
-//   )
-
-//   // Reset new message indicator when viewing the conversation
-//   setHasNewMessages(false)
-
-//   // Focus the message input
-//   setTimeout(() => {
-//     messageInputRef.current?.focus()
-//   }, 100)
-// }
-
-// const handleDeleteConversation = (conversation: Conversation) => {
-//   setConversationToDelete(conversation)
-//   setIsDeleteModalOpen(true)
-// }
-
-// const confirmDelete = async () => {
-//   if (!conversationToDelete || !pageId) return
-
-//   try {
-//     setConversations((prev) => prev.filter((conv) => conv.id !== conversationToDelete.id))
-//     if (selectedConversation?.id === conversationToDelete.id) {
-//       setSelectedConversation(null)
-//     }
-
-//     // Also remove from cached conversations
-//     setCachedConversations((prev) => prev.filter((conv) => conv.id !== conversationToDelete.id))
-
-//     // Update localStorage with the updated cachedConversations
-//     if (typeof window !== "undefined") {
-//       try {
-//         const updatedCachedConversations = cachedConversations.filter((conv) => conv.id !== conversationToDelete.id)
-//         localStorage.setItem("cachedConversations", JSON.stringify(updatedCachedConversations))
-//       } catch (e) {
-//         console.error("Error updating cached conversations in localStorage:", e)
-//       }
-//     }
-
-//     // Remove from pinned/starred if needed
-//     if (pinnedConversations.has(conversationToDelete.id)) {
-//       setPinnedConversations((prev) => {
-//         const newSet = new Set(prev)
-//         newSet.delete(conversationToDelete.id)
-//         return newSet
-//       })
-//     }
-
-//     if (starredConversations.has(conversationToDelete.id)) {
-//       setStarredConversations((prev) => {
-//         const newSet = new Set(prev)
-//         newSet.delete(conversationToDelete.id)
-//         return newSet
-//       })
-//     }
-//   } catch (error) {
-//     console.error("Error deleting conversation:", error)
-//     setError(`Failed to delete conversation: ${error instanceof Error ? error.message : String(error)}`)
-//   } finally {
-//     setIsDeleteModalOpen(false)
-//     setConversationToDelete(null)
-//   }
-// }
-
-// const getActivityStatus = (lastActive: Date) => {
-//   const now = new Date()
-//   const diffInMinutes = Math.floor((now.getTime() - lastActive.getTime()) / 60000)
-
-//   if (diffInMinutes < 1) return "Active now"
-//   if (diffInMinutes < 60) return `Active ${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`
-
-//   const diffInHours = Math.floor(diffInMinutes / 60)
-//   if (diffInHours < 24) return `Active ${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`
-
-//   const diffInDays = Math.floor(diffInHours / 24)
-//   return `Active ${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`
-// }
-
-// const ActiveNowIndicator = () => (
-//   <span className="relative flex h-3 w-3 ml-2">
-//     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-//     <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-//   </span>
-// )
-
-// const generateAiSuggestion = useCallback(() => {
-//   const suggestions = [
-//     "Would you like to know more about our products?",
-//     "Can I assist you with anything specific today?",
-//     "Have you checked out our latest offers?",
-//     "Is there anything else I can help you with?",
-//   ]
-//   setAiSuggestion(suggestions[Math.floor(Math.random() * suggestions.length)])
-// }, [])
-
-// useEffect(() => {
-//   if (selectedConversation && selectedConversation.messages.length > 0) {
-//     const lastMessage = selectedConversation.messages[selectedConversation.messages.length - 1]
-//     if (lastMessage && lastMessage.role === "user") {
-//       generateAiSuggestion()
-//     }
-//   }
-// }, [selectedConversation, generateAiSuggestion])
-
-// const togglePinConversation = (conversationId: string, e: React.MouseEvent) => {
-//   e.stopPropagation()
-//   setPinnedConversations((prev) => {
-//     const newSet = new Set(prev)
-//     if (newSet.has(conversationId)) {
-//       newSet.delete(conversationId)
-//     } else {
-//       newSet.add(conversationId)
-//     }
-//     return newSet
-//   })
-// }
-
-// const toggleStarConversation = (conversationId: string, e: React.MouseEvent) => {
-//   e.stopPropagation()
-//   setStarredConversations((prev) => {
-//     const newSet = new Set(prev)
-//     if (newSet.has(conversationId)) {
-//       newSet.delete(conversationId)
-//     } else {
-//       newSet.add(conversationId)
-//     }
-//     return newSet
-//   })
-// }
-
-// const FancyErrorMessage: React.FC<{ message: string }> = ({ message }) => {
-//   return (
-//     <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-//       <motion.div
-//         initial={{ scale: 0 }}
-//         animate={{ scale: 1 }}
-//         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-//       >
-//         <Zap className="w-16 h-16 text-yellow-400 mb-4" />
-//       </motion.div>
-//       <h3 className="text-xl font-semibold mb-2">Hang tight!</h3>
-//       <p className="text-muted-foreground mb-4">{message}</p>
-//       <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}>
-//         <Loader2 className="w-6 h-6 text-primary animate-spin" />
-//       </motion.div>
-//     </div>
-//   )
-// }
-
-// const loadMoreMessages = useCallback(() => {
-//   if (selectedConversation) {
-//     const currentLength = displayedMessages.length
-//     const newMessages = selectedConversation.messages.slice(
-//       Math.max(0, selectedConversation.messages.length - currentLength - 10),
-//       selectedConversation.messages.length - currentLength,
-//     )
-//     setDisplayedMessages((prevMessages) => [...newMessages, ...prevMessages])
-//   }
-// }, [selectedConversation, displayedMessages])
-
-// useEffect(() => {
-//   if (selectedConversation) {
-//     const lastMessages = selectedConversation.messages.slice(-10)
-//     setDisplayedMessages(lastMessages)
-//   }
-// }, [selectedConversation])
-
-// useEffect(() => {
-//   const scrollArea = scrollRef.current
-//   if (!scrollArea) return
-
-//   const handleScroll = () => {
-//     if (scrollArea.scrollTop === 0) {
-//       loadMoreMessages()
-//     }
-//   }
-
-//   scrollArea.addEventListener("scroll", handleScroll)
-//   return () => scrollArea.removeEventListener("scroll", handleScroll)
-// }, [loadMoreMessages])
-
-// useEffect(() => {
-//   // Update document title with unread count
-//   if (totalUnreadMessages > 0) {
-//     document.title = `(${totalUnreadMessages}) New Messages`
-//   } else {
-//     document.title = "Chat Dashboard"
-//   }
-
-//   return () => {
-//     document.title = "Chat Dashboard"
-//   }
-// }, [totalUnreadMessages])
-
-// // Render conversation list item
-// const ConversationListItem = ({ conversation }: { conversation: Conversation }) => {
-//   const isPinned = pinnedConversations.has(conversation.id)
-//   const isStarred = starredConversations.has(conversation.id)
-//   const isUnread = conversation.unreadCount > 0
-
-//   return (
-//     <motion.div
-//       key={conversation.id}
-//       initial={{ opacity: 0, y: 10 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.2 }}
-//       className={cn(
-//         "p-4 bg-background rounded-lg shadow-md hover:bg-muted cursor-pointer transition-colors duration-200 relative",
-//         isPinned && "border-l-4 border-blue-500",
-//         isUnread && "bg-background/90 border-l-4 border-red-500",
-//       )}
-//       onClick={() => handleSelectConversation(conversation)}
-//     >
-//       <div className="flex items-start space-x-3">
-//         <Avatar className="w-12 h-12 relative border-2 border-primary flex-shrink-0">
-//           <AvatarImage src={getAvatarUrl()} />
-//           <AvatarFallback>{getFancyName(conversation.id).slice(0, 2)}</AvatarFallback>
-//           {isUnread && (
-//             <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 transform translate-x-1/2 -translate-y-1/2"></span>
-//           )}
-//         </Avatar>
-
-//         <div className="flex-grow overflow-hidden">
-//           <div className="flex items-center justify-between mb-1">
-//             <div className="flex items-center">
-//               <p className={cn("font-medium text-sm text-foreground", isUnread && "font-bold")}>
-//                 {getFancyName(conversation.id)}
-//               </p>
-//               {isPinned && (
-//                 <Badge variant="outline" className="ml-2 px-1">
-//                   <Pin className="h-3 w-3 text-blue-500" />
-//                 </Badge>
-//               )}
-//               {isStarred && (
-//                 <Badge variant="outline" className="ml-2 px-1">
-//                   <Star className="h-3 w-3 text-yellow-500" />
-//                 </Badge>
-//               )}
-//             </div>
-//             <span className="text-xs text-muted-foreground">
-//               {new Date(conversation.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-//             </span>
-//           </div>
-
-//           <p className="text-xs text-muted-foreground flex items-center mb-1">
-//             {getActivityStatus(conversation.updatedAt)}
-//             {getActivityStatus(conversation.updatedAt) === "Active now" && <ActiveNowIndicator />}
-//           </p>
-
-//           <p className={cn("text-sm text-muted-foreground truncate", isUnread && "text-foreground font-medium")}>
-//             {conversation.messages.length > 0
-//               ? conversation.messages[conversation.messages.length - 1].content
-//               : "No messages"}
-//           </p>
-
-//           <div className="flex justify-between items-center mt-2">
-//             <div className="flex space-x-1">
-//               <Button
-//                 variant="ghost"
-//                 size="icon"
-//                 className="h-7 w-7 rounded-full"
-//                 onClick={(e) => togglePinConversation(conversation.id, e)}
-//               >
-//                 <Pin className={cn("h-4 w-4", isPinned ? "text-blue-500 fill-blue-500" : "text-muted-foreground")} />
-//               </Button>
-
-//               <Button
-//                 variant="ghost"
-//                 size="icon"
-//                 className="h-7 w-7 rounded-full"
-//                 onClick={(e) => toggleStarConversation(conversation.id, e)}
-//               >
-//                 <Star
-//                   className={cn("h-4 w-4", isStarred ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground")}
-//                 />
-//               </Button>
-
-//               <Button
-//                 variant="ghost"
-//                 size="icon"
-//                 className="h-7 w-7 rounded-full"
-//                 onClick={(e) => {
-//                   e.stopPropagation()
-//                   handleDeleteConversation(conversation)
-//                 }}
-//               >
-//                 <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
-//               </Button>
-//             </div>
-
-//             {isUnread && (
-//               <Badge variant="destructive" className="text-xs">
-//                 {conversation.unreadCount}
-//               </Badge>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </motion.div>
-//   )
-// }
-
-// // Update the main component's return statement to include the new unread chats section
-// // Replace the existing return statement with this improved version
-// return (
-//     <>
-//       {/* Add audio element for notification sound */}
-//       <audio id="notification-sound" src="/message-notification.mp3" preload="auto" />
-
-//       <NotificationIndicator
-//         show={hasNewMessages && !selectedConversation}
-//         onClick={() => {
-//           // Find the first unread conversation and open it
-//           const firstUnread = conversations.find((conv) => conv.unreadCount > 0)
-//           if (firstUnread) {
-//             handleSelectConversation(firstUnread)
-//           }
-//         }}
-//       />
-
-//       <AnimatePresence>
-//         {showHelpModal && <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />}
-//       </AnimatePresence>
-
-//       <ShimmeringBorder>
-//         <div
-//           className={`flex flex-col ${fancyBackground} text-foreground rounded-lg overflow-hidden h-full max-h-[90vh] sm:max-h-[80vh]`}
-//         >
-//           {isLoading ? (
-//             <FancyLoader />
-//           ) : error ? (
-//             <FancyErrorMessage message={error} />
-//           ) : (
-//             <>
-//               {selectedConversation ? (
-//                 <>
-//                   <div className="p-2 sm:p-4 bg-background border-b border-primary/10 flex items-center">
-//                     <Button variant="ghost" className="mr-4 p-2" onClick={() => setSelectedConversation(null)}>
-//                       <ArrowLeft size={20} />
-//                     </Button>
-//                     <Avatar className="w-10 h-10">
-//                       <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${selectedConversation.id}`} />
-//                       <AvatarFallback>{getFancyName(selectedConversation.id).slice(0, 2)}</AvatarFallback>
-//                     </Avatar>
-//                     <div className="ml-3 flex-grow">
-//                       <h4 className="font-medium text-lg">{getFancyName(selectedConversation.id)}</h4>
-//                       {selectedConversation && selectedConversation.messages.length > 0 && (
-//                         <p className="text-sm text-muted-foreground flex items-center">
-//                           {getActivityStatus(
-//                             new Date(selectedConversation.messages[selectedConversation.messages.length - 1].createdAt),
-//                           )}
-//                           {getActivityStatus(
-//                             new Date(selectedConversation.messages[selectedConversation.messages.length - 1].createdAt),
-//                           ) === "Active now" && <ActiveNowIndicator />}
-//                         </p>
-//                       )}
-//                     </div>
-
-//                     <div className="flex items-center space-x-2">
-//                       <TooltipProvider>
-//                         <Tooltip>
-//                           <TooltipTrigger asChild>
-//                             <Button variant="ghost" size="icon" className="rounded-full">
-//                               <Phone className="h-5 w-5 text-muted-foreground" />
-//                             </Button>
-//                           </TooltipTrigger>
-//                           <TooltipContent>
-//                             <p>Call</p>
-//                           </TooltipContent>
-//                         </Tooltip>
-//                       </TooltipProvider>
-
-//                       <TooltipProvider>
-//                         <Tooltip>
-//                           <TooltipTrigger asChild>
-//                             <Button variant="ghost" size="icon" className="rounded-full">
-//                               <Video className="h-5 w-5 text-muted-foreground" />
-//                             </Button>
-//                           </TooltipTrigger>
-//                           <TooltipContent>
-//                             <p>Video call</p>
-//                           </TooltipContent>
-//                         </Tooltip>
-//                       </TooltipProvider>
-
-//                       <TooltipProvider>
-//                         <Tooltip>
-//                           <TooltipTrigger asChild>
-//                             <Button variant="ghost" size="icon" className="rounded-full">
-//                               <Info className="h-5 w-5 text-muted-foreground" />
-//                             </Button>
-//                           </TooltipTrigger>
-//                           <TooltipContent>
-//                             <p>Info</p>
-//                           </TooltipContent>
-//                         </Tooltip>
-//                       </TooltipProvider>
-//                     </div>
-//                   </div>
-                  
-//                   {/* Offline/Online Status Banners */}
-//                   {isOffline && (
-//                     <OfflineStatusBanner 
-//                       isOffline={isOffline} 
-//                       onReconnect={handleManualReconnect} 
-//                     />
-//                   )}
-                  
-//                   {showReconnectedBanner && (
-//                     <ConnectionRestoredBanner 
-//                       show={showReconnectedBanner} 
-//                       onDismiss={() => setShowReconnectedBanner(false)} 
-//                     />
-//                   )}
-                  
-//                   <ScrollArea className="flex-grow h-[calc(100vh-300px)] overflow-hidden">
-//                     <div className="p-4 space-y-4" ref={scrollRef}>
-//                       {displayedMessages.length === 0 ? (
-//                         <div className="flex flex-col items-center justify-center h-64 text-center">
-//                           <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-//                           <h3 className="text-lg font-medium mb-2">No messages yet</h3>
-//                           <p className="text-muted-foreground max-w-md">
-//                             Start the conversation by sending a message below.
-//                           </p>
-//                         </div>
-//                       ) : (
-//                         <>
-//                           {displayedMessages.map((message, index) => (
-//                             <React.Fragment key={`msg-fragment-${message.id}-${index}`}>
-//                               {index === unreadSeparatorIndex && (
-//                                 <div className="flex items-center my-2">
-//                                   <div className="flex-grow border-t border-gray-600"></div>
-//                                   <span className="mx-4 px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">
-//                                     Unread messages
-//                                   </span>
-//                                   <div className="flex-grow border-t border-gray-600"></div>
-//                                 </div>
-//                               )}
-
-//                               {/* Show date separator if needed */}
-//                               {index > 0 &&
-//                                 new Date(message.createdAt).toDateString() !==
-//                                   new Date(displayedMessages[index - 1].createdAt).toDateString() && (
-//                                   <div className="flex justify-center my-4">
-//                                     <Badge variant="outline" className="bg-background/50 px-3 py-1">
-//                                       {new Date(message.createdAt).toLocaleDateString(undefined, {
-//                                         weekday: "long",
-//                                         month: "short",
-//                                         day: "numeric",
-//                                       })}
-//                                     </Badge>
-//                                   </div>
-//                                 )}
-
-//                               <motion.div
-//                                 key={`msg-${message.id}-${index}`}
-//                                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
-//                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-//                                 transition={{ duration: 0.3, delay: index * 0.05 }}
-//                                 className={`flex items-end mb-4 group ${message.role === "assistant" ? "justify-start" : "justify-end"}`}
-//                               >
-//                                 {message.role === "assistant" ? (
-//                                   <Avatar className="w-8 h-8 mr-2 border-2 border-primary">
-//                                     <AvatarImage src={BOT_AVATAR} />
-//                                     <AvatarFallback>{BOT_NAME.slice(0, 2)}</AvatarFallback>
-//                                   </Avatar>
-//                                 ) : (
-//                                   <Avatar className="w-8 h-8 ml-2 order-last border-2 border-primary">
-//                                     <AvatarImage src={`https://i.pravatar.cc/150?u=${message.senderId}`} />
-//                                     <AvatarFallback>{getFancyName("123456789").slice(0, 2)}</AvatarFallback>
-//                                   </Avatar>
-//                                 )}
-//                                 <div
-//                                   className={cn(
-//                                     "max-w-[85%] sm:max-w-[75%] p-2 sm:p-3 rounded-3xl text-sm relative",
-//                                     message.role === "assistant"
-//                                       ? "bg-gradient-to-br from-blue-400/30 to-blue-600/30 border-2 border-blue-500/50 text-white"
-//                                       : "bg-gradient-to-br from-purple-400/30 to-purple-600/30 border-2 border-purple-500/50 text-white",
-//                                   )}
-//                                   style={{
-//                                     backdropFilter: "blur(10px)",
-//                                     WebkitBackdropFilter: "blur(10px)",
-//                                   }}
-//                                 >
-//                                   <p className="break-words relative z-10">{message.content}</p>
-//                                   <div className="flex justify-between items-center mt-1 text-xs text-gray-300">
-//                                     <MessageTime time={new Date(message.createdAt)} />
-//                                     {message.role === "assistant" && (
-//                                       <div
-//                                         className={`flex items-center ${
-//                                           message.status === "sent" ? "text-green-400" : "text-green-400"
-//                                         }`}
-//                                       >
-//                                         {message.status === "sent" || true ? (
-//                                           <>
-//                                             <Check size={12} className="mr-1" />
-//                                             <span>Sent</span>
-//                                           </>
-//                                         ) : (
-//                                           <span>Failed</span>
-//                                         )}
-//                                       </div>
-//                                     )}
-//                                   </div>
-//                                   <div
-//                                     className={cn(
-//                                       "absolute inset-0 rounded-3xl opacity-20",
-//                                       message.role === "assistant"
-//                                         ? "bg-gradient-to-br from-blue-400 to-blue-600"
-//                                         : "bg-gradient-to-br from-purple-400 to-purple-600",
-//                                     )}
-//                                   ></div>
-
-//                                   {/* Message actions on hover */}
-//                                   <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity -mt-8 bg-background rounded-full shadow-md p-1 flex space-x-1">
-//                                     <TooltipProvider>
-//                                       <Tooltip>
-//                                         <TooltipTrigger asChild>
-//                                           <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
-//                                             <MoreHorizontal className="h-4 w-4" />
-//                                           </Button>
-//                                         </TooltipTrigger>
-//                                         <TooltipContent>
-//                                           <p>More options</p>
-//                                         </TooltipContent>
-//                                       </Tooltip>
-//                                     </TooltipProvider>
-//                                   </div>
-//                                 </div>
-//                               </motion.div>
-//                             </React.Fragment>
-//                           ))}
-
-//                           {/* Typing indicator */}
-//                           {isTyping && (
-//                             <div className="flex items-start">
-//                               <Avatar className="w-8 h-8 mr-2 border-2 border-primary">
-//                                 <AvatarImage src={BOT_AVATAR} />
-//                                 <AvatarFallback>{BOT_NAME.slice(0, 2)}</AvatarFallback>
-//                               </Avatar>
-//                               <div className="bg-gradient-to-br from-blue-400/30 to-blue-600/30 border-2 border-blue-500/50 rounded-3xl p-3">
-//                                 <TypingIndicator />
-//                               </div>
-//                             </div>
-//                           )}
-//                         </>
-//                       )}
-//                     </div>
-//                   </ScrollArea>
-//                   <div className="p-2 sm:p-4 bg-background border-t border-primary/10">
-//                     <div className="flex space-x-2 mb-2 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
-//                       {[
-//                         "Hello!",
-//                         "Torever",
-//                         "Hi there",
-//                         "Awesome",
-//                         "How can I help?",
-//                         "Thank you!",
-//                         "I'll get back to you soon.",
-//                         "You are welcome",
-//                       ].map((response, index) => (
-//                         <motion.button
-//                           key={index}
-//                           whileHover={{ scale: 1.05 }}
-//                           whileTap={{ scale: 0.95 }}
-//                           className={cn(
-//                             "bg-primary/20 text-primary px-3 py-1 rounded-full text-sm whitespace-nowrap",
-//                             isOffline && "opacity-50 cursor-not-allowed"
-//                           )}
-//                           onClick={() => !isOffline && setNewMessage(response)}
-//                           disabled={isOffline}
-//                         >
-//                           {response}
-//                         </motion.button>
-//                       ))}
-//                     </div>
-//                     {isTyping && (
-//                       <motion.div
-//                         initial={{ opacity: 0, y: 10 }}
-//                         animate={{ opacity: 1, y: 0 }}
-//                         exit={{ opacity: 0, y: 10 }}
-//                         className="flex items-center space-x-2 p-2 bg-muted rounded-lg mb-2"
-//                       >
-//                         <span className="text-sm text-muted-foreground">AiAssist is typing</span>
-//                         <motion.div
-//                           animate={{
-//                             scale: [1, 1.2, 1],
-//                             transition: { repeat: Number.POSITIVE_INFINITY, duration: 1 },
-//                           }}
-//                         >
-//                           <Sparkles className="h-4 w-4 text-primary" />
-//                         </motion.div>
-//                       </motion.div>
-//                     )}
-//                     <div className="flex items-center space-x-2 relative">
-//                       <Popover open={showEmojiPicker && !isOffline} onOpenChange={(open) => !isOffline && setShowEmojiPicker(open)}>
-//                         <PopoverTrigger asChild>
-//                           <Button 
-//                             variant="ghost" 
-//                             size="icon" 
-//                             className={cn(
-//                               "h-6 w-6 rounded-full flex-shrink-0",
-//                               isOffline && "opacity-50 cursor-not-allowed"
-//                             )}
-//                             disabled={isOffline}
-//                           >
-//                             <Smile className="h-5 w-5" />
-//                           </Button>
-//                         </PopoverTrigger>
-//                         <PopoverContent className="w-auto p-0">
-//                           <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="dark" />
-//                         </PopoverContent>
-//                       </Popover>
-//                       <div className="flex-grow relative">
-//                         <Textarea
-//                           ref={messageInputRef}
-//                           placeholder={isOffline ? "Can't send messages while offline..." : "Type here..."}
-//                           value={newMessage}
-//                           onChange={(e) => setNewMessage(e.target.value)}
-//                           onKeyPress={(e) => {
-//                             if (e.key === "Enter" && !e.shiftKey && !isOffline) {
-//                               e.preventDefault()
-//                               handleSendMessage()
-//                             }
-//                           }}
-//                           className={cn(
-//                             "flex-grow text-sm bg-muted border-primary/20 text-foreground placeholder-muted-foreground min-h-[36px] max-h-[96px] py-2 px-2 rounded-lg resize-none overflow-hidden w-full",
-//                             isOffline && "opacity-75"
-//                           )}
-//                           style={{ height: "36px", transition: "height 0.1s ease" }}
-//                           onInput={(e) => {
-//                             const target = e.target as HTMLTextAreaElement
-//                             target.style.height = "36px"
-//                             target.style.height = `${Math.min(target.scrollHeight, 96)}px`
-//                           }}
-//                           disabled={isOffline}
-//                         />
-//                       </div>
-//                       <div className="flex space-x-1">
-//                         <TooltipProvider>
-//                           <Tooltip>
-//                             <TooltipTrigger asChild>
-//                               <motion.button
-//                                 whileHover={{ scale: isOffline ? 1 : 1.1 }}
-//                                 whileTap={{ scale: isOffline ? 1 : 0.9 }}
-//                                 onClick={!isOffline ? handleSendMessage : undefined}
-//                                 className={cn(
-//                                   "bg-primary hover:bg-green text-primary-foreground h-7 w-7 rounded-full flex-shrink-0 flex items-center justify-center",
-//                                   isOffline && "opacity-50 cursor-not-allowed"
-//                                 )}
-//                                 disabled={isOffline}
-//                               >
-//                                 <Send className="h-5 w-5" />
-//                               </motion.button>
-//                             </TooltipTrigger>
-//                             <TooltipContent>
-//                               <p>{isOffline ? "Cant send while offline" : "Send Message"}</p>
-//                             </TooltipContent>
-//                           </Tooltip>
-//                         </TooltipProvider>
-//                         <TooltipProvider>
-//                           <Tooltip>
-//                             <TooltipTrigger asChild>
-//                               <Button
-//                                 variant="ghost"
-//                                 size="icon"
-//                                 className={cn(
-//                                   "h-6 w-6 rounded-full",
-//                                   isRecording ? "text-red-500" : "",
-//                                   isOffline && "opacity-50 cursor-not-allowed"
-//                                 )}
-//                                 onClick={!isOffline ? handleVoiceMessage : undefined}
-//                                 disabled={isOffline}
-//                               >
-//                                 <Mic className="h-5 w-5" />
-//                               </Button>
-//                             </TooltipTrigger>
-//                             <TooltipContent>
-//                               <p>{isOffline ? "Voice unavailable offline" : "Record voice message"}</p>
-//                             </TooltipContent>
-//                           </Tooltip>
-//                         </TooltipProvider>
-//                         <TooltipProvider>
-//                           <Tooltip>
-//                             <TooltipTrigger asChild>
-//                               <label htmlFor="file-upload" className={isOffline ? "cursor-not-allowed" : "cursor-pointer"}>
-//                                 <Button 
-//                                   variant="ghost" 
-//                                   size="icon" 
-//                                   className={cn(
-//                                     "h-6 w-6 rounded-full",
-//                                     isOffline && "opacity-50 cursor-not-allowed"
-//                                   )}
-//                                   disabled={isOffline}
-//                                 >
-//                                   <Paperclip className="h-5 w-5" />
-//                                 </Button>
-//                               </label>
-//                             </TooltipTrigger>
-//                             <TooltipContent>
-//                               <p>{isOffline ? "Attachments unavailable offline" : "Attach file"}</p>
-//                             </TooltipContent>
-//                           </Tooltip>
-//                         </TooltipProvider>
-//                       </div>
-//                       <input type="file" id="file-upload" onChange={handleFileUpload} style={{ display: "none" }} disabled={isOffline} />
-//                     </div>
-//                     {aiSuggestion && !isOffline && (
-//                       <motion.div
-//                         initial={{ opacity: 0, y: 10 }}
-//                         animate={{ opacity: 1, y: 0 }}
-//                         exit={{ opacity: 0, y: 10 }}
-//                         className="mt-2 p-2 bg-blue-500/20 rounded-lg flex items-center space-x-2"
-//                       >
-//                         <Zap className="h-4 w-4 text-blue-500" />
-//                         <p className="text-sm text-blue-500">{aiSuggestion}</p>
-//                         <button
-//                           className="text-xs text-blue-700 hover:underline"
-//                           onClick={() => setNewMessage(aiSuggestion)}
-//                         >
-//                           Use
-//                         </button>
-//                       </motion.div>
-//                     )}
-//                   </div>
-//                 </>
-//               ) : (
-//                 <>
-//                   <div className="p-4 bg-background border-b border-primary/10">
-//                     <div className="flex items-center justify-between mb-4">
-//                       <h3 className="text-lg font-semibold flex items-center">
-//                         <span>Recent Chats</span>
-//                         {hasNewMessages && (
-//                           <motion.div
-//                             animate={{ scale: [1, 1.2, 1] }}
-//                             transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-//                             className="ml-2 w-2 h-2 bg-green-500 rounded-full"
-//                           />
-//                         )}
-//                         {totalUnreadMessages > 0 && (
-//                           <Badge variant="destructive" className="ml-2">
-//                             {totalUnreadMessages}
-//                           </Badge>
-//                         )}
-//                       </h3>
-
-//                       <div className="flex items-center space-x-2">
-//                         <TooltipProvider>
-//                           <Tooltip>
-//                             <TooltipTrigger asChild>
-//                               <Button
-//                                 variant="ghost"
-//                                 size="icon"
-//                                 className="rounded-full"
-//                                 onClick={() => setSoundEnabled(!soundEnabled)}
-//                               >
-//                                 {soundEnabled ? (
-//                                   <Bell className="h-5 w-5 text-primary" />
-//                                 ) : (
-//                                   <BellOff className="h-5 w-5 text-muted-foreground" />
-//                                 )}
-//                               </Button>
-//                             </TooltipTrigger>
-//                             <TooltipContent>
-//                               <p>{soundEnabled ? "Mute notifications" : "Unmute notifications"}</p>
-//                             </TooltipContent>
-//                           </Tooltip>
-//                         </TooltipProvider>
-
-//                         <TooltipProvider>
-//                           <Tooltip>
-//                             <TooltipTrigger asChild>
-//                               <Button variant="ghost" size="icon" className="rounded-full" onClick={markAllAsRead}>
-//                                 <Check className="h-5 w-5 text-muted-foreground" />
-//                               </Button>
-//                             </TooltipTrigger>
-//                             <TooltipContent>
-//                               <p>Mark all as read</p>
-//                             </TooltipContent>
-//                           </Tooltip>
-//                         </TooltipProvider>
-
-//                         <TooltipProvider>
-//                           <Tooltip>
-//                             <TooltipTrigger asChild>
-//                               <Button
-//                                 variant="ghost"
-//                                 size="icon"
-//                                 className="rounded-full"
-//                                 onClick={() => setShowHelpModal(true)}
-//                               >
-//                                 <span className="text-sm font-semibold">?</span>
-//                               </Button>
-//                             </TooltipTrigger>
-//                             <TooltipContent>
-//                               <p>Help</p>
-//                             </TooltipContent>
-//                           </Tooltip>
-//                         </TooltipProvider>
-//                       </div>
-//                     </div>
-
-//                     {/* Offline Banner */}
-//                     {isOffline && (
-//                       <OfflineStatusBanner 
-//                         isOffline={isOffline} 
-//                         onReconnect={handleManualReconnect} 
-//                       />
-//                     )}
-                    
-//                     {/* Reconnected Banner */}
-//                     {showReconnectedBanner && (
-//                       <ConnectionRestoredBanner 
-//                         show={showReconnectedBanner} 
-//                         onDismiss={() => setShowReconnectedBanner(false)} 
-//                       />
-//                     )}
-
-//                     <div className="relative mb-4">
-//                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//                       <Input
-//                         ref={searchInputRef}
-//                         placeholder="Search conversations..."
-//                         value={searchQuery}
-//                         onChange={(e) => setSearchQuery(e.target.value)}
-//                         onFocus={() => setIsSearchFocused(true)}
-//                         onBlur={() => setIsSearchFocused(false)}
-//                         className={cn(
-//                           "pl-10 pr-10 py-2 bg-muted border-primary/20",
-//                           isSearchFocused && "ring-2 ring-primary/50",
-//                         )}
-//                       />
-//                       {searchQuery && (
-//                         <Button
-//                           variant="ghost"
-//                           size="icon"
-//                           className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 rounded-full"
-//                           onClick={() => setSearchQuery("")}
-//                         >
-//                           <X className="h-4 w-4 text-muted-foreground" />
-//                         </Button>
-//                       )}
-
-//                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
-//                         <KeyboardShortcut keys={["Ctrl", "K"]} />
-//                       </div>
-//                     </div>
-
-//                     <Tabs
-//                       defaultValue="all"
-//                       className="w-full"
-//                       onValueChange={(value) => setActiveFilter(value as any)}
-//                     >
-//                       <TabsList className="grid grid-cols-3 mb-4">
-//                         <TabsTrigger value="all" className="text-xs">
-//                           All Chats
-//                         </TabsTrigger>
-//                         <TabsTrigger value="unread" className="text-xs">
-//                           Unread
-//                           {totalUnreadMessages > 0 && (
-//                             <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1">
-//                               {totalUnreadMessages}
-//                             </Badge>
-//                           )}
-//                         </TabsTrigger>
-//                         <TabsTrigger value="recent" className="text-xs">
-//                           Recent
-//                         </TabsTrigger>
-//                       </TabsList>
-//                     </Tabs>
-//                   </div>
-
-//                   <ScrollArea className="flex-grow">
-//                     <div className="flex flex-col p-4 space-y-4">
-//                       {!token ? (
-//                         <div className="w-full p-4 bg-background rounded-lg shadow-md">
-//                           <ExampleConversations onSelectConversation={handleSelectConversation} className="mb-4" />
-//                           <div className="text-center">
-//                             <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-//                               Connect your Instagram account to start receiving real messages.
-//                             </p>
-//                             <Button
-//                               onClick={() => {
-//                                 console.log("Navigate to integration page")
-//                               }}
-//                               className="bg-[#3352CC] hover:bg-[#3352CC]/90 text-white font-bold py-2 px-4 rounded-full transition-all duration-200 transform hover:scale-105 w-full"
-//                               disabled={isOffline}
-//                             >
-//                               Connect Instagram
-//                             </Button>
-//                           </div>
-//                         </div>
-//                       ) : filteredConversations.length === 0 ? (
-//                         <div className="flex flex-col items-center justify-center h-64 text-center">
-//                           {searchQuery ? (
-//                             <>
-//                               <Search className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-//                               <h3 className="text-lg font-medium mb-2">No results found</h3>
-//                               <p className="text-muted-foreground max-w-md">
-//                                 We couldnt find any conversations matching {searchQuery}.
-//                               </p>
-//                               <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
-//                                 Clear search
-//                               </Button>
-//                             </>
-//                           ) : (
-//                             <>
-//                               <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-//                               <h3 className="text-lg font-medium mb-2">No conversations yet</h3>
-//                               <p className="text-muted-foreground max-w-md">
-//                                 {isOffline 
-//                                   ? "You're currently offline. Saved conversations will appear here." 
-//                                   : "Connect your account to start receiving messages."}
-//                               </p>
-//                               <ExampleConversations onSelectConversation={handleSelectConversation} className="mt-6" />
-//                             </>
-//                           )}
-//                         </div>
-//                       ) : (
-//                         <>
-//                           {/* Unread chats section */}
-//                           <UnreadChatsList
-//                             conversations={conversations}
-//                             onSelectConversation={handleSelectConversation}
-//                           />
-
-//                           {/* All chats section */}
-//                           <div className="space-y-3">
-//                             <div className="flex items-center justify-between">
-//                               <h4 className="text-sm font-semibold">
-//                                 {activeFilter === "all"
-//                                   ? "All Conversations"
-//                                   : activeFilter === "unread"
-//                                     ? "Unread Conversations"
-//                                     : "Recent Conversations"}
-//                                 {isOffline && (
-//                                   <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-500">
-//                                     Offline
-//                                   </Badge>
-//                                 )}
-//                               </h4>
-//                               <DropdownMenu>
-//                                 <DropdownMenuTrigger asChild>
-//                                   <Button variant="ghost" size="sm" className="h-8 px-2">
-//                                     <Filter className="h-4 w-4 mr-1" />
-//                                     <span className="text-xs">Sort</span>
-//                                   </Button>
-//                                 </DropdownMenuTrigger>
-//                                 <DropdownMenuContent align="end">
-//                                   <DropdownMenuItem>Newest first</DropdownMenuItem>
-//                                   <DropdownMenuItem>Oldest first</DropdownMenuItem>
-//                                   <DropdownMenuItem>Unread first</DropdownMenuItem>
-//                                 </DropdownMenuContent>
-//                               </DropdownMenu>
-//                             </div>
-
-//                             <div className="grid grid-cols-1 gap-3">
-//                               {filteredConversations.map((conversation) => (
-//                                 <ConversationListItem key={conversation.id} conversation={conversation} />
-//                               ))}
-//                             </div>
-//                           </div>
-//                         </>
-//                       )}
-//                     </div>
-//                   </ScrollArea>
-//                 </>
-//               )}
-//             </>
-//           )}
-//           <DeleteConfirmationModal
-//             isOpen={isDeleteModalOpen}
-//             onClose={() => setIsDeleteModalOpen(false)}
-//             onConfirm={confirmDelete}
-//           />
-//         </div>
-//       </ShimmeringBorder>
-//     </>
-//   )
-// }
-
-// export default AutomationChats
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// "use client"
-
 // import type React from "react"
 // import { useEffect, useState, useRef, useCallback, useMemo } from "react"
 // import { motion } from "framer-motion"
@@ -2194,745 +12,12 @@
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 // import { Badge } from "@/components/ui/badge"
 // import type { Conversation, Message } from "@/types/dashboard"
-// import { fetchChatsAndBusinessVariables, sendMessage } from "@/actions/messageAction/messageAction"
+// import { fetchChatsAndBusinessVariables } from "@/actions/messageAction/messageAction"
+// import { sendDMz } from "@/lib/fetch"
 // import { cn } from "@/lib/utils"
 // import FancyLoader from "./fancy-loader"
 // import ExampleConversations from "./exampleConvo"
 // import DeleteConfirmationModal from "./confirmDelete"
-
-// import { usePusher } from "@/hooks/use-pusher"
-// import { useChatState } from "@/hooks/use-chat-state"
-// import { useOfflineStorage } from "@/hooks/use-offline-storage"
-// import { ChatHeader } from "./chat-header"
-// import { ConversationList } from "./conversation-list"
-// import { MessageInput } from "./message-input"
-
-// interface AutomationChatsProps {
-//   automationId: string
-// }
-
-// interface BusinessVariables {
-//   [key: string]: string
-//   business_name: string
-//   welcome_message: string
-//   business_industry: string
-// }
-
-// const BOT_NAME = "AiAssist"
-// const BOT_AVATAR = "/fancy-profile-pic.svg"
-// const EXCLUDED_CHAT_ID = "17841444435951291"
-
-// const gradientBorder = "bg-gradient-to-r from-primary via-purple-500 to-secondary p-[2px] rounded-lg"
-// const fancyBackground = "bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1d1d1d]"
-
-// const ShimmeringBorder = ({ children }: { children: React.ReactNode }) => {
-//   const styles = useSpring({
-//     from: { backgroundPosition: "0% 50%" },
-//     to: { backgroundPosition: "100% 50%" },
-//     config: { duration: 5000 },
-//     loop: true,
-//   })
-
-//   return (
-//     <animated.div
-//       style={{
-//         ...styles,
-//         backgroundSize: "200% 200%",
-//       }}
-//       className={`${gradientBorder} p-[2px] rounded-lg`}
-//     >
-//       {children}
-//     </animated.div>
-//   )
-// }
-
-// const FancyErrorMessage: React.FC<{ message: string }> = ({ message }) => {
-//   return (
-//     <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-//       <motion.div
-//         initial={{ scale: 0 }}
-//         animate={{ scale: 1 }}
-//         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-//       >
-//         <Zap className="w-16 h-16 text-yellow-400 mb-4" />
-//       </motion.div>
-//       <h3 className="text-xl font-semibold mb-2">Hang tight!</h3>
-//       <p className="text-muted-foreground mb-4">{message}</p>
-//       <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}>
-//         <Loader2 className="w-6 h-6 text-primary animate-spin" />
-//       </motion.div>
-//     </div>
-//   )
-// }
-
-// const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
-//   const [chatState, chatActions] = useChatState()
-//   const { cachedConversations, isOffline, saveConversations, loadReadStatus, saveReadStatus } = useOfflineStorage()
-//   const { pusher, isConnected: isPusherConnected, subscribe } = usePusher()
-
-//   const [newMessage, setNewMessage] = useState("")
-//   const [isTyping, setIsTyping] = useState(false)
-//   const [isLoading, setIsLoading] = useState(true)
-//   const [error, setError] = useState<string | null>(null)
-//   const [isRecording, setIsRecording] = useState(false)
-//   const [token, setToken] = useState<string | null>(null)
-//   const [pageId, setPageId] = useState<string | null>(null)
-//   const [businessVariables, setBusinessVariables] = useState<BusinessVariables>({
-//     business_name: "",
-//     welcome_message: "",
-//     business_industry: "",
-//   })
-
-//   const [soundEnabled, setSoundEnabled] = useState(true)
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "recent">("all")
-//   const [isSearchFocused, setIsSearchFocused] = useState(false)
-//   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(new Set())
-//   const [starredConversations, setStarredConversations] = useState<Set<string>>(new Set())
-//   const [hasNewMessages, setHasNewMessages] = useState(false)
-
-//   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-//   const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null)
-
-//   const scrollRef = useRef<HTMLDivElement>(null)
-//   const audioRef = useRef<HTMLAudioElement | null>(null)
-
-//   useEffect(() => {
-//     if (typeof window !== "undefined") {
-//       const audio = new Audio("/message-notification.mp3")
-//       audio.load()
-//       audioRef.current = audio
-//       return () => {
-//         if (audioRef.current) {
-//           audioRef.current.pause()
-//           audioRef.current = null
-//         }
-//       }
-//     }
-//   }, [])
-
-//   useEffect(() => {
-//     const savedReadStatus = loadReadStatus()
-//     if (savedReadStatus.size > 0) {
-//       savedReadStatus.forEach((conversationId) => {
-//         chatActions.markConversationAsRead(conversationId)
-//       })
-//     }
-//   }, [loadReadStatus, chatActions])
-
-//   useEffect(() => {
-//     saveReadStatus(chatState.readConversations)
-//   }, [chatState.readConversations, saveReadStatus])
-
-//   useEffect(() => {
-//     if (!pusher || !isPusherConnected || !automationId) return
-
-//     const channelName = `automation-${automationId}`
-//     const channel = subscribe(channelName)
-
-//     if (channel) {
-//       const handleNewMessage = (data: { conversationId: string; message: Message }) => {
-//         console.log("New message received via Pusher:", data)
-//         chatActions.addMessage(data.conversationId, data.message)
-
-//         if (soundEnabled && chatState.selectedConversation?.id !== data.conversationId) {
-//           playNotificationSound()
-//         }
-
-//         setHasNewMessages(true)
-//       }
-
-//       const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
-//         console.log("Message read status updated via Pusher:", data)
-//         const conversation = chatState.conversations.find((c) => c.id === data.conversationId)
-//         if (conversation) {
-//           const updatedMessages = conversation.messages.map((msg) =>
-//             data.messageIds.includes(msg.id) ? { ...msg, read: true } : msg,
-//           )
-//           chatActions.updateConversation(data.conversationId, { messages: updatedMessages })
-//         }
-//       }
-
-//       const handleConversationUpdated = (data: { conversation: Conversation }) => {
-//         console.log("Conversation updated via Pusher:", data)
-//         chatActions.updateConversation(data.conversation.id, data.conversation)
-//       }
-
-//       channel.bind("new-message", handleNewMessage)
-//       channel.bind("message-read", handleMessageRead)
-//       channel.bind("conversation-updated", handleConversationUpdated)
-
-//       return () => {
-//         channel.unbind("new-message", handleNewMessage)
-//         channel.unbind("message-read", handleMessageRead)
-//         channel.unbind("conversation-updated", handleConversationUpdated)
-//       }
-//     }
-//   }, [
-//     pusher,
-//     isPusherConnected,
-//     automationId,
-//     chatState.selectedConversation,
-//     soundEnabled,
-//     chatActions,
-//     chatState.conversations,
-//   ])
-
-//   const playNotificationSound = useCallback(() => {
-//     if (!soundEnabled || !audioRef.current) return
-
-//     try {
-//       audioRef.current.currentTime = 0
-//       const playPromise = audioRef.current.play()
-
-//       if (playPromise !== undefined) {
-//         playPromise.catch((error) => {
-//           console.error("Audio play failed:", error)
-//         })
-//       }
-//     } catch (e) {
-//       console.error("Error playing sound:", e)
-//     }
-//   }, [soundEnabled])
-
-//   const fetchChats = useCallback(async () => {
-//     if (isOffline) return
-
-//     if (!automationId) {
-//       setError("Missing automation ID")
-//       setIsLoading(false)
-//       return
-//     }
-
-//     try {
-//       setError(null)
-//       const result = await fetchChatsAndBusinessVariables(automationId)
-
-//       if (!result || typeof result !== "object") {
-//         throw new Error("Invalid response from server")
-//       }
-
-//       const { conversations, token, businessVariables } = result as {
-//         conversations: any[]
-//         token: string
-//         businessVariables: BusinessVariables
-//       }
-
-//       if (!Array.isArray(conversations)) {
-//         throw new Error("Conversations data is not in the expected format")
-//       }
-
-//       const transformedConversations = conversations
-//         .filter((conv) => conv.chatId !== EXCLUDED_CHAT_ID)
-//         .map(
-//           (conv): Conversation => ({
-//             id: conv.chatId,
-//             userId: conv.messages[0]?.senderId || conv.chatId,
-//             pageId: conv.pageId,
-//             messages: conv.messages.map(
-//               (msg: any): Message => ({
-//                 id: msg.id,
-//                 role: msg.role,
-//                 content: msg.content,
-//                 senderId: msg.senderId,
-//                 createdAt: new Date(msg.createdAt),
-//                 read: chatState.readConversations.has(conv.chatId) ? true : Boolean(msg.read),
-//               }),
-//             ),
-//             createdAt: new Date(conv.messages[0]?.createdAt ?? Date.now()),
-//             updatedAt: new Date(conv.messages[conv.messages.length - 1]?.createdAt ?? Date.now()),
-//             unreadCount: chatState.readConversations.has(conv.chatId)
-//               ? 0
-//               : conv.messages.filter((msg: any) => !msg.read).length,
-//             Automation: null,
-//           }),
-//         )
-
-//       transformedConversations.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-
-//       chatActions.setConversations(transformedConversations)
-//       saveConversations(transformedConversations)
-
-//       if (transformedConversations.length > 0 && !pageId) {
-//         setPageId(transformedConversations[0].pageId)
-//       }
-
-//       if (token) setToken(token)
-//       if (businessVariables) setBusinessVariables(businessVariables)
-
-//       setIsLoading(false)
-//     } catch (error) {
-//       console.error("Error fetching chats:", error)
-
-//       if (typeof navigator !== "undefined" && !navigator.onLine) {
-//         if (cachedConversations.length > 0) {
-//           chatActions.setConversations(cachedConversations)
-//           setIsLoading(false)
-//         } else {
-//           setError("You are offline. Please check your internet connection.")
-//         }
-//       } else {
-//         setError(`Error loading conversations: ${error instanceof Error ? error.message : "Unknown error"}`)
-//       }
-//     }
-//   }, [
-//     automationId,
-//     isOffline,
-//     cachedConversations,
-//     chatState.readConversations,
-//     chatActions,
-//     saveConversations,
-//     pageId,
-//   ])
-
-//   useEffect(() => {
-//     if (typeof navigator !== "undefined" && navigator.onLine) {
-//       fetchChats()
-//     } else if (cachedConversations.length > 0) {
-//       chatActions.setConversations(cachedConversations)
-//       setIsLoading(false)
-//     } else {
-//       setIsLoading(false)
-//     }
-//   }, [fetchChats, cachedConversations, chatActions])
-
-//   const filteredConversations = useMemo(() => {
-//     let filtered = [...chatState.conversations]
-
-//     if (searchQuery.trim()) {
-//       const query = searchQuery.toLowerCase()
-//       filtered = filtered.filter((conv) => {
-//         const hasMatchingMessage = conv.messages.some((msg) => msg.content.toLowerCase().includes(query))
-//         const matchesId = conv.id.toLowerCase().includes(query)
-//         return hasMatchingMessage || matchesId
-//       })
-//     }
-
-//     if (activeFilter === "unread") {
-//       filtered = filtered.filter((conv) => conv.unreadCount > 0)
-//     } else if (activeFilter === "recent") {
-//       filtered = filtered.slice(0, 5)
-//     }
-
-//     filtered.sort((a, b) => {
-//       if (pinnedConversations.has(a.id) && !pinnedConversations.has(b.id)) return -1
-//       if (!pinnedConversations.has(a.id) && pinnedConversations.has(b.id)) return 1
-//       return b.updatedAt.getTime() - a.updatedAt.getTime()
-//     })
-
-//     return filtered
-//   }, [chatState.conversations, searchQuery, activeFilter, pinnedConversations])
-
-//   const handleSendMessage = async () => {
-//     if (!newMessage.trim() || !chatState.selectedConversation || isOffline) return
-//     if (!token || !pageId) {
-//       setError("Missing authentication token or page ID")
-//       return
-//     }
-
-//     setIsTyping(true)
-//     setError(null)
-
-//     try {
-//       const userId = `${pageId}_${chatState.selectedConversation.userId}`
-//       const result = await sendMessage(newMessage, userId, pageId, automationId, token, businessVariables)
-
-//       if (result.success && result.userMessage) {
-//         const userMessage: Message = {
-//           id: Date.now().toString(),
-//           role: "user",
-//           content: result.userMessage.content,
-//           senderId: chatState.selectedConversation.userId,
-//           receiverId: pageId,
-//           createdAt: result.userMessage.timestamp,
-//           status: "sent",
-//           read: true,
-//         }
-
-//         chatActions.addMessage(chatState.selectedConversation.id, userMessage)
-//         setNewMessage("")
-
-//         setTimeout(() => {
-//           if (scrollRef.current) {
-//             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-//           }
-//         }, 100)
-//       } else {
-//         setError(`Failed to send message: ${result.message || "Unknown error"}`)
-//       }
-//     } catch (error) {
-//       console.error("Error sending message:", error)
-//       if (typeof navigator !== "undefined" && !navigator.onLine) {
-//         setError("You are offline. Messages can't be sent until you reconnect.")
-//       } else {
-//         setError(`Error sending message: ${error instanceof Error ? error.message : "Unknown error"}`)
-//       }
-//     } finally {
-//       setIsTyping(false)
-//     }
-//   }
-
-//   const handleSelectConversation = (conversation: Conversation) => {
-//     chatActions.markConversationAsRead(conversation.id)
-//     chatActions.setSelectedConversation(conversation)
-//     setHasNewMessages(false)
-//   }
-
-//   const togglePinConversation = (conversationId: string, e: React.MouseEvent) => {
-//     e.stopPropagation()
-//     setPinnedConversations((prev) => {
-//       const newSet = new Set(prev)
-//       if (newSet.has(conversationId)) {
-//         newSet.delete(conversationId)
-//       } else {
-//         newSet.add(conversationId)
-//       }
-//       return newSet
-//     })
-//   }
-
-//   const toggleStarConversation = (conversationId: string, e: React.MouseEvent) => {
-//     e.stopPropagation()
-//     setStarredConversations((prev) => {
-//       const newSet = new Set(prev)
-//       if (newSet.has(conversationId)) {
-//         newSet.delete(conversationId)
-//       } else {
-//         newSet.add(conversationId)
-//       }
-//       return newSet
-//     })
-//   }
-
-//   const handleDeleteConversation = (conversation: Conversation) => {
-//     setConversationToDelete(conversation)
-//     setIsDeleteModalOpen(true)
-//   }
-
-//   const confirmDelete = async () => {
-//     if (!conversationToDelete) return
-
-//     try {
-//       chatActions.deleteConversation(conversationToDelete.id)
-
-//       if (pinnedConversations.has(conversationToDelete.id)) {
-//         setPinnedConversations((prev) => {
-//           const newSet = new Set(prev)
-//           newSet.delete(conversationToDelete.id)
-//           return newSet
-//         })
-//       }
-
-//       if (starredConversations.has(conversationToDelete.id)) {
-//         setStarredConversations((prev) => {
-//           const newSet = new Set(prev)
-//           newSet.delete(conversationToDelete.id)
-//           return newSet
-//         })
-//       }
-//     } catch (error) {
-//       console.error("Error deleting conversation:", error)
-//       setError(`Failed to delete conversation: ${error instanceof Error ? error.message : String(error)}`)
-//     } finally {
-//       setIsDeleteModalOpen(false)
-//       setConversationToDelete(null)
-//     }
-//   }
-
-//   return (
-//     <>
-//       <ShimmeringBorder>
-//         <div
-//           className={`flex flex-col ${fancyBackground} text-foreground rounded-lg overflow-hidden h-full max-h-[90vh] sm:max-h-[80vh]`}
-//         >
-//           {isLoading ? (
-//             <FancyLoader />
-//           ) : error ? (
-//             <FancyErrorMessage message={error} />
-//           ) : (
-//             <>
-//               {chatState.selectedConversation ? (
-//                 <>
-//                   <div className="p-2 sm:p-4 bg-background border-b border-primary/10 flex items-center">
-//                     <Button
-//                       variant="ghost"
-//                       className="mr-4 p-2"
-//                       onClick={() => chatActions.setSelectedConversation(null)}
-//                     >
-//                       <ArrowLeft size={20} />
-//                     </Button>
-//                     <Avatar className="w-10 h-10">
-//                       <AvatarImage
-//                         src={`https://api.dicebear.com/6.x/initials/svg?seed=${chatState.selectedConversation.id}`}
-//                       />
-//                       <AvatarFallback>CL</AvatarFallback>
-//                     </Avatar>
-//                     <div className="ml-3 flex-grow">
-//                       <h4 className="font-medium text-lg">Client</h4>
-//                       <p className="text-sm text-muted-foreground flex items-center">
-//                         {isPusherConnected ? (
-//                           <span className="flex items-center">
-//                             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-//                             Connected
-//                           </span>
-//                         ) : (
-//                           <span className="flex items-center">
-//                             <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-//                             {isOffline ? "Offline" : "Connecting..."}
-//                           </span>
-//                         )}
-//                       </p>
-//                     </div>
-//                   </div>
-
-//                   {isOffline && (
-//                     <Alert variant="destructive" className="m-4 border-red-400">
-//                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
-//                       <AlertDescription className="text-sm">
-//                         Showing cached messages. New messages can&apos;t be sent.
-//                       </AlertDescription>
-//                     </Alert>
-//                   )}
-
-//                   <ScrollArea className="flex-grow h-[calc(100vh-300px)] overflow-hidden">
-//                     <div className="p-4 space-y-4" ref={scrollRef}>
-//                       {chatState.selectedConversation.messages.length === 0 ? (
-//                         <div className="flex flex-col items-center justify-center h-64 text-center">
-//                           <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-//                           <h3 className="text-lg font-medium mb-2">No messages yet</h3>
-//                           <p className="text-muted-foreground max-w-md">
-//                             Start the conversation by sending a message below.
-//                           </p>
-//                         </div>
-//                       ) : (
-//                         chatState.selectedConversation.messages.map((message, index) => (
-//                           <motion.div
-//                             key={`${message.id}-${index}`}
-//                             initial={{ opacity: 0, y: 20 }}
-//                             animate={{ opacity: 1, y: 0 }}
-//                             transition={{ duration: 0.3 }}
-//                             className={`flex items-end mb-4 ${message.role === "assistant" ? "justify-start" : "justify-end"}`}
-//                           >
-//                             {message.role === "assistant" ? (
-//                               <Avatar className="w-8 h-8 mr-2 border-2 border-primary">
-//                                 <AvatarImage src={BOT_AVATAR || "/placeholder.svg"} />
-//                                 <AvatarFallback>{BOT_NAME.slice(0, 2)}</AvatarFallback>
-//                               </Avatar>
-//                             ) : (
-//                               <Avatar className="w-8 h-8 ml-2 order-last border-2 border-primary">
-//                                 <AvatarImage src={`https://i.pravatar.cc/150?u=${message.senderId}`} />
-//                                 <AvatarFallback>CL</AvatarFallback>
-//                               </Avatar>
-//                             )}
-//                             <div
-//                               className={cn(
-//                                 "max-w-[85%] sm:max-w-[75%] p-2 sm:p-3 rounded-3xl text-sm relative",
-//                                 message.role === "assistant"
-//                                   ? "bg-gradient-to-br from-blue-400/30 to-blue-600/30 border-2 border-blue-500/50 text-white"
-//                                   : "bg-gradient-to-br from-purple-400/30 to-purple-600/30 border-2 border-purple-500/50 text-white",
-//                               )}
-//                               style={{
-//                                 backdropFilter: "blur(10px)",
-//                                 WebkitBackdropFilter: "blur(10px)",
-//                               }}
-//                             >
-//                               <p className="break-words relative z-10">{message.content}</p>
-//                               <div className="flex justify-between items-center mt-1 text-xs text-gray-300">
-//                                 <span>
-//                                   {new Date(message.createdAt).toLocaleTimeString([], {
-//                                     hour: "2-digit",
-//                                     minute: "2-digit",
-//                                   })}
-//                                 </span>
-//                               </div>
-//                             </div>
-//                           </motion.div>
-//                         ))
-//                       )}
-//                     </div>
-//                   </ScrollArea>
-
-//                   <MessageInput
-//                     message={newMessage}
-//                     isOffline={isOffline}
-//                     isRecording={isRecording}
-//                     onMessageChange={setNewMessage}
-//                     onSendMessage={handleSendMessage}
-//                     onVoiceMessage={() => setIsRecording(!isRecording)}
-//                     onFileUpload={(event) => {
-//                       const file = event.target.files?.[0]
-//                       if (file) {
-//                         console.log("File selected:", file.name)
-//                       }
-//                     }}
-//                   />
-//                 </>
-//               ) : (
-//                 <>
-//                   <ChatHeader
-//                     totalUnreadMessages={chatState.totalUnreadMessages}
-//                     hasNewMessages={hasNewMessages}
-//                     soundEnabled={soundEnabled}
-//                     searchQuery={searchQuery}
-//                     isSearchFocused={isSearchFocused}
-//                     onToggleSound={() => setSoundEnabled(!soundEnabled)}
-//                     onMarkAllAsRead={chatActions.markAllAsRead}
-//                     onShowHelp={() => {}}
-//                     onSearchChange={setSearchQuery}
-//                     onSearchFocus={() => setIsSearchFocused(true)}
-//                     onSearchBlur={() => setIsSearchFocused(false)}
-//                     onClearSearch={() => setSearchQuery("")}
-//                   />
-
-//                   {isOffline && (
-//                     <Alert variant="destructive" className="mx-4 mb-4 border-red-400">
-//                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
-//                       <AlertDescription className="text-sm">
-//                         Showing cached conversations. Real-time updates are unavailable.
-//                         <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-500">
-//                           Offline Mode
-//                         </Badge>
-//                       </AlertDescription>
-//                     </Alert>
-//                   )}
-
-//                   <div className="px-4">
-//                     <Tabs
-//                       defaultValue="all"
-//                       className="w-full"
-//                       onValueChange={(value) => setActiveFilter(value as any)}
-//                     >
-//                       <TabsList className="grid grid-cols-3 mb-4">
-//                         <TabsTrigger value="all" className="text-xs">
-//                           All Chats
-//                         </TabsTrigger>
-//                         <TabsTrigger value="unread" className="text-xs">
-//                           Unread
-//                           {chatState.totalUnreadMessages > 0 && (
-//                             <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1">
-//                               {chatState.totalUnreadMessages}
-//                             </Badge>
-//                           )}
-//                         </TabsTrigger>
-//                         <TabsTrigger value="recent" className="text-xs">
-//                           Recent
-//                         </TabsTrigger>
-//                       </TabsList>
-//                     </Tabs>
-//                   </div>
-
-//                   <ScrollArea className="flex-grow">
-//                     <div className="flex flex-col p-4 space-y-4">
-//                       {!token ? (
-//                         <div className="w-full p-4 bg-background rounded-lg shadow-md">
-//                           <ExampleConversations onSelectConversation={handleSelectConversation} className="mb-4" />
-//                           <div className="text-center">
-//                             <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-//                               Connect your Instagram account to start receiving real messages.
-//                             </p>
-//                             <Button
-//                               onClick={() => console.log("Navigate to integration page")}
-//                               className="bg-[#3352CC] hover:bg-[#3352CC]/90 text-white font-bold py-2 px-4 rounded-full transition-all duration-200 transform hover:scale-105 w-full"
-//                               disabled={isOffline}
-//                             >
-//                               Connect Instagram
-//                             </Button>
-//                           </div>
-//                         </div>
-//                       ) : filteredConversations.length === 0 ? (
-//                         <div className="flex flex-col items-center justify-center h-64 text-center">
-//                           <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-//                           <h3 className="text-lg font-medium mb-2">No conversations yet</h3>
-//                           <p className="text-muted-foreground max-w-md">
-//                             {isOffline
-//                               ? "You're currently offline. Saved conversations will appear here."
-//                               : "Connect your account to start receiving messages."}
-//                           </p>
-//                           <ExampleConversations onSelectConversation={handleSelectConversation} className="mt-6" />
-//                         </div>
-//                       ) : (
-//                         <ConversationList
-//                           conversations={filteredConversations}
-//                           pinnedConversations={pinnedConversations}
-//                           starredConversations={starredConversations}
-//                           onSelectConversation={handleSelectConversation}
-//                           onTogglePin={togglePinConversation}
-//                           onToggleStar={toggleStarConversation}
-//                           onDeleteConversation={handleDeleteConversation}
-//                         />
-//                       )}
-//                     </div>
-//                   </ScrollArea>
-//                 </>
-//               )}
-//             </>
-//           )}
-
-//           <DeleteConfirmationModal
-//             isOpen={isDeleteModalOpen}
-//             onClose={() => setIsDeleteModalOpen(false)}
-//             onConfirm={confirmDelete}
-//           />
-//         </div>
-//       </ShimmeringBorder>
-//     </>
-//   )
-// }
-
-// export default AutomationChats
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// "use client"
-
-// import type React from "react"
-// import { useEffect, useState, useRef, useCallback, useMemo } from "react"
-// import { motion } from "framer-motion"
-// import { useSpring, animated } from "react-spring"
-// import { ArrowLeft, MessageSquare, Loader2, Zap } from "lucide-react"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Button } from "@/components/ui/button"
-// import { ScrollArea } from "@/components/ui/scroll-area"
-// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-// import { Badge } from "@/components/ui/badge"
-// import type { Conversation, Message } from "@/types/dashboard"
-// import { fetchChatsAndBusinessVariables, sendMessage } from "@/actions/messageAction/messageAction"
-// import { cn } from "@/lib/utils"
-// import FancyLoader from "./fancy-loader"
-// import ExampleConversations from "./exampleConvo"
-// import DeleteConfirmationModal from "./confirmDelete"
-
 // import { usePusher } from "@/hooks/use-pusher"
 // import { useChatState } from "@/hooks/use-chat-state"
 // import { useOfflineStorage } from "@/hooks/use-offline-storage"
@@ -2955,7 +40,7 @@
 
 // const BOT_NAME = "AiAssist"
 // const BOT_AVATAR = "/fancy-profile-pic.svg"
-// const EXCLUDED_CHAT_ID = "17841444435951291"
+// const EXCLUDED_CHAT_ID = "17841471075473962"
 
 // const gradientBorder = "bg-gradient-to-r from-primary via-purple-500 to-secondary p-[2px] rounded-lg"
 // const fancyBackground = "bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1d1d1d]"
@@ -3018,7 +103,6 @@
 //     welcome_message: "",
 //     business_industry: "",
 //   })
-
 //   const [soundEnabled, setSoundEnabled] = useState(true)
 //   const [searchQuery, setSearchQuery] = useState("")
 //   const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "recent">("all")
@@ -3026,7 +110,6 @@
 //   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(new Set())
 //   const [starredConversations, setStarredConversations] = useState<Set<string>>(new Set())
 //   const [hasNewMessages, setHasNewMessages] = useState(false)
-
 //   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 //   const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null)
 
@@ -3039,6 +122,7 @@
 //       const audio = new Audio("/message-notification.mp3")
 //       audio.load()
 //       audioRef.current = audio
+
 //       return () => {
 //         if (audioRef.current) {
 //           audioRef.current.pause()
@@ -3098,7 +182,6 @@
 
 //       // Try to load from database first
 //       const dbConversations = await loadConversations()
-
 //       if (dbConversations.length > 0) {
 //         chatActions.setConversations(dbConversations)
 //         saveConversations(dbConversations)
@@ -3162,7 +245,6 @@
 //       if (businessVariables) setBusinessVariables(businessVariables)
 //     } catch (error) {
 //       console.error("Error fetching chats:", error)
-
 //       if (cachedConversations.length > 0) {
 //         chatActions.setConversations(cachedConversations)
 //       } else {
@@ -3241,7 +323,6 @@
 //     try {
 //       audioRef.current.currentTime = 0
 //       const playPromise = audioRef.current.play()
-
 //       if (playPromise !== undefined) {
 //         playPromise.catch((error) => {
 //           console.error("Audio play failed:", error)
@@ -3281,6 +362,7 @@
 
 //   const handleSendMessage = async () => {
 //     if (!newMessage.trim() || !chatState.selectedConversation || isOffline) return
+
 //     if (!token || !pageId) {
 //       setError("Missing authentication token or page ID")
 //       return
@@ -3290,17 +372,37 @@
 //     setError(null)
 
 //     try {
-//       const userId = `${pageId}_${chatState.selectedConversation.userId}`
-//       const result = await sendMessage(newMessage, userId, pageId, automationId, token, businessVariables)
+//       console.log("🚀 Sending message with new sendDM function:", {
+//         pageId,
+//         receiverId: chatState.selectedConversation.userId,
+//         message: newMessage.substring(0, 50) + "...",
+//         hasToken: !!token,
+//       })
 
-//       if (result.success && result.userMessage) {
+//       // Use the new sendDM function directly
+//       const result = await sendDMz(
+//         pageId, // userId (the page sending the message)
+//         chatState.selectedConversation.userId || "123456", // receiverId (the user receiving the message)
+//         newMessage, // prompt (the message content)
+//         token, // token
+//         undefined, // buttons (not used in this context)
+//       )
+
+//       console.log("📥 sendDM response:", {
+//         status: result.status,
+//         statusText: result.statusText,
+//         success: result.status === 200,
+//       })
+
+//       if (result.status === 200) {
+//         // Create user message for the UI
 //         const userMessage: Message = {
 //           id: Date.now().toString(),
 //           role: "user",
-//           content: result.userMessage.content,
+//           content: newMessage,
 //           senderId: chatState.selectedConversation.userId,
 //           receiverId: pageId,
-//           createdAt: result.userMessage.timestamp,
+//           createdAt: new Date(),
 //           status: "sent",
 //           read: true,
 //         }
@@ -3308,20 +410,35 @@
 //         await chatActions.addMessage(chatState.selectedConversation.id, userMessage)
 //         setNewMessage("")
 
+//         // Scroll to bottom
 //         setTimeout(() => {
 //           if (scrollRef.current) {
 //             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
 //           }
 //         }, 100)
+
+//         console.log("✅ Message sent successfully and added to UI")
 //       } else {
-//         setError(`Failed to send message: ${result.message || "Unknown error"}`)
+//         throw new Error(`Instagram API returned status ${result.status}: ${result.statusText}`)
 //       }
 //     } catch (error) {
-//       console.error("Error sending message:", error)
+//       console.error("❌ Error sending message:", error)
+
 //       if (typeof navigator !== "undefined" && !navigator.onLine) {
 //         setError("You are offline. Messages can't be sent until you reconnect.")
+//       } else if (error instanceof Error) {
+//         // Handle specific error types
+//         if (error.message.includes("401") || error.message.includes("unauthorized")) {
+//           setError("Instagram authentication failed. Please reconnect your Instagram account.")
+//         } else if (error.message.includes("400") || error.message.includes("bad request")) {
+//           setError("Invalid message format. Please try again.")
+//         } else if (error.message.includes("429") || error.message.includes("rate limit")) {
+//           setError("Too many messages sent. Please wait a moment before trying again.")
+//         } else {
+//           setError(`Failed to send message: ${error.message}`)
+//         }
 //       } else {
-//         setError(`Error sending message: ${error instanceof Error ? error.message : "Unknown error"}`)
+//         setError("Failed to send message. Please try again.")
 //       }
 //     } finally {
 //       setIsTyping(false)
@@ -3370,7 +487,6 @@
 
 //     try {
 //       await chatActions.deleteConversation(conversationToDelete.id)
-
 //       if (pinnedConversations.has(conversationToDelete.id)) {
 //         setPinnedConversations((prev) => {
 //           const newSet = new Set(prev)
@@ -3378,7 +494,6 @@
 //           return newSet
 //         })
 //       }
-
 //       if (starredConversations.has(conversationToDelete.id)) {
 //         setStarredConversations((prev) => {
 //           const newSet = new Set(prev)
@@ -3643,27 +758,27 @@ import type React from "react"
 import { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import { motion } from "framer-motion"
 import { useSpring, animated } from "react-spring"
-import { ArrowLeft, MessageSquare, Loader2, Zap } from "lucide-react"
+import { 
+  ArrowLeft, MessageSquare, Loader2, Zap, Brain, TrendingUp, 
+  Heart, AlertCircle, Star, Pin, Trash2, Volume2, VolumeX,
+  Search, MoreHorizontal, BarChart3, MessageCircle, Users,
+  Clock, Target, Sparkles, Eye, ThumbsUp, ThumbsDown
+} from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
 import type { Conversation, Message } from "@/types/dashboard"
-import { fetchChatsAndBusinessVariables } from "@/actions/messageAction/messageAction"
-import { sendDMz } from "@/lib/fetch"
-import { cn } from "@/lib/utils"
-import FancyLoader from "./fancy-loader"
-import ExampleConversations from "./exampleConvo"
-import DeleteConfirmationModal from "./confirmDelete"
-import { usePusher } from "@/hooks/use-pusher"
-import { useChatState } from "@/hooks/use-chat-state"
-import { useOfflineStorage } from "@/hooks/use-offline-storage"
-import { useDatabaseSync } from "@/hooks/use-database-sync"
-import { ChatHeader } from "./chat-header"
-import { ConversationList } from "./conversation-list"
-import { MessageInput } from "./message-input"
+
+// Mock functions - replace with your actual implementations
+const fetchChatsAndBusinessVariables = async (automationId: string) => ({ conversations: [], token: "", businessVariables: {} })
+const sendDMz = async (pageId: string, receiverId: string, message: string, token: string, buttons?: any) => ({ status: 200, statusText: "OK" })
 
 interface AutomationChatsProps {
   automationId: string
@@ -3677,12 +792,38 @@ interface BusinessVariables {
   business_industry: string
 }
 
+interface ConversationAnalysis {
+  sentiment: {
+    positive: number
+    neutral: number
+    negative: number
+    overall: 'positive' | 'neutral' | 'negative'
+  }
+  engagement: {
+    responseRate: number
+    averageResponseTime: string
+    messageLength: number
+    conversationFlow: 'smooth' | 'choppy' | 'excellent'
+  }
+  insights: {
+    customerSatisfaction: number
+    conversionPotential: number
+    urgencyLevel: 'low' | 'medium' | 'high'
+    topKeywords: string[]
+    suggestedActions: string[]
+  }
+  summary: string
+  aiRecommendations: string[]
+}
+
 const BOT_NAME = "AiAssist"
 const BOT_AVATAR = "/fancy-profile-pic.svg"
 const EXCLUDED_CHAT_ID = "17841471075473962"
 
-const gradientBorder = "bg-gradient-to-r from-primary via-purple-500 to-secondary p-[2px] rounded-lg"
-const fancyBackground = "bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1d1d1d]"
+// Enhanced gradient with dark theme consistency
+const gradientBorder = "bg-gradient-to-r from-primary via-chart-1 to-chart-2 p-[2px] rounded-lg"
+const darkBackground = "bg-gradient-to-br from-background via-card to-muted/20"
+const glassEffect = "backdrop-blur-md bg-card/30 border border-border/50"
 
 const ShimmeringBorder = ({ children }: { children: React.ReactNode }) => {
   const styles = useSpring({
@@ -3705,36 +846,352 @@ const ShimmeringBorder = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-const FancyErrorMessage: React.FC<{ message: string }> = ({ message }) => {
-  return (
-    <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+const AIInsightCard: React.FC<{ 
+  analysis: ConversationAnalysis, 
+  onClose: () => void,
+  isLoading: boolean 
+}> = ({ analysis, onClose, isLoading }) => {
+  if (isLoading) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`${glassEffect} p-6 rounded-xl mb-4`}
       >
-        <Zap className="w-16 h-16 text-yellow-400 mb-4" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-chart-1 animate-pulse" />
+            <h3 className="text-lg font-semibold">AI Analysis in Progress...</h3>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="animate-pulse">
+            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-muted rounded w-1/2"></div>
+          </div>
+          <div className="flex justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-chart-1" />
+          </div>
+        </div>
       </motion.div>
-      <h3 className="text-xl font-semibold mb-2">Hang tight!</h3>
-      <p className="text-muted-foreground mb-4">{message}</p>
-      <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}>
-        <Loader2 className="w-6 h-6 text-primary animate-spin" />
-      </motion.div>
+    )
+  }
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`${glassEffect} p-6 rounded-xl mb-4 border-l-4 border-chart-1`}
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-full bg-chart-1/20">
+            <Brain className="w-5 h-5 text-chart-1" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">AI Conversation Analysis</h3>
+            <p className="text-sm text-muted-foreground">Powered by DeepSeek AI</p>
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onClose} className="hover:bg-destructive/10">
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Sentiment Analysis */}
+        <Card className="bg-card/50 border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Heart className="w-4 h-4 text-chart-2" />
+              Sentiment Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Positive</span>
+                <span className="text-sm font-medium text-green-400">{analysis.sentiment.positive}%</span>
+              </div>
+              <Progress value={analysis.sentiment.positive} className="h-2 bg-muted" />
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Neutral</span>
+                <span className="text-sm font-medium text-yellow-400">{analysis.sentiment.neutral}%</span>
+              </div>
+              <Progress value={analysis.sentiment.neutral} className="h-2 bg-muted" />
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Negative</span>
+                <span className="text-sm font-medium text-red-400">{analysis.sentiment.negative}%</span>
+              </div>
+              <Progress value={analysis.sentiment.negative} className="h-2 bg-muted" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Engagement Metrics */}
+        <Card className="bg-card/50 border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-chart-3" />
+              Engagement Score
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm">Response Rate</span>
+                <Badge variant="outline" className="bg-chart-3/10 text-chart-3 border-chart-3/30">
+                  {analysis.engagement.responseRate}%
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Avg Response</span>
+                <span className="text-sm font-medium">{analysis.engagement.averageResponseTime}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Flow Quality</span>
+                <Badge variant={analysis.engagement.conversationFlow === 'excellent' ? 'default' : 'secondary'}>
+                  {analysis.engagement.conversationFlow}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Key Insights */}
+      <Card className="bg-card/50 border-border/50 mb-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Target className="w-4 h-4 text-chart-4" />
+            Key Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-chart-4">{analysis.insights.customerSatisfaction}%</div>
+              <div className="text-xs text-muted-foreground">Satisfaction</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-chart-5">{analysis.insights.conversionPotential}%</div>
+              <div className="text-xs text-muted-foreground">Conversion</div>
+            </div>
+            <div className="text-center">
+              <Badge variant={
+                analysis.insights.urgencyLevel === 'high' ? 'destructive' : 
+                analysis.insights.urgencyLevel === 'medium' ? 'default' : 'secondary'
+              }>
+                {analysis.insights.urgencyLevel} priority
+              </Badge>
+            </div>
+          </div>
+          
+          <div className="mb-3">
+            <h4 className="text-sm font-medium mb-2">Top Keywords</h4>
+            <div className="flex flex-wrap gap-1">
+              {analysis.insights.topKeywords.map((keyword, index) => (
+                <Badge key={index} variant="outline" className="text-xs bg-primary/10">
+                  {keyword}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Summary & Recommendations */}
+      <Card className="bg-gradient-to-br from-chart-1/5 to-chart-2/5 border-chart-1/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-chart-1" />
+            AI Summary & Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm mb-4 text-foreground/90">{analysis.summary}</p>
+          
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Recommended Actions:</h4>
+            {analysis.aiRecommendations.map((rec, index) => (
+              <div key={index} className="flex items-start gap-2 text-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-chart-1 mt-2 flex-shrink-0"></div>
+                <span className="text-foreground/80">{rec}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+const EnhancedChatHeader: React.FC<{
+  totalUnreadMessages: number
+  hasNewMessages: boolean
+  soundEnabled: boolean
+  searchQuery: string
+  isSearchFocused: boolean
+  onToggleSound: () => void
+  onMarkAllAsRead: () => void
+  onShowHelp: () => void
+  onSearchChange: (query: string) => void
+  onSearchFocus: () => void
+  onSearchBlur: () => void
+  onClearSearch: () => void
+}> = ({ 
+  totalUnreadMessages, hasNewMessages, soundEnabled, searchQuery, isSearchFocused,
+  onToggleSound, onMarkAllAsRead, onShowHelp, onSearchChange, onSearchFocus, onSearchBlur, onClearSearch 
+}) => {
+  return (
+    <div className={`${glassEffect} p-4 border-b border-border/50`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-gradient-to-br from-chart-1 to-chart-2">
+            <MessageCircle className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-chart-1 to-chart-2 bg-clip-text text-transparent">
+              Instagram DMs
+            </h2>
+            <p className="text-sm text-muted-foreground">AI-powered conversation management</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {totalUnreadMessages > 0 && (
+            <Badge className="bg-destructive/20 text-destructive border-destructive/30 animate-pulse">
+              {totalUnreadMessages} unread
+            </Badge>
+          )}
+          <Button variant="ghost" size="sm" onClick={onToggleSound}>
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </Button>
+        </div>
+      </div>
+      
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          onFocus={onSearchFocus}
+          onBlur={onSearchBlur}
+          className={`pl-10 bg-background/50 border-border/50 focus:border-chart-1 transition-colors ${
+            isSearchFocused ? 'ring-2 ring-chart-1/20' : ''
+          }`}
+        />
+      </div>
     </div>
   )
 }
 
-const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId = "" }) => {
-  const [chatState, chatActions] = useChatState()
-  const { cachedConversations, isOffline, saveConversations, loadReadStatus, saveReadStatus } = useOfflineStorage()
-  const { pusher, isConnected: isPusherConnected, subscribe } = usePusher()
-  const { loadConversations, saveUserPreferences, loadUserPreferences } = useDatabaseSync(automationId, userId)
+const ConversationCard: React.FC<{
+  conversation: Conversation
+  isPinned: boolean
+  isStarred: boolean
+  onSelect: () => void
+  onTogglePin: (e: React.MouseEvent) => void
+  onToggleStar: (e: React.MouseEvent) => void
+  onDelete: () => void
+}> = ({ conversation, isPinned, isStarred, onSelect, onTogglePin, onToggleStar, onDelete }) => {
+  const lastMessage = conversation.messages[conversation.messages.length - 1]
+  const isUnread = conversation.unreadCount > 0
+  
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      className={`${glassEffect} p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+        isUnread ? 'ring-2 ring-chart-1/30 bg-chart-1/5' : ''
+      } ${isPinned ? 'border-l-4 border-chart-2' : ''}`}
+      onClick={onSelect}
+    >
+      <div className="flex items-start gap-3">
+        <div className="relative">
+          <Avatar className="w-10 h-10 ring-2 ring-border">
+            <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${conversation.id}`} />
+            <AvatarFallback>CL</AvatarFallback>
+          </Avatar>
+          {isUnread && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-chart-1 rounded-full flex items-center justify-center">
+              <span className="text-xs text-white font-bold">{conversation.unreadCount}</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-medium truncate">Client #{conversation.id.slice(-4)}</h4>
+            <div className="flex items-center gap-1">
+              {isPinned && <Pin className="w-3 h-3 text-chart-2" />}
+              {isStarred && <Star className="w-3 h-3 text-chart-4 fill-current" />}
+              <span className="text-xs text-muted-foreground">
+                {new Date(conversation.updatedAt).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+          
+          {lastMessage && (
+            <p className="text-sm text-muted-foreground truncate">
+              {lastMessage.role === 'assistant' ? '🤖 ' : '👤 '}
+              {lastMessage.content}
+            </p>
+          )}
+          
+          <div className="flex items-center justify-between mt-2">
+            <Badge variant="outline" className="text-xs bg-background/50">
+              {conversation.messages.length} messages
+            </Badge>
+            
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onTogglePin}
+                className="h-6 w-6 p-0 hover:bg-chart-2/20"
+              >
+                <Pin className={`w-3 h-3 ${isPinned ? 'text-chart-2' : 'text-muted-foreground'}`} />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onToggleStar}
+                className="h-6 w-6 p-0 hover:bg-chart-4/20"
+              >
+                <Star className={`w-3 h-3 ${isStarred ? 'text-chart-4 fill-current' : 'text-muted-foreground'}`} />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onDelete}
+                className="h-6 w-6 p-0 hover:bg-destructive/20"
+              >
+                <Trash2 className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
 
+const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId = "" }) => {
+  // State management
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isRecording, setIsRecording] = useState(false)
   const [token, setToken] = useState<string | null>(null)
   const [pageId, setPageId] = useState<string | null>(null)
   const [businessVariables, setBusinessVariables] = useState<BusinessVariables>({
@@ -3749,231 +1206,136 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId 
   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(new Set())
   const [starredConversations, setStarredConversations] = useState<Set<string>>(new Set())
   const [hasNewMessages, setHasNewMessages] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null)
+  
+  // AI Analysis states
+  const [showAnalysis, setShowAnalysis] = useState(false)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [conversationAnalysis, setConversationAnalysis] = useState<ConversationAnalysis | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Initialize audio
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const audio = new Audio("/message-notification.mp3")
-      audio.load()
-      audioRef.current = audio
-
-      return () => {
-        if (audioRef.current) {
-          audioRef.current.pause()
-          audioRef.current = null
-        }
-      }
+  // Mock AI Analysis function - replace with actual DeepSeek API call
+  const analyzeConversationWithAI = async (conversation: Conversation): Promise<ConversationAnalysis> => {
+    setAnalysisLoading(true)
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    // Mock analysis - replace with actual DeepSeek API integration
+    const mockAnalysis: ConversationAnalysis = {
+      sentiment: {
+        positive: 65,
+        neutral: 25,
+        negative: 10,
+        overall: 'positive'
+      },
+      engagement: {
+        responseRate: 87,
+        averageResponseTime: '2.3 min',
+        messageLength: 45,
+        conversationFlow: 'smooth'
+      },
+      insights: {
+        customerSatisfaction: 78,
+        conversionPotential: 82,
+        urgencyLevel: 'medium',
+        topKeywords: ['interested', 'pricing', 'features', 'demo', 'support'],
+        suggestedActions: [
+          'Follow up with pricing information',
+          'Schedule a product demo',
+          'Address specific feature questions'
+        ]
+      },
+      summary: "This conversation shows strong engagement with positive sentiment. The customer is actively interested in your product and has asked specific questions about pricing and features. They appear ready for the next step in the sales process.",
+      aiRecommendations: [
+        "Send detailed pricing breakdown within 24 hours",
+        "Offer a personalized demo session",
+        "Highlight key features mentioned in conversation",
+        "Set up automated follow-up for next week"
+      ]
     }
+    
+    setAnalysisLoading(false)
+    return mockAnalysis
+  }
+
+  const handleAnalyzeConversation = async () => {
+    if (!selectedConversation) return
+    
+    setShowAnalysis(true)
+    try {
+      const analysis = await analyzeConversationWithAI(selectedConversation)
+      setConversationAnalysis(analysis)
+    } catch (error) {
+      console.error('Analysis failed:', error)
+      setError('Failed to analyze conversation')
+    }
+  }
+
+  // Mock data for demonstration
+  useEffect(() => {
+    const mockConversations: Conversation[] = [
+      {
+        id: '1',
+        userId: 'user1',
+        pageId: 'page1',
+        messages: [
+          {
+            id: '1',
+            role: 'user',
+            content: 'Hi, I\'m interested in your product. Can you tell me more about the pricing?',
+            senderId: 'user1',
+            createdAt: new Date(),
+            read: false
+          },
+          {
+            id: '2',
+            role: 'assistant',
+            content: 'Hello! I\'d be happy to help you with pricing information. We have several plans available. What specific features are you most interested in?',
+            senderId: 'bot',
+            createdAt: new Date(),
+            read: true
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        unreadCount: 1,
+        Automation: null
+      },
+      {
+        id: '2',
+        userId: 'user2',
+        pageId: 'page1',
+        messages: [
+          {
+            id: '3',
+            role: 'user',
+            content: 'Great product! When can I schedule a demo?',
+            senderId: 'user2',
+            createdAt: new Date(),
+            read: true
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        unreadCount: 0,
+        Automation: null
+      }
+    ]
+    
+    setTimeout(() => {
+      setConversations(mockConversations)
+      setIsLoading(false)
+      setToken('mock-token')
+    }, 1000)
   }, [])
 
-  // Load user preferences on mount
-  useEffect(() => {
-    const loadPrefs = async () => {
-      if (!userId) return
-
-      try {
-        const prefs = await loadUserPreferences()
-        if (prefs) {
-          setSoundEnabled(prefs.soundEnabled)
-        }
-      } catch (error) {
-        console.error("Error loading preferences:", error)
-      }
-    }
-
-    loadPrefs()
-  }, [userId, loadUserPreferences])
-
-  // Save preferences when they change
-  useEffect(() => {
-    if (!userId) return
-
-    const savePrefs = async () => {
-      try {
-        await saveUserPreferences({
-          soundEnabled,
-          desktopNotifications: true,
-          emailNotifications: false,
-          autoMarkAsRead: false,
-          theme: "system",
-          language: "en",
-        })
-      } catch (error) {
-        console.error("Error saving preferences:", error)
-      }
-    }
-
-    savePrefs()
-  }, [soundEnabled, userId, saveUserPreferences])
-
-  // Load conversations from database
-  const fetchChats = useCallback(async () => {
-    if (isOffline || !automationId) return
-
-    try {
-      setError(null)
-      setIsLoading(true)
-
-      // Try to load from database first
-      const dbConversations = await loadConversations()
-      if (dbConversations.length > 0) {
-        chatActions.setConversations(dbConversations)
-        saveConversations(dbConversations)
-        setIsLoading(false)
-        return
-      }
-
-      // Fallback to existing API
-      const result = await fetchChatsAndBusinessVariables(automationId)
-
-      if (!result || typeof result !== "object") {
-        throw new Error("Invalid response from server")
-      }
-
-      const { conversations, token, businessVariables } = result as {
-        conversations: any[]
-        token: string
-        businessVariables: BusinessVariables
-      }
-
-      if (!Array.isArray(conversations)) {
-        throw new Error("Conversations data is not in the expected format")
-      }
-
-      const transformedConversations = conversations
-        .filter((conv) => conv.chatId !== EXCLUDED_CHAT_ID)
-        .map(
-          (conv): Conversation => ({
-            id: conv.chatId,
-            userId: conv.messages[0]?.senderId || conv.chatId,
-            pageId: conv.pageId,
-            messages: conv.messages.map(
-              (msg: any): Message => ({
-                id: msg.id,
-                role: msg.role,
-                content: msg.content,
-                senderId: msg.senderId,
-                createdAt: new Date(msg.createdAt),
-                read: chatState.readConversations.has(conv.chatId) ? true : Boolean(msg.read),
-              }),
-            ),
-            createdAt: new Date(conv.messages[0]?.createdAt ?? Date.now()),
-            updatedAt: new Date(conv.messages[conv.messages.length - 1]?.createdAt ?? Date.now()),
-            unreadCount: chatState.readConversations.has(conv.chatId)
-              ? 0
-              : conv.messages.filter((msg: any) => !msg.read).length,
-            Automation: null,
-          }),
-        )
-
-      transformedConversations.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-
-      chatActions.setConversations(transformedConversations)
-      saveConversations(transformedConversations)
-
-      if (transformedConversations.length > 0 && !pageId) {
-        setPageId(transformedConversations[0].pageId)
-      }
-
-      if (token) setToken(token)
-      if (businessVariables) setBusinessVariables(businessVariables)
-    } catch (error) {
-      console.error("Error fetching chats:", error)
-      if (cachedConversations.length > 0) {
-        chatActions.setConversations(cachedConversations)
-      } else {
-        setError(`Error loading conversations: ${error instanceof Error ? error.message : "Unknown error"}`)
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }, [
-    automationId,
-    isOffline,
-    loadConversations,
-    chatActions,
-    saveConversations,
-    cachedConversations,
-    chatState.readConversations,
-    pageId,
-  ])
-
-  // Initial load
-  useEffect(() => {
-    fetchChats()
-  }, []) // Remove fetchChats from dependencies to prevent infinite loop
-
-  // Set up Pusher subscriptions
-  useEffect(() => {
-    if (!pusher || !isPusherConnected || !automationId) return
-
-    const channelName = `automation-${automationId}`
-    const channel = subscribe(channelName)
-
-    if (channel) {
-      const handleNewMessage = (data: { conversationId: string; message: Message }) => {
-        console.log("New message received via Pusher:", data)
-        chatActions.addMessage(data.conversationId, data.message)
-
-        if (soundEnabled && chatState.selectedConversation?.id !== data.conversationId) {
-          playNotificationSound()
-        }
-
-        setHasNewMessages(true)
-      }
-
-      const handleMessageRead = (data: { conversationId: string; messageIds: string[] }) => {
-        console.log("Message read status updated via Pusher:", data)
-        const conversation = chatState.conversations.find((c) => c.id === data.conversationId)
-        if (conversation) {
-          const updatedMessages = conversation.messages.map((msg) =>
-            data.messageIds.includes(msg.id) ? { ...msg, read: true } : msg,
-          )
-          chatActions.updateConversation(data.conversationId, { messages: updatedMessages })
-        }
-      }
-
-      channel.bind("new-message", handleNewMessage)
-      channel.bind("message-read", handleMessageRead)
-
-      return () => {
-        channel.unbind("new-message", handleNewMessage)
-        channel.unbind("message-read", handleMessageRead)
-      }
-    }
-  }, [
-    pusher,
-    isPusherConnected,
-    automationId,
-    soundEnabled,
-    chatState.selectedConversation?.id,
-    chatActions,
-    chatState.conversations,
-  ])
-
-  const playNotificationSound = useCallback(() => {
-    if (!soundEnabled || !audioRef.current) return
-
-    try {
-      audioRef.current.currentTime = 0
-      const playPromise = audioRef.current.play()
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.error("Audio play failed:", error)
-        })
-      }
-    } catch (e) {
-      console.error("Error playing sound:", e)
-    }
-  }, [soundEnabled])
+  const totalUnreadMessages = useMemo(() => {
+    return conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)
+  }, [conversations])
 
   const filteredConversations = useMemo(() => {
-    let filtered = [...chatState.conversations]
+    let filtered = [...conversations]
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
@@ -3997,396 +1359,408 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId 
     })
 
     return filtered
-  }, [chatState.conversations, searchQuery, activeFilter, pinnedConversations])
+  }, [conversations, searchQuery, activeFilter, pinnedConversations])
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !chatState.selectedConversation || isOffline) return
+  if (isLoading) {
+    return (
+      <div className={`${darkBackground} rounded-lg h-full flex items-center justify-center`}>
+        <motion.div 
+          animate={{ rotate: 360 }} 
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="p-4 rounded-full bg-gradient-to-r from-chart-1 to-chart-2"
+        >
+          <Brain className="w-8 h-8 text-white" />
+        </motion.div>
+      </div>
+    )
+  }
 
-    if (!token || !pageId) {
-      setError("Missing authentication token or page ID")
-      return
-    }
+  return (
+    <ShimmeringBorder>
+      <div className={`flex flex-col ${darkBackground} text-foreground rounded-lg overflow-hidden h-full max-h-[90vh]`}>
+        {selectedConversation ? (
+          <>
+            {/* Enhanced Chat Header */}
+            <div className={`${glassEffect} p-4 border-b border-border/50`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    className="p-2 hover:bg-chart-1/20"
+                    onClick={() => {
+                      setSelectedConversation(null)
+                      setShowAnalysis(false)
+                      setConversationAnalysis(null)
+                    }}
+                  >
+                    <ArrowLeft size={20} />
+                  </Button>
+                  <Avatar className="w-10 h-10 ring-2 ring-chart-1">
+                    <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${selectedConversation.id}`} />
+                    <AvatarFallback>CL</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-medium text-lg">Client #{selectedConversation.id.slice(-4)}</h4>
+                    <p className="text-sm text-muted-foreground flex items-center">
+                      <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                      Online
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleAnalyzeConversation}
+                    className="bg-gradient-to-r from-chart-1 to-chart-2 hover:from-chart-1/80 hover:to-chart-2/80 text-white"
+                    disabled={analysisLoading}
+                  >
+                    {analysisLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Brain className="w-4 h-4 mr-2" />
+                    )}
+                    Analyze Conversation
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Analysis Panel */}
+            {showAnalysis && (
+              <div className="max-h-[50vh] overflow-y-auto">
+                <AIInsightCard 
+                  analysis={conversationAnalysis!}
+                  onClose={() => {
+                    setShowAnalysis(false)
+                    setConversationAnalysis(null)
+                  }}
+                  isLoading={analysisLoading}
+                />
+              </div>
+            )}
+
+            {/* Messages Area */}
+            <ScrollArea className="flex-grow">
+              <div className="p-4 space-y-4" ref={scrollRef}>
+                {selectedConversation.messages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-center">
+                    <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+                    <h3 className="text-lg font-medium mb-2">No messages yet</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      Start the conversation by sending a message below.
+                    </p>
+                  </div>
+                ) : (
+                  selectedConversation.messages.map((message, index) => (
+                    <motion.div
+                      key={`${message.id}-${index}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className={`flex items-end mb-4 ${message.role === "assistant" ? "justify-start" : "justify-end"}`}
+                    >
+                      {message.role === "assistant" ? (
+                        <Avatar className="w-8 h-8 mr-3 ring-2 ring-chart-1/50">
+                          <AvatarImage src={BOT_AVATAR || "/placeholder.svg"} />
+                          <AvatarFallback className="bg-gradient-to-br from-chart-1 to-chart-2 text-white text-xs">
+                            {BOT_NAME.slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <Avatar className="w-8 h-8 ml-3 order-last ring-2 ring-chart-3/50">
+                          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.senderId}`} />
+                          <AvatarFallback className="bg-gradient-to-br from-chart-3 to-chart-4 text-white text-xs">
+                            CL
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div className="relative group">
+                        <div
+                          className={`max-w-[85%] sm:max-w-[75%] p-3 rounded-2xl text-sm relative transition-all duration-200 ${
+                            message.role === "assistant"
+                              ? "bg-gradient-to-br from-chart-1/20 to-chart-2/20 border border-chart-1/30 text-foreground mr-2"
+                              : "bg-gradient-to-br from-chart-3/20 to-chart-4/20 border border-chart-3/30 text-foreground ml-2"
+                          }`}
+                          style={{
+                            backdropFilter: "blur(10px)",
+                            WebkitBackdropFilter: "blur(10px)",
+                          }}
+                        >
+                          <p className="break-words leading-relaxed">{message.content}</p>
+                          <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
+                            <span>
+                              {new Date(message.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                            {message.role === "user" && (
+                              <div className="flex items-center gap-1">
+                                {message.read ? (
+                                  <Eye className="w-3 h-3 text-chart-3" />
+                                ) : (
+                                  <div className="w-2 h-2 bg-chart-1 rounded-full"></div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Message Actions (appear on hover) */}
+                        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 p-1">
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-chart-1/20">
+                            <ThumbsUp className="w-3 h-3" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-destructive/20">
+                            <ThumbsDown className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+
+            {/* Enhanced Message Input */}
+            <div className={`${glassEffect} p-4 border-t border-border/50`}>
+              <div className="flex items-end gap-3">
+                <div className="flex-1 relative">
+                  <Input
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSendMessage()
+                      }
+                    }}
+                    className="min-h-[44px] bg-background/50 border-border/50 focus:border-chart-1 resize-none"
+                    disabled={isTyping}
+                  />
+                  {isTyping && (
+                    <div className="absolute bottom-2 left-3 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Sending...
+                    </div>
+                  )}
+                </div>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || isTyping}
+                  className="bg-gradient-to-r from-chart-1 to-chart-2 hover:from-chart-1/80 hover:to-chart-2/80 text-white h-11 px-6"
+                >
+                  Send
+                </Button>
+              </div>
+              
+              {error && (
+                <Alert variant="destructive" className="mt-3 bg-destructive/10 border-destructive/30">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Enhanced Chat List Header */}
+            <EnhancedChatHeader
+              totalUnreadMessages={totalUnreadMessages}
+              hasNewMessages={hasNewMessages}
+              soundEnabled={soundEnabled}
+              searchQuery={searchQuery}
+              isSearchFocused={isSearchFocused}
+              onToggleSound={() => setSoundEnabled(!soundEnabled)}
+              onMarkAllAsRead={() => {
+                const updatedConversations = conversations.map(conv => ({
+                  ...conv,
+                  unreadCount: 0,
+                  messages: conv.messages.map(msg => ({ ...msg, read: true }))
+                }))
+                setConversations(updatedConversations)
+              }}
+              onShowHelp={() => {}}
+              onSearchChange={setSearchQuery}
+              onSearchFocus={() => setIsSearchFocused(true)}
+              onSearchBlur={() => setIsSearchFocused(false)}
+              onClearSearch={() => setSearchQuery("")}
+            />
+
+            {/* Enhanced Analytics Dashboard */}
+            <div className="px-4 mb-4">
+              <Card className={`${glassEffect} border-border/50`}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-chart-1" />
+                    Quick Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-bold text-chart-1">{conversations.length}</div>
+                      <div className="text-xs text-muted-foreground">Total Chats</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-chart-2">{totalUnreadMessages}</div>
+                      <div className="text-xs text-muted-foreground">Unread</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-chart-3">87%</div>
+                      <div className="text-xs text-muted-foreground">Response Rate</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-chart-4">2.3m</div>
+                      <div className="text-xs text-muted-foreground">Avg Response</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="px-4 mb-4">
+              <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setActiveFilter(value as any)}>
+                <TabsList className={`grid grid-cols-3 ${glassEffect} border-border/50`}>
+                  <TabsTrigger value="all" className="text-xs data-[state=active]:bg-chart-1/20 data-[state=active]:text-chart-1">
+                    All Chats
+                  </TabsTrigger>
+                  <TabsTrigger value="unread" className="text-xs data-[state=active]:bg-chart-2/20 data-[state=active]:text-chart-2">
+                    Unread
+                    {totalUnreadMessages > 0 && (
+                      <Badge className="ml-2 h-4 min-w-4 px-1 bg-chart-2/20 text-chart-2 border-chart-2/30">
+                        {totalUnreadMessages}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="recent" className="text-xs data-[state=active]:bg-chart-3/20 data-[state=active]:text-chart-3">
+                    Recent
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            {/* Conversations List */}
+            <ScrollArea className="flex-grow">
+              <div className="px-4 pb-4 space-y-3">
+                {filteredConversations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64 text-center">
+                    <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+                    <h3 className="text-lg font-medium mb-2">No conversations yet</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      {token 
+                        ? "Start engaging with your customers through Instagram DMs"
+                        : "Connect your Instagram account to start receiving messages"
+                      }
+                    </p>
+                    {!token && (
+                      <Button className="mt-4 bg-gradient-to-r from-chart-1 to-chart-2 hover:from-chart-1/80 hover:to-chart-2/80 text-white">
+                        Connect Instagram Account
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  filteredConversations.map((conversation, index) => (
+                    <motion.div
+                      key={conversation.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <ConversationCard
+                        conversation={conversation}
+                        isPinned={pinnedConversations.has(conversation.id)}
+                        isStarred={starredConversations.has(conversation.id)}
+                        onSelect={() => setSelectedConversation(conversation)}
+                        onTogglePin={(e) => {
+                          e.stopPropagation()
+                          setPinnedConversations(prev => {
+                            const newSet = new Set(prev)
+                            if (newSet.has(conversation.id)) {
+                              newSet.delete(conversation.id)
+                            } else {
+                              newSet.add(conversation.id)
+                            }
+                            return newSet
+                          })
+                        }}
+                        onToggleStar={(e) => {
+                          e.stopPropagation()
+                          setStarredConversations(prev => {
+                            const newSet = new Set(prev)
+                            if (newSet.has(conversation.id)) {
+                              newSet.delete(conversation.id)
+                            } else {
+                              newSet.add(conversation.id)
+                            }
+                            return newSet
+                          })
+                        }}
+                        onDelete={() => {
+                          setConversations(prev => prev.filter(c => c.id !== conversation.id))
+                        }}
+                      />
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </>
+        )}
+      </div>
+    </ShimmeringBorder>
+  )
+
+  // Helper function to handle message sending
+  async function handleSendMessage() {
+    if (!newMessage.trim() || !selectedConversation) return
 
     setIsTyping(true)
     setError(null)
 
     try {
-      console.log("🚀 Sending message with new sendDM function:", {
-        pageId,
-        receiverId: chatState.selectedConversation.userId,
-        message: newMessage.substring(0, 50) + "...",
-        hasToken: !!token,
-      })
+      // Mock sending - replace with actual API call
+      const userMessage = {
+        id: Date.now().toString(),
+        role: 'user' as const,
+        content: newMessage,
+        senderId: selectedConversation.userId,
+        createdAt: new Date(),
+        read: true
+      }
 
-      // Use the new sendDM function directly
-      const result = await sendDMz(
-        pageId, // userId (the page sending the message)
-        chatState.selectedConversation.userId || "123456", // receiverId (the user receiving the message)
-        newMessage, // prompt (the message content)
-        token, // token
-        undefined, // buttons (not used in this context)
+      // Update conversation
+      const updatedConversation = {
+        ...selectedConversation,
+        messages: [...selectedConversation.messages, userMessage],
+        updatedAt: new Date()
+      }
+
+      setSelectedConversation(updatedConversation)
+      setConversations(prev => 
+        prev.map(conv => 
+          conv.id === selectedConversation.id ? updatedConversation : conv
+        )
       )
 
-      console.log("📥 sendDM response:", {
-        status: result.status,
-        statusText: result.statusText,
-        success: result.status === 200,
-      })
+      setNewMessage("")
 
-      if (result.status === 200) {
-        // Create user message for the UI
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          role: "user",
-          content: newMessage,
-          senderId: chatState.selectedConversation.userId,
-          receiverId: pageId,
-          createdAt: new Date(),
-          status: "sent",
-          read: true,
+      // Scroll to bottom
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight
         }
+      }, 100)
 
-        await chatActions.addMessage(chatState.selectedConversation.id, userMessage)
-        setNewMessage("")
-
-        // Scroll to bottom
-        setTimeout(() => {
-          if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-          }
-        }, 100)
-
-        console.log("✅ Message sent successfully and added to UI")
-      } else {
-        throw new Error(`Instagram API returned status ${result.status}: ${result.statusText}`)
-      }
     } catch (error) {
-      console.error("❌ Error sending message:", error)
-
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        setError("You are offline. Messages can't be sent until you reconnect.")
-      } else if (error instanceof Error) {
-        // Handle specific error types
-        if (error.message.includes("401") || error.message.includes("unauthorized")) {
-          setError("Instagram authentication failed. Please reconnect your Instagram account.")
-        } else if (error.message.includes("400") || error.message.includes("bad request")) {
-          setError("Invalid message format. Please try again.")
-        } else if (error.message.includes("429") || error.message.includes("rate limit")) {
-          setError("Too many messages sent. Please wait a moment before trying again.")
-        } else {
-          setError(`Failed to send message: ${error.message}`)
-        }
-      } else {
-        setError("Failed to send message. Please try again.")
-      }
+      console.error("Error sending message:", error)
+      setError("Failed to send message. Please try again.")
     } finally {
       setIsTyping(false)
     }
   }
-
-  const handleSelectConversation = (conversation: Conversation) => {
-    chatActions.markConversationAsRead(conversation.id)
-    chatActions.setSelectedConversation(conversation)
-    setHasNewMessages(false)
-  }
-
-  const togglePinConversation = (conversationId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setPinnedConversations((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(conversationId)) {
-        newSet.delete(conversationId)
-      } else {
-        newSet.add(conversationId)
-      }
-      return newSet
-    })
-  }
-
-  const toggleStarConversation = (conversationId: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setStarredConversations((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(conversationId)) {
-        newSet.delete(conversationId)
-      } else {
-        newSet.add(conversationId)
-      }
-      return newSet
-    })
-  }
-
-  const handleDeleteConversation = (conversation: Conversation) => {
-    setConversationToDelete(conversation)
-    setIsDeleteModalOpen(true)
-  }
-
-  const confirmDelete = async () => {
-    if (!conversationToDelete) return
-
-    try {
-      await chatActions.deleteConversation(conversationToDelete.id)
-      if (pinnedConversations.has(conversationToDelete.id)) {
-        setPinnedConversations((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(conversationToDelete.id)
-          return newSet
-        })
-      }
-      if (starredConversations.has(conversationToDelete.id)) {
-        setStarredConversations((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(conversationToDelete.id)
-          return newSet
-        })
-      }
-    } catch (error) {
-      console.error("Error deleting conversation:", error)
-      setError(`Failed to delete conversation: ${error instanceof Error ? error.message : String(error)}`)
-    } finally {
-      setIsDeleteModalOpen(false)
-      setConversationToDelete(null)
-    }
-  }
-
-  return (
-    <>
-      <ShimmeringBorder>
-        <div
-          className={`flex flex-col ${fancyBackground} text-foreground rounded-lg overflow-hidden h-full max-h-[90vh] sm:max-h-[80vh]`}
-        >
-          {isLoading ? (
-            <FancyLoader />
-          ) : error ? (
-            <FancyErrorMessage message={error} />
-          ) : (
-            <>
-              {chatState.selectedConversation ? (
-                <>
-                  <div className="p-2 sm:p-4 bg-background border-b border-primary/10 flex items-center">
-                    <Button
-                      variant="ghost"
-                      className="mr-4 p-2"
-                      onClick={() => chatActions.setSelectedConversation(null)}
-                    >
-                      <ArrowLeft size={20} />
-                    </Button>
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage
-                        src={`https://api.dicebear.com/6.x/initials/svg?seed=${chatState.selectedConversation.id}`}
-                      />
-                      <AvatarFallback>CL</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-3 flex-grow">
-                      <h4 className="font-medium text-lg">Client</h4>
-                      <p className="text-sm text-muted-foreground flex items-center">
-                        {isPusherConnected ? (
-                          <span className="flex items-center">
-                            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                            Connected
-                          </span>
-                        ) : (
-                          <span className="flex items-center">
-                            <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                            {isOffline ? "Offline" : "Connecting..."}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {isOffline && (
-                    <Alert variant="destructive" className="m-4 border-red-400">
-                      <AlertTitle className="text-red-500">You are offline</AlertTitle>
-                      <AlertDescription className="text-sm">
-                        Showing cached messages. New messages can&apos;t be sent.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  <ScrollArea className="flex-grow h-[calc(100vh-300px)] overflow-hidden">
-                    <div className="p-4 space-y-4" ref={scrollRef}>
-                      {chatState.selectedConversation.messages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-center">
-                          <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-                          <h3 className="text-lg font-medium mb-2">No messages yet</h3>
-                          <p className="text-muted-foreground max-w-md">
-                            Start the conversation by sending a message below.
-                          </p>
-                        </div>
-                      ) : (
-                        chatState.selectedConversation.messages.map((message, index) => (
-                          <motion.div
-                            key={`${message.id}-${index}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className={`flex items-end mb-4 ${message.role === "assistant" ? "justify-start" : "justify-end"}`}
-                          >
-                            {message.role === "assistant" ? (
-                              <Avatar className="w-8 h-8 mr-2 border-2 border-primary">
-                                <AvatarImage src={BOT_AVATAR || "/placeholder.svg"} />
-                                <AvatarFallback>{BOT_NAME.slice(0, 2)}</AvatarFallback>
-                              </Avatar>
-                            ) : (
-                              <Avatar className="w-8 h-8 ml-2 order-last border-2 border-primary">
-                                <AvatarImage src={`https://i.pravatar.cc/150?u=${message.senderId}`} />
-                                <AvatarFallback>CL</AvatarFallback>
-                              </Avatar>
-                            )}
-                            <div
-                              className={cn(
-                                "max-w-[85%] sm:max-w-[75%] p-2 sm:p-3 rounded-3xl text-sm relative",
-                                message.role === "assistant"
-                                  ? "bg-gradient-to-br from-blue-400/30 to-blue-600/30 border-2 border-blue-500/50 text-white"
-                                  : "bg-gradient-to-br from-purple-400/30 to-purple-600/30 border-2 border-purple-500/50 text-white",
-                              )}
-                              style={{
-                                backdropFilter: "blur(10px)",
-                                WebkitBackdropFilter: "blur(10px)",
-                              }}
-                            >
-                              <p className="break-words relative z-10">{message.content}</p>
-                              <div className="flex justify-between items-center mt-1 text-xs text-gray-300">
-                                <span>
-                                  {new Date(message.createdAt).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-
-                  <MessageInput
-                    message={newMessage}
-                    isOffline={isOffline}
-                    isRecording={isRecording}
-                    onMessageChange={setNewMessage}
-                    onSendMessage={handleSendMessage}
-                    onVoiceMessage={() => setIsRecording(!isRecording)}
-                    onFileUpload={(event) => {
-                      const file = event.target.files?.[0]
-                      if (file) {
-                        console.log("File selected:", file.name)
-                      }
-                    }}
-                  />
-                </>
-              ) : (
-                <>
-                  <ChatHeader
-                    totalUnreadMessages={chatState.totalUnreadMessages}
-                    hasNewMessages={hasNewMessages}
-                    soundEnabled={soundEnabled}
-                    searchQuery={searchQuery}
-                    isSearchFocused={isSearchFocused}
-                    onToggleSound={() => setSoundEnabled(!soundEnabled)}
-                    onMarkAllAsRead={chatActions.markAllAsRead}
-                    onShowHelp={() => {}}
-                    onSearchChange={setSearchQuery}
-                    onSearchFocus={() => setIsSearchFocused(true)}
-                    onSearchBlur={() => setIsSearchFocused(false)}
-                    onClearSearch={() => setSearchQuery("")}
-                  />
-
-                  {isOffline && (
-                    <Alert variant="destructive" className="mx-4 mb-4 border-red-400">
-                      <AlertTitle className="text-red-500">You are offline</AlertTitle>
-                      <AlertDescription className="text-sm">
-                        Showing cached conversations. Real-time updates are unavailable.
-                        <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-500">
-                          Offline Mode
-                        </Badge>
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div className="px-4">
-                    <Tabs
-                      defaultValue="all"
-                      className="w-full"
-                      onValueChange={(value) => setActiveFilter(value as any)}
-                    >
-                      <TabsList className="grid grid-cols-3 mb-4">
-                        <TabsTrigger value="all" className="text-xs">
-                          All Chats
-                        </TabsTrigger>
-                        <TabsTrigger value="unread" className="text-xs">
-                          Unread
-                          {chatState.totalUnreadMessages > 0 && (
-                            <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1">
-                              {chatState.totalUnreadMessages}
-                            </Badge>
-                          )}
-                        </TabsTrigger>
-                        <TabsTrigger value="recent" className="text-xs">
-                          Recent
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-
-                  <ScrollArea className="flex-grow">
-                    <div className="flex flex-col p-4 space-y-4">
-                      {!token ? (
-                        <div className="w-full p-4 bg-background rounded-lg shadow-md">
-                          <ExampleConversations onSelectConversation={handleSelectConversation} className="mb-4" />
-                          <div className="text-center">
-                            <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-                              Connect your Instagram account to start receiving real messages.
-                            </p>
-                            <Button
-                              onClick={() => console.log("Navigate to integration page")}
-                              className="bg-[#3352CC] hover:bg-[#3352CC]/90 text-white font-bold py-2 px-4 rounded-full transition-all duration-200 transform hover:scale-105 w-full"
-                              disabled={isOffline}
-                            >
-                              Connect Instagram
-                            </Button>
-                          </div>
-                        </div>
-                      ) : filteredConversations.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-center">
-                          <MessageSquare className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-                          <h3 className="text-lg font-medium mb-2">No conversations yet</h3>
-                          <p className="text-muted-foreground max-w-md">
-                            {isOffline
-                              ? "You're currently offline. Saved conversations will appear here."
-                              : "Connect your account to start receiving messages."}
-                          </p>
-                          <ExampleConversations onSelectConversation={handleSelectConversation} className="mt-6" />
-                        </div>
-                      ) : (
-                        <ConversationList
-                          conversations={filteredConversations}
-                          pinnedConversations={pinnedConversations}
-                          starredConversations={starredConversations}
-                          onSelectConversation={handleSelectConversation}
-                          onTogglePin={togglePinConversation}
-                          onToggleStar={toggleStarConversation}
-                          onDeleteConversation={handleDeleteConversation}
-                        />
-                      )}
-                    </div>
-                  </ScrollArea>
-                </>
-              )}
-            </>
-          )}
-
-          <DeleteConfirmationModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            onConfirm={confirmDelete}
-          />
-        </div>
-      </ShimmeringBorder>
-    </>
-  )
 }
 
 export default AutomationChats
