@@ -187,7 +187,7 @@ function LeadDetailsModal({ lead, isOpen, onClose }: { lead: any; isOpen: boolea
   // Update the action handlers:
   const handleViewInCRM = (lead: any) => {
     if (lead.crmId) {
-      window.open(`https://your-crm.com/contacts/${lead.crmId}`, "_blank")
+      window.open(`https://hubspot.com/contacts/${lead.crmId}`, "_blank")
     } else {
       toast.info("Lead not synced to CRM yet. Would you like to sync now?")
     }
