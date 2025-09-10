@@ -863,307 +863,6 @@ const FancyErrorMessage: React.FC<{ message: string }> = ({ message }) => {
   )
 }
 
-// const AnalysisModal = ({ 
-//   isOpen, 
-//   onClose, 
-//   analysis, 
-//   isLoading 
-// }: { 
-//   isOpen: boolean
-//   onClose: () => void
-//   analysis: ConversationAnalysis | null
-//   isLoading: boolean
-// }) => {
-//   if (!isOpen) return null
-
-//   const getSentimentColor = (sentiment: string) => {
-//     switch (sentiment) {
-//       case 'positive': return 'text-green-400 bg-green-400/20'
-//       case 'negative': return 'text-red-400 bg-red-400/20'
-//       default: return 'text-yellow-400 bg-yellow-400/20'
-//     }
-//   }
-
-//   const getUrgencyColor = (urgency: string) => {
-//     switch (urgency) {
-//       case 'high': return 'text-red-400 bg-red-400/20'
-//       case 'medium': return 'text-yellow-400 bg-yellow-400/20'
-//       default: return 'text-green-400 bg-green-400/20'
-//     }
-//   }
-
-//   const getEngagementColor = (engagement: string) => {
-//     switch (engagement) {
-//       case 'high': return 'text-green-400 bg-green-400/20'
-//       case 'medium': return 'text-yellow-400 bg-yellow-400/20'
-//       default: return 'text-red-400 bg-red-400/20'
-//     }
-//   }
-
-//   return (
-//     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-//       <motion.div
-//         initial={{ opacity: 0, scale: 0.9 }}
-//         animate={{ opacity: 1, scale: 1 }}
-//         exit={{ opacity: 0, scale: 0.9 }}
-//         className="bg-background border border-border rounded-lg max-w-4xl max-h-[98h] overflow-hidden w-full"
-//       >
-//         <div className="p-6 border-b border-border">
-//           <div className="flex items-center justify-between">
-//             <div className="flex items-center space-x-3">
-//               <Brain className="w-8 h-8 text-primary" />
-//               <div>
-//                 <h2 className="text-2xl font-bold">AI Conversation Analysis</h2>
-//                 <p className="text-muted-foreground">Insights and recommendations</p>
-//               </div>
-//             </div>
-//             <Button variant="ghost" onClick={onClose} className="h-8 w-8 p-0">
-//               ✕
-//             </Button>
-//           </div>
-//         </div>
-
-//         <ScrollArea className="max-h-[70vh]">
-//           <div className="p-6">
-//             {isLoading ? (
-//               <div className="flex flex-col items-center justify-center py-12">
-//                 <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-//                 <p className="text-lg font-medium mb-2">Analyzing conversation...</p>
-//                 <p className="text-muted-foreground text-center">
-//                   DeepSeek AI is processing the conversation data to provide detailed insights
-//                 </p>
-//               </div>
-//             ) : analysis ? (
-//               <div className="space-y-6">
-//                 {/* Overview Cards */}
-//                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-//                   <Card className="bg-card/50 border-border">
-//                     <CardContent className="p-4">
-//                       <div className="flex items-center space-x-2">
-//                         <TrendingUp className="w-5 h-5 text-primary" />
-//                         <span className="text-sm font-medium">Health Score</span>
-//                       </div>
-//                       <div className="mt-2">
-//                         <div className="text-2xl font-bold">{analysis.conversationHealth}%</div>
-//                         <Progress value={analysis.conversationHealth} className="mt-2" />
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   <Card className="bg-card/50 border-border">
-//                     <CardContent className="p-4">
-//                       <div className="flex items-center space-x-2">
-//                         <MessageCircle className="w-5 h-5 text-primary" />
-//                         <span className="text-sm font-medium">Sentiment</span>
-//                       </div>
-//                       <div className="mt-2">
-//                         <Badge className={cn("text-xs", getSentimentColor(analysis.overallSentiment))}>
-//                           {analysis.overallSentiment.toUpperCase()}
-//                         </Badge>
-//                         <div className="text-sm text-muted-foreground mt-1">
-//                           Score: {analysis.sentimentScore.toFixed(1)}/10
-//                         </div>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   <Card className="bg-card/50 border-border">
-//                     <CardContent className="p-4">
-//                       <div className="flex items-center space-x-2">
-//                         <Clock className="w-5 h-5 text-primary" />
-//                         <span className="text-sm font-medium">Response Time</span>
-//                       </div>
-//                       <div className="mt-2">
-//                         <div className="text-lg font-semibold">{analysis.responseTime.average}m</div>
-//                         <Badge variant={analysis.responseTime.trend === 'improving' ? 'default' : 'secondary'} className="text-xs mt-1">
-//                           {analysis.responseTime.trend}
-//                         </Badge>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-
-//                   <Card className="bg-card/50 border-border">
-//                     <CardContent className="p-4">
-//                       <div className="flex items-center space-x-2">
-//                         <Users className="w-5 h-5 text-primary" />
-//                         <span className="text-sm font-medium">Satisfaction</span>
-//                       </div>
-//                       <div className="mt-2">
-//                         <div className="text-2xl font-bold">{analysis.customerSatisfaction}%</div>
-//                         <div className="flex text-yellow-400 mt-1">
-//                           {[...Array(5)].map((_, i) => (
-//                             <Star key={i} className={cn("w-3 h-3", i < Math.floor(analysis.customerSatisfaction / 20) ? "fill-current" : "")} />
-//                           ))}
-//                         </div>
-//                       </div>
-//                     </CardContent>
-//                   </Card>
-//                 </div>
-
-//                 <Tabs defaultValue="insights" className="w-full">
-//                   <TabsList className="grid w-full grid-cols-5">
-//                     <TabsTrigger value="insights">Insights</TabsTrigger>
-//                     <TabsTrigger value="topics">Topics</TabsTrigger>
-//                     <TabsTrigger value="actions">Actions</TabsTrigger>
-//                     <TabsTrigger value="risks">Risks</TabsTrigger>
-//                     <TabsTrigger value="summary">Summary</TabsTrigger>
-//                   </TabsList>
-
-//                   <TabsContent value="insights" className="space-y-4">
-//                     <Card className="bg-card/50 border-border">
-//                       <CardHeader>
-//                         <CardTitle className="flex items-center space-x-2">
-//                           <BarChart3 className="w-5 h-5" />
-//                           <span>Key Insights</span>
-//                         </CardTitle>
-//                       </CardHeader>
-//                       <CardContent className="space-y-3">
-//                         {analysis.insights.map((insight, index) => (
-//                           <div key={index} className="flex items-start space-x-3 p-3 bg-muted/30 rounded-lg">
-//                             <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-//                             <p className="text-sm">{insight}</p>
-//                           </div>
-//                         ))}
-//                       </CardContent>
-//                     </Card>
-
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <Card className="bg-card/50 border-border">
-//                         <CardHeader>
-//                           <CardTitle className="text-lg">Customer Intent</CardTitle>
-//                         </CardHeader>
-//                         <CardContent>
-//                           <p className="text-muted-foreground">{analysis.customerIntent}</p>
-//                         </CardContent>
-//                       </Card>
-
-//                       <Card className="bg-card/50 border-border">
-//                         <CardHeader>
-//                           <CardTitle className="text-lg flex items-center space-x-2">
-//                             <span>Engagement Level</span>
-//                             <Badge className={cn("text-xs", getEngagementColor(analysis.engagementLevel))}>
-//                               {analysis.engagementLevel}
-//                             </Badge>
-//                           </CardTitle>
-//                         </CardHeader>
-//                         <CardContent>
-//                           <div className="flex items-center space-x-2">
-//                             <span>Urgency:</span>
-//                             <Badge className={cn("text-xs", getUrgencyColor(analysis.urgencyLevel))}>
-//                               {analysis.urgencyLevel} Priority
-//                             </Badge>
-//                           </div>
-//                         </CardContent>
-//                       </Card>
-//                     </div>
-//                   </TabsContent>
-
-//                   <TabsContent value="topics" className="space-y-4">
-//                     <Card className="bg-card/50 border-border">
-//                       <CardHeader>
-//                         <CardTitle>Key Topics Discussed</CardTitle>
-//                         <CardDescription>Main themes and subjects in this conversation</CardDescription>
-//                       </CardHeader>
-//                       <CardContent>
-//                         <div className="flex flex-wrap gap-2">
-//                           {analysis.keyTopics.map((topic, index) => (
-//                             <Badge key={index} variant="secondary" className="text-sm py-1 px-3">
-//                               #{topic}
-//                             </Badge>
-//                           ))}
-//                         </div>
-//                       </CardContent>
-//                     </Card>
-//                   </TabsContent>
-
-//                   <TabsContent value="actions" className="space-y-4">
-//                     <Card className="bg-card/50 border-border">
-//                       <CardHeader>
-//                         <CardTitle>Recommended Actions</CardTitle>
-//                         <CardDescription>AI-suggested next steps to improve customer experience</CardDescription>
-//                       </CardHeader>
-//                       <CardContent className="space-y-3">
-//                         {analysis.recommendedActions.map((action, index) => (
-//                           <div key={index} className="flex items-start space-x-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
-//                             <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-//                               {index + 1}
-//                             </div>
-//                             <p className="text-sm">{action}</p>
-//                           </div>
-//                         ))}
-//                       </CardContent>
-//                     </Card>
-//                   </TabsContent>
-
-//                   <TabsContent value="risks" className="space-y-4">
-//                     <div className="grid gap-4">
-//                       <Card className="bg-card/50 border-border">
-//                         <CardHeader>
-//                           <CardTitle className="flex items-center space-x-2 text-red-400">
-//                             <AlertTriangle className="w-5 h-5" />
-//                             <span>Potential Risks</span>
-//                           </CardTitle>
-//                         </CardHeader>
-//                         <CardContent className="space-y-3">
-//                           {analysis.risks.map((risk, index) => (
-//                             <div key={index} className="flex items-start space-x-3 p-3 bg-red-400/10 rounded-lg border border-red-400/20">
-//                               <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-//                               <p className="text-sm">{risk}</p>
-//                             </div>
-//                           ))}
-//                         </CardContent>
-//                       </Card>
-
-//                       <Card className="bg-card/50 border-border">
-//                         <CardHeader>
-//                           <CardTitle className="flex items-center space-x-2 text-green-400">
-//                             <TrendingUp className="w-5 h-5" />
-//                             <span>Opportunities</span>
-//                           </CardTitle>
-//                         </CardHeader>
-//                         <CardContent className="space-y-3">
-//                           {analysis.opportunities.map((opportunity, index) => (
-//                             <div key={index} className="flex items-start space-x-3 p-3 bg-green-400/10 rounded-lg border border-green-400/20">
-//                               <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-//                               <p className="text-sm">{opportunity}</p>
-//                             </div>
-//                           ))}
-//                         </CardContent>
-//                       </Card>
-//                     </div>
-//                   </TabsContent>
-
-//                   <TabsContent value="summary" className="space-y-4">
-//                     <Card className="bg-card/50 border-border">
-//                       <CardHeader>
-//                         <CardTitle>Conversation Summary</CardTitle>
-//                         <CardDescription>AI-generated overview of the entire conversation</CardDescription>
-//                       </CardHeader>
-//                       <CardContent>
-//                         <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-//                           {analysis.summary}
-//                         </p>
-//                       </CardContent>
-//                     </Card>
-//                   </TabsContent>
-//                 </Tabs>
-//               </div>
-//             ) : (
-//               <div className="text-center py-12">
-//                 <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-//                 <h3 className="text-xl font-semibold mb-2">Analysis Failed</h3>
-//                 <p className="text-muted-foreground">
-//                   Unable to analyze the conversation. Please try again later.
-//                 </p>
-//               </div>
-//             )}
-//           </div>
-//         </ScrollArea>
-//       </motion.div>
-//     </div>
-//   )
-// }
-
 const AnalysisModal = ({ 
   isOpen, 
   onClose, 
@@ -1207,10 +906,9 @@ const AnalysisModal = ({
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-background border border-border rounded-lg max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        className="bg-background border border-border rounded-lg max-w-4xl max-h-[90h] overflow-hidden w-full"
       >
-        {/* Fixed Header */}
-        <div className="p-6 border-b border-border flex-shrink-0">
+        <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Brain className="w-8 h-8 text-primary" />
@@ -1225,252 +923,248 @@ const AnalysisModal = ({
           </div>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="p-6">
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-                  <p className="text-lg font-medium mb-2">Analyzing conversation...</p>
-                  <p className="text-muted-foreground text-center">
-                    DeepSeek AI is processing the conversation data to provide detailed insights
-                  </p>
+        <ScrollArea className="max-h-[70vh]">
+          <div className="p-6">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+                <p className="text-lg font-medium mb-2">Analyzing conversation...</p>
+                <p className="text-muted-foreground text-center">
+                  DeepSeek AI is processing the conversation data to provide detailed insights
+                </p>
+              </div>
+            ) : analysis ? (
+              <div className="space-y-6">
+                {/* Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card className="bg-card/50 border-border">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp className="w-5 h-5 text-primary" />
+                        <span className="text-sm font-medium">Health Score</span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="text-2xl font-bold">{analysis.conversationHealth}%</div>
+                        <Progress value={analysis.conversationHealth} className="mt-2" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-card/50 border-border">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <MessageCircle className="w-5 h-5 text-primary" />
+                        <span className="text-sm font-medium">Sentiment</span>
+                      </div>
+                      <div className="mt-2">
+                        <Badge className={cn("text-xs", getSentimentColor(analysis.overallSentiment))}>
+                          {analysis.overallSentiment.toUpperCase()}
+                        </Badge>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Score: {analysis.sentimentScore.toFixed(1)}/10
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-card/50 border-border">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-5 h-5 text-primary" />
+                        <span className="text-sm font-medium">Response Time</span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="text-lg font-semibold">{analysis.responseTime.average}m</div>
+                        <Badge variant={analysis.responseTime.trend === 'improving' ? 'default' : 'secondary'} className="text-xs mt-1">
+                          {analysis.responseTime.trend}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-card/50 border-border">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <Users className="w-5 h-5 text-primary" />
+                        <span className="text-sm font-medium">Satisfaction</span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="text-2xl font-bold">{analysis.customerSatisfaction}%</div>
+                        <div className="flex text-yellow-400 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={cn("w-3 h-3", i < Math.floor(analysis.customerSatisfaction / 20) ? "fill-current" : "")} />
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              ) : analysis ? (
-                <div className="space-y-6">
-                  {/* Overview Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="bg-card/50 border-border">
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-2">
-                          <TrendingUp className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium">Health Score</span>
-                        </div>
-                        <div className="mt-2">
-                          <div className="text-2xl font-bold">{analysis.conversationHealth}%</div>
-                          <Progress value={analysis.conversationHealth} className="mt-2" />
-                        </div>
-                      </CardContent>
-                    </Card>
 
+                <Tabs defaultValue="insights" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="insights">Insights</TabsTrigger>
+                    <TabsTrigger value="topics">Topics</TabsTrigger>
+                    <TabsTrigger value="actions">Actions</TabsTrigger>
+                    <TabsTrigger value="risks">Risks</TabsTrigger>
+                    <TabsTrigger value="summary">Summary</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="insights" className="space-y-4">
                     <Card className="bg-card/50 border-border">
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-2">
-                          <MessageCircle className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium">Sentiment</span>
-                        </div>
-                        <div className="mt-2">
-                          <Badge className={cn("text-xs", getSentimentColor(analysis.overallSentiment))}>
-                            {analysis.overallSentiment.toUpperCase()}
-                          </Badge>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            Score: {analysis.sentimentScore.toFixed(1)}/10
+                      <CardHeader>
+                        <CardTitle className="flex items-center space-x-2">
+                          <BarChart3 className="w-5 h-5" />
+                          <span>Key Insights</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {analysis.insights.map((insight, index) => (
+                          <div key={index} className="flex items-start space-x-3 p-3 bg-muted/30 rounded-lg">
+                            <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm">{insight}</p>
                           </div>
-                        </div>
+                        ))}
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-card/50 border-border">
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium">Response Time</span>
-                        </div>
-                        <div className="mt-2">
-                          <div className="text-lg font-semibold">{analysis.responseTime.average}m</div>
-                          <Badge variant={analysis.responseTime.trend === 'improving' ? 'default' : 'secondary'} className="text-xs mt-1">
-                            {analysis.responseTime.trend}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/50 border-border">
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-2">
-                          <Users className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium">Satisfaction</span>
-                        </div>
-                        <div className="mt-2">
-                          <div className="text-2xl font-bold">{analysis.customerSatisfaction}%</div>
-                          <div className="flex text-yellow-400 mt-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={cn("w-3 h-3", i < Math.floor(analysis.customerSatisfaction / 20) ? "fill-current" : "")} />
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <Tabs defaultValue="insights" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
-                      <TabsTrigger value="insights">Insights</TabsTrigger>
-                      <TabsTrigger value="topics">Topics</TabsTrigger>
-                      <TabsTrigger value="actions">Actions</TabsTrigger>
-                      <TabsTrigger value="risks">Risks</TabsTrigger>
-                      <TabsTrigger value="summary">Summary</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="insights" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Card className="bg-card/50 border-border">
                         <CardHeader>
-                          <CardTitle className="flex items-center space-x-2">
-                            <BarChart3 className="w-5 h-5" />
-                            <span>Key Insights</span>
+                          <CardTitle className="text-lg">Customer Intent</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground">{analysis.customerIntent}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-card/50 border-border">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center space-x-2">
+                            <span>Engagement Level</span>
+                            <Badge className={cn("text-xs", getEngagementColor(analysis.engagementLevel))}>
+                              {analysis.engagementLevel}
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center space-x-2">
+                            <span>Urgency:</span>
+                            <Badge className={cn("text-xs", getUrgencyColor(analysis.urgencyLevel))}>
+                              {analysis.urgencyLevel} Priority
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="topics" className="space-y-4">
+                    <Card className="bg-card/50 border-border">
+                      <CardHeader>
+                        <CardTitle>Key Topics Discussed</CardTitle>
+                        <CardDescription>Main themes and subjects in this conversation</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {analysis.keyTopics.map((topic, index) => (
+                            <Badge key={index} variant="secondary" className="text-sm py-1 px-3">
+                              #{topic}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="actions" className="space-y-4">
+                    <Card className="bg-card/50 border-border">
+                      <CardHeader>
+                        <CardTitle>Recommended Actions</CardTitle>
+                        <CardDescription>AI-suggested next steps to improve customer experience</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {analysis.recommendedActions.map((action, index) => (
+                          <div key={index} className="flex items-start space-x-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                            <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                              {index + 1}
+                            </div>
+                            <p className="text-sm">{action}</p>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="risks" className="space-y-4">
+                    <div className="grid gap-4">
+                      <Card className="bg-card/50 border-border">
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2 text-red-400">
+                            <AlertTriangle className="w-5 h-5" />
+                            <span>Potential Risks</span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          {analysis.insights.map((insight, index) => (
-                            <div key={index} className="flex items-start space-x-3 p-3 bg-muted/30 rounded-lg">
-                              <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                              <p className="text-sm">{insight}</p>
+                          {analysis.risks.map((risk, index) => (
+                            <div key={index} className="flex items-start space-x-3 p-3 bg-red-400/10 rounded-lg border border-red-400/20">
+                              <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                              <p className="text-sm">{risk}</p>
                             </div>
                           ))}
                         </CardContent>
                       </Card>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card className="bg-card/50 border-border">
-                          <CardHeader>
-                            <CardTitle className="text-lg">Customer Intent</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground">{analysis.customerIntent}</p>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="bg-card/50 border-border">
-                          <CardHeader>
-                            <CardTitle className="text-lg flex items-center space-x-2">
-                              <span>Engagement Level</span>
-                              <Badge className={cn("text-xs", getEngagementColor(analysis.engagementLevel))}>
-                                {analysis.engagementLevel}
-                              </Badge>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center space-x-2">
-                              <span>Urgency:</span>
-                              <Badge className={cn("text-xs", getUrgencyColor(analysis.urgencyLevel))}>
-                                {analysis.urgencyLevel} Priority
-                              </Badge>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="topics" className="space-y-4 mt-4">
                       <Card className="bg-card/50 border-border">
                         <CardHeader>
-                          <CardTitle>Key Topics Discussed</CardTitle>
-                          <CardDescription>Main themes and subjects in this conversation</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-wrap gap-2">
-                            {analysis.keyTopics.map((topic, index) => (
-                              <Badge key={index} variant="secondary" className="text-sm py-1 px-3">
-                                #{topic}
-                              </Badge>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-
-                    <TabsContent value="actions" className="space-y-4 mt-4">
-                      <Card className="bg-card/50 border-border">
-                        <CardHeader>
-                          <CardTitle>Recommended Actions</CardTitle>
-                          <CardDescription>AI-suggested next steps to improve customer experience</CardDescription>
+                          <CardTitle className="flex items-center space-x-2 text-green-400">
+                            <TrendingUp className="w-5 h-5" />
+                            <span>Opportunities</span>
+                          </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          {analysis.recommendedActions.map((action, index) => (
-                            <div key={index} className="flex items-start space-x-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                              <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                                {index + 1}
-                              </div>
-                              <p className="text-sm">{action}</p>
+                          {analysis.opportunities.map((opportunity, index) => (
+                            <div key={index} className="flex items-start space-x-3 p-3 bg-green-400/10 rounded-lg border border-green-400/20">
+                              <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                              <p className="text-sm">{opportunity}</p>
                             </div>
                           ))}
                         </CardContent>
                       </Card>
-                    </TabsContent>
+                    </div>
+                  </TabsContent>
 
-                    <TabsContent value="risks" className="space-y-4 mt-4">
-                      <div className="grid gap-4">
-                        <Card className="bg-card/50 border-border">
-                          <CardHeader>
-                            <CardTitle className="flex items-center space-x-2 text-red-400">
-                              <AlertTriangle className="w-5 h-5" />
-                              <span>Potential Risks</span>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            {analysis.risks.map((risk, index) => (
-                              <div key={index} className="flex items-start space-x-3 p-3 bg-red-400/10 rounded-lg border border-red-400/20">
-                                <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                                <p className="text-sm">{risk}</p>
-                              </div>
-                            ))}
-                          </CardContent>
-                        </Card>
-
-                        <Card className="bg-card/50 border-border">
-                          <CardHeader>
-                            <CardTitle className="flex items-center space-x-2 text-green-400">
-                              <TrendingUp className="w-5 h-5" />
-                              <span>Opportunities</span>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            {analysis.opportunities.map((opportunity, index) => (
-                              <div key={index} className="flex items-start space-x-3 p-3 bg-green-400/10 rounded-lg border border-green-400/20">
-                                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                                <p className="text-sm">{opportunity}</p>
-                              </div>
-                            ))}
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="summary" className="space-y-4 mt-4">
-                      <Card className="bg-card/50 border-border">
-                        <CardHeader>
-                          <CardTitle>Conversation Summary</CardTitle>
-                          <CardDescription>AI-generated overview of the entire conversation</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                            {analysis.summary}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  </Tabs>
-
-                  {/* Extra padding at bottom to ensure all content is accessible */}
-                  <div className="h-4" />
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Analysis Failed</h3>
-                  <p className="text-muted-foreground">
-                    Unable to analyze the conversation. Please try again later.
-                  </p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
+                  <TabsContent value="summary" className="space-y-4">
+                    <Card className="bg-card/50 border-border">
+                      <CardHeader>
+                        <CardTitle>Conversation Summary</CardTitle>
+                        <CardDescription>AI-generated overview of the entire conversation</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                          {analysis.summary}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Analysis Failed</h3>
+                <p className="text-muted-foreground">
+                  Unable to analyze the conversation. Please try again later.
+                </p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </motion.div>
     </div>
   )
 }
+
+
 
 const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId = "" }) => {
   const [chatState, chatActions] = useChatState()

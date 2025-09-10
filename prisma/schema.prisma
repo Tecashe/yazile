@@ -60,6 +60,7 @@ model User {
 
   webhookNotifications Notification[]
   alerts               Alert[]
+  WhatsAppAccount      WhatsAppAccount[]
 }
 
 enum AutomationGoalType {
@@ -829,13 +830,13 @@ model Subscription {
   customerId String? @unique
 
   // Stripe specific fields (keep for migration)
-  stripeSubscriptionId     String? @unique
+  stripeSubscriptionId     String?   @unique
   stripePriceId            String?
   stripeCurrentPeriodStart DateTime?
   stripeCurrentPeriodEnd   DateTime?
 
   // Lemon Squeezy specific fields
-  lemonSqueezySubscriptionId     String? @unique
+  lemonSqueezySubscriptionId     String?   @unique
   lemonSqueezyVariantId          String?
   lemonSqueezyCurrentPeriodStart DateTime?
   lemonSqueezyCurrentPeriodEnd   DateTime?
@@ -860,6 +861,7 @@ model Subscription {
   interval      String? // e.g., "month", "year"
   intervalCount Int?    @default(1) // e.g., 1 for every month, 3 for every 3 months
 }
+
 /////NEWESSST
 
 model TriggerExecution {
@@ -1489,8 +1491,6 @@ model Tenant {
   @@index([isActive])
 }
 
-
-
 model Integration {
   id       String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenantId String          @db.Uuid
@@ -1512,7 +1512,6 @@ model Integration {
   config String? // JSON configuration specific to integration type
 
   capabilities String? @default("{}") // JSON object storing capability toggles
-
 
   // Metadata
   lastSyncAt  DateTime?
@@ -1659,4 +1658,187 @@ enum SessionStatus {
   COMPLETED
   EXPIRED
   ERROR
+}
+
+///////////////
+
+// Add these models to your existing schema
+
+model WhatsAppAccount {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String    @db.Uuid
+  wabaId                String    @unique // WhatsApp Business Account ID
+  businessPhoneNumberId String    @unique
+  phoneNumber           String
+  displayName           String?
+  accessToken           String    @db.Text
+  refreshToken          String?   @db.Text
+  expiresAt             DateTime?
+  status                String    @default("pending") // pending, verified, suspended
+  webhookToken          String?
+  isActive              Boolean   @default(true)
+
+  // Meta app credentials
+  appId     String
+  appSecret String @db.Text
+
+  // Business verification status
+  businessVerified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user            User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns       WhatsAppCampaign[]
+  messages        WhatsAppMessage[]
+  templates       WhatsAppTemplate[]
+  automationRules WhatsAppAutomationRule[]
+  contacts        WhatsAppContact[]
+
+  @@map("whatsapp_accounts")
+}
+
+model WhatsAppTemplate {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  whatsAppAccountId String  @db.Uuid
+  templateName      String
+  templateId        String // Meta template ID
+  language          String  @default("en")
+  category          String // AUTHENTICATION, MARKETING, UTILITY
+  status            String // APPROVED, PENDING, REJECTED
+  headerType        String? // TEXT, IMAGE, VIDEO, DOCUMENT
+  headerText        String? @db.Text
+  bodyText          String  @db.Text
+  footerText        String? @db.Text
+  buttonType        String? // QUICK_REPLY, CALL_TO_ACTION, URL
+  buttonText        String?
+  buttonUrl         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  whatsAppAccount WhatsAppAccount @relation(fields: [whatsAppAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([whatsAppAccountId, templateName])
+  @@map("whatsapp_templates")
+}
+
+model WhatsAppMessage {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  whatsAppAccountId String   @db.Uuid
+  messageId         String? // Meta message ID
+  waId              String // WhatsApp ID of recipient
+  phoneNumber       String
+  contactName       String?
+  messageType       String // text, template, image, document, etc.
+  content           String   @db.Text
+  templateName      String?
+  direction         String // inbound, outbound
+  status            String // sent, delivered, read, failed
+  timestamp         DateTime @default(now())
+
+  // Automation context - Fixed to use String @db.Uuid
+  campaignId       String? @db.Uuid
+  automationRuleId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  whatsAppAccount WhatsAppAccount         @relation(fields: [whatsAppAccountId], references: [id], onDelete: Cascade)
+  campaign        WhatsAppCampaign?       @relation(fields: [campaignId], references: [id])
+  automationRule  WhatsAppAutomationRule? @relation(fields: [automationRuleId], references: [id])
+
+  @@map("whatsapp_messages")
+}
+
+model WhatsAppContact {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  whatsAppAccountId String    @db.Uuid
+  waId              String // WhatsApp ID
+  phoneNumber       String
+  name              String?
+  profileName       String?
+  lastSeen          DateTime?
+  isBlocked         Boolean   @default(false)
+  tags              String[] // For segmentation
+  customFields      Json? // Store additional contact data
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  whatsAppAccount WhatsAppAccount @relation(fields: [whatsAppAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([whatsAppAccountId, waId])
+  @@map("whatsapp_contacts")
+}
+
+model WhatsAppCampaign {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  whatsAppAccountId String    @db.Uuid
+  name              String
+  description       String?
+  templateId        String?
+  targetAudience    Json // Criteria for targeting
+  scheduledAt       DateTime?
+  status            String    @default("draft") // draft, scheduled, running, completed, paused
+  totalTargets      Int       @default(0)
+  sentCount         Int       @default(0)
+  deliveredCount    Int       @default(0)
+  readCount         Int       @default(0)
+  failedCount       Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  whatsAppAccount WhatsAppAccount   @relation(fields: [whatsAppAccountId], references: [id], onDelete: Cascade)
+  messages        WhatsAppMessage[]
+
+  @@map("whatsapp_campaigns")
+}
+
+model WhatsAppAutomationRule {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  whatsAppAccountId String  @db.Uuid
+  name              String
+  description       String?
+  trigger           String // keyword, welcome, business_hours, etc.
+  triggerValue      String? // specific keyword or condition
+  isActive          Boolean @default(true)
+
+  // Response configuration
+  responseType       String // text, template, transfer
+  responseContent    String  @db.Text
+  responseTemplateId String?
+  delayMinutes       Int     @default(0)
+
+  // Conditions
+  businessHoursOnly Boolean @default(false)
+  maxResponses      Int? // Limit responses per contact
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  whatsAppAccount WhatsAppAccount   @relation(fields: [whatsAppAccountId], references: [id], onDelete: Cascade)
+  messages        WhatsAppMessage[]
+
+  @@map("whatsapp_automation_rules")
+}
+
+model WhatsAppWebhookLog {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  whatsAppAccountId String? @db.Uuid
+  eventType         String
+  payload           Json
+  processed         Boolean @default(false)
+  processingError   String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@map("whatsapp_webhook_logs")
 }
