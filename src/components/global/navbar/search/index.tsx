@@ -608,6 +608,136 @@
 
 // export default Search
 
+// 'use client'
+
+// import React, { useState, useEffect, useCallback, useRef } from 'react'
+// import { motion, AnimatePresence } from 'framer-motion'
+// import { SearchIcon, X } from 'lucide-react'
+// import { Input } from '@/components/ui/input'
+// import { getAllAutomations } from '@/actions/automations'
+// import debounce from 'lodash.debounce'
+// import { useRouter, usePathname } from 'next/navigation'
+
+// type Automation = {
+//   id: string
+//   name: string
+//   active: boolean
+// }
+
+// const Search = () => {
+//   const [searchTerm, setSearchTerm] = useState('')
+//   const [automations, setAutomations] = useState<Automation[]>([])
+//   const [filteredAutomations, setFilteredAutomations] = useState<Automation[]>([])
+//   const [isOpen, setIsOpen] = useState(false)
+//   const inputRef = useRef<HTMLInputElement>(null)
+//   const listRef = useRef<HTMLUListElement>(null)
+//   const router = useRouter()
+//   const pathname = usePathname()
+
+//   // Extract the slug from the pathname (same logic as breadcrumb)
+//   const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
+//   const slug = slugMatch ? slugMatch[1] : ""
+
+//   useEffect(() => {
+//     const fetchAutomations = async () => {
+//       const result = await getAllAutomations()
+//       if (result.status === 200) {
+//         setAutomations(result.data)
+//       }
+//     }
+//     fetchAutomations()
+//   }, [])
+
+//   const debouncedSearch = useCallback(
+//     debounce((searchTerm: string) => {
+//       const filtered = automations.filter(automation =>
+//         automation.name.toLowerCase().includes(searchTerm.toLowerCase())
+//       )
+//       setFilteredAutomations(filtered)
+//       setIsOpen(searchTerm.length > 0)
+//     }, 300),
+//     [automations]
+//   )
+
+//   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const value = e.target.value
+//     setSearchTerm(value)
+//     debouncedSearch(value)
+//   }
+
+//   const handleAutomationClick = (automationId: string) => {
+//     // Always redirect to automations page with the extracted slug
+//     const automationUrl = `/dashboard/${slug}/automations/${automationId}`
+//     router.push(automationUrl)
+//     setIsOpen(false)
+//     setSearchTerm('')
+//   }
+
+//   const clearSearch = () => {
+//     setSearchTerm('')
+//     setFilteredAutomations([])
+//     setIsOpen(false)
+//     inputRef.current?.focus()
+//   }
+
+//   return (
+//     <div className="relative w-full">
+//       <div className="flex items-center border-2 border-[#3352CC] rounded-full px-4 py-1 bg-[#0A0A0B]">
+//         <SearchIcon className="text-[#3352CC] mr-2" />
+//         <Input
+//           ref={inputRef}
+//           placeholder="Search automation by name"
+//           className="w-full border-none focus:ring-0"
+//           value={searchTerm}
+//           onChange={handleSearch}
+//         />
+//         {searchTerm && (
+//           <button
+//             className="ml-2 text-[#3352CC] hover:text-[#2241B8] transition-colors"
+//             onClick={clearSearch}
+//           >
+//             <X size={20} />
+//           </button>
+//         )}
+//       </div>
+
+//       <AnimatePresence>
+//         {isOpen && (
+//           <motion.div
+//             initial={{ opacity: 0, y: 10 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             exit={{ opacity: 0, y: 10 }}
+//             transition={{ duration: 0.2 }}
+//             className="absolute z-10 w-full mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-lg overflow-hidden"
+//           >
+//             <ul
+//               ref={listRef}
+//               className="max-h-60 overflow-y-auto divide-y divide-gray-700 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800"
+//             >
+//               {filteredAutomations.map((automation, index) => (
+//                 <li
+//                   key={automation.id}
+//                   className="p-3 hover:bg-gray-800 cursor-pointer text-gray-200 text-sm transition-colors duration-150 ease-in-out flex items-center space-x-3"
+//                   onClick={() => handleAutomationClick(automation.id)}
+//                 >
+//                   <span className={`w-2 h-2 rounded-full ${automation.active ? 'bg-green-500' : 'bg-red-500'}`}></span>
+//                   <span>{automation.name}</span>
+//                 </li>
+//               ))}
+//               {filteredAutomations.length === 0 && searchTerm && (
+//                 <li className="p-3 text-gray-400 text-sm">No automations found</li>
+//               )}
+//             </ul>
+//           </motion.div>
+//         )}
+//       </AnimatePresence>
+//     </div>
+//   )
+// }
+
+// export default Search
+
+
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
@@ -629,8 +759,10 @@ const Search = () => {
   const [automations, setAutomations] = useState<Automation[]>([])
   const [filteredAutomations, setFilteredAutomations] = useState<Automation[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -647,6 +779,23 @@ const Search = () => {
     }
     fetchAutomations()
   }, [])
+
+  // Handle clicking outside to collapse
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        if (!searchTerm) {
+          setIsExpanded(false)
+        }
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [searchTerm])
 
   const debouncedSearch = useCallback(
     debounce((searchTerm: string) => {
@@ -671,61 +820,147 @@ const Search = () => {
     router.push(automationUrl)
     setIsOpen(false)
     setSearchTerm('')
+    setIsExpanded(false)
   }
 
   const clearSearch = () => {
     setSearchTerm('')
     setFilteredAutomations([])
     setIsOpen(false)
+    if (!isExpanded) {
+      setIsExpanded(false)
+    }
     inputRef.current?.focus()
   }
 
-  return (
-    <div className="relative w-full">
-      <div className="flex items-center border-2 border-[#3352CC] rounded-full px-4 py-1 bg-[#0A0A0B]">
-        <SearchIcon className="text-[#3352CC] mr-2" />
-        <Input
-          ref={inputRef}
-          placeholder="Search automation by name"
-          className="w-full border-none focus:ring-0"
-          value={searchTerm}
-          onChange={handleSearch}
-        />
-        {searchTerm && (
-          <button
-            className="ml-2 text-[#3352CC] hover:text-[#2241B8] transition-colors"
-            onClick={clearSearch}
-          >
-            <X size={20} />
-          </button>
-        )}
-      </div>
+  const handleExpand = () => {
+    setIsExpanded(true)
+    // Small delay to ensure the input is rendered before focusing
+    setTimeout(() => {
+      inputRef.current?.focus()
+    }, 100)
+  }
 
+  const handleCollapse = () => {
+    if (!searchTerm) {
+      setIsExpanded(false)
+      setIsOpen(false)
+    }
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <motion.div
+        initial={false}
+        animate={{
+          width: isExpanded ? '300px' : '40px',
+          height: '40px'
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 400,
+          damping: 30,
+          duration: 0.3
+        }}
+        className="flex items-center border-2 border-[#3352CC] rounded-full bg-[#0A0A0B] overflow-hidden cursor-pointer"
+        onClick={!isExpanded ? handleExpand : undefined}
+        onMouseEnter={!isExpanded ? () => setIsExpanded(true) : undefined}
+        onMouseLeave={!isExpanded ? handleCollapse : undefined}
+      >
+        {/* Search Icon - Always Visible */}
+        <motion.div
+          initial={false}
+          animate={{
+            paddingLeft: isExpanded ? '12px' : '8px',
+            paddingRight: isExpanded ? '8px' : '8px'
+          }}
+          transition={{ duration: 0.2 }}
+          className="flex items-center justify-center flex-shrink-0"
+        >
+          <SearchIcon 
+            className="text-[#3352CC] transition-colors duration-200" 
+            size={20}
+          />
+        </motion.div>
+
+        {/* Input Field - Only visible when expanded */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: 'auto' }}
+              exit={{ opacity: 0, width: 0 }}
+              transition={{ duration: 0.2, delay: isExpanded ? 0.1 : 0 }}
+              className="flex-1 flex items-center min-w-0"
+            >
+              <Input
+                ref={inputRef}
+                placeholder="Search automation..."
+                className="w-full border-none focus:ring-0 bg-transparent text-white placeholder-gray-400 text-sm px-0"
+                value={searchTerm}
+                onChange={handleSearch}
+                onBlur={handleCollapse}
+              />
+              {searchTerm && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="ml-2 mr-2 text-[#3352CC] hover:text-[#2241B8] transition-colors flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    clearSearch()
+                  }}
+                >
+                  <X size={16} />
+                </motion.button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Search Results Dropdown */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && isExpanded && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-10 w-full mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 400, 
+              damping: 25,
+              duration: 0.2 
+            }}
+            className="absolute z-50 w-full mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-lg overflow-hidden"
+            style={{ minWidth: '300px' }}
           >
             <ul
               ref={listRef}
               className="max-h-60 overflow-y-auto divide-y divide-gray-700 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800"
             >
               {filteredAutomations.map((automation, index) => (
-                <li
+                <motion.li
                   key={automation.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
                   className="p-3 hover:bg-gray-800 cursor-pointer text-gray-200 text-sm transition-colors duration-150 ease-in-out flex items-center space-x-3"
                   onClick={() => handleAutomationClick(automation.id)}
                 >
-                  <span className={`w-2 h-2 rounded-full ${automation.active ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span>{automation.name}</span>
-                </li>
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${automation.active ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className="truncate">{automation.name}</span>
+                </motion.li>
               ))}
               {filteredAutomations.length === 0 && searchTerm && (
-                <li className="p-3 text-gray-400 text-sm">No automations found</li>
+                <motion.li 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="p-3 text-gray-400 text-sm"
+                >
+                  No automations found
+                </motion.li>
               )}
             </ul>
           </motion.div>
