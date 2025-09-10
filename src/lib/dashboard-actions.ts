@@ -2,6 +2,15 @@
 
 // import { client } from "@/lib/prisma"
 
+// interface ActivityItem {
+//   type: "lead" | "message" | "conversion"
+//   user: string
+//   title: string
+//   description: string
+//   timestamp: string
+//   value: string | null
+// }
+
 // export async function getDashboardMetrics() {
 //   try {
 //     // Get current period data
@@ -275,16 +284,26 @@
 //       automationTypes.map(async (automation) => {
 //         const triggers = await client.triggerExecution.count({
 //           where: {
-//             automation: {
-//               name: automation.name,
+//             automationId: {
+//               in: await client.automation
+//                 .findMany({
+//                   where: { name: automation.name },
+//                   select: { id: true },
+//                 })
+//                 .then((autos) => autos.map((a) => a.id)),
 //             },
 //           },
 //         })
 
 //         const responses = await client.triggerExecution.count({
 //           where: {
-//             automation: {
-//               name: automation.name,
+//             automationId: {
+//               in: await client.automation
+//                 .findMany({
+//                   where: { name: automation.name },
+//                   select: { id: true },
+//                 })
+//                 .then((autos) => autos.map((a) => a.id)),
 //             },
 //             success: true,
 //           },
@@ -389,7 +408,7 @@
 
 // export async function getRealtimeActivity() {
 //   try {
-//     const activities = []
+//     const activities: ActivityItem[] = []
 
 //     // Get recent leads
 //     const recentLeads = await client.lead.findMany({
@@ -434,7 +453,7 @@
 //         type: "message",
 //         user: "System",
 //         title: "Automation triggered",
-//         description: `Message processed: ${message.content.substring(0, 50)}...`,
+//         description: `Message processed: ${message.message.substring(0, 50)}...`,
 //         timestamp: `${timeDiff} minutes ago`,
 //         value: null,
 //       })
@@ -566,7 +585,7 @@
 
 "use server"
 
-import { client } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma"
 
 interface ActivityItem {
   type: "lead" | "message" | "conversion"
@@ -586,18 +605,18 @@ export async function getDashboardMetrics() {
     const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1)
 
     // Get total leads count
-    const totalLeads = await client.lead.count()
+    const totalLeads = await prisma.lead.count()
 
     // Get leads from current and last month for comparison
     const [currentMonthLeads, lastMonthLeads] = await Promise.all([
-      client.lead.count({
+      prisma.lead.count({
         where: {
           createdAt: {
             gte: currentMonth,
           },
         },
       }),
-      client.lead.count({
+      prisma.lead.count({
         where: {
           createdAt: {
             gte: lastMonth,
@@ -609,7 +628,7 @@ export async function getDashboardMetrics() {
 
     // Get active automations current vs last month
     const [currentAutomations, lastMonthAutomations] = await Promise.all([
-      client.automation.count({
+      prisma.automation.count({
         where: {
           active: true,
           createdAt: {
@@ -617,7 +636,7 @@ export async function getDashboardMetrics() {
           },
         },
       }),
-      client.automation.count({
+      prisma.automation.count({
         where: {
           active: true,
           createdAt: {
@@ -630,7 +649,7 @@ export async function getDashboardMetrics() {
 
     // Get revenue data current vs last month
     const [currentRevenue, lastMonthRevenue] = await Promise.all([
-      client.revenueOpportunity.aggregate({
+      prisma.revenueOpportunity.aggregate({
         _sum: {
           estimatedValue: true,
         },
@@ -641,7 +660,7 @@ export async function getDashboardMetrics() {
           },
         },
       }),
-      client.revenueOpportunity.aggregate({
+      prisma.revenueOpportunity.aggregate({
         _sum: {
           estimatedValue: true,
         },
@@ -657,7 +676,7 @@ export async function getDashboardMetrics() {
 
     // Get conversion rate current vs last month
     const [currentQualified, lastMonthQualified] = await Promise.all([
-      client.lead.count({
+      prisma.lead.count({
         where: {
           status: "QUALIFIED",
           updatedAt: {
@@ -665,7 +684,7 @@ export async function getDashboardMetrics() {
           },
         },
       }),
-      client.lead.count({
+      prisma.lead.count({
         where: {
           status: "QUALIFIED",
           updatedAt: {
@@ -695,7 +714,7 @@ export async function getDashboardMetrics() {
     return {
       totalLeads,
       leadsChange,
-      activeAutomations: await client.automation.count({ where: { active: true } }),
+      activeAutomations: await prisma.automation.count({ where: { active: true } }),
       automationsChange,
       revenue: currentRevenueValue,
       revenueChange,
@@ -720,7 +739,7 @@ export async function getDashboardMetrics() {
 export async function getRevenueData() {
   try {
     // Get revenue opportunities
-    const revenueOpportunities = await client.revenueOpportunity.findMany({
+    const revenueOpportunities = await prisma.revenueOpportunity.findMany({
       include: {
         lead: true,
       },
@@ -742,7 +761,7 @@ export async function getRevenueData() {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
 
-      const monthRevenue = await client.revenueOpportunity.aggregate({
+      const monthRevenue = await prisma.revenueOpportunity.aggregate({
         _sum: {
           estimatedValue: true,
         },
@@ -761,8 +780,8 @@ export async function getRevenueData() {
       })
     }
 
-    const totalLeads = await client.lead.count()
-    const qualifiedLeads = await client.lead.count({
+    const totalLeads = await prisma.lead.count()
+    const qualifiedLeads = await prisma.lead.count({
       where: { status: "QUALIFIED" },
     })
     const conversionRate = totalLeads > 0 ? Math.round((qualifiedLeads / totalLeads) * 100) : 0
@@ -771,14 +790,14 @@ export async function getRevenueData() {
     const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const [currentMonthRevenue, lastMonthRevenue] = await Promise.all([
-      client.revenueOpportunity.aggregate({
+      prisma.revenueOpportunity.aggregate({
         _sum: { estimatedValue: true },
         where: {
           status: "CONVERTED",
           createdAt: { gte: currentMonth },
         },
       }),
-      client.revenueOpportunity.aggregate({
+      prisma.revenueOpportunity.aggregate({
         _sum: { estimatedValue: true },
         where: {
           status: "CONVERTED",
@@ -813,7 +832,7 @@ export async function getRevenueData() {
 export async function getAutomationData() {
   try {
     // Get automation performance data
-    const automations = await client.automation.findMany({
+    const automations = await prisma.automation.findMany({
       where: {
         active: true,
       },
@@ -824,8 +843,8 @@ export async function getAutomationData() {
     })
 
     // Calculate metrics
-    const totalTriggers = await client.triggerExecution.count()
-    const successfulTriggers = await client.triggerExecution.count({
+    const totalTriggers = await prisma.triggerExecution.count()
+    const successfulTriggers = await prisma.triggerExecution.count({
       where: {
         success: true,
       },
@@ -834,13 +853,13 @@ export async function getAutomationData() {
     const successRate = totalTriggers > 0 ? Math.round((successfulTriggers / totalTriggers) * 100) : 0
 
     // Get average response time
-    const avgResponseTime = await client.responseMetrics.aggregate({
+    const avgResponseTime = await prisma.responseMetrics.aggregate({
       _avg: {
         responseTime: true,
       },
     })
 
-    const automationTypes = await client.automation.groupBy({
+    const automationTypes = await prisma.automation.groupBy({
       by: ["name"],
       where: { active: true },
       _count: { id: true },
@@ -848,10 +867,10 @@ export async function getAutomationData() {
 
     const chartData = await Promise.all(
       automationTypes.map(async (automation) => {
-        const triggers = await client.triggerExecution.count({
+        const triggers = await prisma.triggerExecution.count({
           where: {
             automationId: {
-              in: await client.automation
+              in: await prisma.automation
                 .findMany({
                   where: { name: automation.name },
                   select: { id: true },
@@ -861,10 +880,10 @@ export async function getAutomationData() {
           },
         })
 
-        const responses = await client.triggerExecution.count({
+        const responses = await prisma.triggerExecution.count({
           where: {
             automationId: {
-              in: await client.automation
+              in: await prisma.automation
                 .findMany({
                   where: { name: automation.name },
                   select: { id: true },
@@ -883,7 +902,7 @@ export async function getAutomationData() {
       }),
     )
 
-    const conversions = await client.lead.count({
+    const conversions = await prisma.lead.count({
       where: {
         status: "QUALIFIED",
         source: {
@@ -916,7 +935,7 @@ export async function getAutomationData() {
 export async function getSentimentData() {
   try {
     // Get sentiment analysis data
-    const sentimentAnalyses = await client.sentimentAnalysis.findMany({
+    const sentimentAnalyses = await prisma.sentimentAnalysis.findMany({
       orderBy: {
         analyzedAt: "desc",
       },
@@ -934,7 +953,7 @@ export async function getSentimentData() {
     const negativePercent = total > 0 ? Math.round((negative / total) * 100) : 0
 
     // Get sentiment alerts
-    const alerts = await client.sentimentAlert.findMany({
+    const alerts = await prisma.sentimentAlert.findMany({
       where: {
         resolved: false,
       },
@@ -977,20 +996,20 @@ export async function getRealtimeActivity() {
     const activities: ActivityItem[] = []
 
     // Get recent leads
-    const recentLeads = await client.lead.findMany({
+    const recentLeads = await prisma.lead.findMany({
       orderBy: { createdAt: "desc" },
       take: 3,
       include: { revenueOpportunities: true },
     })
 
     // Get recent messages
-    const recentMessages = await client.message.findMany({
+    const recentMessages = await prisma.message.findMany({
       orderBy: { createdAt: "desc" },
       take: 2,
     })
 
     // Get recent conversions
-    const recentConversions = await client.revenueOpportunity.findMany({
+    const recentConversions = await prisma.revenueOpportunity.findMany({
       where: { status: "CONVERTED" },
       orderBy: { updatedAt: "desc" },
       take: 2,
@@ -1055,7 +1074,7 @@ export async function getRealtimeActivity() {
 export async function getLeadData() {
   try {
     // Get high-value leads
-    const topLeads = await client.lead.findMany({
+    const topLeads = await prisma.lead.findMany({
       where: {
         status: {
           in: ["QUALIFIED", "NURTURING"],
@@ -1083,13 +1102,13 @@ export async function getLeadData() {
     }))
 
     // Calculate summary metrics
-    const totalQualified = await client.lead.count({
+    const totalQualified = await prisma.lead.count({
       where: {
         status: "QUALIFIED",
       },
     })
 
-    const totalValue = await client.revenueOpportunity.aggregate({
+    const totalValue = await prisma.revenueOpportunity.aggregate({
       _sum: {
         estimatedValue: true,
       },
@@ -1098,7 +1117,7 @@ export async function getLeadData() {
       },
     })
 
-    const totalLeads = await client.lead.count()
+    const totalLeads = await prisma.lead.count()
     const conversionRate = totalLeads > 0 ? Math.round((totalQualified / totalLeads) * 100) : 0
 
     return {

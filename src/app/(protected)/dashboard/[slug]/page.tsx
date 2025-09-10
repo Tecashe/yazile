@@ -68,6 +68,8 @@
 //   )
 // }
 
+export const dynamic = 'force-dynamic'
+
 import { Suspense } from "react"
 import { DashboardHeader } from "./_components/dashboard/dashboard-header"
 import { MetricsOverview } from "./_components/dashboard/metrics-overview"
@@ -183,3 +185,6 @@ function TableSkeleton() {
     </Card>
   )
 }
+
+
+
