@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import CreateAutomation from "../create-automation"
 import { NotificationCenter } from "./notifications/notifications"
+import Search from "./search"
 
 type Props = {
   slug: string
@@ -119,6 +120,7 @@ const Navbar = ({ slug }: Props) => {
             </Button>
             <NotificationCenter />
             <CreateAutomation />
+            <Search/>
           </div>
         </div>
       </header>

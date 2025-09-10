@@ -596,7 +596,7 @@ const Search = () => {
                 </li>
               ))}
               {filteredAutomations.length === 0 && searchTerm && (
-                <li className="p-3 text-gray-400 text-sm">No automations foun</li>
+                <li className="p-3 text-gray-400 text-sm">No automations found</li>
               )}
             </ul>
           </motion.div>
