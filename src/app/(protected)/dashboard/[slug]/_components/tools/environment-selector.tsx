@@ -107,7 +107,7 @@ export function EnvironmentSelector({
             <AlertDescription className="text-yellow-600">
               <strong>Production Environment Selected</strong>
               <br />
-              You're connecting to the live {integrationName} environment. All actions will affect real data and may
+              You&apos;re connecting to the live {integrationName} environment. All actions will affect real data and may
               incur charges.
             </AlertDescription>
           </Alert>
@@ -120,7 +120,7 @@ export function EnvironmentSelector({
             <AlertDescription className="text-blue-600">
               <strong>Test Environment Selected</strong>
               <br />
-              You're connecting to the {integrationName} sandbox. This is safe for testing and development.
+              You&apos;re connecting to the {integrationName} sandbox. This is safe for testing and development.
             </AlertDescription>
           </Alert>
         )}
@@ -153,7 +153,7 @@ export function EnvironmentSelector({
           <Info className="h-4 w-4 text-orange-500" />
           <AlertDescription className="text-orange-600">
             <strong>Important:</strong> Ensure your API credentials match the selected environment. Production
-            credentials won't work in sandbox and vice versa.
+            credentials won&apos;t work in sandbox and vice versa.
           </AlertDescription>
         </Alert>
       </CardContent>
