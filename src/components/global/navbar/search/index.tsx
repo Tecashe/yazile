@@ -854,7 +854,7 @@ const Search = () => {
         initial={false}
         animate={{
           width: isExpanded ? '300px' : '40px',
-          height: '50px'
+          height: '40px'
         }}
         transition={{
           type: "spring",
