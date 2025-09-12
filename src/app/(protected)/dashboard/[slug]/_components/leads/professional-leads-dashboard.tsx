@@ -1383,7 +1383,7 @@ export function ProfessionalLeadsDashboard({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3">
+            {/* <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/5 rounded-xl border border-blue-500/30">
                 <Crown className="h-8 w-8 text-blue-400" />
               </div>
@@ -1405,7 +1405,7 @@ export function ProfessionalLeadsDashboard({
             </h1>
             <p className="text-muted-foreground mt-2 text-lg">
               Professional lead qualification with revenue prediction
-            </p>
+            </p> */}
           </div>
 
           {/* Mock Data Toggle */}
