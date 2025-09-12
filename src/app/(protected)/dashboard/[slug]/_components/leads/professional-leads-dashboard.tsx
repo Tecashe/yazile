@@ -3128,6 +3128,19 @@ interface ProfessionalLeadsDashboardProps {
 
 type TimePeriod = "7d" | "30d" | "90d" | "6m" | "1y" | "all"
 
+// Color palettes for charts
+const CHART_COLORS = {
+  primary: "#3b82f6",    // Blue
+  secondary: "#10b981",  // Green  
+  tertiary: "#f59e0b",   // Amber
+  quaternary: "#ef4444", // Red
+  accent: "#8b5cf6",     // Purple
+  muted: "#6b7280"       // Gray
+}
+
+const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"]
+const BAR_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"]
+
 // Mock data generator for demo mode
 const generateMockData = (period: TimePeriod = "30d") => {
   const periodMultiplier = {
@@ -3249,18 +3262,18 @@ const generateRevenueChartData = (analytics: any, isMockMode: boolean, period: T
 const generateConversionFunnelData = (analytics: any, isMockMode: boolean) => {
   if (isMockMode) {
     return [
-      { stage: "Visitors", count: 5420, fill: "var(--chart-1)" },
-      { stage: "Leads", count: 1247, fill: "var(--chart-2)" },
-      { stage: "Qualified", count: 342, fill: "var(--chart-3)" },
-      { stage: "Converted", count: 89, fill: "var(--chart-4)" },
+      { stage: "Visitors", count: 5420, fill: BAR_COLORS[0] },
+      { stage: "Leads", count: 1247, fill: BAR_COLORS[1] },
+      { stage: "Qualified", count: 342, fill: BAR_COLORS[2] },
+      { stage: "Converted", count: 89, fill: BAR_COLORS[3] },
     ]
   }
 
   return [
-    { stage: "Visitors", count: (analytics?.totalLeads || 0) * 4, fill: "var(--chart-1)" },
-    { stage: "Leads", count: analytics?.totalLeads || 0, fill: "var(--chart-2)" },
-    { stage: "Qualified", count: analytics?.qualifiedLeads || 0, fill: "var(--chart-3)" },
-    { stage: "Converted", count: analytics?.convertedLeads || 0, fill: "var(--chart-4)" },
+    { stage: "Visitors", count: (analytics?.totalLeads || 0) * 4, fill: BAR_COLORS[0] },
+    { stage: "Leads", count: analytics?.totalLeads || 0, fill: BAR_COLORS[1] },
+    { stage: "Qualified", count: analytics?.qualifiedLeads || 0, fill: BAR_COLORS[2] },
+    { stage: "Converted", count: analytics?.convertedLeads || 0, fill: BAR_COLORS[3] },
   ]
 }
 
@@ -3287,17 +3300,17 @@ const getTierBadge = (metadata: any) => {
   const tier = metadata?.lastAnalysis?.leadTier || "BRONZE"
   
   const configs = {
-    PLATINUM: { variant: "default", icon: Crown },
-    GOLD: { variant: "secondary", icon: Award },
-    SILVER: { variant: "outline", icon: Star },
-    BRONZE: { variant: "outline", icon: Target },
+    PLATINUM: { variant: "default", icon: Crown, className: "bg-purple-100 text-purple-800 border-purple-200" },
+    GOLD: { variant: "secondary", icon: Award, className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+    SILVER: { variant: "outline", icon: Star, className: "bg-gray-100 text-gray-800 border-gray-200" },
+    BRONZE: { variant: "outline", icon: Target, className: "bg-orange-100 text-orange-800 border-orange-200" },
   }
 
   const config = configs[tier as keyof typeof configs] || configs.BRONZE
   const IconComponent = config.icon
 
   return (
-    <Badge variant={config.variant as any} className="gap-1">
+    <Badge variant={config.variant as any} className={`gap-1 ${config.className}`}>
       <IconComponent className="w-3 h-3" />
       {tier}
     </Badge>
@@ -3306,11 +3319,11 @@ const getTierBadge = (metadata: any) => {
 
 const getStatusBadge = (status: string) => {
   const configs = {
-    NEW: { variant: "outline", className: "" },
-    QUALIFYING: { variant: "secondary", className: "" },
-    QUALIFIED: { variant: "default", className: "" },
-    CONVERTING: { variant: "default", className: "bg-chart-4" },
-    CONVERTED: { variant: "default", className: "bg-chart-2" },
+    NEW: { variant: "outline", className: "bg-blue-50 text-blue-700 border-blue-200" },
+    QUALIFYING: { variant: "secondary", className: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+    QUALIFIED: { variant: "default", className: "bg-green-50 text-green-700 border-green-200" },
+    CONVERTING: { variant: "default", className: "bg-purple-50 text-purple-700 border-purple-200" },
+    CONVERTED: { variant: "default", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
     LOST: { variant: "destructive", className: "" },
   }
   
@@ -3327,16 +3340,16 @@ const getStatusBadge = (status: string) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border bg-popover/95 backdrop-blur-sm p-3 shadow-md">
-        <p className="text-sm font-medium text-popover-foreground mb-2">{label}</p>
+      <div className="rounded-lg border bg-white/95 backdrop-blur-sm p-3 shadow-md">
+        <p className="text-sm font-medium text-gray-900 mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center gap-2 text-sm">
             <div
               className="w-3 h-3 rounded-sm"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-muted-foreground">{entry.name}:</span>
-            <span className="font-medium text-popover-foreground">
+            <span className="text-gray-600">{entry.name}:</span>
+            <span className="font-medium text-gray-900">
               {entry.name === 'revenue' ? getRevenueDisplay(entry.value) : entry.value.toLocaleString()}
             </span>
           </div>
@@ -3449,20 +3462,20 @@ function RevenueChart({ analytics, isMockMode, period }: { analytics: any; isMoc
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0.1} />
+                  <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0.1} />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+              <CartesianGrid vertical={false} stroke="#e5e7eb" />
               <XAxis 
                 dataKey="period" 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#6b7280" 
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="hsl(var(--muted-foreground))"
+                stroke="#6b7280"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
@@ -3472,7 +3485,7 @@ function RevenueChart({ analytics, isMockMode, period }: { analytics: any; isMoc
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="hsl(var(--chart-1))"
+                stroke={CHART_COLORS.primary}
                 strokeWidth={2}
                 fill="url(#revenueGradient)"
               />
@@ -3534,16 +3547,16 @@ function ConversionFunnel({ analytics, isMockMode }: { analytics: any; isMockMod
                 }
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
               <XAxis 
                 dataKey="stage"
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#6b7280" 
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#6b7280" 
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
@@ -3596,10 +3609,10 @@ function LeadTierDistribution({ analytics, isMockMode }: { analytics: any; isMoc
     : analytics?.tierDistribution || { platinum: 0, gold: 0, silver: 0, bronze: 0 }
 
   const data = [
-    { name: "Platinum", value: tierData.platinum, color: "var(--chart-4)" },
-    { name: "Gold", value: tierData.gold, color: "var(--chart-3)" },
-    { name: "Silver", value: tierData.silver, color: "var(--chart-2)" },
-    { name: "Bronze", value: tierData.bronze, color: "var(--chart-1)" },
+    { name: "Platinum", value: tierData.platinum, color: PIE_COLORS[0] },
+    { name: "Gold", value: tierData.gold, color: PIE_COLORS[1] },
+    { name: "Silver", value: tierData.silver, color: PIE_COLORS[2] },
+    { name: "Bronze", value: tierData.bronze, color: PIE_COLORS[3] },
   ]
 
   const total = data.reduce((sum, tier) => sum + tier.value, 0)
@@ -3762,8 +3775,8 @@ function ProfessionalLeadsTable({
                     {/* Header Row */}
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-4">
-                        <Avatar className="h-12 w-12 border-2 border-slate-200 dark:border-slate-700">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 font-semibold text-slate-700 dark:text-slate-300">
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback className="bg-muted font-semibold">
                             {displayName.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
