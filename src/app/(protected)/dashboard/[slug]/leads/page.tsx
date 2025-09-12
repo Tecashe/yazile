@@ -492,12 +492,13 @@
 //   )
 // }
 
+
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { onUserInfor } from "@/actions/user"
 import { client } from "@/lib/prisma"
 import { getPremiumLeadAnalytics, mergeDuplicateLeads } from "@/lib/lead-qualification"
-import { PremiumLeadsDashboard } from "../_components/leads/leads"
+import { ProfessionalLeadsDashboard } from "../_components/leads/professional-leads-dashboard"
 
 // Add this function to calculate marketing completeness
 function calculateMarketingCompleteness(lead: any): number {
@@ -957,21 +958,21 @@ export default async function EnhancedLeadsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Suspense
         fallback={
           <div className="flex items-center justify-center h-64">
             <div className="flex flex-col items-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               <div className="text-center">
-                <p className="text-lg font-medium">Loading Dashboard...</p>
-                <p className="text-sm text-muted-foreground">Preparing your lead intelligence</p>
+                <p className="text-lg font-medium">Loading Professional Dashboard...</p>
+                <p className="text-sm text-muted-foreground">Preparing your revenue intelligence interface</p>
               </div>
             </div>
           </div>
         }
       >
-        <PremiumLeadsDashboard
+        <ProfessionalLeadsDashboard
           analytics={analytics}
           recentLeads={recentLeads}
           topLeads={topLeads}
