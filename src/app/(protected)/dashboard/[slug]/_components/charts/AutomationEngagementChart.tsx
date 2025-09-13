@@ -1,0 +1,374 @@
+"use client"
+
+import * as React from "react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { TrendingUp, MessageSquare, Mail, Loader2 } from "lucide-react"
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+// Import your server actions
+import { getAutomationsForUser, getEngagementDataForAutomation } from "@/actions/dashboard"
+
+const chartConfig = {
+  dms: {
+    label: "Direct Messages",
+    color: "hsl(var(--chart-1))",
+    icon: Mail,
+  },
+  comments: {
+    label: "Comments",
+    color: "hsl(var(--chart-2))",
+    icon: MessageSquare,
+  },
+} satisfies ChartConfig
+
+export default function AutomationEngagementChart() {
+  const [timeRange, setTimeRange] = React.useState("180d")
+  const [selectedAutomationId, setSelectedAutomationId] = React.useState<string>("")
+  const [automations, setAutomations] = React.useState<any[]>([])
+  const [engagementData, setEngagementData] = React.useState<any[]>([])
+  const [commentData, setCommentData] = React.useState<any>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  // Fetch automations on component mount
+  React.useEffect(() => {
+    const fetchAutomations = async () => {
+      try {
+        const userAutomations = await getAutomationsForUser()
+        setAutomations(userAutomations)
+        
+        // Set the first automation as selected by default
+        if (userAutomations.length > 0) {
+          setSelectedAutomationId(userAutomations[0].id)
+        }
+      } catch (err) {
+        setError("Failed to load automations")
+        console.error("Error fetching automations:", err)
+      }
+    }
+    
+    fetchAutomations()
+  }, [])
+
+  // Fetch engagement data when automation changes
+  React.useEffect(() => {
+    const fetchEngagementData = async () => {
+      if (!selectedAutomationId) {
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      try {
+        const { engagementData: data, commentData: comments } = await getEngagementDataForAutomation(selectedAutomationId)
+        setEngagementData(data)
+        setCommentData(comments)
+        setError(null)
+      } catch (err) {
+        setError("Failed to load engagement data")
+        console.error("Error fetching engagement data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEngagementData()
+  }, [selectedAutomationId])
+
+  const filteredData = React.useMemo(() => {
+    if (!engagementData.length) return []
+    
+    const referenceDate = new Date()
+    let daysToSubtract = 180
+    
+    if (timeRange === "30d") daysToSubtract = 30
+    else if (timeRange === "60d") daysToSubtract = 60
+    else if (timeRange === "90d") daysToSubtract = 90
+
+    const startDate = new Date(referenceDate)
+    startDate.setDate(startDate.getDate() - daysToSubtract)
+
+    return engagementData.filter((item) => {
+      const date = new Date(item.date)
+      return date >= startDate
+    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }, [engagementData, timeRange])
+
+  const totalEngagement = React.useMemo(() => {
+    return filteredData.reduce((acc, curr) => ({
+      dms: acc.dms + curr.dms,
+      comments: acc.comments + curr.comments,
+    }), { dms: 0, comments: 0 })
+  }, [filteredData])
+
+  const trendPercentage = React.useMemo(() => {
+    if (filteredData.length < 14) return 0
+    
+    const recent = filteredData.slice(-7)
+    const previous = filteredData.slice(-14, -7)
+    
+    const recentTotal = recent.reduce((acc, curr) => acc + curr.dms + curr.comments, 0)
+    const previousTotal = previous.reduce((acc, curr) => acc + curr.dms + curr.comments, 0)
+    
+    if (previousTotal === 0) return recentTotal > 0 ? 100 : 0
+    return ((recentTotal - previousTotal) / previousTotal * 100)
+  }, [filteredData])
+
+  const selectedAutomation = automations.find(auto => auto.id === selectedAutomationId)
+
+  if (error) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-red-600">Error Loading Data</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+        <div className="grid flex-1 gap-1">
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Automation Engagement Analytics
+          </CardTitle>
+          <CardDescription>
+            Track DMs and comments generated by your automations over time
+            {selectedAutomation && ` - ${selectedAutomation.name}`}
+          </CardDescription>
+        </div>
+        <div className="flex gap-2">
+          <Select value={selectedAutomationId} onValueChange={setSelectedAutomationId}>
+            <SelectTrigger className="w-[200px] rounded-lg">
+              <SelectValue placeholder="Select automation" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              {automations.map((automation) => (
+                <SelectItem key={automation.id} value={automation.id} className="rounded-lg">
+                  {automation.name}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {automation.active ? "Active" : "Inactive"}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[160px] rounded-lg">
+              <SelectValue placeholder="Select time range" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="30d" className="rounded-lg">
+                Last 30 days
+              </SelectItem>
+              <SelectItem value="60d" className="rounded-lg">
+                Last 60 days
+              </SelectItem>
+              <SelectItem value="90d" className="rounded-lg">
+                Last 90 days
+              </SelectItem>
+              <SelectItem value="180d" className="rounded-lg">
+                Last 6 months
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        {loading ? (
+          <div className="flex items-center justify-center h-[400px]">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading engagement data...</span>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="flex items-center justify-center h-[400px]">
+            <div className="text-center">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold">No engagement data</h3>
+              <p className="text-muted-foreground">
+                {selectedAutomationId ? "No data available for the selected automation and time period." : "Please select an automation to view engagement data."}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-lg border p-4">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium">Total DMs</span>
+                </div>
+                <div className="text-2xl font-bold text-blue-600 mt-2">
+                  {totalEngagement.dms.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Last {timeRange === "30d" ? "30 days" : timeRange === "60d" ? "60 days" : timeRange === "90d" ? "90 days" : "6 months"}
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium">Total Comments</span>
+                </div>
+                <div className="text-2xl font-bold text-green-600 mt-2">
+                  {totalEngagement.comments.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Last {timeRange === "30d" ? "30 days" : timeRange === "60d" ? "60 days" : timeRange === "90d" ? "90 days" : "6 months"}
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-medium">Weekly Trend</span>
+                </div>
+                <div className={`text-2xl font-bold mt-2 ${trendPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {trendPercentage >= 0 ? '+' : ''}{trendPercentage.toFixed(1)}%
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  vs previous week
+                </p>
+              </div>
+            </div>
+            
+            <ChartContainer config={chartConfig} className="aspect-auto h-[350px] w-full">
+              <AreaChart
+                data={filteredData}
+                margin={{
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 20,
+                }}
+              >
+                <defs>
+                  <linearGradient id="fillDms" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-dms)"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-dms)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                  <linearGradient id="fillComments" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-comments)"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-comments)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  minTickGap={32}
+                  tickFormatter={(value) => {
+                    const date = new Date(value)
+                    return date.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(value) => `${value}`}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(value) => {
+                        return new Date(value).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                      }}
+                      indicator="dot"
+                    />
+                  }
+                />
+                <Area
+                  dataKey="comments"
+                  type="monotone"
+                  fill="url(#fillComments)"
+                  stroke="var(--color-comments)"
+                  strokeWidth={2}
+                  stackId="a"
+                />
+                <Area
+                  dataKey="dms"
+                  type="monotone"
+                  fill="url(#fillDms)"
+                  stroke="var(--color-dms)"
+                  strokeWidth={2}
+                  stackId="a"
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+              </AreaChart>
+            </ChartContainer>
+          </>
+        )}
+      </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+          {filteredData.length > 0 && (
+            <>
+              {trendPercentage >= 0 ? 'Trending up' : 'Trending down'} by {Math.abs(trendPercentage).toFixed(1)}% this week 
+              <TrendingUp className="h-4 w-4" />
+            </>
+          )}
+        </div>
+        <div className="leading-none text-muted-foreground">
+          {selectedAutomation && `Automation: ${selectedAutomation.name} (${selectedAutomation.active ? 'Active' : 'Inactive'})`}
+          {commentData && (
+            <span className="ml-2">
+              • Created: {new Date(commentData.Automation.createdAt).toLocaleDateString()}
+            </span>
+          )}
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
