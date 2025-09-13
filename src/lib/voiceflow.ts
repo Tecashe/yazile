@@ -994,7 +994,7 @@ export async function fetchEnhancedBusinessVariablesE(
       business_profile: profileContent || "Professional business assistant",
       business_name: businessContext.businessName || businessData?.businessName || "Our Business",
       display_name: businessContext.name || businessData?.name || "",
-      welcome_message: "Hello! How can I help you today?",
+      welcome_message: "Hello there! How can I help you today?",
       business_type: businessContext.businessType || businessData?.businessType || "Service Business",
       business_description:
         businessContext.businessDescription ||
