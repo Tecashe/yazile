@@ -3061,906 +3061,6 @@
 //   )
 // }
 
-// "use client"
-
-// import { useState, useMemo } from "react"
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { Button } from "@/components/ui/button"
-// import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-// import { Progress } from "@/components/ui/progress"
-// import { Alert, AlertDescription } from "@/components/ui/alert"
-// import { Input } from "@/components/ui/input"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { ScrollArea } from "@/components/ui/scroll-area"
-// import { Switch } from "@/components/ui/switch"
-// import {
-//   Users,
-//   TrendingUp,
-//   Target,
-//   BarChart3,
-//   DollarSign,
-//   Crown,
-//   Award,
-//   ArrowUpRight,
-//   Brain,
-//   Search,
-//   Filter,
-//   Mail,
-//   Phone,
-//   AlertTriangle,
-//   Star,
-//   Activity,
-//   Zap,
-//   LineChart,
-//   PieChart,
-//   Database,
-//   TestTube,
-//   Calendar,
-//   TrendingDown,
-// } from "lucide-react"
-// import {
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   ResponsiveContainer,
-//   AreaChart,
-//   Area,
-//   BarChart,
-//   Bar,
-//   PieChart as RechartsPieChart,
-//   Cell,
-//   Pie,
-//   Rectangle,
-// } from "recharts"
-
-// interface ProfessionalLeadsDashboardProps {
-//   analytics?: any
-//   recentLeads?: any[]
-//   topLeads?: any[]
-//   hasDuplicates?: boolean
-//   duplicateCount?: number
-//   userId?: string
-//   onMergeDuplicates?: (userId: string) => Promise<{ success: boolean; mergedGroups?: number; error?: string }>
-//   interactions?: any[]
-// }
-
-// type TimePeriod = "7d" | "30d" | "90d" | "6m" | "1y" | "all"
-
-// // Color palettes for charts
-// const CHART_COLORS = {
-//   primary: "#3b82f6",    // Blue
-//   secondary: "#10b981",  // Green  
-//   tertiary: "#f59e0b",   // Amber
-//   quaternary: "#ef4444", // Red
-//   accent: "#8b5cf6",     // Purple
-//   muted: "#6b7280"       // Gray
-// }
-
-// const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"]
-// const BAR_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"]
-
-// // Mock data generator for demo mode
-// const generateMockData = (period: TimePeriod = "30d") => {
-//   const periodMultiplier = {
-//     "7d": 0.2,
-//     "30d": 1,
-//     "90d": 3,
-//     "6m": 6,
-//     "1y": 12,
-//     "all": 24
-//   }[period]
-
-//   const baseMetrics = {
-//     totalLeads: Math.floor(1247 * periodMultiplier),
-//     qualifiedLeads: Math.floor(342 * periodMultiplier),
-//     convertedLeads: Math.floor(89 * periodMultiplier),
-//     conversionRate: 26.0,
-//     qualificationRate: 27.4,
-//     revenueMetrics: {
-//       totalEstimatedRevenue: Math.floor(2450000 * periodMultiplier),
-//       totalExpectedRevenue: Math.floor(1890000 * periodMultiplier),
-//       averageROI: 340,
-//       revenueGrowth: Math.random() > 0.5 ? 23.5 : -8.2,
-//     },
-//     tierDistribution: {
-//       platinum: Math.floor(23 * periodMultiplier),
-//       gold: Math.floor(67 * periodMultiplier),
-//       silver: Math.floor(156 * periodMultiplier),
-//       bronze: Math.floor(96 * periodMultiplier),
-//     },
-//     premiumInsights: {
-//       highValueLeads: Math.floor(90 * periodMultiplier),
-//       averageLeadValue: 7150,
-//       conversionProbability: 68,
-//       totalPipelineValue: Math.floor(2450000 * periodMultiplier),
-//     },
-//   }
-
-//   return {
-//     analytics: baseMetrics,
-//     recentLeads: Array.from({ length: 15 }, (_, i) => ({
-//       id: `mock-${i}`,
-//       name: [`Sarah Johnson`, `Michael Chen`, `Emma Rodriguez`, `David Kim`, `Lisa Thompson`][i % 5],
-//       email: [
-//         `sarah.j@company.com`,
-//         `m.chen@business.co`,
-//         `emma.r@startup.io`,
-//         `david@techcorp.com`,
-//         `lisa@enterprise.net`,
-//       ][i % 5],
-//       phone: [`+1 (555) 123-4567`, `+1 (555) 234-5678`, `+1 (555) 345-6789`, `+1 (555) 456-7890`, `+1 (555) 567-8901`][
-//         i % 5
-//       ],
-//       instagramUserId: [`sarahj_biz`, `michaelc_pro`, `emmarodriguez`, `davidkim_tech`, `lisathompson`][i % 5],
-//       status: [`QUALIFIED`, `NEW`, `CONVERTING`, `QUALIFIED`, `NEW`][i % 5],
-//       score: [85, 72, 91, 68, 79][i % 5],
-//       lastContactDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-//       metadata: {
-//         lastAnalysis: {
-//           leadTier: [`PLATINUM`, `GOLD`, `PLATINUM`, `SILVER`, `GOLD`][i % 5],
-//           estimatedValue: [25000, 15000, 35000, 8000, 18000][i % 5],
-//           roi: [450, 280, 520, 180, 320][i % 5],
-//           notificationMessage: `High-value opportunity detected - immediate follow-up recommended`,
-//           nextActions: [`immediate_call`, `send_proposal`, `email_sequence`],
-//           followUpStrategy: `immediate_personal_outreach`,
-//           buyerPersona: `engaged_prospect`,
-//         },
-//         marketingCompleteness: [95, 80, 100, 65, 85][i % 5],
-//       },
-//     })),
-//   }
-// }
-
-// // Chart data generators
-// const generateRevenueChartData = (analytics: any, isMockMode: boolean, period: TimePeriod) => {
-//   const dataPoints = {
-//     "7d": { count: 7, unit: "day" },
-//     "30d": { count: 30, unit: "day" },
-//     "90d": { count: 12, unit: "week" },
-//     "6m": { count: 6, unit: "month" },
-//     "1y": { count: 12, unit: "month" },
-//     "all": { count: 24, unit: "month" }
-//   }[period]
-
-//   if (isMockMode) {
-//     return Array.from({ length: dataPoints.count }, (_, i) => {
-//       const date = new Date()
-//       if (dataPoints.unit === "day") {
-//         date.setDate(date.getDate() - (dataPoints.count - 1 - i))
-//         return {
-//           period: date.toLocaleDateString("en", { month: "short", day: "numeric" }),
-//           revenue: Math.floor(Math.random() * 50000) + 10000,
-//           leads: Math.floor(Math.random() * 20) + 5,
-//         }
-//       } else if (dataPoints.unit === "week") {
-//         date.setDate(date.getDate() - (dataPoints.count - 1 - i) * 7)
-//         return {
-//           period: `Week ${i + 1}`,
-//           revenue: Math.floor(Math.random() * 150000) + 50000,
-//           leads: Math.floor(Math.random() * 50) + 20,
-//         }
-//       } else {
-//         date.setMonth(date.getMonth() - (dataPoints.count - 1 - i))
-//         return {
-//           period: date.toLocaleDateString("en", { month: "short", year: "2-digit" }),
-//           revenue: Math.floor(Math.random() * 300000) + 100000,
-//           leads: Math.floor(Math.random() * 100) + 50,
-//         }
-//       }
-//     })
-//   }
-
-//   return Array.from({ length: dataPoints.count }, (_, i) => ({
-//     period: new Date(Date.now() - (dataPoints.count - 1 - i) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en", { month: "short" }),
-//     revenue: (analytics?.revenueMetrics?.totalEstimatedRevenue || 0) * (0.8 + Math.random() * 0.4),
-//     leads: (analytics?.totalLeads || 0) * (0.1 + Math.random() * 0.2),
-//   }))
-// }
-
-// const generateConversionFunnelData = (analytics: any, isMockMode: boolean) => {
-//   if (isMockMode) {
-//     return [
-//       { stage: "Visitors", count: 5420, fill: BAR_COLORS[0] },
-//       { stage: "Leads", count: 1247, fill: BAR_COLORS[1] },
-//       { stage: "Qualified", count: 342, fill: BAR_COLORS[2] },
-//       { stage: "Converted", count: 89, fill: BAR_COLORS[3] },
-//     ]
-//   }
-
-//   return [
-//     { stage: "Visitors", count: (analytics?.totalLeads || 0) * 4, fill: BAR_COLORS[0] },
-//     { stage: "Leads", count: analytics?.totalLeads || 0, fill: BAR_COLORS[1] },
-//     { stage: "Qualified", count: analytics?.qualifiedLeads || 0, fill: BAR_COLORS[2] },
-//     { stage: "Converted", count: analytics?.convertedLeads || 0, fill: BAR_COLORS[3] },
-//   ]
-// }
-
-// // Utility functions
-// const getRevenueDisplay = (value: number) => {
-//   if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`
-//   if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`
-//   return `$${value.toLocaleString()}`
-// }
-
-// const getPeriodLabel = (period: TimePeriod) => {
-//   const labels = {
-//     "7d": "Last 7 days",
-//     "30d": "Last 30 days", 
-//     "90d": "Last 90 days",
-//     "6m": "Last 6 months",
-//     "1y": "Last 12 months",
-//     "all": "All time"
-//   }
-//   return labels[period]
-// }
-
-// const getTierBadge = (metadata: any) => {
-//   const tier = metadata?.lastAnalysis?.leadTier || "BRONZE"
-  
-//   const configs = {
-//     PLATINUM: { variant: "default", icon: Crown, className: "bg-purple-100 text-purple-800 border-purple-200" },
-//     GOLD: { variant: "secondary", icon: Award, className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-//     SILVER: { variant: "outline", icon: Star, className: "bg-gray-100 text-gray-800 border-gray-200" },
-//     BRONZE: { variant: "outline", icon: Target, className: "bg-orange-100 text-orange-800 border-orange-200" },
-//   }
-
-//   const config = configs[tier as keyof typeof configs] || configs.BRONZE
-//   const IconComponent = config.icon
-
-//   return (
-//     <Badge variant={config.variant as any} className={`gap-1 ${config.className}`}>
-//       <IconComponent className="w-3 h-3" />
-//       {tier}
-//     </Badge>
-//   )
-// }
-
-// const getStatusBadge = (status: string) => {
-//   const configs = {
-//     NEW: { variant: "outline", className: "bg-blue-50 text-blue-700 border-blue-200" },
-//     QUALIFYING: { variant: "secondary", className: "bg-yellow-50 text-yellow-700 border-yellow-200" },
-//     QUALIFIED: { variant: "default", className: "bg-green-50 text-green-700 border-green-200" },
-//     CONVERTING: { variant: "default", className: "bg-purple-50 text-purple-700 border-purple-200" },
-//     CONVERTED: { variant: "default", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-//     LOST: { variant: "destructive", className: "" },
-//   }
-  
-//   const config = configs[status as keyof typeof configs] || configs.NEW
-  
-//   return (
-//     <Badge variant={config.variant as any} className={config.className}>
-//       {status}
-//     </Badge>
-//   )
-// }
-
-// // Custom Tooltip Component
-// const CustomTooltip = ({ active, payload, label }: any) => {
-//   if (active && payload && payload.length) {
-//     return (
-//       <div className="rounded-lg border bg-white/95 backdrop-blur-sm p-3 shadow-md">
-//         <p className="text-sm font-medium text-gray-900 mb-2">{label}</p>
-//         {payload.map((entry: any, index: number) => (
-//           <div key={index} className="flex items-center gap-2 text-sm">
-//             <div
-//               className="w-3 h-3 rounded-sm"
-//               style={{ backgroundColor: entry.color }}
-//             />
-//             <span className="text-gray-600">{entry.name}:</span>
-//             <span className="font-medium text-gray-900">
-//               {entry.name === 'revenue' ? getRevenueDisplay(entry.value) : entry.value.toLocaleString()}
-//             </span>
-//           </div>
-//         ))}
-//       </div>
-//     )
-//   }
-//   return null
-// }
-
-// // Time Period Selector Component
-// function TimePeriodSelector({ value, onValueChange }: { value: TimePeriod; onValueChange: (value: TimePeriod) => void }) {
-//   return (
-//     <Select value={value} onValueChange={onValueChange}>
-//       <SelectTrigger className="w-40">
-//         <Calendar className="h-4 w-4 mr-2" />
-//         <SelectValue />
-//       </SelectTrigger>
-//       <SelectContent>
-//         <SelectItem value="7d">Last 7 days</SelectItem>
-//         <SelectItem value="30d">Last 30 days</SelectItem>
-//         <SelectItem value="90d">Last 90 days</SelectItem>
-//         <SelectItem value="6m">Last 6 months</SelectItem>
-//         <SelectItem value="1y">Last 12 months</SelectItem>
-//         <SelectItem value="all">All time</SelectItem>
-//       </SelectContent>
-//     </Select>
-//   )
-// }
-
-// // Professional Analytics Cards Component
-// function ProfessionalAnalyticsCards({ analytics, isMockMode, period }: { analytics: any; isMockMode: boolean; period: TimePeriod }) {
-//   const cards = [
-//     {
-//       title: "Total Leads",
-//       value: analytics?.totalLeads || 0,
-//       subtitle: "AI-powered generation",
-//       icon: Users,
-//       trend: analytics?.revenueMetrics?.revenueGrowth > 0 ? "up" : "down",
-//       trendValue: "12.5%"
-//     },
-//     {
-//       title: "Qualified Leads", 
-//       value: analytics?.qualifiedLeads || 0,
-//       subtitle: `${(analytics?.qualificationRate || 0).toFixed(1)}% qualification rate`,
-//       icon: Target,
-//       trend: "up",
-//       trendValue: "8.2%"
-//     },
-//     {
-//       title: "Revenue Pipeline",
-//       value: getRevenueDisplay(analytics?.revenueMetrics?.totalEstimatedRevenue || 0),
-//       subtitle: "Estimated total value",
-//       icon: DollarSign,
-//       trend: analytics?.revenueMetrics?.revenueGrowth > 0 ? "up" : "down",
-//       trendValue: `${Math.abs(analytics?.revenueMetrics?.revenueGrowth || 0).toFixed(1)}%`
-//     },
-//     {
-//       title: "Avg ROI",
-//       value: `${analytics?.revenueMetrics?.averageROI || 0}%`,
-//       subtitle: "Return on investment",
-//       icon: TrendingUp,
-//       trend: "up",
-//       trendValue: "15.3%"
-//     },
-//   ]
-
-//   return (
-//     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-//       {cards.map((card, index) => {
-//         const IconComponent = card.icon
-//         const TrendIcon = card.trend === "up" ? TrendingUp : TrendingDown
-//         return (
-//           <Card key={index} className="relative">
-//             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//               <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
-//               <IconComponent className="h-4 w-4 text-muted-foreground" />
-//             </CardHeader>
-//             <CardContent>
-//               <div className="text-2xl font-bold">{card.value}</div>
-//               <p className="text-xs text-muted-foreground flex items-center mt-1">
-//                 <TrendIcon className={`h-3 w-3 mr-1 ${card.trend === "up" ? "text-green-600" : "text-red-600"}`} />
-//                 <span className={card.trend === "up" ? "text-green-600" : "text-red-600"}>{card.trendValue}</span>
-//                 <span className="ml-1">{card.subtitle}</span>
-//               </p>
-//             </CardContent>
-//           </Card>
-//         )
-//       })}
-//     </div>
-//   )
-// }
-
-// // Revenue Chart Component
-// function RevenueChart({ analytics, isMockMode, period }: { analytics: any; isMockMode: boolean; period: TimePeriod }) {
-//   const data = generateRevenueChartData(analytics, isMockMode, period)
-
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle className="flex items-center gap-2">
-//           <LineChart className="h-5 w-5" />
-//           Revenue Trend
-//         </CardTitle>
-//         <CardDescription>Revenue and lead generation for {getPeriodLabel(period).toLowerCase()}</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <div className="h-80">
-//           <ResponsiveContainer width="100%" height="100%">
-//             <AreaChart data={data}>
-//               <defs>
-//                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-//                   <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8} />
-//                   <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0.1} />
-//                 </linearGradient>
-//               </defs>
-//               <CartesianGrid vertical={false} stroke="#e5e7eb" />
-//               <XAxis 
-//                 dataKey="period" 
-//                 stroke="#6b7280" 
-//                 fontSize={12}
-//                 tickLine={false}
-//                 axisLine={false}
-//               />
-//               <YAxis
-//                 stroke="#6b7280"
-//                 fontSize={12}
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickFormatter={(value) => getRevenueDisplay(value)}
-//               />
-//               <Tooltip content={<CustomTooltip />} />
-//               <Area
-//                 type="monotone"
-//                 dataKey="revenue"
-//                 stroke={CHART_COLORS.primary}
-//                 strokeWidth={2}
-//                 fill="url(#revenueGradient)"
-//               />
-//             </AreaChart>
-//           </ResponsiveContainer>
-//         </div>
-//       </CardContent>
-//       <CardFooter className="flex-col items-start gap-2 text-sm">
-//         <div className="flex gap-2 leading-none font-medium">
-//           {analytics?.revenueMetrics?.revenueGrowth > 0 ? (
-//             <>
-//               Trending up by {analytics.revenueMetrics.revenueGrowth.toFixed(1)}% <TrendingUp className="h-4 w-4 text-green-600" />
-//             </>
-//           ) : (
-//             <>
-//               Trending down by {Math.abs(analytics?.revenueMetrics?.revenueGrowth || 0).toFixed(1)}% <TrendingDown className="h-4 w-4 text-red-600" />
-//             </>
-//           )}
-//         </div>
-//         <div className="text-muted-foreground leading-none">
-//           Showing revenue performance for {getPeriodLabel(period).toLowerCase()}
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   )
-// }
-
-// // Enhanced Conversion Funnel Component
-// function ConversionFunnel({ analytics, isMockMode }: { analytics: any; isMockMode: boolean }) {
-//   const data = generateConversionFunnelData(analytics, isMockMode)
-//   const [activeIndex, setActiveIndex] = useState(1)
-
-//   // Calculate conversion rates
-//   const conversionRates = data.map((item, index) => {
-//     if (index === 0) return null
-//     const previousStage = data[index - 1]
-//     const rate = previousStage ? ((item.count / previousStage.count) * 100).toFixed(1) : "0"
-//     return `${rate}%`
-//   }).filter(Boolean)
-
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle className="flex items-center gap-2">
-//           <BarChart3 className="h-5 w-5" />
-//           Conversion Funnel
-//         </CardTitle>
-//         <CardDescription>Lead progression through qualification stages</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <div className="h-80">
-//           <ResponsiveContainer width="100%" height="100%">
-//             <BarChart 
-//               data={data} 
-//               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-//               onMouseMove={(state) => {
-//                 if (state.isTooltipActive && state.activeTooltipIndex !== undefined) {
-//                   setActiveIndex(state.activeTooltipIndex)
-//                 }
-//               }}
-//             >
-//               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-//               <XAxis 
-//                 dataKey="stage"
-//                 stroke="#6b7280" 
-//                 fontSize={12}
-//                 tickLine={false}
-//                 axisLine={false}
-//               />
-//               <YAxis 
-//                 stroke="#6b7280" 
-//                 fontSize={12}
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickFormatter={(value) => value.toLocaleString()}
-//               />
-//               <Tooltip 
-//                 cursor={false}
-//                 content={<CustomTooltip />}
-//               />
-//               <Bar 
-//                 dataKey="count" 
-//                 strokeWidth={2}
-//                 radius={[8, 8, 0, 0]}
-//                 activeBar={({ ...props }) => {
-//                   return (
-//                     <Rectangle
-//                       {...props}
-//                       fillOpacity={0.8}
-//                       stroke={props.payload.fill}
-//                       strokeDasharray={4}
-//                       strokeDashoffset={4}
-//                     />
-//                   )
-//                 }}
-//               >
-//                 {data.map((entry, index) => (
-//                   <Cell key={`cell-${index}`} fill={entry.fill} />
-//                 ))}
-//               </Bar>
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </div>
-//       </CardContent>
-//       <CardFooter className="flex-col items-start gap-2 text-sm">
-//         <div className="flex gap-2 leading-none font-medium">
-//           Overall conversion rate: {((data[3]?.count / data[0]?.count) * 100).toFixed(1)}% <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="text-muted-foreground leading-none">
-//           Stage conversion rates: {conversionRates.join(" → ")}
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   )
-// }
-
-// // Lead Tier Distribution Component
-// function LeadTierDistribution({ analytics, isMockMode }: { analytics: any; isMockMode: boolean }) {
-//   const tierData = isMockMode
-//     ? generateMockData().analytics.tierDistribution
-//     : analytics?.tierDistribution || { platinum: 0, gold: 0, silver: 0, bronze: 0 }
-
-//   const data = [
-//     { name: "Platinum", value: tierData.platinum, color: PIE_COLORS[0] },
-//     { name: "Gold", value: tierData.gold, color: PIE_COLORS[1] },
-//     { name: "Silver", value: tierData.silver, color: PIE_COLORS[2] },
-//     { name: "Bronze", value: tierData.bronze, color: PIE_COLORS[3] },
-//   ]
-
-//   const total = data.reduce((sum, tier) => sum + tier.value, 0)
-
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle className="flex items-center gap-2">
-//           <PieChart className="h-5 w-5" />
-//           Lead Tier Distribution
-//         </CardTitle>
-//         <CardDescription>AI-classified leads by revenue potential</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <div className="h-80">
-//           <ResponsiveContainer width="100%" height="100%">
-//             <RechartsPieChart>
-//               <Pie 
-//                 data={data} 
-//                 cx="50%" 
-//                 cy="50%" 
-//                 innerRadius={60} 
-//                 outerRadius={120} 
-//                 paddingAngle={5} 
-//                 dataKey="value"
-//               >
-//                 {data.map((entry, index) => (
-//                   <Cell key={`cell-${index}`} fill={entry.color} />
-//                 ))}
-//               </Pie>
-//               <Tooltip content={<CustomTooltip />} />
-//             </RechartsPieChart>
-//           </ResponsiveContainer>
-//         </div>
-//         <div className="grid grid-cols-2 gap-4 mt-4">
-//           {data.map((tier, index) => (
-//             <div key={index} className="flex items-center gap-2">
-//               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tier.color }} />
-//               <span className="text-sm text-muted-foreground">{tier.name}</span>
-//               <span className="text-sm font-medium ml-auto">{tier.value}</span>
-//               <span className="text-xs text-muted-foreground">
-//                 ({total > 0 ? ((tier.value / total) * 100).toFixed(0) : 0}%)
-//               </span>
-//             </div>
-//           ))}
-//         </div>
-//       </CardContent>
-//     </Card>
-//   )
-// }
-
-// // Professional Leads Table Component
-// function ProfessionalLeadsTable({
-//   leads,
-//   isMockMode,
-// }: {
-//   leads: any[]
-//   isMockMode: boolean
-// }) {
-//   const [searchTerm, setSearchTerm] = useState("")
-//   const [statusFilter, setStatusFilter] = useState("all")
-//   const [tierFilter, setTierFilter] = useState("all")
-
-//   const displayLeads = isMockMode ? generateMockData().recentLeads : leads || []
-
-//   const filteredLeads = useMemo(() => {
-//     return displayLeads.filter((lead) => {
-//       const displayName = lead.name || `@${lead.instagramUserId?.slice(-4) || "Unknown"}`
-//       const matchesSearch =
-//         !searchTerm ||
-//         displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//         lead.instagramUserId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//         lead.email?.toLowerCase().includes(searchTerm.toLowerCase())
-
-//       const matchesStatus = statusFilter === "all" || lead.status === statusFilter
-//       const matchesTier = tierFilter === "all" || lead.metadata?.lastAnalysis?.leadTier === tierFilter
-
-//       return matchesSearch && matchesStatus && matchesTier
-//     })
-//   }, [displayLeads, searchTerm, statusFilter, tierFilter])
-
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <div className="flex items-center justify-between">
-//           <div>
-//             <CardTitle className="flex items-center gap-2">
-//               <Database className="h-5 w-5" />
-//               Lead Pipeline
-//             </CardTitle>
-//             <CardDescription>
-//               {isMockMode ? "Demo data - " : "Live data - "}
-//               {filteredLeads.length} qualified leads
-//             </CardDescription>
-//           </div>
-//         </div>
-//       </CardHeader>
-//       <CardContent>
-//         {/* Filters */}
-//         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-//           <div className="flex-1">
-//             <div className="relative">
-//               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//               <Input
-//                 placeholder="Search leads..."
-//                 value={searchTerm}
-//                 onChange={(e) => setSearchTerm(e.target.value)}
-//                 className="pl-10"
-//               />
-//             </div>
-//           </div>
-//           <Select value={statusFilter} onValueChange={setStatusFilter}>
-//             <SelectTrigger className="w-40">
-//               <Filter className="h-4 w-4 mr-2" />
-//               <SelectValue placeholder="Status" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="all">All Status</SelectItem>
-//               <SelectItem value="NEW">New</SelectItem>
-//               <SelectItem value="QUALIFIED">Qualified</SelectItem>
-//               <SelectItem value="CONVERTING">Converting</SelectItem>
-//               <SelectItem value="CONVERTED">Converted</SelectItem>
-//             </SelectContent>
-//           </Select>
-//           <Select value={tierFilter} onValueChange={setTierFilter}>
-//             <SelectTrigger className="w-40">
-//               <Star className="h-4 w-4 mr-2" />
-//               <SelectValue placeholder="Tier" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="all">All Tiers</SelectItem>
-//               <SelectItem value="PLATINUM">Platinum</SelectItem>
-//               <SelectItem value="GOLD">Gold</SelectItem>
-//               <SelectItem value="SILVER">Silver</SelectItem>
-//               <SelectItem value="BRONZE">Bronze</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
-
-//         {/* Leads List */}
-//         <ScrollArea className="h-96">
-//           <div className="space-y-4">
-//             {filteredLeads.length === 0 ? (
-//               <div className="text-center py-12">
-//                 <Brain className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-//                 <p className="text-lg font-medium">No leads found</p>
-//                 <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
-//               </div>
-//             ) : (
-//               filteredLeads.map((lead) => {
-//                 const lastAnalysis = lead.metadata?.lastAnalysis
-//                 const marketingCompleteness = lead.metadata?.marketingCompleteness || 0
-//                 const displayName = lead.name || `@${lead.instagramUserId?.slice(-4) || "Unknown"}`
-
-//                 return (
-//                   <div
-//                     key={lead.id}
-//                     className="p-6 border rounded-lg hover:bg-accent/50 transition-colors space-y-4"
-//                   >
-//                     {/* Header Row */}
-//                     <div className="flex items-start justify-between">
-//                       <div className="flex items-center space-x-4">
-//                         <Avatar className="h-12 w-12">
-//                           <AvatarFallback className="bg-muted font-semibold">
-//                             {displayName.charAt(0).toUpperCase()}
-//                           </AvatarFallback>
-//                         </Avatar>
-//                         <div className="space-y-1">
-//                           <div className="flex items-center gap-3">
-//                             <h3 className="text-lg font-semibold">{displayName}</h3>
-//                             {getTierBadge(lead.metadata)}
-//                             {getStatusBadge(lead.status)}
-//                           </div>
-//                           <p className="text-sm text-muted-foreground">@{lead.instagramUserId}</p>
-//                         </div>
-//                       </div>
-//                       <div className="text-right">
-//                         <div className="text-2xl font-bold">{lead.score}</div>
-//                         <p className="text-xs text-muted-foreground">Lead Score</p>
-//                       </div>
-//                     </div>
-
-//                     {/* Contact & Revenue Row */}
-//                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//                       <div className="space-y-2">
-//                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Contact Info</p>
-//                         <div className="space-y-1">
-//                           {lead.email && (
-//                             <div className="flex items-center gap-2 text-sm">
-//                               <Mail className="h-3 w-3 text-muted-foreground" />
-//                               <span className="truncate">{lead.email}</span>
-//                             </div>
-//                           )}
-//                           {lead.phone && (
-//                             <div className="flex items-center gap-2 text-sm">
-//                               <Phone className="h-3 w-3 text-muted-foreground" />
-//                               <span>{lead.phone}</span>
-//                             </div>
-//                           )}
-//                         </div>
-//                       </div>
-
-//                       <div className="space-y-2">
-//                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Revenue Potential</p>
-//                         {lastAnalysis?.estimatedValue ? (
-//                           <div className="text-lg font-bold">
-//                             {getRevenueDisplay(lastAnalysis.estimatedValue)}
-//                           </div>
-//                         ) : (
-//                           <div className="text-sm text-muted-foreground">Not calculated</div>
-//                         )}
-//                         {lastAnalysis?.roi && (
-//                           <div className="text-xs text-muted-foreground">ROI: {lastAnalysis.roi}%</div>
-//                         )}
-//                       </div>
-
-//                       <div className="space-y-2">
-//                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Profile Status</p>
-//                         <div className="space-y-2">
-//                           <div className="flex items-center justify-between">
-//                             <span className="text-xs">Completeness</span>
-//                             <span className="text-xs font-bold">{marketingCompleteness}%</span>
-//                           </div>
-//                           <Progress value={marketingCompleteness} className="h-2" />
-//                         </div>
-//                       </div>
-//                     </div>
-
-//                     {/* AI Insights */}
-//                     {lastAnalysis?.notificationMessage && (
-//                       <div className="bg-muted/50 border rounded-md p-3">
-//                         <div className="flex items-start gap-2">
-//                           <Brain className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
-//                           <p className="text-sm font-medium">{lastAnalysis.notificationMessage}</p>
-//                         </div>
-//                       </div>
-//                     )}
-//                   </div>
-//                 )
-//               })
-//             )}
-//           </div>
-//         </ScrollArea>
-//       </CardContent>
-//     </Card>
-//   )
-// }
-
-// export function ProfessionalLeadsDashboard({
-//   analytics,
-//   recentLeads,
-//   topLeads,
-//   hasDuplicates = false,
-//   duplicateCount = 0,
-//   userId = "",
-//   onMergeDuplicates,
-//   interactions,
-// }: ProfessionalLeadsDashboardProps) {
-//   const [isMockMode, setIsMockMode] = useState(true)
-//   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("30d")
-
-//   // Use mock data when in mock mode, incorporating the selected time period
-//   const displayData = isMockMode 
-//     ? generateMockData(selectedPeriod) 
-//     : { analytics, recentLeads, topLeads }
-
-//   return (
-//     <div className="min-h-screen bg-background">
-//       <div className="space-y-8 p-6">
-//         {/* Header */}
-//         <div className="flex items-center justify-between">
-//           <div className="flex items-center gap-4">
-//             <div className="flex items-center space-x-2">
-//               <TestTube className="h-4 w-4 text-muted-foreground" />
-//               <span className="text-sm text-muted-foreground">Demo Mode</span>
-//               <Switch checked={isMockMode} onCheckedChange={setIsMockMode} />
-//             </div>
-//           </div>
-//           <TimePeriodSelector value={selectedPeriod} onValueChange={setSelectedPeriod} />
-//         </div>
-
-//         {/* Mock Data Notice */}
-//         {isMockMode && (
-//           <Alert>
-//             <AlertTriangle className="h-4 w-4" />
-//             <AlertDescription>
-//               <strong>Demo Mode Active:</strong> Displaying mock data for demonstration. Switch off demo mode to view
-//               live data when your account starts processing leads.
-//             </AlertDescription>
-//           </Alert>
-//         )}
-
-//         {/* Duplicate Alert */}
-//         {hasDuplicates && !isMockMode && (
-//           <Alert variant="destructive">
-//             <AlertTriangle className="h-4 w-4" />
-//             <AlertDescription>
-//               Found {duplicateCount} potential duplicate leads.
-//               <Button
-//                 variant="link"
-//                 className="p-0 h-auto ml-1"
-//                 onClick={() => onMergeDuplicates?.(userId)}
-//               >
-//                 Merge duplicates
-//               </Button>
-//             </AlertDescription>
-//           </Alert>
-//         )}
-
-//         {/* Analytics Cards */}
-//         <ProfessionalAnalyticsCards 
-//           analytics={displayData.analytics} 
-//           isMockMode={isMockMode} 
-//           period={selectedPeriod} 
-//         />
-
-//         {/* Charts Grid */}
-//         <div className="grid gap-6 md:grid-cols-2">
-//           <RevenueChart 
-//             analytics={displayData.analytics} 
-//             isMockMode={isMockMode} 
-//             period={selectedPeriod} 
-//           />
-//           <ConversionFunnel 
-//             analytics={displayData.analytics} 
-//             isMockMode={isMockMode} 
-//           />
-//         </div>
-
-//         {/* Secondary Charts */}
-//         <div className="grid gap-6 md:grid-cols-3">
-//           <div className="md:col-span-2">
-//             <ProfessionalLeadsTable 
-//               leads={displayData.recentLeads || []} 
-//               isMockMode={isMockMode} 
-//             />
-//           </div>
-//           <LeadTierDistribution 
-//             analytics={displayData.analytics} 
-//             isMockMode={isMockMode} 
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -3974,7 +3074,6 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Users,
   TrendingUp,
@@ -3983,6 +3082,7 @@ import {
   DollarSign,
   Crown,
   Award,
+  ArrowUpRight,
   Brain,
   Search,
   Filter,
@@ -3990,19 +3090,20 @@ import {
   Phone,
   AlertTriangle,
   Star,
+  Activity,
+  Zap,
   LineChart,
   PieChart,
   Database,
   TestTube,
   Calendar,
   TrendingDown,
-  Lock,
 } from "lucide-react"
 import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartsTooltip,
+  Tooltip,
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -4023,20 +3124,18 @@ interface ProfessionalLeadsDashboardProps {
   userId?: string
   onMergeDuplicates?: (userId: string) => Promise<{ success: boolean; mergedGroups?: number; error?: string }>
   interactions?: any[]
-  userPlan?: 'free' | 'pro' | 'enterprise'
-  onUpgradeClick?: () => void
 }
 
 type TimePeriod = "7d" | "30d" | "90d" | "6m" | "1y" | "all"
 
 // Color palettes for charts
 const CHART_COLORS = {
-  primary: "#3b82f6",
-  secondary: "#10b981",
-  tertiary: "#f59e0b",
-  quaternary: "#ef4444",
-  accent: "#8b5cf6",
-  muted: "#6b7280"
+  primary: "#3b82f6",    // Blue
+  secondary: "#10b981",  // Green  
+  tertiary: "#f59e0b",   // Amber
+  quaternary: "#ef4444", // Red
+  accent: "#8b5cf6",     // Purple
+  muted: "#6b7280"       // Gray
 }
 
 const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"]
@@ -4382,7 +3481,7 @@ function RevenueChart({ analytics, isMockMode, period }: { analytics: any; isMoc
                 axisLine={false}
                 tickFormatter={(value) => getRevenueDisplay(value)}
               />
-              <RechartsTooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
                 dataKey="revenue"
@@ -4463,7 +3562,7 @@ function ConversionFunnel({ analytics, isMockMode }: { analytics: any; isMockMod
                 axisLine={false}
                 tickFormatter={(value) => value.toLocaleString()}
               />
-              <RechartsTooltip 
+              <Tooltip 
                 cursor={false}
                 content={<CustomTooltip />}
               />
@@ -4544,7 +3643,7 @@ function LeadTierDistribution({ analytics, isMockMode }: { analytics: any; isMoc
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <RechartsTooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} />
             </RechartsPieChart>
           </ResponsiveContainer>
         </div>
@@ -4771,24 +3870,9 @@ export function ProfessionalLeadsDashboard({
   userId = "",
   onMergeDuplicates,
   interactions,
-  userPlan = 'free',
-  onUpgradeClick,
 }: ProfessionalLeadsDashboardProps) {
   const [isMockMode, setIsMockMode] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("30d")
-
-  // Check if user can access live data (paid plans only)
-  const canAccessLiveData = userPlan !== 'free'
-
-  // Handle demo mode toggle
-  const handleDemoModeChange = (checked: boolean) => {
-    if (!checked && !canAccessLiveData) {
-      // User wants to switch off demo mode but is on free plan
-      onUpgradeClick?.()
-      return
-    }
-    setIsMockMode(checked)
-  }
 
   // Use mock data when in mock mode, incorporating the selected time period
   const displayData = isMockMode 
@@ -4796,139 +3880,84 @@ export function ProfessionalLeadsDashboard({
     : { analytics, recentLeads, topLeads }
 
   return (
-    <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        <div className="space-y-8 p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <TestTube className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Demo Mode</span>
-                
-                {/* Conditional Switch with Tooltip */}
-                {canAccessLiveData ? (
-                  <Switch checked={isMockMode} onCheckedChange={handleDemoModeChange} />
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="relative">
-                        <Switch 
-                          checked={isMockMode} 
-                          onCheckedChange={handleDemoModeChange}
-                          className="opacity-60"
-                        />
-                        <Lock className="absolute -top-1 -right-1 h-3 w-3 text-muted-foreground" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Upgrade to Pro or Enterprise to view your live data</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              
-              {/* Plan Badge */}
-              <Badge variant={userPlan === 'free' ? 'outline' : 'default'} className="capitalize">
-                {userPlan} Plan
-              </Badge>
+    <div className="min-h-screen bg-background">
+      <div className="space-y-8 p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <TestTube className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Demo Mode</span>
+              <Switch checked={isMockMode} onCheckedChange={setIsMockMode} />
             </div>
-            <TimePeriodSelector value={selectedPeriod} onValueChange={setSelectedPeriod} />
           </div>
+          <TimePeriodSelector value={selectedPeriod} onValueChange={setSelectedPeriod} />
+        </div>
 
-          {/* Mock Data Notice */}
-          {isMockMode && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Demo Mode Active:</strong> Displaying mock data for demonstration. 
-                {!canAccessLiveData && (
-                  <>
-                    {" "}
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto font-medium underline"
-                      onClick={() => onUpgradeClick?.()}
-                    >
-                      Upgrade to Pro
-                    </Button>
-                    {" "}to view your live data.
-                  </>
-                )}
-                {canAccessLiveData && " Switch off demo mode to view live data when your account starts processing leads."}
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Mock Data Notice */}
+        {isMockMode && (
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Demo Mode Active:</strong> Displaying mock data for demonstration. Switch off demo mode to view
+              live data when your account starts processing leads.
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Free Plan Limitation Notice */}
-          {userPlan === 'free' && !isMockMode && (
-            <Alert variant="destructive">
-              <Lock className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Upgrade Required:</strong> Live data access is only available for Pro and Enterprise plans.
-                <Button
-                  variant="link"
-                  className="p-0 h-auto ml-1 text-destructive underline"
-                  onClick={() => onUpgradeClick?.()}
-                >
-                  Upgrade now
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Duplicate Alert */}
+        {hasDuplicates && !isMockMode && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Found {duplicateCount} potential duplicate leads.
+              <Button
+                variant="link"
+                className="p-0 h-auto ml-1"
+                onClick={() => onMergeDuplicates?.(userId)}
+              >
+                Merge duplicates
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Duplicate Alert */}
-          {hasDuplicates && !isMockMode && canAccessLiveData && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Found {duplicateCount} potential duplicate leads.
-                <Button
-                  variant="link"
-                  className="p-0 h-auto ml-1"
-                  onClick={() => onMergeDuplicates?.(userId)}
-                >
-                  Merge duplicates
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Analytics Cards */}
+        <ProfessionalAnalyticsCards 
+          analytics={displayData.analytics} 
+          isMockMode={isMockMode} 
+          period={selectedPeriod} 
+        />
 
-          {/* Analytics Cards */}
-          <ProfessionalAnalyticsCards 
+        {/* Charts Grid */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <RevenueChart 
             analytics={displayData.analytics} 
             isMockMode={isMockMode} 
             period={selectedPeriod} 
           />
+          <ConversionFunnel 
+            analytics={displayData.analytics} 
+            isMockMode={isMockMode} 
+          />
+        </div>
 
-          {/* Charts Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <RevenueChart 
-              analytics={displayData.analytics} 
-              isMockMode={isMockMode} 
-              period={selectedPeriod} 
-            />
-            <ConversionFunnel 
-              analytics={displayData.analytics} 
+        {/* Secondary Charts */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <ProfessionalLeadsTable 
+              leads={displayData.recentLeads || []} 
               isMockMode={isMockMode} 
             />
           </div>
-
-          {/* Secondary Charts */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="md:col-span-2">
-              <ProfessionalLeadsTable 
-                leads={displayData.recentLeads || []} 
-                isMockMode={isMockMode} 
-              />
-            </div>
-            <LeadTierDistribution 
-              analytics={displayData.analytics} 
-              isMockMode={isMockMode} 
-            />
-          </div>
+          <LeadTierDistribution 
+            analytics={displayData.analytics} 
+            isMockMode={isMockMode} 
+          />
         </div>
       </div>
-    </TooltipProvider>
+    </div>
   )
 }
+
+

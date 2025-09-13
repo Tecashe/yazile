@@ -994,7 +994,6 @@ import { onUserInfor } from "@/actions/user"
 import { client } from "@/lib/prisma"
 import { getPremiumLeadAnalytics, mergeDuplicateLeads } from "@/lib/lead-qualification"
 import { ProfessionalLeadsDashboard } from "../_components/leads/professional-leads-dashboard"
-import { Loader2 } from "lucide-react"
 
 // Add this function to calculate marketing completeness
 function calculateMarketingCompleteness(lead: any): number {

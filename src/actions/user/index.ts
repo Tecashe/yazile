@@ -113,7 +113,7 @@ export const onSubscribe = async (session_id: string) => {
 
 
 
-export const onUserInfor = async () => {
+export const onUserInforbefore = async () => {
   const user = await onCurrentUser()
 
   // console.log("Clerk user ID:", user.id)
@@ -153,7 +153,38 @@ export const onUserInfor = async () => {
 }
 
 
+// Update your onUserInfor function in index.ts to include subscription data
+export const onUserInfor = async () => {
+  const user = await onCurrentUser()
 
+  try {
+    const profile = await findUser(user.id)
+    
+    if (profile) {
+      // Return serializable data including subscription
+      return {
+        status: 200,
+        data: {
+          id: profile.id,           // Database UUID
+          clerkId: profile.clerkId, // Clerk ID
+          email: profile.email,
+          firstname: profile.firstname,
+          lastname: profile.lastname,
+          subscription: profile.subscription ? {
+            plan: profile.subscription.plan || 'FREE',
+            customerId: profile.subscription.customerId,
+          } : null,
+        },
+      }
+    }
+
+    return { status: 404, error: "User not found in database" }
+    
+  } catch (error) {
+    console.error("Error in onUserInfor:", error)
+    return { status: 500, error: "Internal Server Error" }
+  }
+}
 
 
 export const onUserInfore = async () => {
