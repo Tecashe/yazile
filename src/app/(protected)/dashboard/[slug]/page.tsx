@@ -83,6 +83,11 @@ import EngagementInsights from "./_components/dash/EngagementInsights"
 import { EnhancedDashboardCards } from "@/components/global/dashboard/dashboard-cards"
 import AutomationEngagementChart from "./_components/charts/AutomationEngagementChart"
 
+import DashboardAnalyticsCharts from "./_components/charts/financeCharts"
+
+// In your dashboard
+
+
 import type { Automation } from "@/types/dashboard"
 
 export default async function DashboardPage() {
@@ -95,9 +100,10 @@ export default async function DashboardPage() {
         <EnhancedDashboardCards />       
       </div>       
 
-      {/* <div className="flex gap-5 lg:flex-row flex-col">
-        <EngagementInsights />
-      </div> */}
+      <div className="flex gap-5 lg:flex-row flex-col">
+        {/* <EngagementInsights /> */}
+        <DashboardAnalyticsCharts />
+      </div> 
       
       {/* New Engagement Analytics Chart Section */}
       <div className="border-[1px] relative border-in-active/50 p-5 rounded-xl">
