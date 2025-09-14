@@ -94,7 +94,7 @@ export const agentTemplates: AgentTemplate[] = [
   },
   {
     id: "luxury-concierge",
-    name: "Sebastian",
+    name: "Ladyluck",
     description: "Sophisticated personal concierge who anticipates needs and delivers white-glove service",
     avatar: "/luxury-concierge-professional-avatar.jpg",
     agentType: "personal-concierge",
