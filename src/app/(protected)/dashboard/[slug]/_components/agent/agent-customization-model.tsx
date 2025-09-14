@@ -178,7 +178,7 @@ export function AgentCustomizationModal({ agent, isOpen, onClose, onSave }: Agen
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label>Auto-detect Language</Label>
-                  <p className="text-sm text-muted-foreground">Automatically respond in the customer's language</p>
+                  <p className="text-sm text-muted-foreground">Automatically respond in the customer&apos;s language</p>
                 </div>
                 <Switch
                   checked={customAgent.languageSettings.detectLanguage}
