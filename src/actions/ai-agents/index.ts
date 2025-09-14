@@ -661,7 +661,7 @@ Make the agent suitable for this specific business and its available integration
         description: "An AI assistant tailored for your business",
         agentType: "general-assistant",
         tone: "professional",
-        introductoryStatement: `Hi, I'm your AI assistant from ${businessContext.businessName}. How can I help you today?`,
+        introductoryStatement: `Hi, I'm Laura from ${businessContext.businessName}. How can I help you today?`,
         personality: {
           friendliness: 7,
           formality: 6,

@@ -1616,7 +1616,7 @@ export default function AIAgentPersonalityPage() {
   const handleCreateNewAgent = () => {
     const newAgent: AgentTemplate = {
       id: `custom-${Date.now()}`,
-      name: "Custom Agent",
+      name: "Laura",
       description: "A custom AI agent tailored to your needs",
       avatar: "/professional-ai-assistant.jpg",
       agentType: "general-assistant",
