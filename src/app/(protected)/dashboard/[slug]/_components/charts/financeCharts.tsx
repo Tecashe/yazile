@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Funnel, FunnelChart, LabelList } from "recharts"
-import { TrendingUp, Users, Target, Activity, Zap } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { TrendingUp } from "lucide-react"
 
 import {
   Card,
@@ -15,28 +15,12 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 // Import your server actions
-import { 
-  getLeadAnalytics, 
-  getTimeBasedAnalytics, 
-  getPlatformPerformance,
-  getLeadFunnelAnalytics,
-  getLeadSourceAnalytics,
-  getAutomationPerformance
-} from "@/actions/dashboard/d-actions"
+import { getLeadAnalytics } from "@/actions/dashboard/d-actions"
 
 // Type definitions
 interface DailyLeadData {
@@ -46,95 +30,22 @@ interface DailyLeadData {
   date: string;
 }
 
-interface PlatformData {
-  platform: string;
-  totalLeads: number;
-}
-
-interface LeadSourceData {
-  source: string;
-  totalLeads: number;
-  conversions: number;
-  conversionRate: number;
-  value: number;
-}
-
-interface WeeklyData {
-  week: string;
-  newLeads: number;
-  conversions: number;
-}
-
-interface AutomationData {
-  id: string;
-  name: string;
-  active: boolean;
-  platform: string; // Using string instead of INTEGRATIONS enum for simplicity
-  totalLeads: number;
-  qualifiedLeads: number;
-  convertedLeads: number;
-  conversionRate: number;
-  postsCount: number;
-  dmsCount: number;
-  createdAt: Date;
-}
-
-// Chart configurations
-const leadAnalyticsConfig = {
+const chartConfig = {
   total: {
     label: "New Leads",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
   qualified: {
-    label: "Qualified",
-    color: "hsl(var(--chart-2))",
+    label: "Qualified Leads",
+    color: "var(--chart-2)",
   },
   converted: {
-    label: "Converted",
-    color: "hsl(var(--chart-3))",
+    label: "Converted Leads",
+    color: "var(--chart-3)",
   },
 } satisfies ChartConfig
 
-const platformConfig = {
-  instagram: {
-    label: "Instagram",
-    color: "hsl(var(--chart-1))",
-  },
-  facebook: {
-    label: "Facebook", 
-    color: "hsl(var(--chart-2))",
-  },
-  linkedin: {
-    label: "LinkedIn",
-    color: "hsl(var(--chart-3))",
-  },
-  twitter: {
-    label: "Twitter",
-    color: "hsl(var(--chart-4))",
-  },
-} satisfies ChartConfig
-
-const sourceConfig = {
-  organic: {
-    label: "Organic",
-    color: "hsl(var(--chart-1))",
-  },
-  paid: {
-    label: "Paid Ads",
-    color: "hsl(var(--chart-2))",
-  },
-  referral: {
-    label: "Referral",
-    color: "hsl(var(--chart-3))",
-  },
-  direct: {
-    label: "Direct",
-    color: "hsl(var(--chart-4))",
-  },
-} satisfies ChartConfig
-
-// Lead Analytics Time Series Chart
-function LeadAnalyticsChart() {
+export default function LeadFunnelChart() {
   const [data, setData] = React.useState<DailyLeadData[]>([])
   const [loading, setLoading] = React.useState(true)
 
@@ -152,398 +63,210 @@ function LeadAnalyticsChart() {
     fetchData()
   }, [])
 
-  if (loading) return <Card><CardContent className="p-6">Loading...</CardContent></Card>
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-6 flex items-center justify-center h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-muted-foreground">Loading analytics...</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Calculate performance metrics
+  const totalNewLeads = data.reduce((sum, item) => sum + item.total, 0)
+  const totalQualified = data.reduce((sum, item) => sum + item.qualified, 0)
+  const totalConverted = data.reduce((sum, item) => sum + item.converted, 0)
+  const conversionRate = totalNewLeads > 0 ? ((totalConverted / totalNewLeads) * 100).toFixed(1) : "0.0"
+  const qualificationRate = totalNewLeads > 0 ? ((totalQualified / totalNewLeads) * 100).toFixed(1) : "0.0"
+  
+  // Calculate trend (comparing last half vs first half of data)
+  const midpoint = Math.floor(data.length / 2)
+  const recentData = data.slice(midpoint)
+  const previousData = data.slice(0, midpoint)
+  
+  const recentAvg = recentData.length > 0 ? recentData.reduce((sum, item) => sum + item.converted, 0) / recentData.length : 0
+  const previousAvg = previousData.length > 0 ? previousData.reduce((sum, item) => sum + item.converted, 0) / previousData.length : 0
+  const trendPercentage = previousAvg > 0 ? (((recentAvg - previousAvg) / previousAvg) * 100).toFixed(1) : "0.0"
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Lead Generation Trends</CardTitle>
-        <CardDescription>Daily lead creation over the last 30 days</CardDescription>
+    <Card className="w-full">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <CardTitle className="text-lg sm:text-xl">Lead Generation Funnel</CardTitle>
+            <CardDescription className="text-sm">
+              Complete lead journey over the last 30 days
+            </CardDescription>
+          </div>
+          <div className="flex flex-col space-y-1 text-right">
+            <div className="text-2xl font-bold text-primary">{conversionRate}%</div>
+            <div className="text-xs text-muted-foreground">Conversion Rate</div>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={leadAnalyticsConfig}>
-          <AreaChart
-            accessibilityLayer
-            data={data}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
+      
+      <CardContent className="px-3 sm:px-6">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={data}
+              margin={{
+                top: 10,
+                right: 10,
+                left: 0,
+                bottom: 0,
               }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
-            />
-            <defs>
-              <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-total)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-total)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <Area
-              dataKey="total"
-              type="natural"
-              fill="url(#fillTotal)"
-              fillOpacity={0.4}
-              stroke="var(--color-total)"
-              stackId="a"
-            />
-            <Area
-              dataKey="qualified"
-              type="natural"
-              fill="var(--color-qualified)"
-              fillOpacity={0.4}
-              stroke="var(--color-qualified)"
-              stackId="a"
-            />
-            <Area
-              dataKey="converted"
-              type="natural"
-              fill="var(--color-converted)"
-              fillOpacity={0.4}
-              stroke="var(--color-converted)"
-              stackId="a"
-            />
-          </AreaChart>
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+                tickFormatter={(value) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                tickLine={false}
+                axisLine={false}
+                fontSize={12}
+                width={35}
+              />
+              <ChartTooltip 
+                cursor={{ strokeDasharray: "3 3", opacity: 0.5 }}
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const newLeads = Number(payload.find(p => p.dataKey === 'total')?.value || 0)
+                    const qualified = Number(payload.find(p => p.dataKey === 'qualified')?.value || 0)
+                    const converted = Number(payload.find(p => p.dataKey === 'converted')?.value || 0)
+                    const dayConversionRate = newLeads > 0 ? ((converted / newLeads) * 100).toFixed(1) : "0.0"
+                    
+                    return (
+                      <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+                        <p className="font-medium mb-2">
+                          {new Date(label).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                        {payload.map((entry, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm">
+                            <div 
+                              className="w-3 h-3 rounded-sm" 
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="text-muted-foreground">{entry.name}:</span>
+                            <span className="font-medium">{entry.value}</span>
+                          </div>
+                        ))}
+                        <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                          Conversion Rate: {dayConversionRate}%
+                        </div>
+                      </div>
+                    )
+                  }
+                  return null
+                }}
+              />
+              
+              <defs>
+                <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-total)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--color-total)" stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="fillQualified" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-qualified)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--color-qualified)" stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="fillConverted" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-converted)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="var(--color-converted)" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              
+              <Area
+                dataKey="total"
+                stackId="1"
+                stroke="var(--color-total)"
+                fill="url(#fillTotal)"
+                strokeWidth={2}
+                type="monotone"
+              />
+              <Area
+                dataKey="qualified"
+                stackId="2"
+                stroke="var(--color-qualified)"
+                fill="url(#fillQualified)"
+                strokeWidth={2}
+                type="monotone"
+              />
+              <Area
+                dataKey="converted"
+                stackId="3"
+                stroke="var(--color-converted)"
+                fill="url(#fillConverted)"
+                strokeWidth={2}
+                type="monotone"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
-              Lead generation performance <TrendingUp className="h-4 w-4" />
+      
+      <CardFooter className="pt-4">
+        <div className="flex flex-col space-y-3 w-full">
+          {/* Key Metrics Row */}
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="space-y-1">
+              <div className="text-lg sm:text-xl font-bold text-blue-600">{totalNewLeads}</div>
+              <div className="text-xs text-muted-foreground">New Leads</div>
             </div>
-            <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              Showing daily lead metrics
+            <div className="space-y-1">
+              <div className="text-lg sm:text-xl font-bold text-orange-600">{totalQualified}</div>
+              <div className="text-xs text-muted-foreground">Qualified ({qualificationRate}%)</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-lg sm:text-xl font-bold text-green-600">{totalConverted}</div>
+              <div className="text-xs text-muted-foreground">Converted</div>
+            </div>
+          </div>
+          
+          {/* Trend Information */}
+          <div className="flex items-center justify-center gap-2 text-sm border-t pt-3">
+            <div className="flex items-center gap-2 font-medium leading-none">
+              {Number(trendPercentage) > 0 ? (
+                <>
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <span className="text-green-600">+{trendPercentage}%</span>
+                </>
+              ) : Number(trendPercentage) < 0 ? (
+                <>
+                  <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
+                  <span className="text-red-600">{trendPercentage}%</span>
+                </>
+              ) : (
+                <>
+                  <div className="h-4 w-4 bg-gray-400 rounded-full" />
+                  <span className="text-gray-600">No change</span>
+                </>
+              )}
+              <span className="text-muted-foreground">recent trend</span>
             </div>
           </div>
         </div>
       </CardFooter>
     </Card>
-  )
-}
-
-// Platform Performance Bar Chart
-function PlatformPerformanceChart() {
-  const [data, setData] = React.useState<PlatformData[]>([])
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getPlatformPerformance()
-        setData(result)
-      } catch (error) {
-        console.error("Error fetching platform performance:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  if (loading) return <Card><CardContent className="p-6">Loading...</CardContent></Card>
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Platform Performance</CardTitle>
-        <CardDescription>Lead generation by platform</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={platformConfig}>
-          <BarChart accessibilityLayer data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="platform"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="totalLeads" fill="var(--color-instagram)" radius={8} />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Platform comparison <Activity className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Total leads generated per platform
-        </div>
-      </CardFooter>
-    </Card>
-  )
-}
-
-// Lead Source Pie Chart
-function LeadSourceChart() {
-  const [data, setData] = React.useState<LeadSourceData[]>([])
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getLeadSourceAnalytics()
-        setData(result)
-      } catch (error) {
-        console.error("Error fetching lead source analytics:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))"]
-
-  if (loading) return <Card><CardContent className="p-6">Loading...</CardContent></Card>
-
-  return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Lead Sources</CardTitle>
-        <CardDescription>Distribution of lead sources</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={sourceConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={data}
-              dataKey="totalLeads"
-              nameKey="source"
-              innerRadius={60}
-              strokeWidth={5}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-              <LabelList
-                dataKey="source"
-                className="fill-background"
-                stroke="none"
-                fontSize={12}
-                formatter={(value: keyof typeof sourceConfig) =>
-                  sourceConfig[value]?.label || value
-                }
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Lead source breakdown <Target className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing lead distribution by source
-        </div>
-      </CardFooter>
-    </Card>
-  )
-}
-
-// Weekly Performance Time Series
-function WeeklyPerformanceChart() {
-  const [data, setData] = React.useState<WeeklyData[]>([])
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getTimeBasedAnalytics()
-        setData(result)
-      } catch (error) {
-        console.error("Error fetching time-based analytics:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  if (loading) return <Card><CardContent className="p-6">Loading...</CardContent></Card>
-
-  const config = {
-    newLeads: {
-      label: "New Leads",
-      color: "hsl(var(--chart-1))",
-    },
-    conversions: {
-      label: "Conversions",
-      color: "hsl(var(--chart-2))",
-    },
-  } satisfies ChartConfig
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Weekly Performance</CardTitle>
-        <CardDescription>Weekly lead generation and conversion trends</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={config}>
-          <BarChart accessibilityLayer data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="week"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
-              }}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey="newLeads" fill="var(--color-newLeads)" radius={4} />
-            <Bar dataKey="conversions" fill="var(--color-conversions)" radius={4} />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Weekly trends <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Comparing new leads vs conversions by week
-        </div>
-      </CardFooter>
-    </Card>
-  )
-}
-
-// Automation Performance Chart
-function AutomationPerformanceChart() {
-  const [data, setData] = React.useState<AutomationData[]>([])
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getAutomationPerformance()
-        setData(result.slice(0, 10)) // Limit to top 10 for readability
-      } catch (error) {
-        console.error("Error fetching automation performance:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  if (loading) return <Card><CardContent className="p-6">Loading...</CardContent></Card>
-
-  const config = {
-    totalLeads: {
-      label: "Total Leads",
-      color: "hsl(var(--chart-1))",
-    },
-    convertedLeads: {
-      label: "Conversions",
-      color: "hsl(var(--chart-2))",
-    },
-  } satisfies ChartConfig
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Automation Performance</CardTitle>
-        <CardDescription>Lead generation by individual automations</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={config}>
-          <BarChart
-            accessibilityLayer
-            data={data}
-            layout="horizontal"
-            margin={{
-              left: 80,
-            }}
-          >
-            <CartesianGrid horizontal={false} />
-            <YAxis
-              dataKey="name"
-              type="category"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={10}
-              width={70}
-              fontSize={12}
-              tickFormatter={(value) => value.slice(0, 10) + (value.length > 10 ? '...' : '')}
-            />
-            <XAxis dataKey="totalLeads" type="number" hide />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey="totalLeads" fill="var(--color-totalLeads)" radius={4} />
-            <Bar dataKey="convertedLeads" fill="var(--color-convertedLeads)" radius={4} />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Top performing automations <Zap className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Individual automation lead generation performance
-        </div>
-      </CardFooter>
-    </Card>
-  )
-}
-
-export default function DashboardAnalyticsCharts() {
-  return (
-    <div className="grid gap-6">
-      {/* Lead Analytics - Time Series */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LeadAnalyticsChart />
-        <WeeklyPerformanceChart />
-      </div>
-
-      {/* Platform Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PlatformPerformanceChart />
-        <LeadSourceChart />
-      </div>
-
-      {/* Automation Performance - Full Width */}
-      <AutomationPerformanceChart />
-    </div>
   )
 }
