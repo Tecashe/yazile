@@ -124,6 +124,48 @@ model MarketingInfo {
   userId    String   @db.Uuid
 }
 
+
+
+
+model AIAgent {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String
+  avatar      String?
+  agentType   String   // customer-support, sales-assistant, etc.
+  isCustom    Boolean  @default(false)
+  isActive    Boolean  @default(false)
+  
+  // Personality traits (1-10 scale)
+  friendliness Int @default(5)
+  formality    Int @default(5)
+  enthusiasm   Int @default(5)
+  empathy      Int @default(5)
+  humor        Int @default(5)
+  patience     Int @default(5)
+  expertise    Int @default(5)
+  
+  // Language settings
+  primaryLanguage    String  @default("English")
+  detectLanguage     Boolean @default(true)
+  supportedLanguages String[] // Array of language codes
+  responseStyle      String  @default("professional") // casual, professional, friendly, formal
+  
+  // Relationships
+  businessId String   @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([businessId])
+  @@index([agentType])
+  @@index([isActive])
+}
+
+
+
+
 model Business {
   id                  String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                String?
@@ -148,6 +190,7 @@ model Business {
   agentAssignments AgentBusinessAssignment[]
   handoffSettings  HandoffSettings[]
   agentPerformance AgentPerformance[]
+  aiAgents         AIAgent[]
 
   generalNotifications GeneralNotification[]
 
