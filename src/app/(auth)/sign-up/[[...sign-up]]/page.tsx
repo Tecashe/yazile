@@ -86,21 +86,97 @@
 // }
 
 // export default Page
+// import { SignUp } from "@clerk/nextjs"
+// import Link from "next/link"
+
+// type Props = {
+//   searchParams?: { ref?: string }
+// }
+
+// const Page = ({ searchParams }: Props) => {
+//   const referralCode = searchParams?.ref || ""
+
+//   // Store the referral code in localStorage for later use
+//   if (typeof window !== "undefined" && referralCode) {
+//     localStorage.setItem("referralCode", referralCode)
+//   }
+
+//   return (
+//     <div className="flex flex-col items-center space-y-6 py-2">
+//       <div className="text-center space-y-2 w-full">
+//         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+//           Get Started
+//         </h1>
+//         <p className="text-muted-foreground text-sm">
+//           Create your account to get started
+//           {referralCode && (
+//             <span className="block mt-2 text-foreground font-medium">
+//               Using referral code: {referralCode}
+//             </span>
+//           )}
+//         </p>
+//       </div>
+
+//       <div className="w-full">
+//         <SignUp
+//           appearance={{
+//             elements: {
+//               formButtonPrimary:
+//                 "bg-foreground hover:bg-foreground/90 text-background font-semibold py-2.5 px-4 rounded-lg transition-all duration-200",
+//               card: "bg-card border border-border",
+//               headerTitle: "text-foreground",
+//               headerSubtitle: "text-muted-foreground",
+//               formFieldLabel: "text-foreground",
+//               formFieldInput:
+//                 "bg-background border border-border focus:border-foreground text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200",
+//               footerActionLink: "text-muted-foreground hover:text-foreground",
+//               identityPreviewText: "text-foreground",
+//               identityPreviewEditButton: "text-muted-foreground hover:text-foreground",
+//               formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground",
+//               dividerLine: "bg-border",
+//               dividerText: "text-muted-foreground",
+//               formFieldWarning: "text-yellow-500",
+//               formFieldError: "text-red-500",
+//               socialButtonsBlockButton:
+//                 "border border-border hover:border-foreground bg-background hover:bg-card transition-all duration-200",
+//               socialButtonsBlockButtonText: "text-foreground",
+//               socialButtonsBlockButtonArrow: "text-muted-foreground",
+//             },
+//             layout: {
+//               socialButtonsPlacement: "bottom",
+//               showOptionalFields: false,
+//             },
+//           }}
+//         />
+//       </div>
+
+//       <div className="w-full">
+//         <div className="text-center px-4">
+//           <p className="text-xs text-muted-foreground">
+//             By signing up, you agree to our{" "}
+//             <Link href="/terms" className="text-foreground hover:text-foreground/80 underline">
+//               Terms of Service
+//             </Link>{" "}
+//             and{" "}
+//             <Link href="/privacy" className="text-foreground hover:text-foreground/80 underline">
+//               Privacy Policy
+//             </Link>
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default Page
+
+// SignUp Component
 import { SignUp } from "@clerk/nextjs"
 import Link from "next/link"
 
-type Props = {
-  searchParams?: { ref?: string }
-}
+type Props = {}
 
-const Page = ({ searchParams }: Props) => {
-  const referralCode = searchParams?.ref || ""
-
-  // Store the referral code in localStorage for later use
-  if (typeof window !== "undefined" && referralCode) {
-    localStorage.setItem("referralCode", referralCode)
-  }
-
+const SignUpPage = (props: Props) => {
   return (
     <div className="flex flex-col items-center space-y-6 py-2">
       <div className="text-center space-y-2 w-full">
@@ -109,11 +185,6 @@ const Page = ({ searchParams }: Props) => {
         </h1>
         <p className="text-muted-foreground text-sm">
           Create your account to get started
-          {referralCode && (
-            <span className="block mt-2 text-foreground font-medium">
-              Using referral code: {referralCode}
-            </span>
-          )}
         </p>
       </div>
 
@@ -122,24 +193,38 @@ const Page = ({ searchParams }: Props) => {
           appearance={{
             elements: {
               formButtonPrimary:
-                "bg-foreground hover:bg-foreground/90 text-background font-semibold py-2.5 px-4 rounded-lg transition-all duration-200",
-              card: "bg-card border border-border",
-              headerTitle: "text-foreground",
+                "bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-all duration-200",
+              
+              card: "bg-card border-2 border-border shadow-lg",
+              
+              headerTitle: "text-foreground font-bold",
+              
               headerSubtitle: "text-muted-foreground",
-              formFieldLabel: "text-foreground",
+              
+              formFieldLabel: "text-foreground font-medium",
+              
               formFieldInput:
-                "bg-background border border-border focus:border-foreground text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200",
-              footerActionLink: "text-muted-foreground hover:text-foreground",
+                "bg-input border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200 hover:border-primary/50",
+              
+              footerActionLink: "text-primary hover:text-primary/80",
+              
               identityPreviewText: "text-foreground",
+              
               identityPreviewEditButton: "text-muted-foreground hover:text-foreground",
+              
               formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground",
+              
               dividerLine: "bg-border",
+              
               dividerText: "text-muted-foreground",
-              formFieldWarning: "text-yellow-500",
-              formFieldError: "text-red-500",
+              
+              formFieldError: "text-destructive",
+              
               socialButtonsBlockButton:
-                "border border-border hover:border-foreground bg-background hover:bg-card transition-all duration-200",
+                "border-2 border-border hover:border-primary bg-card hover:bg-accent transition-all duration-200",
+              
               socialButtonsBlockButtonText: "text-foreground",
+              
               socialButtonsBlockButtonArrow: "text-muted-foreground",
             },
             layout: {
@@ -151,8 +236,8 @@ const Page = ({ searchParams }: Props) => {
       </div>
 
       <div className="w-full">
-        <div className="text-center px-4">
-          <p className="text-xs text-muted-foreground">
+        <div className="text-center px-4 py-3 rounded-lg border border-border bg-muted/50">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             By signing up, you agree to our{" "}
             <Link href="/terms" className="text-foreground hover:text-foreground/80 underline">
               Terms of Service
@@ -167,5 +252,3 @@ const Page = ({ searchParams }: Props) => {
     </div>
   )
 }
-
-export default Page
