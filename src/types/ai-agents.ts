@@ -47,4 +47,6 @@ export interface AgentTemplate {
   personality: PersonalityTraits
   languageSettings: LanguageSettings
   tags: string[]
+  introductoryStatement?: string
+  tone?: string
 }

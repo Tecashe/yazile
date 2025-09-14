@@ -126,6 +126,7 @@ model MarketingInfo {
 
 
 
+// Add this to your existing Prisma schema
 
 model AIAgent {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -151,6 +152,9 @@ model AIAgent {
   supportedLanguages String[] // Array of language codes
   responseStyle      String  @default("professional") // casual, professional, friendly, formal
   
+  tone                  String? // professional, friendly, casual, formal, enthusiastic, empathetic
+  introductoryStatement String? // Custom greeting message
+  
   // Relationships
   businessId String   @db.Uuid
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -162,7 +166,6 @@ model AIAgent {
   @@index([agentType])
   @@index([isActive])
 }
-
 
 
 
