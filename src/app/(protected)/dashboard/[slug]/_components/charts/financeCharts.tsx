@@ -852,26 +852,347 @@
 //   )
 // }
 
+// "use client"
+
+// import * as React from "react"
+// import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+// import { TrendingUp } from "lucide-react"
+
+// import {
+//   Card,
+//   CardContent,
+//   CardDescription,
+//   CardFooter,
+//   CardHeader,
+//   CardTitle,
+// } from "@/components/ui/card"
+// import {
+//   ChartConfig,
+//   ChartContainer,
+//   ChartTooltip,
+//   ChartTooltipContent,
+// } from "@/components/ui/chart"
+
+// // Type definitions
+// interface DailyLeadData {
+//   total: number;
+//   qualified: number;
+//   converted: number;
+//   date: string;
+// }
+
+// // Mock data for demo purposes
+// const mockData: DailyLeadData[] = [
+//   { date: "2024-02-15", total: 45, qualified: 32, converted: 12 },
+//   { date: "2024-02-16", total: 52, qualified: 38, converted: 15 },
+//   { date: "2024-02-17", total: 38, qualified: 28, converted: 10 },
+//   { date: "2024-02-18", total: 67, qualified: 48, converted: 18 },
+//   { date: "2024-02-19", total: 73, qualified: 55, converted: 22 },
+//   { date: "2024-02-20", total: 58, qualified: 42, converted: 16 },
+//   { date: "2024-02-21", total: 84, qualified: 61, converted: 25 },
+//   { date: "2024-02-22", total: 79, qualified: 58, converted: 23 },
+//   { date: "2024-02-23", total: 91, qualified: 68, converted: 28 },
+//   { date: "2024-02-24", total: 76, qualified: 56, converted: 21 },
+//   { date: "2024-02-25", total: 89, qualified: 67, converted: 26 },
+//   { date: "2024-02-26", total: 95, qualified: 72, converted: 30 },
+//   { date: "2024-02-27", total: 82, qualified: 64, converted: 25 },
+//   { date: "2024-02-28", total: 88, qualified: 71, converted: 29 },
+//   { date: "2024-02-29", total: 103, qualified: 81, converted: 35 },
+//   { date: "2024-03-01", total: 97, qualified: 76, converted: 32 },
+//   { date: "2024-03-02", total: 85, qualified: 68, converted: 28 },
+//   { date: "2024-03-03", total: 92, qualified: 74, converted: 31 },
+//   { date: "2024-03-04", total: 108, qualified: 87, converted: 38 },
+//   { date: "2024-03-05", total: 94, qualified: 78, converted: 33 },
+//   { date: "2024-03-06", total: 101, qualified: 83, converted: 36 },
+//   { date: "2024-03-07", total: 87, qualified: 71, converted: 29 },
+//   { date: "2024-03-08", total: 99, qualified: 81, converted: 34 },
+//   { date: "2024-03-09", total: 105, qualified: 89, converted: 39 },
+//   { date: "2024-03-10", total: 93, qualified: 77, converted: 32 },
+//   { date: "2024-03-11", total: 111, qualified: 92, converted: 41 },
+//   { date: "2024-03-12", total: 98, qualified: 82, converted: 35 },
+//   { date: "2024-03-13", total: 106, qualified: 88, converted: 38 },
+//   { date: "2024-03-14", total: 89, qualified: 74, converted: 31 },
+//   { date: "2024-03-15", total: 115, qualified: 96, converted: 43 }
+// ]
+
+// const chartConfig = {
+//   total: {
+//     label: "New Leads",
+//     color: "var(--chart-1)",
+//   },
+//   qualified: {
+//     label: "Qualified Leads",
+//     color: "var(--chart-2)",
+//   },
+//   converted: {
+//     label: "Converted Leads",
+//     color: "var(--chart-3)",
+//   },
+// } satisfies ChartConfig
+
+// export default function LeadFunnelChart() {
+//   const [data, setData] = React.useState<DailyLeadData[]>(mockData)
+//   const [loading, setLoading] = React.useState(false)
+
+//   // Uncomment below to use real data from server action
+//   // const [data, setData] = React.useState<DailyLeadData[]>([])
+//   // const [loading, setLoading] = React.useState(true)
+//   // 
+//   // React.useEffect(() => {
+//   //   const fetchData = async () => {
+//   //     try {
+//   //       const result = await getLeadAnalytics()
+//   //       setData(result.dailyLeads)
+//   //     } catch (error) {
+//   //       console.error("Error fetching lead analytics:", error)
+//   //     } finally {
+//   //       setLoading(false)
+//   //     }
+//   //   }
+//   //   fetchData()
+//   // }, [])
+
+//   if (loading) {
+//     return (
+//       <Card className="w-full">
+//         <CardContent className="p-6 flex items-center justify-center h-[400px]">
+//           <div className="text-center">
+//             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+//             <p className="text-muted-foreground">Loading analytics...</p>
+//           </div>
+//         </CardContent>
+//       </Card>
+//     )
+//   }
+
+//   // Calculate performance metrics
+//   const totalNewLeads = data.reduce((sum, item) => sum + item.total, 0)
+//   const totalQualified = data.reduce((sum, item) => sum + item.qualified, 0)
+//   const totalConverted = data.reduce((sum, item) => sum + item.converted, 0)
+//   const conversionRate = totalNewLeads > 0 ? ((totalConverted / totalNewLeads) * 100).toFixed(1) : "0.0"
+//   const qualificationRate = totalNewLeads > 0 ? ((totalQualified / totalNewLeads) * 100).toFixed(1) : "0.0"
+  
+//   // Calculate trend (comparing last half vs first half of data)
+//   const midpoint = Math.floor(data.length / 2)
+//   const recentData = data.slice(midpoint)
+//   const previousData = data.slice(0, midpoint)
+  
+//   const recentAvg = recentData.length > 0 ? recentData.reduce((sum, item) => sum + item.converted, 0) / recentData.length : 0
+//   const previousAvg = previousData.length > 0 ? previousData.reduce((sum, item) => sum + item.converted, 0) / previousData.length : 0
+//   const trendPercentage = previousAvg > 0 ? (((recentAvg - previousAvg) / previousAvg) * 100).toFixed(1) : "0.0"
+
+//   return (
+//     <Card className="w-full">
+//       <CardHeader className="pb-4">
+//         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+//           <div>
+//             <CardTitle className="text-lg sm:text-xl">Lead Generation Funnel</CardTitle>
+//             <CardDescription className="text-sm">
+//               Complete lead journey over the last 30 days
+//             </CardDescription>
+//           </div>
+//           <div className="flex flex-col space-y-1 text-right">
+//             <div className="text-2xl font-bold text-primary">{conversionRate}%</div>
+//             <div className="text-xs text-muted-foreground">Conversion Rate</div>
+//           </div>
+//         </div>
+//       </CardHeader>
+      
+//       <CardContent className="px-3 sm:px-6">
+//         <ChartContainer config={chartConfig} className="h-[300px] w-full">
+//           <ResponsiveContainer width="100%" height="100%">
+//             <AreaChart
+//               data={data}
+//               margin={{
+//                 top: 10,
+//                 right: 10,
+//                 left: 0,
+//                 bottom: 0,
+//               }}
+//             >
+//               <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+//               <XAxis
+//                 dataKey="date"
+//                 tickLine={false}
+//                 axisLine={false}
+//                 tickMargin={8}
+//                 fontSize={12}
+//                 tickFormatter={(value) => {
+//                   const date = new Date(value)
+//                   return date.toLocaleDateString("en-US", {
+//                     month: "short",
+//                     day: "numeric",
+//                   })
+//                 }}
+//                 interval="preserveStartEnd"
+//               />
+//               <YAxis 
+//                 tickLine={false}
+//                 axisLine={false}
+//                 fontSize={12}
+//                 width={35}
+//               />
+//               <ChartTooltip 
+//                 cursor={{ strokeDasharray: "3 3", opacity: 0.5 }}
+//                 content={({ active, payload, label }) => {
+//                   if (active && payload && payload.length) {
+//                     const newLeads = Number(payload.find(p => p.dataKey === 'total')?.value || 0)
+//                     const qualified = Number(payload.find(p => p.dataKey === 'qualified')?.value || 0)
+//                     const converted = Number(payload.find(p => p.dataKey === 'converted')?.value || 0)
+//                     const dayConversionRate = newLeads > 0 ? ((converted / newLeads) * 100).toFixed(1) : "0.0"
+                    
+//                     return (
+//                       <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+//                         <p className="font-medium mb-2">
+//                           {new Date(label).toLocaleDateString("en-US", {
+//                             month: "short",
+//                             day: "numeric",
+//                             year: "numeric",
+//                           })}
+//                         </p>
+//                         {payload.map((entry, index) => (
+//                           <div key={index} className="flex items-center gap-2 text-sm">
+//                             <div 
+//                               className="w-3 h-3 rounded-sm" 
+//                               style={{ backgroundColor: entry.color }}
+//                             />
+//                             <span className="text-muted-foreground">{entry.name}:</span>
+//                             <span className="font-medium">{entry.value}</span>
+//                           </div>
+//                         ))}
+//                         <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+//                           Conversion Rate: {dayConversionRate}%
+//                         </div>
+//                       </div>
+//                     )
+//                   }
+//                   return null
+//                 }}
+//               />
+              
+//               <defs>
+//                 <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+//                   <stop offset="5%" stopColor="hsl(220, 70%, 50%)" stopOpacity={0.4} />
+//                   <stop offset="95%" stopColor="hsl(220, 70%, 50%)" stopOpacity={0.1} />
+//                 </linearGradient>
+//                 <linearGradient id="fillQualified" x1="0" y1="0" x2="0" y2="1">
+//                   <stop offset="5%" stopColor="hsl(160, 60%, 45%)" stopOpacity={0.4} />
+//                   <stop offset="95%" stopColor="hsl(160, 60%, 45%)" stopOpacity={0.1} />
+//                 </linearGradient>
+//                 <linearGradient id="fillConverted" x1="0" y1="0" x2="0" y2="1">
+//                   <stop offset="5%" stopColor="hsl(30, 80%, 55%)" stopOpacity={0.5} />
+//                   <stop offset="95%" stopColor="hsl(30, 80%, 55%)" stopOpacity={0.2} />
+//                 </linearGradient>
+//               </defs>
+              
+//               <Area
+//                 dataKey="total"
+//                 stackId="1"
+//                 stroke="hsl(220, 70%, 50%)"
+//                 fill="url(#fillTotal)"
+//                 strokeWidth={3}
+//                 type="monotone"
+//               />
+//               <Area
+//                 dataKey="qualified"
+//                 stackId="2"
+//                 stroke="hsl(160, 60%, 45%)"
+//                 fill="url(#fillQualified)"
+//                 strokeWidth={3}
+//                 type="monotone"
+//               />
+//               <Area
+//                 dataKey="converted"
+//                 stackId="3"
+//                 stroke="hsl(30, 80%, 55%)"
+//                 fill="url(#fillConverted)"
+//                 strokeWidth={3}
+//                 type="monotone"
+//               />
+//             </AreaChart>
+//           </ResponsiveContainer>
+//         </ChartContainer>
+//       </CardContent>
+      
+//       <CardFooter className="pt-4">
+//         <div className="flex flex-col space-y-3 w-full">
+//           {/* Key Metrics Row */}
+//           <div className="grid grid-cols-3 gap-4 text-center">
+//             <div className="space-y-1">
+//               <div className="text-lg sm:text-xl font-bold text-blue-600">{totalNewLeads}</div>
+//               <div className="text-xs text-muted-foreground">New Leads</div>
+//             </div>
+//             <div className="space-y-1">
+//               <div className="text-lg sm:text-xl font-bold text-orange-600">{totalQualified}</div>
+//               <div className="text-xs text-muted-foreground">Qualified ({qualificationRate}%)</div>
+//             </div>
+//             <div className="space-y-1">
+//               <div className="text-lg sm:text-xl font-bold text-green-600">{totalConverted}</div>
+//               <div className="text-xs text-muted-foreground">Converted</div>
+//             </div>
+//           </div>
+          
+//           {/* Trend Information */}
+//           <div className="flex items-center justify-center gap-2 text-sm border-t pt-3">
+//             <div className="flex items-center gap-2 font-medium leading-none">
+//               {Number(trendPercentage) > 0 ? (
+//                 <>
+//                   <TrendingUp className="h-4 w-4 text-green-600" />
+//                   <span className="text-green-600">+{trendPercentage}%</span>
+//                 </>
+//               ) : Number(trendPercentage) < 0 ? (
+//                 <>
+//                   <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
+//                   <span className="text-red-600">{trendPercentage}%</span>
+//                 </>
+//               ) : (
+//                 <>
+//                   <div className="h-4 w-4 bg-gray-400 rounded-full" />
+//                   <span className="text-gray-600">No change</span>
+//                 </>
+//               )}
+//               <span className="text-muted-foreground">recent trend</span>
+//             </div>
+//           </div>
+//         </div>
+//       </CardFooter>
+//     </Card>
+//   )
+// }
+
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
-import { TrendingUp } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { TrendingUp, Info } from "lucide-react"
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+
+// Import your server actions
+import { getLeadAnalytics } from "@/actions/dashboard/d-actions"
 
 // Type definitions
 interface DailyLeadData {
@@ -912,45 +1233,116 @@ const mockData: DailyLeadData[] = [
   { date: "2024-03-12", total: 98, qualified: 82, converted: 35 },
   { date: "2024-03-13", total: 106, qualified: 88, converted: 38 },
   { date: "2024-03-14", total: 89, qualified: 74, converted: 31 },
-  { date: "2024-03-15", total: 115, qualified: 96, converted: 43 }
+  { date: "2024-03-15", total: 115, qualified: 96, converted: 43 },
+  { date: "2024-03-16", total: 87, qualified: 71, converted: 29 },
+  { date: "2024-03-17", total: 99, qualified: 81, converted: 34 },
+  { date: "2024-03-18", total: 105, qualified: 89, converted: 39 },
+  { date: "2024-03-19", total: 93, qualified: 77, converted: 32 },
+  { date: "2024-03-20", total: 111, qualified: 92, converted: 41 },
+  { date: "2024-03-21", total: 98, qualified: 82, converted: 35 },
+  { date: "2024-03-22", total: 106, qualified: 88, converted: 38 },
+  { date: "2024-03-23", total: 89, qualified: 74, converted: 31 },
+  { date: "2024-03-24", total: 115, qualified: 96, converted: 43 },
+  { date: "2024-03-25", total: 102, qualified: 84, converted: 37 },
+  { date: "2024-03-26", total: 88, qualified: 72, converted: 30 },
+  { date: "2024-03-27", total: 95, qualified: 79, converted: 33 },
+  { date: "2024-03-28", total: 108, qualified: 91, converted: 40 },
+  { date: "2024-03-29", total: 91, qualified: 75, converted: 32 },
+  { date: "2024-03-30", total: 118, qualified: 98, converted: 45 }
 ]
 
 const chartConfig = {
+  leads: {
+    label: "Leads",
+  },
   total: {
     label: "New Leads",
-    color: "var(--chart-1)",
+    color: "hsl(220, 70%, 50%)",
   },
   qualified: {
-    label: "Qualified Leads",
-    color: "var(--chart-2)",
+    label: "Qualified",
+    color: "hsl(160, 60%, 45%)",
   },
   converted: {
-    label: "Converted Leads",
-    color: "var(--chart-3)",
+    label: "Converted",
+    color: "hsl(30, 80%, 55%)",
   },
 } satisfies ChartConfig
 
 export default function LeadFunnelChart() {
-  const [data, setData] = React.useState<DailyLeadData[]>(mockData)
-  const [loading, setLoading] = React.useState(false)
+  const [timeRange, setTimeRange] = React.useState("30d")
+  const [data, setData] = React.useState<DailyLeadData[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [hasRealData, setHasRealData] = React.useState(false)
+  const [showMockData, setShowMockData] = React.useState(true)
 
-  // Uncomment below to use real data from server action
-  // const [data, setData] = React.useState<DailyLeadData[]>([])
-  // const [loading, setLoading] = React.useState(true)
-  // 
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const result = await getLeadAnalytics()
-  //       setData(result.dailyLeads)
-  //     } catch (error) {
-  //       console.error("Error fetching lead analytics:", error)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-  //   fetchData()
-  // }, [])
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getLeadAnalytics()
+        if (result.dailyLeads && result.dailyLeads.length > 0) {
+          setData(result.dailyLeads)
+          setHasRealData(true)
+          setShowMockData(false)
+        } else {
+          // No real data available, use mock data
+          setData(mockData)
+          setHasRealData(false)
+          setShowMockData(true)
+        }
+      } catch (error) {
+        console.error("Error fetching lead analytics:", error)
+        // Fallback to mock data on error
+        setData(mockData)
+        setHasRealData(false)
+        setShowMockData(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const filteredData = React.useMemo(() => {
+    if (!data.length) return []
+    
+    const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    const referenceDate = new Date(sortedData[sortedData.length - 1].date)
+    let daysToSubtract = 30
+    
+    if (timeRange === "7d") {
+      daysToSubtract = 7
+    } else if (timeRange === "14d") {
+      daysToSubtract = 14
+    } else if (timeRange === "30d") {
+      daysToSubtract = 30
+    } else if (timeRange === "90d") {
+      daysToSubtract = 90
+    }
+    
+    const startDate = new Date(referenceDate)
+    startDate.setDate(startDate.getDate() - daysToSubtract)
+    
+    return sortedData.filter((item) => {
+      const date = new Date(item.date)
+      return date >= startDate
+    })
+  }, [data, timeRange])
+
+  // Calculate performance metrics
+  const totalNewLeads = filteredData.reduce((sum, item) => sum + item.total, 0)
+  const totalQualified = filteredData.reduce((sum, item) => sum + item.qualified, 0)
+  const totalConverted = filteredData.reduce((sum, item) => sum + item.converted, 0)
+  const conversionRate = totalNewLeads > 0 ? ((totalConverted / totalNewLeads) * 100).toFixed(1) : "0.0"
+  
+  // Calculate trend
+  const midpoint = Math.floor(filteredData.length / 2)
+  const recentData = filteredData.slice(midpoint)
+  const previousData = filteredData.slice(0, midpoint)
+  
+  const recentAvg = recentData.length > 0 ? recentData.reduce((sum, item) => sum + item.converted, 0) / recentData.length : 0
+  const previousAvg = previousData.length > 0 ? previousData.reduce((sum, item) => sum + item.converted, 0) / previousData.length : 0
+  const trendPercentage = previousAvg > 0 ? (((recentAvg - previousAvg) / previousAvg) * 100).toFixed(1) : "0.0"
 
   if (loading) {
     return (
@@ -965,197 +1357,223 @@ export default function LeadFunnelChart() {
     )
   }
 
-  // Calculate performance metrics
-  const totalNewLeads = data.reduce((sum, item) => sum + item.total, 0)
-  const totalQualified = data.reduce((sum, item) => sum + item.qualified, 0)
-  const totalConverted = data.reduce((sum, item) => sum + item.converted, 0)
-  const conversionRate = totalNewLeads > 0 ? ((totalConverted / totalNewLeads) * 100).toFixed(1) : "0.0"
-  const qualificationRate = totalNewLeads > 0 ? ((totalQualified / totalNewLeads) * 100).toFixed(1) : "0.0"
-  
-  // Calculate trend (comparing last half vs first half of data)
-  const midpoint = Math.floor(data.length / 2)
-  const recentData = data.slice(midpoint)
-  const previousData = data.slice(0, midpoint)
-  
-  const recentAvg = recentData.length > 0 ? recentData.reduce((sum, item) => sum + item.converted, 0) / recentData.length : 0
-  const previousAvg = previousData.length > 0 ? previousData.reduce((sum, item) => sum + item.converted, 0) / previousData.length : 0
-  const trendPercentage = previousAvg > 0 ? (((recentAvg - previousAvg) / previousAvg) * 100).toFixed(1) : "0.0"
-
   return (
     <Card className="w-full">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div>
-            <CardTitle className="text-lg sm:text-xl">Lead Generation Funnel</CardTitle>
-            <CardDescription className="text-sm">
-              Complete lead journey over the last 30 days
-            </CardDescription>
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+        <div className="grid flex-1 gap-1">
+          <div className="flex items-center gap-2">
+            <CardTitle>Lead Generation Funnel</CardTitle>
+            {!hasRealData && showMockData && (
+              <Badge variant="secondary" className="text-xs">
+                Demo Data
+              </Badge>
+            )}
           </div>
-          <div className="flex flex-col space-y-1 text-right">
-            <div className="text-2xl font-bold text-primary">{conversionRate}%</div>
-            <div className="text-xs text-muted-foreground">Conversion Rate</div>
-          </div>
+          <CardDescription>
+            {hasRealData 
+              ? "Real-time lead funnel performance" 
+              : showMockData 
+                ? "Preview with sample data - real data will display automatically when available"
+                : "No data available yet"
+            }
+          </CardDescription>
+        </div>
+        <div className="flex items-center gap-2">
+          {!hasRealData && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowMockData(!showMockData)}
+              className="text-xs"
+            >
+              {showMockData ? "Hide Demo" : "Show Demo"}
+            </Button>
+          )}
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger
+              className="w-[160px] rounded-lg sm:ml-auto"
+              aria-label="Select a time range"
+            >
+              <SelectValue placeholder="Last 30 days" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="7d" className="rounded-lg">
+                Last 7 days
+              </SelectItem>
+              <SelectItem value="14d" className="rounded-lg">
+                Last 14 days
+              </SelectItem>
+              <SelectItem value="30d" className="rounded-lg">
+                Last 30 days
+              </SelectItem>
+              <SelectItem value="90d" className="rounded-lg">
+                Last 3 months
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
       
-      <CardContent className="px-3 sm:px-6">
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={data}
-              margin={{
-                top: 10,
-                right: 10,
-                left: 0,
-                bottom: 0,
-              }}
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        {(!hasRealData && !showMockData) ? (
+          <div className="flex items-center justify-center h-[300px] text-center">
+            <div className="space-y-2">
+              <Info className="h-8 w-8 mx-auto text-muted-foreground" />
+              <p className="text-muted-foreground">No lead data available yet</p>
+              <p className="text-sm text-muted-foreground">Data will appear automatically once leads are generated</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-[250px] w-full"
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                fontSize={12}
-                tickFormatter={(value) => {
-                  const date = new Date(value)
-                  return date.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })
-                }}
-                interval="preserveStartEnd"
-              />
-              <YAxis 
-                tickLine={false}
-                axisLine={false}
-                fontSize={12}
-                width={35}
-              />
-              <ChartTooltip 
-                cursor={{ strokeDasharray: "3 3", opacity: 0.5 }}
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    const newLeads = Number(payload.find(p => p.dataKey === 'total')?.value || 0)
-                    const qualified = Number(payload.find(p => p.dataKey === 'qualified')?.value || 0)
-                    const converted = Number(payload.find(p => p.dataKey === 'converted')?.value || 0)
-                    const dayConversionRate = newLeads > 0 ? ((converted / newLeads) * 100).toFixed(1) : "0.0"
-                    
-                    return (
-                      <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-                        <p className="font-medium mb-2">
-                          {new Date(label).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                        {payload.map((entry, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm">
-                            <div 
-                              className="w-3 h-3 rounded-sm" 
-                              style={{ backgroundColor: entry.color }}
-                            />
-                            <span className="text-muted-foreground">{entry.name}:</span>
-                            <span className="font-medium">{entry.value}</span>
-                          </div>
-                        ))}
-                        <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                          Conversion Rate: {dayConversionRate}%
-                        </div>
-                      </div>
-                    )
+              <AreaChart data={filteredData}>
+                <defs>
+                  <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="hsl(220, 70%, 50%)"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="hsl(220, 70%, 50%)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                  <linearGradient id="fillQualified" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="hsl(160, 60%, 45%)"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="hsl(160, 60%, 45%)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                  <linearGradient id="fillConverted" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="hsl(30, 80%, 55%)"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="hsl(30, 80%, 55%)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  minTickGap={32}
+                  tickFormatter={(value) => {
+                    const date = new Date(value)
+                    return date.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(value) => {
+                        return new Date(value).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                      }}
+                      indicator="dot"
+                    />
                   }
-                  return null
-                }}
-              />
-              
-              <defs>
-                <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(220, 70%, 50%)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="hsl(220, 70%, 50%)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillQualified" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(160, 60%, 45%)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="hsl(160, 60%, 45%)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillConverted" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(30, 80%, 55%)" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="hsl(30, 80%, 55%)" stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
-              
-              <Area
-                dataKey="total"
-                stackId="1"
-                stroke="hsl(220, 70%, 50%)"
-                fill="url(#fillTotal)"
-                strokeWidth={3}
-                type="monotone"
-              />
-              <Area
-                dataKey="qualified"
-                stackId="2"
-                stroke="hsl(160, 60%, 45%)"
-                fill="url(#fillQualified)"
-                strokeWidth={3}
-                type="monotone"
-              />
-              <Area
-                dataKey="converted"
-                stackId="3"
-                stroke="hsl(30, 80%, 55%)"
-                fill="url(#fillConverted)"
-                strokeWidth={3}
-                type="monotone"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+                />
+                <Area
+                  dataKey="converted"
+                  type="natural"
+                  fill="url(#fillConverted)"
+                  stroke="hsl(30, 80%, 55%)"
+                  stackId="a"
+                />
+                <Area
+                  dataKey="qualified"
+                  type="natural"
+                  fill="url(#fillQualified)"
+                  stroke="hsl(160, 60%, 45%)"
+                  stackId="a"
+                />
+                <Area
+                  dataKey="total"
+                  type="natural"
+                  fill="url(#fillTotal)"
+                  stroke="hsl(220, 70%, 50%)"
+                  stackId="a"
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+              </AreaChart>
+            </ChartContainer>
+
+            {/* Summary Stats */}
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4 text-center">
+              <div className="space-y-1">
+                <div className="text-lg font-bold" style={{ color: "hsl(220, 70%, 50%)" }}>
+                  {totalNewLeads}
+                </div>
+                <div className="text-xs text-muted-foreground">New Leads</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-lg font-bold" style={{ color: "hsl(160, 60%, 45%)" }}>
+                  {totalQualified}
+                </div>
+                <div className="text-xs text-muted-foreground">Qualified</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-lg font-bold" style={{ color: "hsl(30, 80%, 55%)" }}>
+                  {totalConverted}
+                </div>
+                <div className="text-xs text-muted-foreground">Converted</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-lg font-bold text-primary">{conversionRate}%</div>
+                <div className="text-xs text-muted-foreground">Conversion Rate</div>
+              </div>
+            </div>
+
+            {/* Trend */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm border-t pt-4">
+              <div className="flex items-center gap-2 font-medium leading-none">
+                {Number(trendPercentage) > 0 ? (
+                  <>
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <span className="text-green-600">+{trendPercentage}%</span>
+                  </>
+                ) : Number(trendPercentage) < 0 ? (
+                  <>
+                    <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
+                    <span className="text-red-600">{trendPercentage}%</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-4 w-4 bg-gray-400 rounded-full" />
+                    <span className="text-gray-600">No change</span>
+                  </>
+                )}
+                <span className="text-muted-foreground">vs previous period</span>
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
-      
-      <CardFooter className="pt-4">
-        <div className="flex flex-col space-y-3 w-full">
-          {/* Key Metrics Row */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="space-y-1">
-              <div className="text-lg sm:text-xl font-bold text-blue-600">{totalNewLeads}</div>
-              <div className="text-xs text-muted-foreground">New Leads</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-lg sm:text-xl font-bold text-orange-600">{totalQualified}</div>
-              <div className="text-xs text-muted-foreground">Qualified ({qualificationRate}%)</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-lg sm:text-xl font-bold text-green-600">{totalConverted}</div>
-              <div className="text-xs text-muted-foreground">Converted</div>
-            </div>
-          </div>
-          
-          {/* Trend Information */}
-          <div className="flex items-center justify-center gap-2 text-sm border-t pt-3">
-            <div className="flex items-center gap-2 font-medium leading-none">
-              {Number(trendPercentage) > 0 ? (
-                <>
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                  <span className="text-green-600">+{trendPercentage}%</span>
-                </>
-              ) : Number(trendPercentage) < 0 ? (
-                <>
-                  <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
-                  <span className="text-red-600">{trendPercentage}%</span>
-                </>
-              ) : (
-                <>
-                  <div className="h-4 w-4 bg-gray-400 rounded-full" />
-                  <span className="text-gray-600">No change</span>
-                </>
-              )}
-              <span className="text-muted-foreground">recent trend</span>
-            </div>
-          </div>
-        </div>
-      </CardFooter>
     </Card>
   )
 }
