@@ -183,10 +183,10 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
                 </h4>
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-sm italic">
-                    "
+                    &ldquo;
                     {activeAgent.introductoryStatement ||
                       `Hi, I'm ${activeAgent.name} from ${business.businessName}. How can I help you today?`}
-                    "
+                    &rdquo;
                   </p>
                 </div>
               </div>
