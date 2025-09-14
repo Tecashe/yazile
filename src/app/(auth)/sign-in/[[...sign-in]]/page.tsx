@@ -99,13 +99,12 @@
 
 // export default Page
 
-// Enhanced SignIn Component
-// SignIn Component
+
 import { SignIn } from "@clerk/nextjs"
 
 type Props = {}
 
-const SignInPage = (props: Props) => {
+const Page = (props: Props) => {
   return (
     <div className="flex flex-col items-center space-y-6 py-2">
       <div className="text-center space-y-2 w-full">
@@ -119,38 +118,24 @@ const SignInPage = (props: Props) => {
           appearance={{
             elements: {
               formButtonPrimary:
-                "bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-all duration-200",
-              
-              card: "bg-card border-2 border-border shadow-lg",
-              
-              headerTitle: "text-foreground font-bold",
-              
+                "bg-foreground hover:bg-foreground/90 text-background font-semibold py-2.5 px-4 rounded-lg transition-all duration-200",
+              card: "bg-card border border-foreground/20",
+              headerTitle: "text-foreground",
               headerSubtitle: "text-muted-foreground",
-              
-              formFieldLabel: "text-foreground font-medium",
-              
+              formFieldLabel: "text-foreground",
               formFieldInput:
-                "bg-input border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200 hover:border-primary/50",
-              
-              footerActionLink: "text-primary hover:text-primary/80",
-              
+                "bg-background border-2 border-foreground/30 focus:border-foreground text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200 hover:border-foreground/50",
+              footerActionLink: "text-muted-foreground hover:text-foreground",
               identityPreviewText: "text-foreground",
-              
               identityPreviewEditButton: "text-muted-foreground hover:text-foreground",
-              
               formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground",
-              
-              dividerLine: "bg-border",
-              
+              dividerLine: "bg-foreground/20",
               dividerText: "text-muted-foreground",
-              
-              formFieldError: "text-destructive",
-              
+              formFieldWarning: "text-yellow-500",
+              formFieldError: "text-red-500",
               socialButtonsBlockButton:
-                "border-2 border-border hover:border-primary bg-card hover:bg-accent transition-all duration-200",
-              
+                "border-2 border-foreground/30 hover:border-foreground bg-background hover:bg-card transition-all duration-200",
               socialButtonsBlockButtonText: "text-foreground",
-              
               socialButtonsBlockButtonArrow: "text-muted-foreground",
             },
             layout: {
@@ -164,7 +149,4 @@ const SignInPage = (props: Props) => {
   )
 }
 
-export default SignInPage
-
-// ============================================
-
+export default Page
