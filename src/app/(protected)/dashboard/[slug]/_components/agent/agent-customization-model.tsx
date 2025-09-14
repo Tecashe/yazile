@@ -1256,21 +1256,21 @@ export function AgentCustomizationModal({
                 icon="😄"
               />
 
-              <PersonalitySlider
+              {/* <PersonalitySlider
                 label="Patience"
                 value={customAgent.personality.patience}
                 onChange={(value) => updatePersonality("patience", value)}
                 description="How well the agent handles difficult or repetitive questions"
                 icon="🧘"
-              />
+              /> */}
 
-              <PersonalitySlider
+              {/* <PersonalitySlider
                 label="Expertise"
                 value={customAgent.personality.expertise}
                 onChange={(value) => updatePersonality("expertise", value)}
                 description="How knowledgeable and authoritative the agent sounds"
                 icon="🎓"
-              />
+              /> */}
             </div>
           </div>
 
