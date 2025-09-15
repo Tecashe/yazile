@@ -1,3 +1,4 @@
+
 // "use client"
 
 // import { useState, useEffect } from "react"
@@ -257,7 +258,16 @@
 
 //               <div>
 //                 <h4 className="font-semibold mb-2">Description</h4>
-//                 <p className="text-sm text-muted-foreground leading-relaxed">{business.businessDescription}</p>
+//                 <p className="text-sm text-muted-foreground leading-relaxed">
+//                   {business.businessDescription.length > 200
+//                     ? `${business.businessDescription.substring(0, 200)}...`
+//                     : business.businessDescription}
+//                 </p>
+//                 {business.businessDescription.length > 200 && (
+//                   <Button variant="link" className="p-0 h-auto text-xs mt-1" onClick={onEdit}>
+//                     Read more
+//                   </Button>
+//                 )}
 //               </div>
 
 //               <div>
@@ -335,7 +345,6 @@
 //   )
 // }
 
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -344,7 +353,15 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+
+
+// import { useToast } from "@/hooks/use-toast"
+// import { getBusinessWithActiveAgent, getAvailableIntegrations } from "@/actions/ai-agents"
+// import { Bot, Building2, Edit, Globe, MessageSquare, Settings, Zap, CheckCircle, Loader2 } from "lucide-react"
+
+
 import { getBusinessWithActiveAgent, getAvailableIntegrations } from "@/actions/ai-agents"
+import { AgentEditModal } from "./agent-edit-modal"
 import { Bot, Building2, Edit, Globe, MessageSquare, Settings, Zap, CheckCircle, Loader2 } from "lucide-react"
 
 interface AgentDashboardProps {
@@ -357,6 +374,7 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
   const [business, setBusiness] = useState<any>(null)
   const [activeAgent, setActiveAgent] = useState<any>(null)
   const [integrations, setIntegrations] = useState<any[]>([])
+  const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -389,6 +407,14 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
 
     loadDashboardData()
   }, [toast])
+
+  const handleSaveEditedAgent = (updatedAgent: any) => {
+    setActiveAgent(updatedAgent)
+    toast({
+      title: "Success!",
+      description: "Your AI agent has been updated successfully.",
+    })
+  }
 
   if (isLoading) {
     return (
@@ -469,9 +495,9 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
                 </p>
               </div>
             </div>
-            <Button onClick={onEdit}>
+            <Button onClick={() => setShowEditModal(true)}>
               <Edit className="h-4 w-4 mr-2" />
-              Edit Setup
+              Edit Agent
             </Button>
           </div>
         </div>
@@ -521,10 +547,10 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
                 </h4>
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-sm italic">
-                    &ldquo;
+                    "
                     {activeAgent.introductoryStatement ||
                       `Hi, I'm ${activeAgent.name} from ${business.businessName}. How can I help you today?`}
-                    &rdquo;
+                    "
                   </p>
                 </div>
               </div>
@@ -601,7 +627,7 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
                     : business.businessDescription}
                 </p>
                 {business.businessDescription.length > 200 && (
-                  <Button variant="link" className="p-0 h-auto text-xs mt-1" onClick={onEdit}>
+                  <Button variant="link" className="p-0 h-auto text-xs mt-1" onClick={() => setShowEditModal(true)}>
                     Read more
                   </Button>
                 )}
@@ -678,6 +704,14 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
           </Card>
         )}
       </div>
+
+      <AgentEditModal
+        agent={activeAgent}
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSave={handleSaveEditedAgent}
+        businessName={business?.businessName || ""}
+      />
     </div>
   )
 }
