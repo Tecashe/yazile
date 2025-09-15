@@ -1,20 +1,864 @@
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { motion } from "framer-motion"
+
+// import {
+//   Instagram,
+//   PhoneIcon as WhatsApp,
+//   Plus,
+//   CheckCircle,
+//   AlertCircle,
+//   Info,
+//   RefreshCw,
+//   Loader2,
+//   Trash2,
+//   Shield,
+// } from "lucide-react"
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "@/components/ui/alert-dialog"
+// import { useToast } from "@/hooks/use-toast"
+// import { useQuery, useQueryClient } from "@tanstack/react-query"
+// import { onUserInfo } from "@/actions/user"
+// import { refreshInstagramData, onOAuthInstagram } from "@/actions/integrations"
+// import { deauthorizeInstagram } from "@/lib/deauth"
+// import IntegrationCard from "./integration-card"
+// import RequirementsModal from "./requirements-modal"
+// import AccountsList from "./accounts-list"
+// import PlatformBenefits from "./platform-benefits"
+// import ConnectionStatus from "./connection-status"
+// import InstagramDashboard from "./my-info" 
+// import { useSearchParams } from "next/navigation"
+
+// export default function IntegrationsPage() {
+//   const [activeTab, setActiveTab] = useState("all")
+//   const [showRequirements, setShowRequirements] = useState<string | null>(null)
+//   const [isRefreshing, setIsRefreshing] = useState(false)
+//   const [isConnecting, setIsConnecting] = useState<{ [key: string]: boolean }>({})
+//   const [showDeauthorizeDialog, setShowDeauthorizeDialog] = useState<{
+//     show: boolean
+//     platform: string
+//     accountId: string
+//     accountName: string
+//   }>({
+//     show: false,
+//     platform: "",
+//     accountId: "",
+//     accountName: "",
+//   })
+//   const [isDeauthorizing, setIsDeauthorizing] = useState(false)
+//   const { toast } = useToast()
+//   const queryClient = useQueryClient()
+//   const searchParams = useSearchParams()
+
+//   const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false)
+//   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false)
+//   const [deauthorizationProgress, setDeauthorizationProgress] = useState<{
+//     show: boolean
+//     step: "confirming" | "revoking" | "removing" | "completed" | "error"
+//     message: string
+//   }>({
+//     show: false,
+//     step: "confirming",
+//     message: "",
+//   })
+
+//   // Check for OAuth code in URL (for Instagram callback
+//   const code = searchParams.get("code")
+
+//   // Fetch user data including integrations
+//   const {
+//     data: userData,
+//     isLoading,
+//     error,
+//   } = useQuery({
+//     queryKey: ["user-profile"],
+//     queryFn: onUserInfo,
+//   })
+
+//   // Handle Instagram OAuth callback
+//   useEffect(() => {
+//     if (code) {
+//       // The code will be processed by your server-side code
+//       toast({
+//         title: "Instagram Connected",
+//         description: "Your Instagram account has been successfully connected.",
+//         duration: 5000,
+//       })
+
+//       // Refresh the user data to include the new integration
+//       queryClient.invalidateQueries({ queryKey: ["user-profile"] })
+
+//       // Reset any connecting states
+//       setIsConnecting({})
+//     }
+//   }, [code, toast, queryClient])
+
+//   // Transform real user data into the format needed for our components
+//   const transformUserData = () => {
+//     if (!userData?.data?.integrations || !Array.isArray(userData.data.integrations)) {
+//       return {
+//         instagram: [],
+//         whatsapp: [],
+//       }
+//     }
+
+//     try {
+//       const instagramAccounts = userData.data.integrations
+//         .filter((integration: any) => integration && integration.name === "INSTAGRAM")
+//         .map((integration: any) => ({
+//           id: integration.id || `instagram-${Math.random().toString(36).substr(2, 9)}`,
+//           username: integration.username || integration.instagramId || "instagram_user",
+//           avatar: integration.profilePicture || "/placeholder.svg?height=40&width=40",
+//           isActive: true, // Assuming all connected accounts are active
+//           accessToken: integration.token, // Store access token for deauthorization
+//         }))
+
+//       const whatsappAccounts = userData.data.integrations
+//         .filter((integration: any) => integration && integration.name === "CRM")
+//         .map((integration: any) => ({
+//           id: integration.id || `whatsapp-${Math.random().toString(36).substr(2, 9)}`,
+//           phone: integration.phone || "+1 (555) 123-4567", // Fallback if not available
+//           name: integration.name || "Business Line",
+//           avatar: integration.profilePicture || "/placeholder.svg?height=40&width=40",
+//           isActive: true, // Assuming all connected accounts are active
+//         }))
+
+//       return {
+//         instagram: instagramAccounts,
+//         whatsapp: whatsappAccounts,
+//       }
+//     } catch (error) {
+//       console.error("Error transforming user data:", error)
+//       return {
+//         instagram: [],
+//         whatsapp: [],
+//       }
+//     }
+//   }
+
+//   const connectedAccounts = transformUserData()
+
+//   // Enhanced OAuth connection handler
+//   const handleOAuthConnection = async (platform: string, strategy: "INSTAGRAM" | "CRM") => {
+//     setIsConnecting((prev) => ({ ...prev, [platform]: true }))
+
+//     try {
+//       if (strategy === "INSTAGRAM") {
+//         // This will redirect to Instagram OAuth
+//         await onOAuthInstagram(strategy)
+//       } else if (strategy === "CRM") {
+//         // Handle WhatsApp/CRM OAuth here when implemented
+//         toast({
+//           title: "Coming Soon",
+//           description: "WhatsApp integration is being developed.",
+//           duration: 3000,
+//         })
+//         setIsConnecting((prev) => ({ ...prev, [platform]: false }))
+//       }
+//     } catch (error) {
+//       console.error(`Error connecting ${platform}:`, error)
+//       toast({
+//         title: "Connection Failed",
+//         description: `Failed to connect your ${platform} account. Please try again.`,
+//         variant: "destructive",
+//         duration: 3000,
+//       })
+//       setIsConnecting((prev) => ({ ...prev, [platform]: false }))
+//     }
+//   }
+
+//   const handleAddAccount = async (platform: string) => {
+//     // Check if account is already connected - enforce single account limit
+//     const isInstagramConnected = connectedAccounts.instagram.length > 0
+//     const isWhatsAppConnected = connectedAccounts.whatsapp.length > 0
+
+//     if (platform === "instagram" && isInstagramConnected) {
+//       toast({
+//         title: "Single Account Limit",
+//         description:
+//           "You can only connect one Instagram account. Please disconnect your current account first if you want to connect a different one.",
+//         duration: 5000,
+//       })
+//       return
+//     }
+
+//     if (platform === "whatsapp" && isWhatsAppConnected) {
+//       toast({
+//         title: "Single Account Limit",
+//         description:
+//           "You can only connect one WhatsApp account. Please disconnect your current account first if you want to connect a different one.",
+//         duration: 5000,
+//       })
+//       return
+//     }
+
+//     // Show privacy policy dialog first
+//     setShowPrivacyDialog(true)
+//   }
+
+//   // Handle connection after requirements modal
+//   const handleConnectAfterRequirements = async (platform: string) => {
+//     setShowRequirements(null)
+
+//     if (platform === "instagram") {
+//       await handleOAuthConnection("instagram", "INSTAGRAM")
+//     } else if (platform === "whatsapp") {
+//       await handleOAuthConnection("whatsapp", "CRM")
+//     }
+//   }
+
+//   // Show deauthorization confirmation dialog
+
+//   const handleShowDeauthorizeDialog = (platform: string, id: string) => {
+//     const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc) => acc.id === id)
+
+//     const accountName =
+//       platform === "instagram"
+//         ? (account as any)?.username || "Instagram Account"
+//         : (account as any)?.name || "WhatsApp Account"
+
+//     setShowDeauthorizeDialog({
+//       show: true,
+//       platform,
+//       accountId: id,
+//       accountName,
+//     })
+//   }
+
+//   // Handle deauthorization
+//   const handleDeauthorizeAccount = async () => {
+//     const { platform, accountId, accountName } = showDeauthorizeDialog
+
+//     // Start the deauthorization process with progress tracking
+//     setDeauthorizationProgress({
+//       show: true,
+//       step: "revoking",
+//       message: `Revoking access permissions for ${accountName}...`,
+//     })
+
+//     setShowDeauthorizeDialog({
+//       show: false,
+//       platform: "",
+//       accountId: "",
+//       accountName: "",
+//     })
+
+//     try {
+//       if (platform === "instagram") {
+//         // Find the account to get access token
+//         const account = connectedAccounts.instagram.find((acc) => acc.id === accountId)
+
+//         if (!account?.accessToken) {
+//           throw new Error("Access token not found")
+//         }
+
+//         // Step 1: Revoke Instagram permissions
+//         setDeauthorizationProgress((prev) => ({
+//           ...prev,
+//           step: "revoking",
+//           message: `Revoking Instagram permissions for ${accountName}...`,
+//         }))
+
+//         const result = await deauthorizeInstagram(accountId, account.accessToken)
+
+//         if (result.status === 200) {
+//           // Step 2: Remove from our database
+//           setDeauthorizationProgress((prev) => ({
+//             ...prev,
+//             step: "removing",
+//             message: "Removing account from your integrations...",
+//           }))
+
+//           // Wait a moment to show the removing step
+//           await new Promise((resolve) => setTimeout(resolve, 1500))
+
+//           // Step 3: Complete
+//           setDeauthorizationProgress((prev) => ({
+//             ...prev,
+//             step: "completed",
+//             message: `${accountName} has been successfully disconnected!`,
+//           }))
+
+//           toast({
+//             title: "Account Disconnected",
+//             description: `${accountName} has been successfully deauthorized and removed.`,
+//             duration: 3000,
+//           })
+
+//           // Refresh the user data to remove the deauthorized account
+//           queryClient.invalidateQueries({ queryKey: ["user-profile"] })
+
+//           // Hide progress after 2 seconds
+//           setTimeout(() => {
+//             setDeauthorizationProgress({
+//               show: false,
+//               step: "confirming",
+//               message: "",
+//             })
+//           }, 2000)
+//         } else {
+//           throw new Error(result.message || "Deauthorization failed")
+//         }
+//       } else if (platform === "whatsapp") {
+//         // Handle WhatsApp deauthorization when implemented
+//         setDeauthorizationProgress((prev) => ({
+//           ...prev,
+//           step: "error",
+//           message: "WhatsApp deauthorization is not yet available.",
+//         }))
+
+//         setTimeout(() => {
+//           setDeauthorizationProgress({
+//             show: false,
+//             step: "confirming",
+//             message: "",
+//           })
+//         }, 3000)
+//       }
+//     } catch (error) {
+//       console.error(`Error deauthorizing ${platform}:`, error)
+
+//       setDeauthorizationProgress((prev) => ({
+//         ...prev,
+//         step: "error",
+//         message: `Failed to disconnect ${accountName}. Please try again or remove access manually from your ${platform} settings.`,
+//       }))
+
+//       toast({
+//         title: "Disconnection Failed",
+//         description: `Failed to deauthorize ${accountName}. Please try again or remove access manually from your ${platform} settings.`,
+//         variant: "destructive",
+//         duration: 5000,
+//       })
+
+//       // Hide progress after 5 seconds on error
+//       setTimeout(() => {
+//         setDeauthorizationProgress({
+//           show: false,
+//           step: "confirming",
+//           message: "",
+//         })
+//       }, 5000)
+//     }
+//   }
+
+//   const handleRemoveAccount = (platform: string, id: string) => {
+//     // Show deauthorization dialog instead of immediate removal
+//     handleShowDeauthorizeDialog(platform, id)
+//   }
+
+//   const handleRefreshData = async () => {
+//     setIsRefreshing(true)
+//     try {
+//       // Use the actual user ID from userData
+//       const userId = userData?.data?.clerkId || "User"
+//       const result = await refreshInstagramData(userId || "237462617")
+
+//       if (result.status === 200) {
+//         toast({
+//           title: "Data Refreshed",
+//           description: "Your Instagram data has been successfully updated.",
+//           duration: 3000,
+//         })
+
+//         // Refresh the user data
+//         queryClient.invalidateQueries({ queryKey: ["user-profile"] })
+//       } else {
+//         toast({
+//           title: "Refresh Failed",
+//           description: result.message || "Failed to refresh Instagram data.",
+//           variant: "destructive",
+//           duration: 3000,
+//         })
+//       }
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: "An unexpected error occurred.",
+//         variant: "destructive",
+//         duration: 3000,
+//       })
+//     } finally {
+//       setIsRefreshing(false)
+//     }
+//   }
+
+//   const containerVariants = {
+//     hidden: { opacity: 0 },
+//     visible: {
+//       opacity: 1,
+//       transition: {
+//         staggerChildren: 0.1,
+//       },
+//     },
+//   }
+
+//   const itemVariants = {
+//     hidden: { y: 20, opacity: 0 },
+//     visible: {
+//       y: 0,
+//       opacity: 1,
+//       transition: {
+//         type: "spring",
+//         stiffness: 100,
+//       },
+//     },
+//   }
+
+//   if (isLoading) {
+//     return (
+//       <div className="container max-w-5xl py-20 flex flex-col items-center justify-center">
+//         <Loader2 className="h-10 w-10 text-blue-600 animate-spin mb-4" />
+//         <p className="text-muted-foreground">Loading your integrations...</p>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="container max-w-5xl py-10 space-y-8">
+//       <motion.div
+//         initial={{ opacity: 0, y: -20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         transition={{ duration: 0.5 }}
+//         className="space-y-2"
+//       >
+//         <div className="flex items-center justify-between">
+//           <h1 className="text-3xl font-bold tracking-tight">Account Integrations</h1>
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={handleRefreshData}
+//             disabled={isRefreshing}
+//             className="flex items-center gap-2 bg-transparent"
+//           >
+//             {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+//             Refresh Data
+//           </Button>
+//         </div>
+//         <p className="text-muted-foreground">Connect your social media accounts to enhance your experience</p>
+//       </motion.div>
+
+//       <Alert className="float bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
+//         <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+//         <AlertTitle className="text-blue-800 dark:text-blue-200">Integration Benefits</AlertTitle>
+//         <AlertDescription className="text-blue-700 dark:text-blue-300">
+//           Connecting your accounts enables seamless cross-platform posting, analytics tracking, and automated responses.
+//         </AlertDescription>
+//       </Alert>
+
+//       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+//         <TabsList className="grid w-full grid-cols-3">
+//           <TabsTrigger value="all">All Integrations</TabsTrigger>
+//           <TabsTrigger value="instagram">Instagram</TabsTrigger>
+//           <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
+//         </TabsList>
+
+//         <TabsContent value="all">
+//           <motion.div
+//             variants={containerVariants}
+//             initial="hidden"
+//             animate="visible"
+//             className="staggeredFadeIn grid gap-6 md:grid-cols-2"
+//           >
+//             <motion.div variants={itemVariants}>
+//               <IntegrationCard
+//                 title="Instagram"
+//                 description="Connect your Instagram accounts to share content and analyze engagement"
+//                 icon={<Instagram className="h-8 w-8 text-blue-600 dark:text-blue-400" />}
+//                 strategy="INSTAGRAM"
+//               />
+//             </motion.div>
+
+//             <motion.div variants={itemVariants}>
+//               <IntegrationCard
+//                 title="WhatsApp"
+//                 description="Connect WhatsApp to enable messaging and customer support"
+//                 icon={<WhatsApp className="h-8 w-8 text-blue-600 dark:text-blue-400" />}
+//                 strategy="CRM"
+//               />
+//             </motion.div>
+//           </motion.div>
+//         </TabsContent>
+
+//         <TabsContent value="instagram">
+//           <ConnectionStatus
+//             platform="instagram"
+//             accounts={connectedAccounts.instagram}
+//             onRefresh={handleRefreshData}
+//             isRefreshing={isRefreshing}
+//           />
+//           <Card className="glassEffect mt-4">
+//             <CardHeader>
+//               <div className="flex items-center justify-between">
+//                 <div className="flex items-center space-x-3">
+//                   <Instagram className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+//                   <div>
+//                     <CardTitle>Instagram Accounts</CardTitle>
+//                     <CardDescription>Manage your connected Instagram accounts</CardDescription>
+//                   </div>
+//                 </div>
+//                 <Button
+//                   onClick={() => handleAddAccount("instagram")}
+//                   disabled={isConnecting.instagram || connectedAccounts.instagram.length > 0}
+//                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+//                 >
+//                   {isConnecting.instagram ? (
+//                     <>
+//                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Connecting...
+//                     </>
+//                   ) : connectedAccounts.instagram.length > 0 ? (
+//                     <>
+//                       <CheckCircle className="mr-2 h-4 w-4" /> Connected
+//                     </>
+//                   ) : (
+//                     <>
+//                       <Plus className="mr-2 h-4 w-4" /> Connect Account
+//                     </>
+//                   )}
+//                 </Button>
+//               </div>
+//             </CardHeader>
+//             <CardContent>
+//               <AccountsList
+//                 accounts={connectedAccounts.instagram.map((account) => ({
+//                   id: account.id,
+//                   title: account.username,
+//                   subtitle: `@${account.username}`,
+//                   avatar: account.avatar,
+//                   isActive: account.isActive,
+//                   platform: "instagram",
+//                 }))}
+//                 onRemove={(id) => handleRemoveAccount("instagram", id)}
+//               />
+//             </CardContent>
+//             <CardFooter className="flex flex-col items-start border-t p-4">
+//               <h4 className="text-sm font-medium mb-2">Requirements for Instagram Integration:</h4>
+//               <ul className="text-sm text-muted-foreground space-y-1">
+//                 <li className="flex items-center">
+//                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+//                   Public Instagram account
+//                 </li>
+//                 <li className="flex items-center">
+//                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+//                   Business or Creator account type
+//                 </li>
+//                 <li className="flex items-center">
+//                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+//                   Connected Facebook page
+//                 </li>
+//               </ul>
+//             </CardFooter>
+//           </Card>
+//           <PlatformBenefits platform="instagram" />
+//         </TabsContent>
+
+//         <TabsContent value="whatsapp">
+//           <ConnectionStatus
+//             platform="whatsapp"
+//             accounts={connectedAccounts.whatsapp}
+//             onRefresh={handleRefreshData}
+//             isRefreshing={isRefreshing}
+//           />
+//           <Card className="glassEffect mt-4">
+//             <CardHeader>
+//               <div className="flex items-center justify-between">
+//                 <div className="flex items-center space-x-3">
+//                   <WhatsApp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+//                   <div>
+//                     <CardTitle>WhatsApp Accounts</CardTitle>
+//                     <CardDescription>Manage your connected WhatsApp numbers</CardDescription>
+//                   </div>
+//                 </div>
+//                 <Button
+//                   onClick={() => handleAddAccount("whatsapp")}
+//                   disabled={isConnecting.whatsapp}
+//                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+//                 >
+//                   {isConnecting.whatsapp ? (
+//                     <>
+//                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Connecting...
+//                     </>
+//                   ) : (
+//                     <>
+//                       <Plus className="mr-2 h-4 w-4" /> Add Account
+//                     </>
+//                   )}
+//                 </Button>
+//               </div>
+//             </CardHeader>
+//             <CardContent>
+//               <AccountsList
+//                 accounts={connectedAccounts.whatsapp.map((account) => ({
+//                   id: account.id,
+//                   title: account.name,
+//                   subtitle: account.phone,
+//                   avatar: account.avatar,
+//                   isActive: account.isActive,
+//                   platform: "whatsapp",
+//                 }))}
+//                 onRemove={(id) => handleRemoveAccount("whatsapp", id)}
+//               />
+//             </CardContent>
+//             <CardFooter className="flex flex-col items-start border-t p-4">
+//               <h4 className="text-sm font-medium mb-2">Requirements for WhatsApp Integration:</h4>
+//               <ul className="text-sm text-muted-foreground space-y-1">
+//                 <li className="flex items-center">
+//                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+//                   WhatsApp Business account
+//                 </li>
+//                 <li className="flex items-center">
+//                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+//                   Verified phone number
+//                 </li>
+//                 <li className="flex items-center">
+//                   <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
+//                   Business verification (recommended)
+//                 </li>
+//               </ul>
+//             </CardFooter>
+//           </Card>
+//           <PlatformBenefits platform="whatsapp" />
+//         </TabsContent>
+//       </Tabs>
+
+
+
+
+
+
+//       <InstagramDashboard userId={userData?.data?.clerkId || "1234556"} />
+
+//       {showRequirements && (
+//         <RequirementsModal
+//           platform={showRequirements}
+//           onClose={() => setShowRequirements(null)}
+//           onConnect={() => handleConnectAfterRequirements(showRequirements)}
+//         />
+//       )}
+
+//       {/* Deauthorization Confirmation Dialog */}
+//       <AlertDialog
+//         open={showDeauthorizeDialog.show}
+//         onOpenChange={(open) =>
+//           !open && setShowDeauthorizeDialog({ show: false, platform: "", accountId: "", accountName: "" })
+//         }
+//       >
+//         <AlertDialogContent>
+//           <AlertDialogHeader>
+//             <AlertDialogTitle className="flex items-center gap-2">
+//               <Shield className="h-5 w-5 text-red-500" />
+//               Deauthorize Account
+//             </AlertDialogTitle>
+//             <AlertDialogDescription className="space-y-2">
+//               <p>
+//                 Are you sure you want to deauthorize <strong>{showDeauthorizeDialog.accountName}</strong>?
+//               </p>
+//               <p className="text-sm text-muted-foreground">This action will:</p>
+//               <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+//                 <li>Revoke all access permissions for this account</li>
+//                 <li>Remove the account from your connected integrations</li>
+//                 <li>Stop all automated posting and data syncing</li>
+//                 <li>Delete stored account data from our servers</li>
+//               </ul>
+//               <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+//                 You&apos;ll need to reconnect the account to use it again.
+//               </p>
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           <AlertDialogFooter>
+//             <AlertDialogCancel disabled={isDeauthorizing}>Cancel</AlertDialogCancel>
+//             <AlertDialogAction
+//               onClick={handleDeauthorizeAccount}
+//               disabled={isDeauthorizing}
+//               className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+//             >
+//               {isDeauthorizing ? (
+//                 <>
+//                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                   Deauthorizing...
+//                 </>
+//               ) : (
+//                 <>
+//                   <Trash2 className="mr-2 h-4 w-4" />
+//                   Deauthorize
+//                 </>
+//               )}
+//             </AlertDialogAction>
+//           </AlertDialogFooter>
+//         </AlertDialogContent>
+//       </AlertDialog>
+//       {/* Privacy Policy Agreement Dialog */}
+//       <AlertDialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+//         <AlertDialogContent className="max-w-md">
+//           <AlertDialogHeader>
+//             <AlertDialogTitle className="flex items-center gap-2">
+//               <Shield className="h-5 w-5 text-blue-500" />
+//               Privacy & Data Usage
+//             </AlertDialogTitle>
+//             <AlertDialogDescription className="space-y-4">
+//               <p>
+//                 Before connecting your account, please review our privacy policy to understand how we handle your data.
+//               </p>
+//               <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+//                 <h4 className="font-medium text-sm">We will access:</h4>
+//                 <ul className="text-sm space-y-1">
+//                   <li className="flex items-center gap-2">
+//                     <CheckCircle className="h-3 w-3 text-green-500" />
+//                     Basic profile information
+//                   </li>
+//                   <li className="flex items-center gap-2">
+//                     <CheckCircle className="h-3 w-3 text-green-500" />
+//                     Posts and media content
+//                   </li>
+//                   <li className="flex items-center gap-2">
+//                     <CheckCircle className="h-3 w-3 text-green-500" />
+//                     Engagement metrics
+//                   </li>
+//                 </ul>
+//               </div>
+//               <div className="flex items-start space-x-2">
+//                 <input
+//                   type="checkbox"
+//                   id="privacy-checkbox"
+//                   checked={privacyPolicyAccepted}
+//                   onChange={(e) => setPrivacyPolicyAccepted(e.target.checked)}
+//                   className="mt-1"
+//                 />
+//                 <label htmlFor="privacy-checkbox" className="text-sm">
+//                   I have read and agree to the{" "}
+//                   <a
+//                     href="https://www.yazzil.com/privacy"
+//                     target="_blank"
+//                     rel="noopener noreferrer"
+//                     className="text-blue-600 hover:text-blue-800 underline"
+//                   >
+//                     Privacy Policy
+//                   </a>
+//                 </label>
+//               </div>
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           <AlertDialogFooter>
+//             <AlertDialogCancel
+//               onClick={() => {
+//                 setPrivacyPolicyAccepted(false)
+//                 setShowPrivacyDialog(false)
+//               }}
+//             >
+//               Cancel
+//             </AlertDialogCancel>
+//             <AlertDialogAction
+//               onClick={() => {
+//                 if (privacyPolicyAccepted) {
+//                   setShowPrivacyDialog(false)
+//                   setShowRequirements(showRequirements || "instagram")
+//                   setPrivacyPolicyAccepted(false) // Reset for next time
+//                 }
+//               }}
+//               disabled={!privacyPolicyAccepted}
+//               className="bg-blue-600 hover:bg-blue-700"
+//             >
+//               Continue
+//             </AlertDialogAction>
+//           </AlertDialogFooter>
+//         </AlertDialogContent>
+//       </AlertDialog>
+
+//       {/* Deauthorization Progress Dialog */}
+//       <AlertDialog open={deauthorizationProgress.show} onOpenChange={() => {}}>
+//         <AlertDialogContent className="max-w-md">
+//           <AlertDialogHeader>
+//             <AlertDialogTitle className="flex items-center gap-2">
+//               {deauthorizationProgress.step === "completed" ? (
+//                 <CheckCircle className="h-5 w-5 text-green-500" />
+//               ) : deauthorizationProgress.step === "error" ? (
+//                 <AlertCircle className="h-5 w-5 text-red-500" />
+//               ) : (
+//                 <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+//               )}
+//               {deauthorizationProgress.step === "completed"
+//                 ? "Disconnected Successfully"
+//                 : deauthorizationProgress.step === "error"
+//                   ? "Disconnection Failed"
+//                   : "Disconnecting Account"}
+//             </AlertDialogTitle>
+//             <AlertDialogDescription className="space-y-4">
+//               <p>{deauthorizationProgress.message}</p>
+
+//               {deauthorizationProgress.step !== "error" && deauthorizationProgress.step !== "completed" && (
+//                 <div className="space-y-2">
+//                   <div className="flex justify-between text-sm">
+//                     <span>Progress</span>
+//                     <span>{deauthorizationProgress.step === "revoking" ? "1/2" : "2/2"}</span>
+//                   </div>
+//                   <div className="w-full bg-muted rounded-full h-2">
+//                     <div
+//                       className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+//                       style={{
+//                         width: deauthorizationProgress.step === "revoking" ? "50%" : "100%",
+//                       }}
+//                     />
+//                   </div>
+//                 </div>
+//               )}
+
+//               {deauthorizationProgress.step === "completed" && (
+//                 <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
+//                   <p className="text-sm text-green-700 dark:text-green-300">
+//                     Your account has been successfully disconnected. You can now connect a different account if needed.
+//                   </p>
+//                 </div>
+//               )}
+
+//               {deauthorizationProgress.step === "error" && (
+//                 <div className="bg-red-50 dark:bg-red-950 p-3 rounded-lg">
+//                   <p className="text-sm text-red-700 dark:text-red-300">
+//                     Please try again or manually revoke access from your Instagram settings.
+//                   </p>
+//                 </div>
+//               )}
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           {(deauthorizationProgress.step === "completed" || deauthorizationProgress.step === "error") && (
+//             <AlertDialogFooter>
+//               <AlertDialogAction
+//                 onClick={() =>
+//                   setDeauthorizationProgress({
+//                     show: false,
+//                     step: "confirming",
+//                     message: "",
+//                   })
+//                 }
+//               >
+//                 Close
+//               </AlertDialogAction>
+//             </AlertDialogFooter>
+//           )}
+//         </AlertDialogContent>
+//       </AlertDialog>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
-import {
-  Instagram,
-  PhoneIcon as WhatsApp,
-  Plus,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  RefreshCw,
-  Loader2,
-  Trash2,
-  Shield,
-} from "lucide-react"
+import { Instagram, Plus, CheckCircle, AlertCircle, Info, RefreshCw, Loader2, Trash2, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -39,7 +883,7 @@ import RequirementsModal from "./requirements-modal"
 import AccountsList from "./accounts-list"
 import PlatformBenefits from "./platform-benefits"
 import ConnectionStatus from "./connection-status"
-import InstagramDashboard from "./my-info" 
+import InstagramDashboard from "./my-info"
 import { useSearchParams } from "next/navigation"
 
 export default function IntegrationsPage() {
@@ -111,7 +955,6 @@ export default function IntegrationsPage() {
     if (!userData?.data?.integrations || !Array.isArray(userData.data.integrations)) {
       return {
         instagram: [],
-        whatsapp: [],
       }
     }
 
@@ -126,25 +969,13 @@ export default function IntegrationsPage() {
           accessToken: integration.token, // Store access token for deauthorization
         }))
 
-      const whatsappAccounts = userData.data.integrations
-        .filter((integration: any) => integration && integration.name === "CRM")
-        .map((integration: any) => ({
-          id: integration.id || `whatsapp-${Math.random().toString(36).substr(2, 9)}`,
-          phone: integration.phone || "+1 (555) 123-4567", // Fallback if not available
-          name: integration.name || "Business Line",
-          avatar: integration.profilePicture || "/placeholder.svg?height=40&width=40",
-          isActive: true, // Assuming all connected accounts are active
-        }))
-
       return {
         instagram: instagramAccounts,
-        whatsapp: whatsappAccounts,
       }
     } catch (error) {
       console.error("Error transforming user data:", error)
       return {
         instagram: [],
-        whatsapp: [],
       }
     }
   }
@@ -152,21 +983,13 @@ export default function IntegrationsPage() {
   const connectedAccounts = transformUserData()
 
   // Enhanced OAuth connection handler
-  const handleOAuthConnection = async (platform: string, strategy: "INSTAGRAM" | "CRM") => {
+  const handleOAuthConnection = async (platform: string, strategy: "INSTAGRAM") => {
     setIsConnecting((prev) => ({ ...prev, [platform]: true }))
 
     try {
       if (strategy === "INSTAGRAM") {
         // This will redirect to Instagram OAuth
         await onOAuthInstagram(strategy)
-      } else if (strategy === "CRM") {
-        // Handle WhatsApp/CRM OAuth here when implemented
-        toast({
-          title: "Coming Soon",
-          description: "WhatsApp integration is being developed.",
-          duration: 3000,
-        })
-        setIsConnecting((prev) => ({ ...prev, [platform]: false }))
       }
     } catch (error) {
       console.error(`Error connecting ${platform}:`, error)
@@ -183,23 +1006,12 @@ export default function IntegrationsPage() {
   const handleAddAccount = async (platform: string) => {
     // Check if account is already connected - enforce single account limit
     const isInstagramConnected = connectedAccounts.instagram.length > 0
-    const isWhatsAppConnected = connectedAccounts.whatsapp.length > 0
 
     if (platform === "instagram" && isInstagramConnected) {
       toast({
         title: "Single Account Limit",
         description:
           "You can only connect one Instagram account. Please disconnect your current account first if you want to connect a different one.",
-        duration: 5000,
-      })
-      return
-    }
-
-    if (platform === "whatsapp" && isWhatsAppConnected) {
-      toast({
-        title: "Single Account Limit",
-        description:
-          "You can only connect one WhatsApp account. Please disconnect your current account first if you want to connect a different one.",
         duration: 5000,
       })
       return
@@ -215,8 +1027,6 @@ export default function IntegrationsPage() {
 
     if (platform === "instagram") {
       await handleOAuthConnection("instagram", "INSTAGRAM")
-    } else if (platform === "whatsapp") {
-      await handleOAuthConnection("whatsapp", "CRM")
     }
   }
 
@@ -225,10 +1035,7 @@ export default function IntegrationsPage() {
   const handleShowDeauthorizeDialog = (platform: string, id: string) => {
     const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc) => acc.id === id)
 
-    const accountName =
-      platform === "instagram"
-        ? (account as any)?.username || "Instagram Account"
-        : (account as any)?.name || "WhatsApp Account"
+    const accountName = platform === "instagram" ? (account as any)?.username || "Instagram Account" : "Account"
 
     setShowDeauthorizeDialog({
       show: true,
@@ -312,21 +1119,6 @@ export default function IntegrationsPage() {
         } else {
           throw new Error(result.message || "Deauthorization failed")
         }
-      } else if (platform === "whatsapp") {
-        // Handle WhatsApp deauthorization when implemented
-        setDeauthorizationProgress((prev) => ({
-          ...prev,
-          step: "error",
-          message: "WhatsApp deauthorization is not yet available.",
-        }))
-
-        setTimeout(() => {
-          setDeauthorizationProgress({
-            show: false,
-            step: "confirming",
-            message: "",
-          })
-        }, 3000)
       }
     } catch (error) {
       console.error(`Error deauthorizing ${platform}:`, error)
@@ -421,7 +1213,7 @@ export default function IntegrationsPage() {
   if (isLoading) {
     return (
       <div className="container max-w-5xl py-20 flex flex-col items-center justify-center">
-        <Loader2 className="h-10 w-10 text-blue-600 animate-spin mb-4" />
+        <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
         <p className="text-muted-foreground">Loading your integrations...</p>
       </div>
     )
@@ -448,22 +1240,21 @@ export default function IntegrationsPage() {
             Refresh Data
           </Button>
         </div>
-        <p className="text-muted-foreground">Connect your social media accounts to enhance your experience</p>
+        <p className="text-muted-foreground">Connect your Instagram account to enhance your experience</p>
       </motion.div>
 
-      <Alert className="float bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
-        <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-        <AlertTitle className="text-blue-800 dark:text-blue-200">Integration Benefits</AlertTitle>
-        <AlertDescription className="text-blue-700 dark:text-blue-300">
-          Connecting your accounts enables seamless cross-platform posting, analytics tracking, and automated responses.
+      <Alert className="float bg-accent border-border">
+        <Info className="h-4 w-4 text-primary" />
+        <AlertTitle className="text-accent-foreground">Integration Benefits</AlertTitle>
+        <AlertDescription className="text-muted-foreground">
+          Connecting your Instagram account enables seamless posting, analytics tracking, and automated responses.
         </AlertDescription>
       </Alert>
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="all">All Integrations</TabsTrigger>
           <TabsTrigger value="instagram">Instagram</TabsTrigger>
-          <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
@@ -471,23 +1262,14 @@ export default function IntegrationsPage() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="staggeredFadeIn grid gap-6 md:grid-cols-2"
+            className="staggeredFadeIn grid gap-6 md:grid-cols-1"
           >
             <motion.div variants={itemVariants}>
               <IntegrationCard
                 title="Instagram"
-                description="Connect your Instagram accounts to share content and analyze engagement"
-                icon={<Instagram className="h-8 w-8 text-blue-600 dark:text-blue-400" />}
+                description="Connect your Instagram account to share content and analyze engagement"
+                icon={<Instagram className="h-8 w-8 text-primary" />}
                 strategy="INSTAGRAM"
-              />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <IntegrationCard
-                title="WhatsApp"
-                description="Connect WhatsApp to enable messaging and customer support"
-                icon={<WhatsApp className="h-8 w-8 text-blue-600 dark:text-blue-400" />}
-                strategy="CRM"
               />
             </motion.div>
           </motion.div>
@@ -504,7 +1286,7 @@ export default function IntegrationsPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Instagram className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <Instagram className="h-6 w-6 text-primary" />
                   <div>
                     <CardTitle>Instagram Accounts</CardTitle>
                     <CardDescription>Manage your connected Instagram accounts</CardDescription>
@@ -513,7 +1295,7 @@ export default function IntegrationsPage() {
                 <Button
                   onClick={() => handleAddAccount("instagram")}
                   disabled={isConnecting.instagram || connectedAccounts.instagram.length > 0}
-                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {isConnecting.instagram ? (
                     <>
@@ -548,15 +1330,15 @@ export default function IntegrationsPage() {
               <h4 className="text-sm font-medium mb-2">Requirements for Instagram Integration:</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-chart-2 mr-2" />
                   Public Instagram account
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-chart-2 mr-2" />
                   Business or Creator account type
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-chart-2 mr-2" />
                   Connected Facebook page
                 </li>
               </ul>
@@ -564,80 +1346,7 @@ export default function IntegrationsPage() {
           </Card>
           <PlatformBenefits platform="instagram" />
         </TabsContent>
-
-        <TabsContent value="whatsapp">
-          <ConnectionStatus
-            platform="whatsapp"
-            accounts={connectedAccounts.whatsapp}
-            onRefresh={handleRefreshData}
-            isRefreshing={isRefreshing}
-          />
-          <Card className="glassEffect mt-4">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <WhatsApp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  <div>
-                    <CardTitle>WhatsApp Accounts</CardTitle>
-                    <CardDescription>Manage your connected WhatsApp numbers</CardDescription>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => handleAddAccount("whatsapp")}
-                  disabled={isConnecting.whatsapp}
-                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
-                >
-                  {isConnecting.whatsapp ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" /> Add Account
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <AccountsList
-                accounts={connectedAccounts.whatsapp.map((account) => ({
-                  id: account.id,
-                  title: account.name,
-                  subtitle: account.phone,
-                  avatar: account.avatar,
-                  isActive: account.isActive,
-                  platform: "whatsapp",
-                }))}
-                onRemove={(id) => handleRemoveAccount("whatsapp", id)}
-              />
-            </CardContent>
-            <CardFooter className="flex flex-col items-start border-t p-4">
-              <h4 className="text-sm font-medium mb-2">Requirements for WhatsApp Integration:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  WhatsApp Business account
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Verified phone number
-                </li>
-                <li className="flex items-center">
-                  <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
-                  Business verification (recommended)
-                </li>
-              </ul>
-            </CardFooter>
-          </Card>
-          <PlatformBenefits platform="whatsapp" />
-        </TabsContent>
       </Tabs>
-
-
-
-
-
 
       <InstagramDashboard userId={userData?.data?.clerkId || "1234556"} />
 
@@ -659,7 +1368,7 @@ export default function IntegrationsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-red-500" />
+              <Shield className="h-5 w-5 text-destructive" />
               Deauthorize Account
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
@@ -673,7 +1382,7 @@ export default function IntegrationsPage() {
                 <li>Stop all automated posting and data syncing</li>
                 <li>Delete stored account data from our servers</li>
               </ul>
-              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+              <p className="text-sm font-medium text-chart-4">
                 You&apos;ll need to reconnect the account to use it again.
               </p>
             </AlertDialogDescription>
@@ -683,7 +1392,7 @@ export default function IntegrationsPage() {
             <AlertDialogAction
               onClick={handleDeauthorizeAccount}
               disabled={isDeauthorizing}
-              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               {isDeauthorizing ? (
                 <>
@@ -705,7 +1414,7 @@ export default function IntegrationsPage() {
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-500" />
+              <Shield className="h-5 w-5 text-primary" />
               Privacy & Data Usage
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
@@ -716,15 +1425,15 @@ export default function IntegrationsPage() {
                 <h4 className="font-medium text-sm">We will access:</h4>
                 <ul className="text-sm space-y-1">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    <CheckCircle className="h-3 w-3 text-chart-2" />
                     Basic profile information
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    <CheckCircle className="h-3 w-3 text-chart-2" />
                     Posts and media content
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    <CheckCircle className="h-3 w-3 text-chart-2" />
                     Engagement metrics
                   </li>
                 </ul>
@@ -743,7 +1452,7 @@ export default function IntegrationsPage() {
                     href="https://www.yazzil.com/privacy"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline"
+                    className="text-primary hover:text-primary/80 underline"
                   >
                     Privacy Policy
                   </a>
@@ -769,7 +1478,7 @@ export default function IntegrationsPage() {
                 }
               }}
               disabled={!privacyPolicyAccepted}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Continue
             </AlertDialogAction>
@@ -783,11 +1492,11 @@ export default function IntegrationsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               {deauthorizationProgress.step === "completed" ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-chart-2" />
               ) : deauthorizationProgress.step === "error" ? (
-                <AlertCircle className="h-5 w-5 text-red-500" />
+                <AlertCircle className="h-5 w-5 text-destructive" />
               ) : (
-                <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                <Loader2 className="h-5 w-5 text-primary animate-spin" />
               )}
               {deauthorizationProgress.step === "completed"
                 ? "Disconnected Successfully"
@@ -806,7 +1515,7 @@ export default function IntegrationsPage() {
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                      className="bg-primary h-2 rounded-full transition-all duration-500"
                       style={{
                         width: deauthorizationProgress.step === "revoking" ? "50%" : "100%",
                       }}
@@ -816,16 +1525,16 @@ export default function IntegrationsPage() {
               )}
 
               {deauthorizationProgress.step === "completed" && (
-                <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
-                  <p className="text-sm text-green-700 dark:text-green-300">
+                <div className="bg-accent p-3 rounded-lg">
+                  <p className="text-sm text-accent-foreground">
                     Your account has been successfully disconnected. You can now connect a different account if needed.
                   </p>
                 </div>
               )}
 
               {deauthorizationProgress.step === "error" && (
-                <div className="bg-red-50 dark:bg-red-950 p-3 rounded-lg">
-                  <p className="text-sm text-red-700 dark:text-red-300">
+                <div className="bg-destructive/10 p-3 rounded-lg">
+                  <p className="text-sm text-destructive">
                     Please try again or manually revoke access from your Instagram settings.
                   </p>
                 </div>
