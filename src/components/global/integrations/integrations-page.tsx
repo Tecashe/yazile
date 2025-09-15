@@ -965,8 +965,8 @@ export default function IntegrationsPage() {
         .filter((integration: any) => integration && integration.name === "INSTAGRAM")
         .map((integration: any) => ({
           id: integration.id || `instagram-${Math.random().toString(36).substr(2, 9)}`,
-          username: integration.username || integration.instagramId || "instagram_user",
-          avatar: integration.profilePicture || "/placeholder.svg?height=40&width=40",
+          username: integration.username || integration.instagramId || "",
+          avatar: integration.profilePicture || "",
           isActive: true, // Assuming all connected accounts are active
           accessToken: integration.token, // Store access token for deauthorization
         }))

@@ -33,8 +33,8 @@ interface UnifiedCRMIntegrationProps {
   selectedLeads?: string[]
   onLeadSelectionChange?: (leads: string[]) => void
 }
-// export default function WhatsAppSeupPage
-export default function UnifiedCRMIntegrationPage({
+
+export function UnifiedCRMIntegration({
   userId,
   analytics,
   selectedLeads = [],
@@ -827,11 +827,11 @@ export default function UnifiedCRMIntegrationPage({
   )
 }
 
-// // Export the handleViewInCRM function for use in other components
-// export const handleViewInCRM = (lead: any) => {
-//   if (lead.crmId) {
-//     window.open(`https://hubspot.com/contacts/${lead.crmId}`, "_blank")
-//   } else {
-//     toast.info("Lead not synced to CRM yet. Would you like to sync now?")
-//   }
-// }
+// Export the handleViewInCRM function for use in other components
+export const handleViewInCRM = (lead: any) => {
+  if (lead.crmId) {
+    window.open(`https://hubspot.com/contacts/${lead.crmId}`, "_blank")
+  } else {
+    toast.info("Lead not synced to CRM yet. Would you like to sync now?")
+  }
+}
