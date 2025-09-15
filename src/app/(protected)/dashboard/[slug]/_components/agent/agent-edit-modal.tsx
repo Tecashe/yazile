@@ -290,7 +290,7 @@ export function AgentEditModal({ agent, isOpen, onClose, onSave, businessName }:
             <Bot className="h-5 w-5 text-primary" />
             Edit AI Agent
           </DialogTitle>
-          <DialogDescription>Update your AI agent's personality, settings, and capabilities</DialogDescription>
+          <DialogDescription>Update your AI agent&apos;s personality, settings, and capabilities</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
