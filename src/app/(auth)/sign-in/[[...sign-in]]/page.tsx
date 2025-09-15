@@ -156,7 +156,7 @@ import { SignIn } from "@clerk/nextjs"
 
 type Props = {}
 
-const SignInPage = (props: Props) => {
+const Page = (props: Props) => {
   return (
     <div className="flex flex-col items-center space-y-6 py-2 bg-neutral-950 min-h-screen">
       <div className="text-center space-y-2 w-full">
@@ -201,6 +201,4 @@ const SignInPage = (props: Props) => {
   )
 }
 
-export default SignInPage
-
-// ---
+export default Page

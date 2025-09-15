@@ -344,7 +344,7 @@ import Link from "next/link"
 
 type SignUpProps = {}
 
-const SignUpPage = (props: SignUpProps) => {
+const Page = (props: SignUpProps) => {
   return (
     <div className="flex flex-col items-center space-y-6 py-2 bg-neutral-950 min-h-screen">
       <div className="text-center space-y-2 w-full">
@@ -406,4 +406,4 @@ const SignUpPage = (props: SignUpProps) => {
   )
 }
 
-export default SignUpPage
+export default Page
