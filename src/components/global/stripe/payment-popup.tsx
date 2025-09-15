@@ -161,10 +161,10 @@ const CardForm = ({
     >
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 mx-auto bg-zinc-900 rounded-2xl flex items-center justify-center mb-4">
+        {/* <div className="w-16 h-16 mx-auto bg-zinc-900 rounded-2xl flex items-center justify-center mb-4">
           <plan.icon className="w-8 h-8 text-white" />
-        </div>
-        <h3 className="text-2xl font-semibold text-white">Complete Your Upgrade</h3>
+        </div> */}
+        {/* <h3 className="text-2xl font-semibold text-white">Complete Your Upgrade</h3> */}
         <p className="text-zinc-400">
           You&apos;re upgrading to <span className="text-white font-medium">{plan.name}</span> plan
         </p>
