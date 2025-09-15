@@ -1210,14 +1210,14 @@ export default function IntegrationsPage() {
     },
   }
 
-  if (isLoading) {
-    return (
-      <div className="container max-w-5xl py-20 flex flex-col items-center justify-center">
-        <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
-        <p className="text-muted-foreground">Loading your integrations...</p>
-      </div>
-    )
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="container max-w-5xl py-20 flex flex-col items-center justify-center">
+  //       <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+  //       <p className="text-muted-foreground">Loading your integrations...</p>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="container max-w-5xl py-10 space-y-8">
