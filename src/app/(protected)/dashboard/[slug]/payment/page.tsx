@@ -1112,9 +1112,9 @@ interface UnifiedCRMIntegrationProps {
   analytics: any
   selectedLeads?: string[]
   onLeadSelectionChange?: (leads: string[]) => void
-}
+} 
 
-export function UnifiedCRMIntegration({
+export default function WhatsAppSeupPage({
   userId,
   analytics,
   selectedLeads = [],
