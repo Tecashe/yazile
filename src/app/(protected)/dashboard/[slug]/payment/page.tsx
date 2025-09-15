@@ -1907,11 +1907,11 @@ export function UnifiedCRMIntegration({
   )
 }
 
-// Export the handleViewInCRM function for use in other components
-export const handleViewInCRM = (lead: any) => {
-  if (lead.crmId) {
-    window.open(`https://hubspot.com/contacts/${lead.crmId}`, "_blank")
-  } else {
-    toast.info("Lead not synced to CRM yet. Would you like to sync now?")
-  }
-}
+// // Export the handleViewInCRM function for use in other components
+// export const handleViewInCRM = (lead: any) => {
+//   if (lead.crmId) {
+//     window.open(`https://hubspot.com/contacts/${lead.crmId}`, "_blank")
+//   } else {
+//     toast.info("Lead not synced to CRM yet. Would you like to sync now?")
+//   }
+// }
