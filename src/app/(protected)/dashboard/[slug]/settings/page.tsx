@@ -2673,7 +2673,7 @@ interface Automation {
 }
 
 export default function AIAgentPersonalityPage() {
-  const router = useRouter()
+  
   const { toast } = useToast()
 
   // Business setup state
