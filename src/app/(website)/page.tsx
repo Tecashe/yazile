@@ -1622,6 +1622,7 @@
 // }
 
 
+
 "use client"
 
 import Link from "next/link"
@@ -1701,7 +1702,7 @@ export default function Home() {
       <header className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-12 w-12 sm:h-16 sm:w-16" />
+            <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
             <span className="text-lg sm:text-xl font-bold">Yazzil</span>
           </div>
 
@@ -2229,7 +2230,7 @@ export default function Home() {
                         </Button>
 
                         <div className="space-y-3">
-                          <div className="text-xs sm:text-sm font-medium">What's included:</div>
+                          <div className="text-xs sm:text-sm font-medium">What&apos;s included:</div>
                           <ul className="space-y-2">
                             {plan.features.map((feature, featureIndex) => (
                               <li key={featureIndex} className="flex items-start gap-2 text-xs sm:text-sm">
@@ -2278,7 +2279,7 @@ export default function Home() {
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
                     <p className="text-sm sm:text-base text-muted-foreground italic">
-                      "Yazzil has completely transformed how we handle Instagram DMs. We're converting 3x more leads than before with automated responses."
+                      &quot;Yazzil has completely transformed how we handle Instagram DMs. We&apos;re converting 3x more leads than before with automated responses.&quot;
                     </p>
                     <div>
                       <div className="font-semibold text-sm sm:text-base">Sarah Johnson</div>
@@ -2291,7 +2292,7 @@ export default function Home() {
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
                     <p className="text-sm sm:text-base text-muted-foreground italic">
-                      "The lead qualification is incredible. Every qualified lead automatically appears in our CRM with full conversation context."
+                      &quot;The lead qualification is incredible. Every qualified lead automatically appears in our CRM with full conversation context.&quot;
                     </p>
                     <div>
                       <div className="font-semibold text-sm sm:text-base">Michael Chen</div>
@@ -2304,7 +2305,7 @@ export default function Home() {
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
                     <p className="text-sm sm:text-base text-muted-foreground italic">
-                      "We save 15+ hours per week on DM management and our Instagram lead conversion rate increased by 40%."
+                      &quot;We save 15+ hours per week on DM management and our Instagram lead conversion rate increased by 40%.&quot;
                     </p>
                     <div>
                       <div className="font-semibold text-sm sm:text-base">Jessica Williams</div>
