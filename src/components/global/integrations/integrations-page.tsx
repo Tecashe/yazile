@@ -1603,8 +1603,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { onUserInfo } from "@/actions/user"
 import { refreshInstagramData, onOAuthInstagram } from "@/actions/integrations"
 import { deauthorizeInstagram } from "@/lib/deauth"
-import { getPremiumLeadAnalytics } from "@/lib/lead-qualification"
-import { client } from "@/lib/prisma"
+import { getCRMData } from "@/actions/crm"
 import IntegrationCard from "./integration-card"
 import RequirementsModal from "./requirements-modal"
 import AccountsList from "./accounts-list"
@@ -1692,103 +1691,12 @@ export default function IntegrationsPage() {
     queryFn: async () => {
       if (!userData?.data?.id) return null
       
-      try {
-        console.log(`Fetching CRM data for user: ${userData.data.id}`)
-        
-        const [analytics, allLeads] = await Promise.all([
-          getPremiumLeadAnalytics(userData.data.id).catch((error) => {
-            console.error("Error getting analytics:", error)
-            return {
-              totalLeads: 0,
-              qualifiedLeads: 0,
-              convertedLeads: 0,
-              conversionRate: 0,
-              qualificationRate: 0,
-              recentInteractions: [],
-              revenueMetrics: {
-                totalEstimatedRevenue: 0,
-                totalExpectedRevenue: 0,
-                averageROI: 0,
-                revenueGrowth: 0,
-              },
-              tierDistribution: {
-                platinum: 0,
-                gold: 0,
-                silver: 0,
-                bronze: 0,
-              },
-              premiumInsights: {
-                highValueLeads: 0,
-                averageLeadValue: 0,
-                conversionProbability: 0,
-                totalPipelineValue: 0,
-              },
-              crmStatus: {
-                connected: false,
-                integrations: [],
-                lastSync: null,
-              },
-            }
-          }),
-
-          // Get all leads for CRM integration
-          client.lead
-            .findMany({
-              where: { userId: userData.data.id },
-              include: {
-                qualificationData: true,
-                interactions: {
-                  take: 3,
-                  orderBy: { timestamp: "desc" },
-                },
-              },
-              orderBy: { lastContactDate: "desc" },
-            })
-            .catch((error) => {
-              console.error("Error getting leads:", error)
-              return []
-            }),
-        ])
-
-        console.log(`Found ${allLeads.length} leads for CRM integration`)
-
-        return { analytics, allLeads }
-      } catch (error) {
-        console.error("Error fetching CRM data:", error)
-        return {
-          analytics: {
-            totalLeads: 0,
-            qualifiedLeads: 0,
-            convertedLeads: 0,
-            conversionRate: 0,
-            qualificationRate: 0,
-            recentInteractions: [],
-            revenueMetrics: {
-              totalEstimatedRevenue: 0,
-              totalExpectedRevenue: 0,
-              averageROI: 0,
-              revenueGrowth: 0,
-            },
-            tierDistribution: {
-              platinum: 0,
-              gold: 0,
-              silver: 0,
-              bronze: 0,
-            },
-            premiumInsights: {
-              highValueLeads: 0,
-              averageLeadValue: 0,
-              conversionProbability: 0,
-              totalPipelineValue: 0,
-            },
-            crmStatus: {
-              connected: false,
-              integrations: [],
-              lastSync: null,
-            },
-          },
-          allLeads: [],
-        }
+      const result = await getCRMData(userData.data.id)
+      
+      if (result.status === 200) {
+        return result.data
+      } else {
+        throw new Error("Failed to fetch CRM data")
       }
     },
     enabled: !!userData?.data?.id,
@@ -2487,7 +2395,6 @@ export default function IntegrationsPage() {
     </div>
   )
 }
-
 
 // "use client"
 
