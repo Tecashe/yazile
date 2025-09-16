@@ -1691,7 +1691,7 @@ export default function IntegrationsPage() {
     queryFn: async () => {
       if (!userData?.data?.id) return null
       
-      const result = await getCRMData(userData.data.id)
+      const result = await getCRMData(userData.data.clerkId)
       
       if (result.status === 200) {
         return result.data
