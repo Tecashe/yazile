@@ -1600,7 +1600,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { onUserInfo } from "@/actions/user"
+import { onUserInfo, onUserInfor } from "@/actions/user"
 import { refreshInstagramData, onOAuthInstagram } from "@/actions/integrations"
 import { deauthorizeInstagram } from "@/lib/deauth"
 import { getCRMData } from "@/actions/crm"
@@ -1690,8 +1690,11 @@ export default function IntegrationsPage() {
     queryKey: ["crm-data", userData?.data?.id],
     queryFn: async () => {
       if (!userData?.data?.id) return null
+
+      const user = await onUserInfor()
+      const userId = user.data?.id
       
-      const result = await getCRMData(userData.data.clerkId)
+      const result = await getCRMData(userId||"reach")
       
       if (result.status === 200) {
         return result.data
