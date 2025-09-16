@@ -1609,7 +1609,7 @@ import RequirementsModal from "./requirements-modal"
 import AccountsList from "./accounts-list"
 import PlatformBenefits from "./platform-benefits"
 import ConnectionStatus from "./connection-status"
-import InstagramDashboard from "./my-info"
+// import InstagramDashboard from "./my-info"
 import { UnifiedCRMIntegration } from "./unifiedcrm"
 import { useSearchParams } from "next/navigation"
 
@@ -2181,7 +2181,7 @@ export default function IntegrationsPage() {
         </TabsContent>
       </Tabs>
 
-      <InstagramDashboard userId={userData?.data?.clerkId || userData?.data?.id || "1234556"} />
+      {/* <InstagramDashboard userId={userData?.data?.clerkId || userData?.data?.id || "1234556"} /> */}
 
       {showRequirements && (
         <RequirementsModal
