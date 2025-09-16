@@ -3,11 +3,24 @@
 
 import { client } from "@/lib/prisma"
 import { getPremiumLeadAnalytics } from "@/lib/lead-qualification"
+import { onUserInfor } from "../user" 
 
-export async function getCRMData(userId: string) {
+export async function getCRMData() {
   try {
-    console.log(`Fetching CRM data for user: ${userId}`)
+    // Get user information first
+    const userResponse = await onUserInfor()
     
+    if (userResponse.status !== 200 || !userResponse.data) {
+      console.error("Failed to get user information:", userResponse.error)
+      return {
+        status: userResponse.status,
+        error: userResponse.error || "Failed to get user information"
+      }
+    }
+
+    const userId = userResponse.data.id
+    console.log(`Fetching CRM data for user: ${userId}`)
+         
     const [analytics, allLeads] = await Promise.all([
       getPremiumLeadAnalytics(userId).catch((error) => {
         console.error("Error getting analytics:", error)
@@ -43,7 +56,7 @@ export async function getCRMData(userId: string) {
           },
         }
       }),
-
+       
       // Get all leads for CRM integration
       client.lead
         .findMany({
@@ -67,12 +80,17 @@ export async function getCRMData(userId: string) {
 
     return {
       status: 200,
-      data: { analytics, allLeads }
+      data: { 
+        analytics, 
+        allLeads,
+        user: userResponse.data // Include user info in response if needed
+      }
     }
   } catch (error) {
     console.error("Error fetching CRM data:", error)
     return {
       status: 500,
+      error: "Internal Server Error",
       data: {
         analytics: {
           totalLeads: 0,
