@@ -548,6 +548,147 @@
 //     </TooltipProvider>
 //   )
 // }
+
+
+// "use client"
+
+// import React from "react"
+
+// import { Plus } from "lucide-react"
+// import { NavMain } from "./nav-main"
+// import { NavUser } from "./nav-user"
+// import { PlanSwitcher } from "./team-switcher"
+// import {
+//   Sidebar,
+//   SidebarContent,
+//   SidebarFooter,
+//   SidebarHeader,
+//   SidebarRail,
+//   SidebarGroup,
+//   SidebarGroupLabel,
+//   SidebarGroupContent,
+//   SidebarSeparator,
+//   SidebarGroupAction,
+// } from "@/components/ui/sidebars"
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltips"
+// import { usePathname } from "next/navigation"
+// import { useClerk } from "@clerk/nextjs"
+// import { SIDEBAR_MENU } from "@/constants/menu"
+
+
+// // Transform your menu data to work with the new sidebar
+// const transformMenuData = (slug: string, pathname: string) => {
+//   return SIDEBAR_MENU.map((group) => ({
+//     ...group,
+//     items: group.items.map((item) => ({
+//       title: item.label,
+//       url: buildItemUrl(item, group.label, slug),
+//       icon: extractIconComponent(item.icon),
+//       isActive: isPathActive(item, group.label, slug, pathname),
+//       description: item.description,
+//       items: item.subItems?.map((subItem) => ({
+//         title: subItem.label,
+//         url: buildSubItemUrl(subItem, item, group.label, slug),
+//         isActive: isPathActive(subItem, group.label, slug, pathname, item),
+//         description: subItem.description,
+//       })),
+//     })),
+//   }))
+// }
+
+// // Helper function to extract the icon component from ReactNode
+// const extractIconComponent = (iconNode: React.ReactNode): any => {
+//   if (React.isValidElement(iconNode)) {
+//     return iconNode.type
+//   }
+//   return undefined
+// }
+
+// // Helper function to build URLs
+// const buildItemUrl = (item: any, groupLabel: string, slug: string) => {
+//   const basePath = `/dashboard/${slug}`
+//   const itemPath = item.label.toLowerCase()
+//   if (itemPath === "home") return basePath
+//   if (groupLabel.toLowerCase() === "agents" && itemPath === "agents") return `${basePath}/agents`
+//   return `${basePath}/${itemPath}`
+// }
+
+// const buildSubItemUrl = (subItem: any, parentItem: any, groupLabel: string, slug: string) => {
+//   const basePath = `/dashboard/${slug}`
+//   const subItemPath = subItem.label.toLowerCase().replace(/\s+/g, "-")
+//   if (groupLabel.toLowerCase() === "agents") {
+//     return `${basePath}/agents/${subItemPath}`
+//   }
+//   return `${basePath}/${parentItem.label.toLowerCase()}/${subItemPath}`
+// }
+
+// // Helper function to check if path is active
+// const isPathActive = (item: any, groupLabel: string, slug: string, pathname: string, parentItem?: any) => {
+//   const itemUrl = parentItem
+//     ? buildSubItemUrl(item, parentItem, groupLabel, slug)
+//     : buildItemUrl(item, groupLabel, slug)
+//   return pathname === itemUrl || pathname.startsWith(`${itemUrl}/`)
+// }
+
+// type Props = {
+//   slug: string
+// }
+
+// export function AppSidebar({ slug }: Props) {
+//   const pathname = usePathname()
+//   const { user, signOut } = useClerk()
+//   const transformedMenu = transformMenuData(slug, pathname)
+
+//   const userData = {
+//     name: user?.fullName || "Personal",
+//     email: user?.primaryEmailAddress?.emailAddress || "user@yazzil.com",
+//     avatar: user?.imageUrl || "/placeholder.svg",
+//   }
+
+//   return (
+//     <TooltipProvider delayDuration={300}>
+//       <Sidebar variant="inset" collapsible="icon" className="border-r-0 bg-background">
+//         <SidebarHeader className="bg-background border-b border-border/50">
+//           <PlanSwitcher />
+//         </SidebarHeader>
+//         <SidebarContent className="bg-background">
+//           {transformedMenu.map((group) => (
+//             <SidebarGroup key={group.id} className="px-2">
+//               <Tooltip>
+//                 <TooltipTrigger asChild>
+//                   <SidebarGroupLabel className="text-muted-foreground/70 font-medium text-xs uppercase tracking-wider">
+//                     {group.label}
+//                     <Tooltip>
+//                       <TooltipTrigger asChild>
+//                         <SidebarGroupAction asChild>
+//                           <Plus className="h-4 w-4 opacity-60 hover:opacity-100 transition-opacity" />
+//                         </SidebarGroupAction>
+//                       </TooltipTrigger>
+                      
+//                     </Tooltip>
+//                   </SidebarGroupLabel>
+//                 </TooltipTrigger>
+//                 <TooltipContent side="right" className="max-w-xs">
+//                   <p className="font-medium">{group.label}</p>
+//                   {/* <p className="text-sm text-muted-foreground mt-1">{group.description}</p> */}
+//                 </TooltipContent>
+//               </Tooltip>
+//               <SidebarGroupContent>
+//                 <NavMain items={group.items} />
+//               </SidebarGroupContent>
+//             </SidebarGroup>
+//           ))}
+//           <SidebarSeparator className="mx-4 bg-border/50" />
+//         </SidebarContent>
+//         <SidebarFooter className="bg-background border-t border-border/50">
+//           <NavUser user={userData} onSignOut={signOut} />
+//         </SidebarFooter>
+//         <SidebarRail />
+//       </Sidebar>
+//     </TooltipProvider>
+//   )
+// }
+
 "use client"
 
 import React from "react"
@@ -625,6 +766,14 @@ const isPathActive = (item: any, groupLabel: string, slug: string, pathname: str
   const itemUrl = parentItem
     ? buildSubItemUrl(item, parentItem, groupLabel, slug)
     : buildItemUrl(item, groupLabel, slug)
+  
+  // For the home page (base dashboard path), only match exact path
+  const basePath = `/dashboard/${slug}`
+  if (itemUrl === basePath) {
+    return pathname === basePath
+  }
+  
+  // For other pages, use exact match or startsWith for sub-routes
   return pathname === itemUrl || pathname.startsWith(`${itemUrl}/`)
 }
 
