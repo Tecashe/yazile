@@ -162,10 +162,10 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({ automati
         )}
 
         <div className="mt-6 space-y-4">
-          <div className="flex items-center space-x-2 text-muted-foreground">
+          {/* <div className="flex items-center space-x-2 text-muted-foreground">
             <Clock size={16} />
             <p className="text-sm font-medium">Created {getRelativeTime(automation.createdAt)}</p>
-          </div>
+          </div> */}
 
           <div>
             <h3 className="text-lg font-semibold mb-2 text-foreground">Current Sentiment</h3>
