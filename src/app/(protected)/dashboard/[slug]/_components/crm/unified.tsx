@@ -295,7 +295,7 @@ export function UnifiedCRMIntegration({
 
     setIsManualSyncing(true)
     try {
-      // const result = await manualSyncToCRM(selectedLeads, userId)
+      // const re = await manualSyncToCRM(selectedLeads, userId)
 
       // Placeholder for manual sync - replace with actual implementation
       const result = { success: true, summary: { successful: selectedLeads.length, failed: 0 } }
