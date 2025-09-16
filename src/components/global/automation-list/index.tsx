@@ -131,7 +131,7 @@ const AutomationList = ({ id }: Props) => {
         </div>
       )}
 
-      {showConfirmModal && (
+      {/* {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-primary p-6 rounded-lg text-white shadow-lg w-80">
             <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
@@ -145,6 +145,34 @@ const AutomationList = ({ id }: Props) => {
               </Button>
               <Button
                 className="bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  if (selectedAutomationId) {
+                    handleDelete(selectedAutomationId);
+                  }
+                  setShowConfirmModal(false);
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )} */}
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border p-6 rounded-lg shadow-lg w-80">
+            <h2 className="text-lg font-semibold mb-4 text-card-foreground">Confirm Delete</h2>
+            <p className="text-sm mb-6 text-muted-foreground">This action cannot be undone!</p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => {
                   if (selectedAutomationId) {
                     handleDelete(selectedAutomationId);
