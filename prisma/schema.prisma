@@ -1531,6 +1531,8 @@ model Tenant {
   voiceflowSessions VoiceflowSession[]
   webhookLogs       WebhookLog[]
 
+  workflows    Workflow[]     // New relation to workflows
+
   // Indexes
   @@unique([userId])
   @@index([userId])
@@ -1572,6 +1574,8 @@ model Integration {
   // Relations
   tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   apiLogs ApiLog[]
+
+  workflowSteps WorkflowStep[] // New relation to workflow steps
 
   // Indexes
   @@unique([tenantId, type])
@@ -1887,4 +1891,130 @@ model WhatsAppWebhookLog {
   createdAt DateTime @default(now())
 
   @@map("whatsapp_webhook_logs")
+}
+
+//For the new tools interface
+
+model Workflow {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean  @default(false)
+  
+  // AI-generated metadata
+  aiPrompt    String?  // Original user prompt used to generate workflow
+  aiGenerated Boolean  @default(false)
+  
+  // Execution settings
+  maxRetries     Int     @default(3)
+  timeoutSeconds Int     @default(300)
+  
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  steps      WorkflowStep[]
+  conditions WorkflowCondition[]
+  executions WorkflowExecution[]
+  
+  // Indexes
+  @@index([tenantId])
+  @@index([isActive])
+}
+
+model WorkflowStep {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId String @db.Uuid
+  
+  // Step identification
+  stepId   String // Unique within workflow for referencing
+  stepType String // 'trigger', 'action', 'condition'
+  
+  // Integration reference
+  integrationId   String @db.Uuid
+  integrationName String
+  capabilityId    String
+  capabilityName  String
+  
+  // Configuration
+  config String @default("{}") // JSON configuration for this step
+  
+  // Visual positioning for drag-drop
+  positionX Int @default(0)
+  positionY Int @default(0)
+  stepOrder Int @default(0)
+  
+  // Conditional logic
+  parentStepId String? // For branching workflows
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  workflow    Workflow     @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  integration Integration  @relation(fields: [integrationId], references: [id])
+  
+  // Indexes
+  @@index([workflowId])
+  @@index([integrationId])
+  @@index([stepOrder])
+}
+
+model WorkflowCondition {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId String @db.Uuid
+  
+  // Condition identification
+  conditionId String // Unique within workflow
+  
+  // Condition logic
+  field        String // Field to check
+  operator     String // 'equals', 'not_equals', 'contains', 'greater_than', 'less_than'
+  value        String // Value to compare against
+  
+  // Branching
+  trueStepId  String? // Step to execute if condition is true
+  falseStepId String? // Step to execute if condition is false
+  
+  createdAt DateTime @default(now())
+  
+  // Relations
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  
+  // Indexes
+  @@index([workflowId])
+}
+
+model WorkflowExecution {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId String @db.Uuid
+  
+  // Execution status
+  status       String    // 'pending', 'running', 'completed', 'failed', 'cancelled'
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  
+  // Error handling
+  errorMessage String?
+  errorStep    String? // Step ID where error occurred
+  retryCount   Int     @default(0)
+  
+  // Execution data
+  inputData    String  @default("{}") // JSON input data
+  outputData   String  @default("{}") // JSON output data
+  executionLog String  @default("[]") // JSON array of execution steps
+  
+  // Metadata
+  triggeredBy String? // What triggered this execution
+  
+  // Relations
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  
+  // Indexes
+  @@index([workflowId])
+  @@index([status])
+  @@index([startedAt])
 }

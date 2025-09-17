@@ -864,7 +864,7 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
                 <Cog className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Agent Dashboard</h1>
+                <h1 className="text-3xl font-bold text-foreground">Settings</h1>
                 <p className="text-muted-foreground mt-1">
                   Your AI assistant is ready to handle DMs for {business.businessName}
                 </p>
