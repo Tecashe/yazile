@@ -728,7 +728,7 @@ import { useToast } from "@/hooks/use-toast"
 import { getBusinessWithActiveAgent, getAvailableIntegrations } from "@/actions/ai-agents"
 import { AgentEditModal } from "./agent-edit-modal"
 import { BusinessEditModal } from "./business-edit-modal"
-import { Bot, Building2, Edit, Globe, MessageSquare, Settings, Zap, CheckCircle, Loader2 } from "lucide-react"
+import { Bot, Building2, Edit, Globe, MessageSquare, Settings, Zap, CheckCircle, Loader2, Cog } from "lucide-react"
 
 interface AgentDashboardProps {
   onEdit: () => void
@@ -861,7 +861,7 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-primary/10 rounded-xl">
-                <CheckCircle className="h-8 w-8 text-primary" />
+                <Cog className="h-8 w-8 text-primary" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-foreground">Agent Dashboard</h1>

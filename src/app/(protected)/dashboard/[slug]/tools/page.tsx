@@ -48,6 +48,7 @@ import {
   AlertTriangle,
   Save,
   X,
+  Wrench,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
@@ -1127,7 +1128,7 @@ export default function IntegrationsPage() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl bg-primary/10">
-                <Zap className="h-6 w-6 text-primary" />
+                <Wrench className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-balance">My tools</h1>
