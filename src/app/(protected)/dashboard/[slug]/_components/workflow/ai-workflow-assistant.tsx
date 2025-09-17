@@ -188,7 +188,7 @@ export function AIWorkflowAssistant({ workflow, integrations, onWorkflowUpdate }
                     </Badge>
                   </div>
                   {suggestion.reasoning && (
-                    <p className="text-xs text-muted-foreground italic">"{suggestion.reasoning}"</p>
+                    <p className="text-xs text-muted-foreground italic">&ldquo;{suggestion.reasoning}&rdquo;</p>
                   )}
                 </div>
               </Card>
