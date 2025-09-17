@@ -253,7 +253,8 @@ const CreateAutomation = () => {
       {
         name: "Untitled",
         id: newAutomationId,
-        createdAt: new Date().toISOString(),
+        // createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         keywords: [],
         // Add any other required fields for your automation
         active: false,
