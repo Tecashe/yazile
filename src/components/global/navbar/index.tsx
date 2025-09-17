@@ -15,7 +15,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { Cog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import CreateAutomation from "../create-automation"
+import CreateAutomation from "../create-automation/plusButton"
 import { NotificationCenter } from "./notifications/notifications"
 import Search from "./search"
 
