@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast"
 export interface WorkflowStep {
   id: string
   stepId: string
-  stepType: "trigger" | "action" | "condition"
+  stepType: "trigger" | "action" | "condition" | "permission"
   integrationId: string
   integrationName: string
   capabilityId: string

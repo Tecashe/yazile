@@ -1458,12 +1458,87 @@
 //     </div>
 //   )
 // }
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { toast } from "@/hooks/use-toast"
+// import { WorkflowIcon, Settings, Activity } from "lucide-react"
+// import { WorkflowManager } from "../_components/workflow/workflow-manager"
+// import { IntegrationsManager } from "../_components/workflow/integrations-manager"
+// import { useWorkflows } from "@/hooks/use-workflows"
+// import { useIntegrations } from "@/hooks/use-integrations"
+
+// export default function AIAgentDashboard() {
+//   const [activeTab, setActiveTab] = useState("workflows")
+//   const { workflows, isLoading: workflowsLoading, error: workflowsError } = useWorkflows()
+//   const { integrations, isLoading: integrationsLoading, error: integrationsError } = useIntegrations()
+
+//   const isLoading = workflowsLoading || integrationsLoading
+//   const hasError = workflowsError || integrationsError
+
+//   useEffect(() => {
+//     if (hasError) {
+//       toast({
+//         title: "Error",
+//         description: "Failed to load data. Please refresh the page.",
+//         variant: "destructive",
+//       })
+//     }
+//   }, [hasError])
+
+//   if (isLoading) {
+//     return (
+//       <div className="min-h-screen bg-background flex items-center justify-center">
+//         <div className="text-center space-y-4">
+//           <Activity className="h-8 w-8 animate-spin mx-auto text-primary" />
+//           <p className="text-muted-foreground">Loading AI Agent Dashboard...</p>
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-background">
+//       <div className="container mx-auto p-6 max-w-7xl">
+//         <header className="mb-8">
+//           <h1 className="text-3xl font-bold tracking-tight mb-2">AI Agent Control Center</h1>
+//           <p className="text-muted-foreground text-lg">
+//             Configure intelligent workflows for your AI assistant using connected integrations
+//           </p>
+//         </header>
+
+//         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+//           <TabsList className="grid w-full grid-cols-2 max-w-md">
+//             <TabsTrigger value="workflows" className="flex items-center gap-2">
+//               <WorkflowIcon className="h-4 w-4" />
+//               Workflows
+//             </TabsTrigger>
+//             <TabsTrigger value="integrations" className="flex items-center gap-2">
+//               <Settings className="h-4 w-4" />
+//               Integrations
+//             </TabsTrigger>
+//           </TabsList>
+
+//           <TabsContent value="workflows">
+//             <WorkflowManager workflows={workflows} integrations={integrations} />
+//           </TabsContent>
+
+//           <TabsContent value="integrations">
+//             <IntegrationsManager integrations={integrations} />
+//           </TabsContent>
+//         </Tabs>
+//       </div>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/hooks/use-toast"
-import { WorkflowIcon, Settings, Activity } from "lucide-react"
+import { Bot, Settings, Activity, Shield } from "lucide-react"
 import { WorkflowManager } from "../_components/workflow/workflow-manager"
 import { IntegrationsManager } from "../_components/workflow/integrations-manager"
 import { useWorkflows } from "@/hooks/use-workflows"
@@ -1502,17 +1577,31 @@ export default function AIAgentDashboard() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 max-w-7xl">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">AI Agent Control Center</h1>
-          <p className="text-muted-foreground text-lg">
-            Configure intelligent workflows for your AI assistant using connected integrations
-          </p>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Bot className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">AI Agent Permissions</h1>
+              <p className="text-muted-foreground text-lg">
+                Define what actions your AI agent can perform with your integrations
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+            <Shield className="h-4 w-4" />
+            <span>
+              Configure precise permissions to control what your AI agent can do with Stripe, Shopify, Calendly, and
+              other connected services.
+            </span>
+          </div>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="workflows" className="flex items-center gap-2">
-              <WorkflowIcon className="h-4 w-4" />
-              Workflows
+              <Shield className="h-4 w-4" />
+              Permissions
             </TabsTrigger>
             <TabsTrigger value="integrations" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
