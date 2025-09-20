@@ -143,7 +143,7 @@ export const MobileTrigger = ({ id, onSave, initialData }: Props) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  Let's create your first automation in just a few simple steps. This guide will help you set up
+                  Let&apos;s create your first automation in just a few simple steps. This guide will help you set up
                   triggers that respond to your customers automatically.
                 </p>
 
@@ -287,7 +287,7 @@ export const MobileTrigger = ({ id, onSave, initialData }: Props) => {
                         Set as default fallback automation
                       </label>
                       <p className="text-sm text-muted-foreground mt-1">
-                        This automation will respond to messages that don't match any keywords. Perfect for starting
+                        This automation will respond to messages that don&apos;t match any keywords. Perfect for starting
                         conversations with new customers.
                       </p>
                     </div>
@@ -314,7 +314,7 @@ export const MobileTrigger = ({ id, onSave, initialData }: Props) => {
                     <LifeBuoy className="h-4 w-4" />
                     <AlertTitle>Fallback Automation</AlertTitle>
                     <AlertDescription>
-                      This automation will be triggered when a message doesn't match any keywords. It's a great way to
+                      This automation will be triggered when a message doesn&apos;t match any keywords. It&apos;s a great way to
                       start conversations with new customers.
                     </AlertDescription>
                   </Alert>
