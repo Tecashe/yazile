@@ -152,6 +152,55 @@
 //   )
 // }
 
+// "use client"
+
+// import React from "react"
+// import { motion } from "framer-motion"
+// import { cn } from "@/lib/utils"
+
+// interface YazzilWordLoaderProps {
+//   state: boolean
+//   className?: string
+//   color?: string
+// }
+
+// export default function YazzilWordLoader({ 
+//   state, 
+//   className, 
+//   color = "gray" 
+// }: YazzilWordLoaderProps) {
+//   if (!state) {
+//     return null
+//   }
+
+//   const letters = ["Y", "A", "Z", "Z", "I", "L"]
+
+//   return (
+//     <div className={cn("flex items-center justify-center", className)}>
+//       <div className="flex">
+//         {letters.map((letter, index) => (
+//           <motion.span
+//             key={index}
+//             className={`text-2xl font-bold text-${color}-700`}
+//             animate={{
+//               y: [0, -10, 0],
+//               opacity: [0.5, 1, 0.5]
+//             }}
+//             transition={{
+//               duration: 1.2,
+//               repeat: Infinity,
+//               delay: index * 0.1,
+//               ease: "easeInOut"
+//             }}
+//           >
+//             {letter}
+//           </motion.span>
+//         ))}
+//       </div>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import React from "react"
