@@ -77,7 +77,7 @@ export default function Layout({
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 bg-float"
             style={{
-              backgroundImage: "url('/images/bg-main.jpg')"
+              backgroundImage: "url('/images/bg-main.png')"
             }}
           />
           
@@ -85,14 +85,14 @@ export default function Layout({
           <div 
             className="absolute top-0 right-0 w-1/2 h-1/2 bg-cover bg-center bg-no-repeat opacity-15 rotate-12 bg-float-reverse"
             style={{
-              backgroundImage: "url('/images/bg-secondary.jpg')"
+              backgroundImage: "url('/images/bg-secondary.png')"
             }}
           />
           
           <div 
             className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-cover bg-center bg-no-repeat opacity-20 -rotate-6 bg-float-slow"
             style={{
-              backgroundImage: "url('/images/bg-accent.jpg')"
+              backgroundImage: "url('/images/bg-accent.png')"
             }}
           />
           
