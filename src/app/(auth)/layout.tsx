@@ -27,6 +27,8 @@
 //   )
 // }
 
+"use client"
+
 import type React from "react"
 import { Suspense } from "react"
 import { Loader2 } from "lucide-react"
@@ -37,57 +39,9 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      {/* Background Images with Subtle Movement */}
-      <div className="absolute inset-0 z-0">
-        {/* Main background image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 animate-pulse"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80')",
-            animation: "float 20s ease-in-out infinite"
-          }}
-        />
-        
-        {/* Secondary overlay images for depth */}
-        <div 
-          className="absolute top-0 right-0 w-1/2 h-1/2 bg-cover bg-center bg-no-repeat opacity-15 rotate-12"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2015&q=80')",
-            animation: "floatReverse 25s ease-in-out infinite"
-          }}
-        />
-        
-        <div 
-          className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-cover bg-center bg-no-repeat opacity-20 -rotate-6"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')",
-            animation: "floatSlow 30s ease-in-out infinite"
-          }}
-        />
-        
-        {/* Subtle gradient for depth without blocking content */}
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-background/5 to-transparent" />
-      </div>
-      
-      {/* Content - No background wrapping */}
-      <main className="relative z-10 flex items-center justify-center min-h-screen p-6">
-        <div className="w-full max-w-md">
-          <Suspense
-            fallback={
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-foreground" />
-                <span className="mt-4 text-muted-foreground">Loading...</span>
-              </div>
-            }
-          >
-            {children}
-          </Suspense>
-        </div>
-      </main>
-      
-      {/* CSS animations for subtle movement */}
-      <style jsx>{`
+    <>
+      {/* Global CSS animations */}
+      <style jsx global>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) scale(1); }
           50% { transform: translateY(-10px) scale(1.02); }
@@ -102,7 +56,66 @@ export default function Layout({
           0%, 100% { transform: translateX(0px) translateY(0px) rotate(-6deg); }
           50% { transform: translateX(5px) translateY(-5px) rotate(-6deg); }
         }
+        
+        .bg-float {
+          animation: float 20s ease-in-out infinite;
+        }
+        
+        .bg-float-reverse {
+          animation: floatReverse 25s ease-in-out infinite;
+        }
+        
+        .bg-float-slow {
+          animation: floatSlow 30s ease-in-out infinite;
+        }
       `}</style>
-    </div>
+
+      <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+        {/* Background Images with Subtle Movement */}
+        <div className="absolute inset-0 z-0">
+          {/* Main background image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 bg-float"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80')"
+            }}
+          />
+          
+          {/* Secondary overlay images for depth */}
+          <div 
+            className="absolute top-0 right-0 w-1/2 h-1/2 bg-cover bg-center bg-no-repeat opacity-15 rotate-12 bg-float-reverse"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2015&q=80')"
+            }}
+          />
+          
+          <div 
+            className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-cover bg-center bg-no-repeat opacity-20 -rotate-6 bg-float-slow"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')"
+            }}
+          />
+          
+          {/* Subtle gradient for depth without blocking content */}
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-background/5 to-transparent" />
+        </div>
+        
+        {/* Content - No background wrapping */}
+        <main className="relative z-10 flex items-center justify-center min-h-screen p-6">
+          <div className="w-full max-w-md">
+            <Suspense
+              fallback={
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-foreground" />
+                  <span className="mt-4 text-muted-foreground">Loading...</span>
+                </div>
+              }
+            >
+              {children}
+            </Suspense>
+          </div>
+        </main>
+      </div>
+    </>
   )
 }
