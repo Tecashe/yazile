@@ -339,6 +339,75 @@
 
 
 // SignUp Page Component
+// import { SignUp } from "@clerk/nextjs"
+// import Link from "next/link"
+
+// type SignUpProps = {}
+
+// const Page = (props: SignUpProps) => {
+//   return (
+//     <div className="flex flex-col items-center space-y-6 py-2 bg-neutral-950 min-h-screen">
+//       <div className="text-center space-y-2 w-full">
+//         <h1 className="text-2xl sm:text-3xl font-bold text-neutral-100">
+//           Get Started
+//         </h1>
+//         <p className="text-neutral-400 text-sm">
+//           Create your account to get started
+//         </p>
+//       </div>
+
+//       <div className="w-full">
+//         <SignUp
+//           appearance={{
+//             elements: {
+//               formButtonPrimary:
+//                 "bg-neutral-200 hover:bg-neutral-300 text-neutral-900 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl",
+//               card: "bg-neutral-900 border-2 border-neutral-700 shadow-2xl rounded-xl",
+//               headerTitle: "text-neutral-100 font-bold",
+//               headerSubtitle: "text-neutral-400",
+//               formFieldLabel: "text-neutral-200 font-medium",
+//               formFieldInput:
+//                 "bg-neutral-800 border-2 border-neutral-600 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-400/20 text-neutral-100 placeholder:text-neutral-500 rounded-lg transition-all duration-200 hover:border-neutral-500",
+//               footerActionLink: "text-neutral-300 hover:text-neutral-100",
+//               identityPreviewText: "text-neutral-200",
+//               identityPreviewEditButton: "text-neutral-400 hover:text-neutral-200",
+//               formFieldInputShowPasswordButton: "text-neutral-400 hover:text-neutral-200",
+//               dividerLine: "bg-neutral-700",
+//               dividerText: "text-neutral-500",
+//               formFieldError: "text-red-400",
+//               socialButtonsBlockButton:
+//                 "border-2 border-neutral-700 hover:border-neutral-500 bg-neutral-800 hover:bg-neutral-700 transition-all duration-200",
+//               socialButtonsBlockButtonText: "text-neutral-200",
+//               socialButtonsBlockButtonArrow: "text-neutral-400",
+//             },
+//             layout: {
+//               socialButtonsPlacement: "bottom",
+//               showOptionalFields: false,
+//             },
+//           }}
+//         />
+//       </div>
+
+//       <div className="w-full">
+//         <div className="text-center px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900/50">
+//           <p className="text-xs text-neutral-400 leading-relaxed">
+//             By signing up, you agree to our{" "}
+//             <Link href="/terms" className="text-neutral-200 hover:text-neutral-100 underline">
+//               Terms of Service
+//             </Link>{" "}
+//             and{" "}
+//             <Link href="/privacy" className="text-neutral-200 hover:text-neutral-100 underline">
+//               Privacy Policy
+//             </Link>
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default Page
+
 import { SignUp } from "@clerk/nextjs"
 import Link from "next/link"
 
@@ -346,39 +415,41 @@ type SignUpProps = {}
 
 const Page = (props: SignUpProps) => {
   return (
-    <div className="flex flex-col items-center space-y-6 py-2 bg-neutral-950 min-h-screen">
-      <div className="text-center space-y-2 w-full">
-        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-100">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+      {/* Header */}
+      <div className="text-center space-y-2 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
           Get Started
         </h1>
-        <p className="text-neutral-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           Create your account to get started
         </p>
       </div>
 
-      <div className="w-full">
+      {/* SignUp Component */}
+      <div className="w-full max-w-sm mb-6">
         <SignUp
           appearance={{
             elements: {
               formButtonPrimary:
-                "bg-neutral-200 hover:bg-neutral-300 text-neutral-900 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl",
-              card: "bg-neutral-900 border-2 border-neutral-700 shadow-2xl rounded-xl",
-              headerTitle: "text-neutral-100 font-bold",
-              headerSubtitle: "text-neutral-400",
-              formFieldLabel: "text-neutral-200 font-medium",
+                "bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl",
+              card: "bg-card/80 backdrop-blur-sm border border-border shadow-2xl rounded-xl",
+              headerTitle: "text-card-foreground font-bold",
+              headerSubtitle: "text-muted-foreground",
+              formFieldLabel: "text-card-foreground font-medium",
               formFieldInput:
-                "bg-neutral-800 border-2 border-neutral-600 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-400/20 text-neutral-100 placeholder:text-neutral-500 rounded-lg transition-all duration-200 hover:border-neutral-500",
-              footerActionLink: "text-neutral-300 hover:text-neutral-100",
-              identityPreviewText: "text-neutral-200",
-              identityPreviewEditButton: "text-neutral-400 hover:text-neutral-200",
-              formFieldInputShowPasswordButton: "text-neutral-400 hover:text-neutral-200",
-              dividerLine: "bg-neutral-700",
-              dividerText: "text-neutral-500",
-              formFieldError: "text-red-400",
+                "bg-background border-2 border-input focus:border-ring focus:ring-2 focus:ring-ring/20 text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200 hover:border-ring/60",
+              footerActionLink: "text-muted-foreground hover:text-foreground",
+              identityPreviewText: "text-card-foreground",
+              identityPreviewEditButton: "text-muted-foreground hover:text-foreground",
+              formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground",
+              dividerLine: "bg-border",
+              dividerText: "text-muted-foreground",
+              formFieldError: "text-red-500",
               socialButtonsBlockButton:
-                "border-2 border-neutral-700 hover:border-neutral-500 bg-neutral-800 hover:bg-neutral-700 transition-all duration-200",
-              socialButtonsBlockButtonText: "text-neutral-200",
-              socialButtonsBlockButtonArrow: "text-neutral-400",
+                "border-2 border-input hover:border-ring bg-background hover:bg-accent transition-all duration-200",
+              socialButtonsBlockButtonText: "text-foreground",
+              socialButtonsBlockButtonArrow: "text-muted-foreground",
             },
             layout: {
               socialButtonsPlacement: "bottom",
@@ -388,15 +459,16 @@ const Page = (props: SignUpProps) => {
         />
       </div>
 
-      <div className="w-full">
-        <div className="text-center px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900/50">
-          <p className="text-xs text-neutral-400 leading-relaxed">
+      {/* Terms and Privacy */}
+      <div className="w-full max-w-sm">
+        <div className="text-center px-4 py-3 rounded-lg border border-border bg-card/50 backdrop-blur-sm">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-neutral-200 hover:text-neutral-100 underline">
+            <Link href="/terms" className="text-foreground hover:text-foreground/80 underline">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-neutral-200 hover:text-neutral-100 underline">
+            <Link href="/privacy" className="text-foreground hover:text-foreground/80 underline">
               Privacy Policy
             </Link>
           </p>
