@@ -77,7 +77,7 @@ export default function Layout({
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 bg-float"
             style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80')"
+              backgroundImage: "url('/images/bg-main.jpg')"
             }}
           />
           
@@ -85,14 +85,14 @@ export default function Layout({
           <div 
             className="absolute top-0 right-0 w-1/2 h-1/2 bg-cover bg-center bg-no-repeat opacity-15 rotate-12 bg-float-reverse"
             style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2015&q=80')"
+              backgroundImage: "url('/images/bg-secondary.jpg')"
             }}
           />
           
           <div 
             className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-cover bg-center bg-no-repeat opacity-20 -rotate-6 bg-float-slow"
             style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')"
+              backgroundImage: "url('/images/bg-accent.jpg')"
             }}
           />
           
