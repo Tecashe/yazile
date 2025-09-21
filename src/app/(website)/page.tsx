@@ -1904,6 +1904,7 @@ export default function Home() {
                 </div>
               </div>
 
+
               {/* Visual Side - Mobile Responsive */}
               <div className="relative flex items-center justify-center lg:justify-end mt-8 lg:mt-0">
                 {/* Main Dashboard Screenshot - Responsive */}
@@ -1920,8 +1921,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Floating Screenshots - Hidden on mobile for cleaner look */}
-                <div className="hidden lg:block absolute -top-8 -left-8 xl:-left-16">
+                {/* Floating Screenshots - Better positioned for overlap */}
+                <div className="hidden lg:block absolute -top-16 -left-20 xl:-left-28 z-10">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-2">
@@ -1936,7 +1937,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="hidden lg:block absolute -bottom-12 -right-4 xl:-right-12">
+                <div className="hidden lg:block absolute -bottom-20 -right-16 xl:-right-24 z-10">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:-rotate-2">
@@ -1951,9 +1952,19 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              
             </div>
           </div>
         </section>
+
+
+
+
+
+
+
+
 
         {/* Stats Section */}
         <section className="border-y border-border/50 bg-muted/30 py-8 sm:py-12">
