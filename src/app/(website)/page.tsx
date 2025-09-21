@@ -3189,7 +3189,7 @@ export default function Home() {
                       </div>
                       <div className="p-4 space-y-3">
                         <div className="bg-gray-100 p-3 rounded-lg">
-                          <p className="text-sm">"I need a solution for my 50-person team"</p>
+                          <p className="text-sm">&ldquo;I need a solution for my 50-person team&rdquo;</p>
                         </div>
                         <div className="bg-blue-500 text-white p-3 rounded-lg text-right">
                           <p className="text-sm">Perfect! Let me get your details...</p>
@@ -3500,7 +3500,7 @@ export default function Home() {
                         </Button>
 
                         <div className="space-y-4">
-                          <div className="text-sm font-semibold">What's included:</div>
+                          <div className="text-sm font-semibold">What&apos;s included:</div>
                           <ul className="space-y-3">
                             {plan.features.map((feature, featureIndex) => (
                               <li key={featureIndex} className="flex items-start gap-3">
@@ -3624,7 +3624,7 @@ export default function Home() {
                 >
                   <CardContent className="p-6">
                     <div className="space-y-4">
-                      <p className="text-muted-foreground italic">"{testimonial.quote}"</p>
+                      <p className="text-muted-foreground italic">&ldquo;{testimonial.quote}&rdquo;</p>
                       <div className="flex items-center gap-4">
                         <Image
                           src={testimonial.image}
