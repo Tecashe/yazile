@@ -1920,7 +1920,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Floating Screenshots - Hidden on mobile for cleaner look */}
+                {/* Floating Screenshots - Hidden on mobile for cleanr look */}
                 <div className="hidden lg:block absolute -top-8 -left-8 xl:-left-16">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
