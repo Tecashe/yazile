@@ -2067,107 +2067,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Solutions Section */}
-        <section id="solutions" className="py-12 sm:py-16 md:py-24">
-          <div className="container px-4 sm:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
-                  Complete Solution
-                </Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                  From Instagram DMs to CRM in one seamless flow
-                </h2>
-                <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
-                  See how our platform transforms your Instagram conversations into qualified leads ready for your sales team.
-                </p>
-              </div>
-            </div>
-            <div className="mt-8 sm:mt-12">
-              <Tabs defaultValue="automation" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="automation" className="text-xs sm:text-sm">DM Automation</TabsTrigger>
-                  <TabsTrigger value="leads" className="text-xs sm:text-sm">Lead Qualification & CRM</TabsTrigger>
-                </TabsList>
-                <TabsContent value="automation" className="mt-6">
-                  <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-                    <div className="flex flex-col justify-center space-y-4">
-                      <h3 className="text-xl sm:text-2xl font-bold">Automate your Instagram DM responses</h3>
-                      <p className="text-sm sm:text-base text-muted-foreground">
-                        Our AI-powered system handles Instagram DM conversations 24/7, providing instant, personalized responses that engage potential customers and capture their interest.
-                      </p>
-                      <ul className="space-y-2">
-                        {[
-                          "Intelligent auto-responses",
-                          "24/7 customer engagement",
-                          "Natural conversation flow",
-                          "Custom response templates",
-                          "Multi-language support",
-                        ].map((item, i) => (
-                          <li key={i} className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                            <span className="text-sm sm:text-base">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <Button className="w-fit">
-                        Learn more
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-center rounded-lg border border-border/50 bg-muted/30 p-4 sm:p-6">
-                      <Image
-                        src="/three.png?height=400&width=600&text=DM+Automation+Dashboard"
-                        alt="DM Automation Dashboard Screenshot"
-                        width={600}
-                        height={400}
-                        className="rounded-md w-full h-auto"
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="leads" className="mt-6">
-                  <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-                    <div className="flex flex-col justify-center space-y-4">
-                      <h3 className="text-xl sm:text-2xl font-bold">Qualify leads and sync to your CRM</h3>
-                      <p className="text-sm sm:text-base text-muted-foreground">
-                        AI analyzes every conversation to identify qualified leads based on buying intent, then automatically syncs them to your CRM with detailed context and scoring.
-                      </p>
-                      <ul className="space-y-2">
-                        {[
-                          "AI-powered lead scoring",
-                          "Automatic qualification criteria",
-                          "Real-time CRM synchronization",
-                          "Detailed conversation context",
-                          "Custom lead scoring rules",
-                        ].map((item, i) => (
-                          <li key={i} className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                            <span className="text-sm sm:text-base">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <Button className="w-fit">
-                        Learn more
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-center rounded-lg border border-border/50 bg-muted/30 p-4 sm:p-6">
-                      <Image
-                        src="/two.png?height=400&width=600&text=Lead+Qualification+Dashboard"
-                        alt="Lead Qualification Dashboard Screenshot"
-                        width={600}
-                        height={400}
-                        className="rounded-md w-full h-auto"
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
+
+        <section>
+          <ScrollAnimatedFlowSection />
         </section>
 
+    
         {/* Pricing Section */}
         <section id="pricing" className="py-12 sm:py-16 md:py-24">
           <div className="container px-4 sm:px-6">
@@ -2259,7 +2164,7 @@ export default function Home() {
           </div>
         </section>
 
-        <ScrollAnimatedFlowSection />
+        
 
         {/* Testimonials Section */}
         <section id="testimonials" className="py-12 sm:py-16 md:py-24 bg-muted/30">
