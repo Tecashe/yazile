@@ -1654,6 +1654,7 @@ import {
   Menu,
   X,
 } from "lucide-react"
+import ScrollAnimatedFlowSection from "@/components/global/landing/ai-chat-demo"
 
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -2257,6 +2258,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <ScrollAnimatedFlowSection />
 
         {/* Testimonials Section */}
         <section id="testimonials" className="py-12 sm:py-16 md:py-24 bg-muted/30">
