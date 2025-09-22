@@ -633,7 +633,7 @@ export function SlidingNotificationPanel() {
               </div>
               <h3 className="text-lg font-medium text-foreground mb-2">No notifications yet</h3>
               <p className="text-sm text-muted-foreground max-w-sm">
-                You'll see notifications here when something important happens with your automations and campaigns.
+                You&apos;ll see notifications here when something important happens with your automations and campaigns.
               </p>
             </div>
           ) : (
