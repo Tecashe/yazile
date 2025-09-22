@@ -1117,6 +1117,936 @@
 // }
 
 
+// "use client"
+
+// import { useState, useCallback } from "react"
+// import {
+//   Instagram,
+//   TrendingUp,
+//   RefreshCw,
+//   BarChart3,
+//   Clock,
+//   Loader2,
+//   Sparkles,
+//   Target,
+//   Brain,
+//   Trophy,
+//   Lightbulb,
+//   ArrowUp,
+//   ArrowDown,
+//   Users,
+//   Eye,
+//   Globe,
+//   Calendar,
+//   Zap,
+//   CheckCircle,
+//   XCircle,
+// } from "lucide-react"
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Badge } from "@/components/ui/badge"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { Progress } from "@/components/ui/progress"
+// import { useToast } from "@/hooks/use-toast"
+// import { useQuery, useQueryClient } from "@tanstack/react-query"
+// import {
+//   fetchInstagramMedia,
+//   getAccountInsights,
+//   refreshAccessToken,
+//   bulkRefreshIntegrations,
+//   generateContentStrategy,
+//   getOptimalPostingTimes,
+//   analyzeCompetitors,
+//   getAudienceInsights,
+//   analyzeContentTrends,
+// } from "@/actions/integrations"
+
+// interface InstagramDashboardProps {
+//   userId: string
+// }
+
+// // Analysis control stat
+// interface AnalysisState {
+//   lastAnalysis: Date | null
+//   isAnalyzing: boolean
+//   analysisType: string | null
+// }
+
+// export default function EnhancedInstagramDashboard({ userId }: InstagramDashboardProps) {
+//   const [activeTab, setActiveTab] = useState("overview")
+//   const [selectedPeriod, setSelectedPeriod] = useState<"day" | "week" | "days_28">("week")
+//   const [isRefreshing, setIsRefreshing] = useState(false)
+//   const [analysisState, setAnalysisState] = useState<AnalysisState>({
+//     lastAnalysis: null,
+//     isAnalyzing: false,
+//     analysisType: null,
+//   })
+
+//   const { toast } = useToast()
+//   const queryClient = useQueryClient()
+
+//   // Core data queries - always fetch real data
+//   const {
+//     data: mediaData,
+//     isLoading: mediaLoading,
+//     error: mediaError,
+//   } = useQuery({
+//     queryKey: ["instagram-media", userId],
+//     queryFn: () => fetchInstagramMedia(userId, 50),
+//     refetchInterval: 5 * 60 * 1000,
+//     retry: 2,
+//   })
+
+//   const {
+//     data: insightsData,
+//     isLoading: insightsLoading,
+//     error: insightsError,
+//   } = useQuery({
+//     queryKey: ["instagram-insights", userId, selectedPeriod],
+//     queryFn: () => getAccountInsights(userId, selectedPeriod),
+//     refetchInterval: 10 * 60 * 1000,
+//     retry: 2,
+//   })
+
+//   // Controlled AI analysis queries - only fetch when explicitly triggered
+//   const {
+//     data: contentStrategy,
+//     isLoading: strategyLoading,
+//     refetch: refetchStrategy,
+//   } = useQuery({
+//     queryKey: ["content-strategy", userId],
+//     queryFn: () => generateContentStrategy(userId),
+//     enabled: false, // Don't auto-fetch
+//     staleTime: 24 * 60 * 60 * 1000, // 24 hours
+//   })
+
+//   const {
+//     data: optimalTimes,
+//     isLoading: timesLoading,
+//     refetch: refetchTimes,
+//   } = useQuery({
+//     queryKey: ["optimal-times", userId],
+//     queryFn: () => getOptimalPostingTimes(userId),
+//     enabled: false, // Don't auto-fetch
+//     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+//   })
+
+//   const {
+//     data: audienceInsights,
+//     isLoading: audienceLoading,
+//     refetch: refetchAudience,
+//   } = useQuery({
+//     queryKey: ["audience-insights", userId],
+//     queryFn: () => getAudienceInsights(userId),
+//     enabled: false, // Don't auto-fetch
+//     staleTime: 24 * 60 * 60 * 1000,
+//   })
+
+//   const {
+//     data: competitorAnalysis,
+//     isLoading: competitorLoading,
+//     refetch: refetchCompetitors,
+//   } = useQuery({
+//     queryKey: ["competitor-analysis", userId],
+//     queryFn: () => analyzeCompetitors(userId),
+//     enabled: false, // Don't auto-fetch
+//     staleTime: 7 * 24 * 60 * 60 * 1000,
+//   })
+
+//   const {
+//     data: contentTrends,
+//     isLoading: trendsLoading,
+//     refetch: refetchTrends,
+//   } = useQuery({
+//     queryKey: ["content-trends", userId],
+//     queryFn: () => analyzeContentTrends(userId),
+//     enabled: false, // Don't auto-fetch
+//     staleTime: 24 * 60 * 60 * 1000,
+//   })
+
+//   // Controlled analysis trigger
+//   const triggerAnalysis = useCallback(
+//     async (analysisType: string) => {
+//       const now = new Date()
+//       const lastAnalysis = analysisState.lastAnalysis
+
+//       // Rate limiting: prevent analysis more than once every 30 minutes
+//       if (lastAnalysis && now.getTime() - lastAnalysis.getTime() < 30 * 60 * 1000) {
+//         toast({
+//           title: "Analysis Rate Limited",
+//           description: "Please wait 30 minutes between AI analyses to avoid rate limits.",
+//           variant: "destructive",
+//         })
+//         return
+//       }
+
+//       setAnalysisState({
+//         lastAnalysis: now,
+//         isAnalyzing: true,
+//         analysisType,
+//       })
+
+//       try {
+//         switch (analysisType) {
+//           case "content-strategy":
+//             await refetchStrategy()
+//             break
+//           case "optimal-times":
+//             await refetchTimes()
+//             break
+//           case "audience-insights":
+//             await refetchAudience()
+//             break
+//           case "competitor-analysis":
+//             await refetchCompetitors()
+//             break
+//           case "content-trends":
+//             await refetchTrends()
+//             break
+//           case "full-analysis":
+//             await Promise.all([refetchStrategy(), refetchTimes(), refetchAudience(), refetchTrends()])
+//             break
+//         }
+
+//         toast({
+//           title: "Analysis Complete",
+//           description: `${analysisType.replace("-", " ")} has been updated with fresh AI insights.`,
+//         })
+//       } catch (error) {
+//         toast({
+//           title: "Analysis Failed",
+//           description: "Failed to generate AI insights. Please try again later.",
+//           variant: "destructive",
+//         })
+//       } finally {
+//         setAnalysisState((prev) => ({
+//           ...prev,
+//           isAnalyzing: false,
+//           analysisType: null,
+//         }))
+//       }
+//     },
+//     [
+//       analysisState.lastAnalysis,
+//       refetchStrategy,
+//       refetchTimes,
+//       refetchAudience,
+//       refetchCompetitors,
+//       refetchTrends,
+//       toast,
+//     ],
+//   )
+
+//   // Calculate real metrics from actual data
+//   const calculateRealMetrics = useCallback(() => {
+//     if (!mediaData?.data || !insightsData?.data) return null
+
+//     const posts = mediaData.data
+//     const insights = insightsData.data
+
+//     // Calculate engagement rate from real data
+//     const totalLikes = posts.reduce((sum: number, post: any) => sum + (post.like_count || 0), 0)
+//     const totalComments = posts.reduce((sum: number, post: any) => sum + (post.comments_count || 0), 0)
+//     const totalEngagement = totalLikes + totalComments
+//     const avgEngagementPerPost = posts.length > 0 ? totalEngagement / posts.length : 0
+
+//     // Get follower count from insights or estimate
+//     const followerCount = insights.find((i: any) => i.name === "follower_count")?.values?.[0]?.value || 1000
+//     const engagementRate = ((avgEngagementPerPost / followerCount) * 100).toFixed(2)
+
+   
+//     const postDates = posts.map((post: any) => new Date(post.timestamp))
+//     const oldestPost = Math.min(...postDates.map((d: Date) => d.getTime()))
+//     const newestPost = Math.max(...postDates.map((d: Date) => d.getTime()))
+//     const daysDiff = (newestPost - oldestPost) / (1000 * 60 * 60 * 24)
+//     const postsPerWeek = daysDiff > 0 ? ((posts.length / daysDiff) * 7).toFixed(1) : "0"
+
+//     // Identify top performing content
+//     const topPost = posts.reduce((best: any, current: any) => {
+//       const currentEngagement = (current.like_count || 0) + (current.comments_count || 0)
+//       const bestEngagement = (best?.like_count || 0) + (best?.comments_count || 0)
+//       return currentEngagement > bestEngagement ? current : best
+//     }, null)
+
+//     return {
+//       engagementRate,
+//       totalPosts: posts.length,
+//       totalLikes,
+//       totalComments,
+//       avgLikesPerPost: Math.round(totalLikes / posts.length),
+//       avgCommentsPerPost: Math.round(totalComments / posts.length),
+//       postsPerWeek,
+//       topPost,
+//       followerCount,
+//     }
+//   }, [mediaData, insightsData])
+
+//   const realMetrics = calculateRealMetrics()
+
+//   const handleRefreshData = async () => {
+//     setIsRefreshing(true)
+//     try {
+//       await bulkRefreshIntegrations(userId)
+//       await queryClient.invalidateQueries({ queryKey: ["instagram-media"] })
+//       await queryClient.invalidateQueries({ queryKey: ["instagram-insights"] })
+
+//       toast({
+//         title: "Data Refreshed",
+//         description: "Instagram data has been updated successfully.",
+//       })
+//     } catch (error) {
+//       toast({
+//         title: "Refresh Failed",
+//         description: "Failed to refresh Instagram data.",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsRefreshing(false)
+//     }
+//   }
+
+//   const handleRefreshToken = async () => {
+//     try {
+//       const result = await refreshAccessToken(userId)
+//       if (result.status === 200) {
+//         toast({
+//           title: "Token Refreshed",
+//           description: "Instagram access token refreshed successfully.",
+//         })
+//       } else {
+//         toast({
+//           title: "Token Refresh Failed",
+//           description: result.message || "Failed to refresh access token.",
+//           variant: "destructive",
+//         })
+//       }
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: "Failed to refresh access token.",
+//         variant: "destructive",
+//       })
+//     }
+//   }
+
+//   // Show loading state for core data
+//   if (mediaLoading || insightsLoading) {
+//     return (
+//       <div className="flex items-center justify-center h-96">
+//         <div className="text-center">
+//           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+//           <p className="text-muted-foreground">Loading Instagram data...</p>
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   // Show error state
+//   if (mediaError || insightsError) {
+//     return (
+//       <div className="flex items-center justify-center h-96">
+//         <div className="text-center">
+//           <XCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+//           <p className="text-muted-foreground mb-4">Failed to load Instagram data</p>
+//           <Button onClick={handleRefreshData} variant="outline">
+//             <RefreshCw className="h-4 w-4 mr-2" />
+//             Retry
+//           </Button>
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       {/* Header with controls */}
+//       {/* <div className="flex items-center justify-between">
+//         <div className="flex items-center gap-2">
+//           <Instagram className="h-6 w-6 text-pink-600" />
+//           <h1 className="text-2xl font-bold">Instagram Growth Analytics</h1>
+//         </div>
+//         <div className="flex items-center gap-2">
+//           <Button onClick={handleRefreshToken} variant="outline" size="sm">
+//             <RefreshCw className="h-4 w-4 mr-2" />
+//             Refresh Token
+//           </Button>
+//           <Button onClick={handleRefreshData} disabled={isRefreshing} variant="outline" size="sm">
+//             {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+//             Refresh Data
+//           </Button>
+//           <Button
+//             onClick={() => triggerAnalysis("full-analysis")}
+//             disabled={analysisState.isAnalyzing}
+//             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+//           >
+//             {analysisState.isAnalyzing ? (
+//               <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//             ) : (
+//               <Sparkles className="h-4 w-4 mr-2" />
+//             )}
+//             Generate AI Insights
+//           </Button>
+//         </div>
+//       </div> */}
+
+//       {/* Analysis Status */}
+//       {analysisState.lastAnalysis && (
+//         <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+//           <CardContent className="p-4">
+//             <div className="flex items-center justify-between">
+//               <div className="flex items-center gap-2">
+//                 <CheckCircle className="h-4 w-4 text-blue-600" />
+//                 <span className="text-sm font-medium">
+//                   Last AI analysis: {analysisState.lastAnalysis.toLocaleString()}
+//                 </span>
+//               </div>
+//               <Badge variant="secondary">
+//                 Next analysis available in{" "}
+//                 {Math.max(0, 30 - Math.floor((Date.now() - analysisState.lastAnalysis.getTime()) / (1000 * 60)))}{" "}
+//                 minutes
+//               </Badge>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       )}
+
+//       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+//         <TabsList className="grid w-full grid-cols-4">
+//           <TabsTrigger value="overview">Overview</TabsTrigger>
+//           <TabsTrigger value="growth-insights">Growth Insights</TabsTrigger>
+//           <TabsTrigger value="content-analysis">Content Analysis</TabsTrigger>
+//           <TabsTrigger value="competitive-intel">Competitive Intel</TabsTrigger>
+//         </TabsList>
+
+//         {/* Overview Tab - Real Performance Metrics */}
+//         <TabsContent value="overview" className="space-y-6">
+//           {/* Period Selector */}
+//           <div className="flex items-center gap-2">
+//             <span className="text-sm font-medium">Period:</span>
+//             <Select
+//               value={selectedPeriod}
+//               onValueChange={(value: "day" | "week" | "days_28") => setSelectedPeriod(value)}
+//             >
+//               <SelectTrigger className="w-32">
+//                 <SelectValue />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 <SelectItem value="day">Today</SelectItem>
+//                 <SelectItem value="week">This Week</SelectItem>
+//                 <SelectItem value="days_28">Last 28 Days</SelectItem>
+//               </SelectContent>
+//             </Select>
+//           </div>
+
+//           {/* Real Performance Metrics */}
+//           {realMetrics && (
+//             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//               <Card>
+//                 <CardContent className="p-6">
+//                   <div className="flex items-center justify-between">
+//                     <div>
+//                       <p className="text-sm font-medium text-muted-foreground">Engagement Rate</p>
+//                       <p className="text-2xl font-bold text-green-600">{realMetrics.engagementRate}%</p>
+//                     </div>
+//                     <TrendingUp className="h-6 w-6 text-green-600" />
+//                   </div>
+//                 </CardContent>
+//               </Card>
+
+//               <Card>
+//                 <CardContent className="p-6">
+//                   <div className="flex items-center justify-between">
+//                     <div>
+//                       <p className="text-sm font-medium text-muted-foreground">Total Posts</p>
+//                       <p className="text-2xl font-bold">{realMetrics.totalPosts}</p>
+//                     </div>
+//                     <BarChart3 className="h-6 w-6 text-blue-600" />
+//                   </div>
+//                 </CardContent>
+//               </Card>
+
+//               <Card>
+//                 <CardContent className="p-6">
+//                   <div className="flex items-center justify-between">
+//                     <div>
+//                       <p className="text-sm font-medium text-muted-foreground">Avg Likes/Post</p>
+//                       <p className="text-2xl font-bold">{realMetrics.avgLikesPerPost}</p>
+//                     </div>
+//                     <Eye className="h-6 w-6 text-purple-600" />
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             </div>
+//           )}
+
+//           {/* Account Insights */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//             {insightsData?.data?.map((insight: any, index: number) => {
+//               const icons = [Users, Eye, Globe, TrendingUp]
+//               const colors = ["blue", "green", "purple", "orange"]
+//               const Icon = icons[index % icons.length]
+//               const color = colors[index % colors.length]
+
+//               return (
+//                 <Card key={insight.name}>
+//                   <CardContent className="p-6">
+//                     <div className="flex items-center justify-between">
+//                       <div>
+//                         <p className="text-sm font-medium text-muted-foreground capitalize">
+//                           {insight.title || insight.name.replace("_", " ")}
+//                         </p>
+//                         <p className="text-2xl font-bold">{insight.values[0]?.value?.toLocaleString() || 0}</p>
+//                       </div>
+//                       <Icon className={`h-6 w-6 text-${color}-600`} />
+//                     </div>
+//                   </CardContent>
+//                 </Card>
+//               )
+//             })}
+//           </div>
+
+//           {/* Top Performing Content */}
+//           {realMetrics?.topPost && (
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Trophy className="h-5 w-5 text-amber-600" />
+//                   Top Performing Post
+//                 </CardTitle>
+//                 <CardDescription>Your highest engagement post in this period</CardDescription>
+//               </CardHeader>
+//               <CardContent>
+//                 <div className="flex gap-4">
+//                   <div
+//                     className="w-24 h-24 bg-cover bg-center rounded-lg flex-shrink-0"
+//                     style={{
+//                       backgroundImage: `url(${realMetrics.topPost.media_url || realMetrics.topPost.thumbnail_url || "/placeholder.svg?height=96&width=96"})`,
+//                     }}
+//                   />
+//                   <div className="flex-1">
+//                     <p className="text-sm line-clamp-3 mb-2">{realMetrics.topPost.caption || "No caption"}</p>
+//                     <div className="flex gap-4 text-sm text-muted-foreground">
+//                       <span>{realMetrics.topPost.like_count || 0} likes</span>
+//                       <span>{realMetrics.topPost.comments_count || 0} comments</span>
+//                       <span>
+//                         {(
+//                           ((realMetrics.topPost.like_count + realMetrics.topPost.comments_count) /
+//                             realMetrics.followerCount) *
+//                           100
+//                         ).toFixed(2)}
+//                         % engagement
+//                       </span>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           )}
+//         </TabsContent>
+
+//         {/* Growth Insights Tab - AI-Powered Analysis */}
+//         <TabsContent value="growth-insights" className="space-y-6">
+//           <div className="flex items-center justify-between">
+//             <h2 className="text-xl font-semibold">AI-Powered Growth Insights</h2>
+//             <Button
+//               onClick={() => triggerAnalysis("audience-insights")}
+//               disabled={analysisState.isAnalyzing}
+//               variant="outline"
+//             >
+//               {analysisState.isAnalyzing && analysisState.analysisType === "audience-insights" ? (
+//                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//               ) : (
+//                 <Brain className="h-4 w-4 mr-2" />
+//               )}
+//               Analyze Audience
+//             </Button>
+//           </div>
+
+//           {/* AI Performance Scores */}
+//           {audienceInsights?.data && (
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Brain className="h-5 w-5 text-purple-600" />
+//                   AI Performance Analysis
+//                 </CardTitle>
+//                 <CardDescription>Deep insights into your account performance</CardDescription>
+//               </CardHeader>
+//               <CardContent>
+//                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                   {audienceInsights.data.performanceScores?.map((score: any, index: number) => (
+//                     <div key={index} className="text-center">
+//                       <div
+//                         className={`text-3xl font-bold mb-2 ${
+//                           score.value > 80 ? "text-green-600" : score.value > 60 ? "text-blue-600" : "text-orange-600"
+//                         }`}
+//                       >
+//                         {score.value}
+//                       </div>
+//                       <div className="text-sm text-muted-foreground">{score.name}</div>
+//                       <Progress value={score.value} className="mt-2" />
+//                     </div>
+//                   ))}
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           )}
+
+//           {/* Growth Projections */}
+//           {audienceInsights?.data && (
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <Target className="h-5 w-5 text-green-600" />
+//                     Growth Projection
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent>
+//                   <div className="text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg mb-4">
+//                     <div className="text-2xl font-bold text-green-600">
+//                       {audienceInsights.data.growthProjection?.monthly || "N/A"}
+//                     </div>
+//                     <div className="text-sm text-muted-foreground">Projected monthly growth</div>
+//                   </div>
+//                   <div className="space-y-2">
+//                     {audienceInsights.data.growthFactors?.map((factor: any, index: number) => (
+//                       <div key={index} className="flex justify-between text-sm">
+//                         <span>{factor.name}</span>
+//                         <span className="text-green-600 font-medium">{factor.impact}</span>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </CardContent>
+//               </Card>
+
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <Zap className="h-5 w-5 text-yellow-600" />
+//                     Engagement Optimization
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent>
+//                   <div className="text-center p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 rounded-lg mb-4">
+//                     <div className="text-2xl font-bold text-yellow-600">
+//                       {audienceInsights.data.currentEngagementRate || "N/A"}
+//                     </div>
+//                     <div className="text-sm text-muted-foreground">Current engagement rate</div>
+//                   </div>
+//                   <div className="space-y-2">
+//                     {audienceInsights.data.engagementFactors?.map((factor: any, index: number) => (
+//                       <div key={index} className="flex justify-between text-sm">
+//                         <span>{factor.name}</span>
+//                         <span className="text-blue-600 font-medium">{factor.impact}</span>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             </div>
+//           )}
+
+//           {/* Optimal Posting Times */}
+//           <Card>
+//             <CardHeader>
+//               <div className="flex items-center justify-between">
+//                 <div>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <Clock className="h-5 w-5 text-blue-600" />
+//                     AI-Optimized Posting Schedule
+//                   </CardTitle>
+//                   <CardDescription>When your audience is most active</CardDescription>
+//                 </div>
+//                 <Button
+//                   onClick={() => triggerAnalysis("optimal-times")}
+//                   disabled={analysisState.isAnalyzing}
+//                   variant="outline"
+//                   size="sm"
+//                 >
+//                   {analysisState.isAnalyzing && analysisState.analysisType === "optimal-times" ? (
+//                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//                   ) : (
+//                     <RefreshCw className="h-4 w-4 mr-2" />
+//                   )}
+//                   Analyze Times
+//                 </Button>
+//               </div>
+//             </CardHeader>
+//             <CardContent>
+//               {timesLoading ? (
+//                 <div className="animate-pulse space-y-4">
+//                   <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
+//                   <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+//                 </div>
+//               ) : optimalTimes?.data ? (
+//                 <div className="grid grid-cols-7 gap-2">
+//                   {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => {
+//                     const dayData = optimalTimes.data.schedule?.find((d: any) =>
+//                       d.day.toLowerCase().startsWith(day.toLowerCase()),
+//                     )
+
+//                     return (
+//                       <div key={day} className="text-center">
+//                         <div className="font-medium text-sm mb-2">{day}</div>
+//                         <div className="space-y-1">
+//                           {dayData?.times?.map((time: any, i: number) => (
+//                             <div
+//                               key={i}
+//                               className={`${
+//                                 i % 2 === 0
+//                                   ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+//                                   : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+//                               } text-xs p-1 rounded`}
+//                             >
+//                               {time}
+//                             </div>
+//                           )) || <div className="text-xs text-muted-foreground">Analyzing...</div>}
+//                         </div>
+//                       </div>
+//                     )
+//                   })}
+//                 </div>
+//               ) : (
+//                 <div className="text-center text-muted-foreground py-8">
+//                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+//                   <p>Click &ldquo;Analyze Times&rdquo; to get AI-powered posting recommendations</p>
+//                 </div>
+//               )}
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Content Analysis Tab */}
+//         <TabsContent value="content-analysis" className="space-y-6">
+//           <div className="flex items-center justify-between">
+//             <h2 className="text-xl font-semibold">Content Performance Analysis</h2>
+//             <Button
+//               onClick={() => triggerAnalysis("content-strategy")}
+//               disabled={analysisState.isAnalyzing}
+//               variant="outline"
+//             >
+//               {analysisState.isAnalyzing && analysisState.analysisType === "content-strategy" ? (
+//                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//               ) : (
+//                 <Lightbulb className="h-4 w-4 mr-2" />
+//               )}
+//               Analyze Content
+//             </Button>
+//           </div>
+
+//           {/* Content Strategy Recommendations */}
+//           {contentStrategy?.data && (
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <Lightbulb className="h-5 w-5 text-yellow-600" />
+//                     AI Recommendations
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent className="space-y-4">
+//                   {contentStrategy.data.recommendations?.map((rec: any, index: number) => {
+//                     const icons = [TrendingUp, Target, Sparkles]
+//                     const colors = ["blue", "green", "purple"]
+//                     const Icon = icons[index % icons.length]
+//                     const color = colors[index % colors.length]
+
+//                     return (
+//                       <div
+//                         key={index}
+//                         className={`flex items-start gap-3 p-3 bg-${color}-50 dark:bg-${color}-950 rounded-lg`}
+//                       >
+//                         <Icon className={`h-5 w-5 text-${color}-600 mt-0.5`} />
+//                         <div>
+//                           <h4 className="font-medium">{rec.title}</h4>
+//                           <p className="text-sm text-muted-foreground">{rec.description}</p>
+//                         </div>
+//                       </div>
+//                     )
+//                   })}
+//                 </CardContent>
+//               </Card>
+
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <BarChart3 className="h-5 w-5 text-blue-600" />
+//                     Content Themes Performance
+//                   </CardTitle>
+//                 </CardHeader>
+//                 <CardContent className="space-y-4">
+//                   {contentStrategy.data.contentThemes?.map((theme: any, index: number) => (
+//                     <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+//                       <div>
+//                         <h4 className="font-medium">{theme.theme}</h4>
+//                         <p className="text-sm text-muted-foreground">{theme.performance}</p>
+//                       </div>
+//                       <Badge variant="secondary">{theme.performance}</Badge>
+//                     </div>
+//                   ))}
+//                 </CardContent>
+//               </Card>
+//             </div>
+//           )}
+
+//           {/* Content Trends */}
+//           {contentTrends?.data && (
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <TrendingUp className="h-5 w-5 text-green-600" />
+//                   Content Trends & Opportunities
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent className="space-y-4">
+//                 {contentTrends.data.growthMetrics?.map((metric: any, index: number) => (
+//                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+//                     <div>
+//                       <h4 className="font-medium">{metric.name}</h4>
+//                       <p className="text-sm text-muted-foreground">{metric.description}</p>
+//                     </div>
+//                     {metric.trend === "up" ? (
+//                       <ArrowUp className="h-5 w-5 text-green-600" />
+//                     ) : (
+//                       <ArrowDown className="h-5 w-5 text-red-600" />
+//                     )}
+//                   </div>
+//                 ))}
+//               </CardContent>
+//             </Card>
+//           )}
+
+//           {/* Recent Posts Grid */}
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Recent Posts Performance</CardTitle>
+//               <CardDescription>Your latest content with engagement metrics</CardDescription>
+//             </CardHeader>
+//             <CardContent>
+//               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+//                 {mediaData?.data?.slice(0, 9).map((post: any) => {
+//                   const engagement = (post.like_count || 0) + (post.comments_count || 0)
+//                   const engagementRate = realMetrics ? ((engagement / realMetrics.followerCount) * 100).toFixed(2) : "0"
+
+//                   return (
+//                     <div key={post.id} className="space-y-2">
+//                       <div
+//                         className="aspect-square bg-cover bg-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity relative"
+//                         style={{
+//                           backgroundImage: `url(${post.media_url || post.thumbnail_url || "/placeholder.svg?height=300&width=300"})`,
+//                         }}
+//                       >
+//                         <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all flex items-center justify-center rounded-lg">
+//                           <div className="opacity-0 hover:opacity-100 transition-opacity text-white text-center">
+//                             <div className="text-sm font-medium">{engagement} total engagement</div>
+//                             <div className="text-xs">{engagementRate}% rate</div>
+//                           </div>
+//                         </div>
+//                       </div>
+//                       <div>
+//                         <p className="text-sm line-clamp-2">{post.caption || "No caption"}</p>
+//                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
+//                           <span>{post.like_count || 0} likes</span>
+//                           <span>{post.comments_count || 0} comments</span>
+//                           <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   )
+//                 })}
+//               </div>
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Competitive Intelligence Tab */}
+//         <TabsContent value="competitive-intel" className="space-y-6">
+//           <div className="flex items-center justify-between">
+//             <h2 className="text-xl font-semibold">Competitive Intelligence</h2>
+//             <Button
+//               onClick={() => triggerAnalysis("competitor-analysis")}
+//               disabled={analysisState.isAnalyzing}
+//               variant="outline"
+//             >
+//               {analysisState.isAnalyzing && analysisState.analysisType === "competitor-analysis" ? (
+//                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//               ) : (
+//                 <Trophy className="h-4 w-4 mr-2" />
+//               )}
+//               Analyze Competitors
+//             </Button>
+//           </div>
+
+//           {competitorAnalysis?.data ? (
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Trophy className="h-5 w-5 text-amber-600" />
+//                   Competitor Benchmarking
+//                 </CardTitle>
+//                 <CardDescription>How you compare to similar accounts</CardDescription>
+//               </CardHeader>
+//               <CardContent>
+//                 <div className="space-y-4">
+//                   {competitorAnalysis.data.competitors?.map((competitor: any, index: number) => {
+//                     const colors = [
+//                       "from-pink-500 to-purple-500",
+//                       "from-blue-500 to-cyan-500",
+//                       "from-green-500 to-emerald-500",
+//                       "from-orange-500 to-amber-500",
+//                     ]
+
+//                     return (
+//                       <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+//                         <div className="flex items-center gap-3">
+//                           <div
+//                             className={`w-10 h-10 bg-gradient-to-r ${colors[index % colors.length]} rounded-full flex items-center justify-center text-white font-bold`}
+//                           >
+//                             {competitor.username.charAt(0).toUpperCase()}
+//                           </div>
+//                           <div>
+//                             <h4 className="font-medium">@{competitor.username}</h4>
+//                             <p className="text-sm text-muted-foreground">{competitor.category}</p>
+//                           </div>
+//                         </div>
+//                         <div className="text-right">
+//                           <div className="text-sm font-medium">Engagement: {competitor.engagementRate}</div>
+//                           <div
+//                             className={`text-xs ${competitor.comparison === "better" ? "text-green-600" : "text-muted-foreground"}`}
+//                           >
+//                             {competitor.comparisonText}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )
+//                   })}
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           ) : (
+//             <div className="text-center text-muted-foreground py-12">
+//               <Trophy className="h-16 w-16 mx-auto mb-4 opacity-50" />
+//               <p className="text-lg mb-2">Competitive Analysis</p>
+//               <p className="text-sm mb-4">Get AI-powered insights on how you compare to competitors</p>
+//               <Button onClick={() => triggerAnalysis("competitor-analysis")} disabled={analysisState.isAnalyzing}>
+//                 {analysisState.isAnalyzing ? (
+//                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
+//                 ) : (
+//                   <Trophy className="h-4 w-4 mr-2" />
+//                 )}
+//                 Start Analysis
+//               </Button>
+//             </div>
+//           )}
+//         </TabsContent>
+//       </Tabs>
+//     </div>
+//   )
+// }
+
+
 "use client"
 
 import { useState, useCallback } from "react"
@@ -1127,13 +2057,9 @@ import {
   BarChart3,
   Clock,
   Loader2,
-  Sparkles,
   Target,
   Brain,
-  Trophy,
   Lightbulb,
-  ArrowUp,
-  ArrowDown,
   Users,
   Eye,
   Globe,
@@ -1141,6 +2067,13 @@ import {
   Zap,
   CheckCircle,
   XCircle,
+  DollarSign,
+  MessageSquare,
+  Heart,
+  Share2,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -1157,7 +2090,6 @@ import {
   bulkRefreshIntegrations,
   generateContentStrategy,
   getOptimalPostingTimes,
-  analyzeCompetitors,
   getAudienceInsights,
   analyzeContentTrends,
 } from "@/actions/integrations"
@@ -1166,14 +2098,13 @@ interface InstagramDashboardProps {
   userId: string
 }
 
-// Analysis control stat
 interface AnalysisState {
   lastAnalysis: Date | null
   isAnalyzing: boolean
   analysisType: string | null
 }
 
-export default function EnhancedInstagramDashboard({ userId }: InstagramDashboardProps) {
+export default function InstagramBusinessDashboard({ userId }: InstagramDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [selectedPeriod, setSelectedPeriod] = useState<"day" | "week" | "days_28">("week")
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -1186,7 +2117,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Core data queries - always fetch real data
+  // Core data queries
   const {
     data: mediaData,
     isLoading: mediaLoading,
@@ -1209,7 +2140,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
     retry: 2,
   })
 
-  // Controlled AI analysis queries - only fetch when explicitly triggered
+  // AI analysis queries - controlled
   const {
     data: contentStrategy,
     isLoading: strategyLoading,
@@ -1217,8 +2148,8 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
   } = useQuery({
     queryKey: ["content-strategy", userId],
     queryFn: () => generateContentStrategy(userId),
-    enabled: false, // Don't auto-fetch
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    enabled: false,
+    staleTime: 24 * 60 * 60 * 1000,
   })
 
   const {
@@ -1228,8 +2159,8 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
   } = useQuery({
     queryKey: ["optimal-times", userId],
     queryFn: () => getOptimalPostingTimes(userId),
-    enabled: false, // Don't auto-fetch
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+    enabled: false,
+    staleTime: 7 * 24 * 60 * 60 * 1000,
   })
 
   const {
@@ -1239,19 +2170,8 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
   } = useQuery({
     queryKey: ["audience-insights", userId],
     queryFn: () => getAudienceInsights(userId),
-    enabled: false, // Don't auto-fetch
+    enabled: false,
     staleTime: 24 * 60 * 60 * 1000,
-  })
-
-  const {
-    data: competitorAnalysis,
-    isLoading: competitorLoading,
-    refetch: refetchCompetitors,
-  } = useQuery({
-    queryKey: ["competitor-analysis", userId],
-    queryFn: () => analyzeCompetitors(userId),
-    enabled: false, // Don't auto-fetch
-    staleTime: 7 * 24 * 60 * 60 * 1000,
   })
 
   const {
@@ -1261,21 +2181,19 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
   } = useQuery({
     queryKey: ["content-trends", userId],
     queryFn: () => analyzeContentTrends(userId),
-    enabled: false, // Don't auto-fetch
+    enabled: false,
     staleTime: 24 * 60 * 60 * 1000,
   })
 
-  // Controlled analysis trigger
   const triggerAnalysis = useCallback(
     async (analysisType: string) => {
       const now = new Date()
       const lastAnalysis = analysisState.lastAnalysis
 
-      // Rate limiting: prevent analysis more than once every 30 minutes
       if (lastAnalysis && now.getTime() - lastAnalysis.getTime() < 30 * 60 * 1000) {
         toast({
           title: "Analysis Rate Limited",
-          description: "Please wait 30 minutes between AI analyses to avoid rate limits.",
+          description: "Please wait 30 minutes between analyses to avoid rate limits.",
           variant: "destructive",
         })
         return
@@ -1298,9 +2216,6 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
           case "audience-insights":
             await refetchAudience()
             break
-          case "competitor-analysis":
-            await refetchCompetitors()
-            break
           case "content-trends":
             await refetchTrends()
             break
@@ -1311,12 +2226,12 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
 
         toast({
           title: "Analysis Complete",
-          description: `${analysisType.replace("-", " ")} has been updated with fresh AI insights.`,
+          description: `${analysisType.replace("-", " ")} analysis has been updated.`,
         })
       } catch (error) {
         toast({
           title: "Analysis Failed",
-          description: "Failed to generate AI insights. Please try again later.",
+          description: "Failed to generate insights. Please try again later.",
           variant: "destructive",
         })
       } finally {
@@ -1327,62 +2242,70 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
         }))
       }
     },
-    [
-      analysisState.lastAnalysis,
-      refetchStrategy,
-      refetchTimes,
-      refetchAudience,
-      refetchCompetitors,
-      refetchTrends,
-      toast,
-    ],
+    [analysisState.lastAnalysis, refetchStrategy, refetchTimes, refetchAudience, refetchTrends, toast]
   )
 
-  // Calculate real metrics from actual data
-  const calculateRealMetrics = useCallback(() => {
+  const calculateBusinessMetrics = useCallback(() => {
     if (!mediaData?.data || !insightsData?.data) return null
 
     const posts = mediaData.data
     const insights = insightsData.data
 
-    // Calculate engagement rate from real data
     const totalLikes = posts.reduce((sum: number, post: any) => sum + (post.like_count || 0), 0)
     const totalComments = posts.reduce((sum: number, post: any) => sum + (post.comments_count || 0), 0)
     const totalEngagement = totalLikes + totalComments
-    const avgEngagementPerPost = posts.length > 0 ? totalEngagement / posts.length : 0
 
-    // Get follower count from insights or estimate
     const followerCount = insights.find((i: any) => i.name === "follower_count")?.values?.[0]?.value || 1000
-    const engagementRate = ((avgEngagementPerPost / followerCount) * 100).toFixed(2)
+    const impressions = insights.find((i: any) => i.name === "impressions")?.values?.[0]?.value || 0
+    const reach = insights.find((i: any) => i.name === "reach")?.values?.[0]?.value || 0
+    const profileViews = insights.find((i: any) => i.name === "profile_views")?.values?.[0]?.value || 0
 
-   
+    const engagementRate = posts.length > 0 ? ((totalEngagement / posts.length / followerCount) * 100).toFixed(2) : "0"
+    const reachRate = followerCount > 0 ? ((reach / followerCount) * 100).toFixed(1) : "0"
+    const conversionRate = impressions > 0 ? ((profileViews / impressions) * 100).toFixed(2) : "0"
+
+    // Calculate posting frequency
     const postDates = posts.map((post: any) => new Date(post.timestamp))
     const oldestPost = Math.min(...postDates.map((d: Date) => d.getTime()))
     const newestPost = Math.max(...postDates.map((d: Date) => d.getTime()))
     const daysDiff = (newestPost - oldestPost) / (1000 * 60 * 60 * 24)
     const postsPerWeek = daysDiff > 0 ? ((posts.length / daysDiff) * 7).toFixed(1) : "0"
 
-    // Identify top performing content
+    // Top performing post
     const topPost = posts.reduce((best: any, current: any) => {
       const currentEngagement = (current.like_count || 0) + (current.comments_count || 0)
       const bestEngagement = (best?.like_count || 0) + (best?.comments_count || 0)
       return currentEngagement > bestEngagement ? current : best
     }, null)
 
+    // Content type analysis
+    const contentTypes = {
+      image: posts.filter((p: any) => p.media_type === "IMAGE").length,
+      video: posts.filter((p: any) => p.media_type === "VIDEO").length,
+      carousel: posts.filter((p: any) => p.media_type === "CAROUSEL_ALBUM").length,
+    }
+
     return {
       engagementRate,
+      reachRate,
+      conversionRate,
       totalPosts: posts.length,
       totalLikes,
       totalComments,
+      totalEngagement,
       avgLikesPerPost: Math.round(totalLikes / posts.length),
       avgCommentsPerPost: Math.round(totalComments / posts.length),
       postsPerWeek,
       topPost,
       followerCount,
+      impressions,
+      reach,
+      profileViews,
+      contentTypes,
     }
   }, [mediaData, insightsData])
 
-  const realMetrics = calculateRealMetrics()
+  const businessMetrics = calculateBusinessMetrics()
 
   const handleRefreshData = async () => {
     setIsRefreshing(true)
@@ -1406,43 +2329,17 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
     }
   }
 
-  const handleRefreshToken = async () => {
-    try {
-      const result = await refreshAccessToken(userId)
-      if (result.status === 200) {
-        toast({
-          title: "Token Refreshed",
-          description: "Instagram access token refreshed successfully.",
-        })
-      } else {
-        toast({
-          title: "Token Refresh Failed",
-          description: result.message || "Failed to refresh access token.",
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to refresh access token.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  // Show loading state for core data
   if (mediaLoading || insightsLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading Instagram data...</p>
+          <p className="text-muted-foreground">Loading Instagram analytics...</p>
         </div>
       </div>
     )
   }
 
-  // Show error state
   if (mediaError || insightsError) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -1460,17 +2357,12 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
 
   return (
     <div className="space-y-6">
-      {/* Header with controls */}
-      {/* <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Instagram className="h-6 w-6 text-pink-600" />
-          <h1 className="text-2xl font-bold">Instagram Growth Analytics</h1>
+          <h1 className="text-2xl font-bold">Instagram Business Analytics</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={handleRefreshToken} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Token
-          </Button>
           <Button onClick={handleRefreshData} disabled={isRefreshing} variant="outline" size="sm">
             {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
             Refresh Data
@@ -1478,19 +2370,18 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
           <Button
             onClick={() => triggerAnalysis("full-analysis")}
             disabled={analysisState.isAnalyzing}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="bg-blue-600 hover:bg-blue-700"
           >
             {analysisState.isAnalyzing ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Brain className="h-4 w-4 mr-2" />
             )}
-            Generate AI Insights
+            Generate Insights
           </Button>
         </div>
-      </div> */}
+      </div>
 
-      {/* Analysis Status */}
       {analysisState.lastAnalysis && (
         <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
           <CardContent className="p-4">
@@ -1498,7 +2389,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-blue-600" />
                 <span className="text-sm font-medium">
-                  Last AI analysis: {analysisState.lastAnalysis.toLocaleString()}
+                  Last analysis: {analysisState.lastAnalysis.toLocaleString()}
                 </span>
               </div>
               <Badge variant="secondary">
@@ -1512,18 +2403,15 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="growth-insights">Growth Insights</TabsTrigger>
-          <TabsTrigger value="content-analysis">Content Analysis</TabsTrigger>
-          <TabsTrigger value="competitive-intel">Competitive Intel</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Performance Overview</TabsTrigger>
+          <TabsTrigger value="growth-strategy">Growth Strategy</TabsTrigger>
+          <TabsTrigger value="content-optimization">Content Optimization</TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab - Real Performance Metrics */}
         <TabsContent value="overview" className="space-y-6">
-          {/* Period Selector */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Period:</span>
+            <span className="text-sm font-medium">Time Period:</span>
             <Select
               value={selectedPeriod}
               onValueChange={(value: "day" | "week" | "days_28") => setSelectedPeriod(value)}
@@ -1539,116 +2427,211 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
             </Select>
           </div>
 
-          {/* Real Performance Metrics */}
-          {realMetrics && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Engagement Rate</p>
-                      <p className="text-2xl font-bold text-green-600">{realMetrics.engagementRate}%</p>
-                    </div>
-                    <TrendingUp className="h-6 w-6 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Posts</p>
-                      <p className="text-2xl font-bold">{realMetrics.totalPosts}</p>
-                    </div>
-                    <BarChart3 className="h-6 w-6 text-blue-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Avg Likes/Post</p>
-                      <p className="text-2xl font-bold">{realMetrics.avgLikesPerPost}</p>
-                    </div>
-                    <Eye className="h-6 w-6 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Account Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {insightsData?.data?.map((insight: any, index: number) => {
-              const icons = [Users, Eye, Globe, TrendingUp]
-              const colors = ["blue", "green", "purple", "orange"]
-              const Icon = icons[index % icons.length]
-              const color = colors[index % colors.length]
-
-              return (
-                <Card key={insight.name}>
+          {businessMetrics && (
+            <>
+              {/* Key Performance Indicators */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground capitalize">
-                          {insight.title || insight.name.replace("_", " ")}
-                        </p>
-                        <p className="text-2xl font-bold">{insight.values[0]?.value?.toLocaleString() || 0}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Engagement Rate</p>
+                        <p className="text-2xl font-bold text-green-600">{businessMetrics.engagementRate}%</p>
+                        <p className="text-xs text-muted-foreground">Industry avg: 1.22%</p>
                       </div>
-                      <Icon className={`h-6 w-6 text-${color}-600`} />
+                      <Activity className="h-6 w-6 text-green-600" />
                     </div>
                   </CardContent>
                 </Card>
-              )
-            })}
-          </div>
 
-          {/* Top Performing Content */}
-          {realMetrics?.topPost && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-amber-600" />
-                  Top Performing Post
-                </CardTitle>
-                <CardDescription>Your highest engagement post in this period</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-4">
-                  <div
-                    className="w-24 h-24 bg-cover bg-center rounded-lg flex-shrink-0"
-                    style={{
-                      backgroundImage: `url(${realMetrics.topPost.media_url || realMetrics.topPost.thumbnail_url || "/placeholder.svg?height=96&width=96"})`,
-                    }}
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm line-clamp-3 mb-2">{realMetrics.topPost.caption || "No caption"}</p>
-                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span>{realMetrics.topPost.like_count || 0} likes</span>
-                      <span>{realMetrics.topPost.comments_count || 0} comments</span>
-                      <span>
-                        {(
-                          ((realMetrics.topPost.like_count + realMetrics.topPost.comments_count) /
-                            realMetrics.followerCount) *
-                          100
-                        ).toFixed(2)}
-                        % engagement
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Reach Rate</p>
+                        <p className="text-2xl font-bold text-blue-600">{businessMetrics.reachRate}%</p>
+                        <p className="text-xs text-muted-foreground">Of your followers</p>
+                      </div>
+                      <Eye className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Profile Conversion</p>
+                        <p className="text-2xl font-bold text-purple-600">{businessMetrics.conversionRate}%</p>
+                        <p className="text-xs text-muted-foreground">Impressions to profile views</p>
+                      </div>
+                      <Target className="h-6 w-6 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Posting Frequency</p>
+                        <p className="text-2xl font-bold text-orange-600">{businessMetrics.postsPerWeek}</p>
+                        <p className="text-xs text-muted-foreground">Posts per week</p>
+                      </div>
+                      <Calendar className="h-6 w-6 text-orange-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Detailed Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Engagement Breakdown</CardTitle>
+                    <CardDescription>Total engagement metrics for this period</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-4 w-4 text-red-500" />
+                        <span>Total Likes</span>
+                      </div>
+                      <span className="font-semibold">{businessMetrics.totalLikes.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-blue-500" />
+                        <span>Total Comments</span>
+                      </div>
+                      <span className="font-semibold">{businessMetrics.totalComments.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t pt-2">
+                      <span className="font-medium">Average per Post</span>
+                      <span className="font-semibold">
+                        {businessMetrics.avgLikesPerPost} likes, {businessMetrics.avgCommentsPerPost} comments
                       </span>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Reach & Impressions</CardTitle>
+                    <CardDescription>How your content is being discovered</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-green-500" />
+                        <span>Total Reach</span>
+                      </div>
+                      <span className="font-semibold">{businessMetrics.reach.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-purple-500" />
+                        <span>Total Impressions</span>
+                      </div>
+                      <span className="font-semibold">{businessMetrics.impressions.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t pt-2">
+                      <span className="font-medium">Profile Views</span>
+                      <span className="font-semibold">{businessMetrics.profileViews.toLocaleString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Content Type Performance */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Content Type Distribution</CardTitle>
+                  <CardDescription>Performance by content format</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{businessMetrics.contentTypes.image}</div>
+                      <div className="text-sm text-muted-foreground">Single Images</div>
+                      <div className="text-xs text-blue-600 mt-1">
+                        {((businessMetrics.contentTypes.image / businessMetrics.totalPosts) * 100).toFixed(0)}% of posts
+                      </div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{businessMetrics.contentTypes.video}</div>
+                      <div className="text-sm text-muted-foreground">Videos & Reels</div>
+                      <div className="text-xs text-green-600 mt-1">
+                        {((businessMetrics.contentTypes.video / businessMetrics.totalPosts) * 100).toFixed(0)}% of posts
+                      </div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">{businessMetrics.contentTypes.carousel}</div>
+                      <div className="text-sm text-muted-foreground">Carousels</div>
+                      <div className="text-xs text-purple-600 mt-1">
+                        {((businessMetrics.contentTypes.carousel / businessMetrics.totalPosts) * 100).toFixed(0)}% of posts
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Top Performing Post */}
+              {businessMetrics.topPost && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      Best Performing Post
+                    </CardTitle>
+                    <CardDescription>Learn from your most engaging content</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4">
+                      <div
+                        className="w-24 h-24 bg-cover bg-center rounded-lg flex-shrink-0"
+                        style={{
+                          backgroundImage: `url(${businessMetrics.topPost.media_url || businessMetrics.topPost.thumbnail_url || "/placeholder.svg?height=96&width=96"})`,
+                        }}
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm line-clamp-3 mb-3">
+                          {businessMetrics.topPost.caption?.slice(0, 150)}
+                          {businessMetrics.topPost.caption?.length > 150 ? "..." : ""}
+                        </p>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Likes:</span>
+                            <div className="font-semibold">{businessMetrics.topPost.like_count || 0}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Comments:</span>
+                            <div className="font-semibold">{businessMetrics.topPost.comments_count || 0}</div>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Engagement Rate:</span>
+                            <div className="font-semibold text-green-600">
+                              {(
+                                ((businessMetrics.topPost.like_count + businessMetrics.topPost.comments_count) /
+                                  businessMetrics.followerCount) *
+                                100
+                              ).toFixed(2)}
+                              %
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </TabsContent>
 
-        {/* Growth Insights Tab - AI-Powered Analysis */}
-        <TabsContent value="growth-insights" className="space-y-6">
+        <TabsContent value="growth-strategy" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">AI-Powered Growth Insights</h2>
+            <h2 className="text-xl font-semibold">Growth Strategy Insights</h2>
             <Button
               onClick={() => triggerAnalysis("audience-insights")}
               disabled={analysisState.isAnalyzing}
@@ -1663,101 +2646,118 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
             </Button>
           </div>
 
-          {/* AI Performance Scores */}
-          {audienceInsights?.data && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  AI Performance Analysis
-                </CardTitle>
-                <CardDescription>Deep insights into your account performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {audienceInsights.data.performanceScores?.map((score: any, index: number) => (
-                    <div key={index} className="text-center">
-                      <div
-                        className={`text-3xl font-bold mb-2 ${
-                          score.value > 80 ? "text-green-600" : score.value > 60 ? "text-blue-600" : "text-orange-600"
-                        }`}
-                      >
-                        {score.value}
+          {audienceInsights?.data ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-green-600" />
+                      Growth Opportunity Score
+                    </CardTitle>
+                    <CardDescription>AI-calculated growth potential based on your current metrics</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center p-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg">
+                      <div className="text-4xl font-bold text-green-600 mb-2">
+                        {audienceInsights.data.growthScore || "N/A"}
                       </div>
-                      <div className="text-sm text-muted-foreground">{score.name}</div>
-                      <Progress value={score.value} className="mt-2" />
+                      <div className="text-sm text-muted-foreground mb-4">Growth Opportunity Score</div>
+                      <Progress value={audienceInsights.data.growthScore || 0} className="mb-2" />
+                      <div className="text-xs text-muted-foreground">
+                        Based on engagement rate, posting consistency, and content quality
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </CardContent>
+                </Card>
 
-          {/* Growth Projections */}
-          {audienceInsights?.data && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-green-600" />
-                    Growth Projection
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg mb-4">
-                    <div className="text-2xl font-bold text-green-600">
-                      {audienceInsights.data.growthProjection?.monthly || "N/A"}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Projected monthly growth</div>
-                  </div>
-                  <div className="space-y-2">
-                    {audienceInsights.data.growthFactors?.map((factor: any, index: number) => (
-                      <div key={index} className="flex justify-between text-sm">
-                        <span>{factor.name}</span>
-                        <span className="text-green-600 font-medium">{factor.impact}</span>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      Audience Quality Score
+                    </CardTitle>
+                    <CardDescription>How engaged and valuable your audience is</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg">
+                      <div className="text-4xl font-bold text-blue-600 mb-2">
+                        {audienceInsights.data.audienceQuality || "N/A"}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <div className="text-sm text-muted-foreground mb-4">Audience Quality Score</div>
+                      <Progress value={audienceInsights.data.audienceQuality || 0} className="mb-2" />
+                      <div className="text-xs text-muted-foreground">
+                        Based on engagement patterns and follower interaction quality
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-600" />
-                    Engagement Optimization
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950 rounded-lg mb-4">
-                    <div className="text-2xl font-bold text-yellow-600">
-                      {audienceInsights.data.currentEngagementRate || "N/A"}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Current engagement rate</div>
-                  </div>
-                  <div className="space-y-2">
-                    {audienceInsights.data.engagementFactors?.map((factor: any, index: number) => (
-                      <div key={index} className="flex justify-between text-sm">
-                        <span>{factor.name}</span>
-                        <span className="text-blue-600 font-medium">{factor.impact}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              {audienceInsights.data.growthRecommendations && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-yellow-600" />
+                      Strategic Growth Recommendations
+                    </CardTitle>
+                    <CardDescription>Actionable insights to accelerate your business growth</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {audienceInsights.data.growthRecommendations.map((rec: any, index: number) => {
+                      const priorities = ["High", "Medium", "Low"]
+                      const colors = ["red", "yellow", "green"]
+                      const priority = priorities[index % priorities.length]
+                      const color = colors[index % colors.length]
+
+                      return (
+                        <div key={index} className={`flex items-start gap-3 p-4 border-l-4 border-${color}-500 bg-${color}-50 dark:bg-${color}-950 rounded-r-lg`}>
+                          <div className={`w-2 h-2 bg-${color}-500 rounded-full mt-2`} />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold">{rec.title}</h4>
+                              <Badge variant="outline" className={`text-${color}-700 border-${color}-300`}>
+                                {priority} Priority
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{rec.description}</p>
+                            <div className="text-xs text-muted-foreground">
+                              Expected impact: {rec.expectedImpact || "Medium"}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          ) : (
+            <div className="text-center text-muted-foreground py-12">
+              <Brain className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg mb-2">Growth Strategy Analysis</p>
+              <p className="text-sm mb-4">Get AI-powered insights to accelerate your business growth</p>
+              <Button onClick={() => triggerAnalysis("audience-insights")} disabled={analysisState.isAnalyzing}>
+                {analysisState.isAnalyzing ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Brain className="h-4 w-4 mr-2" />
+                )}
+                Analyze Growth Opportunities
+              </Button>
             </div>
           )}
 
-          {/* Optimal Posting Times */}
+          {/* Optimal Posting Schedule */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-600" />
-                    AI-Optimized Posting Schedule
+                    Optimal Posting Schedule
                   </CardTitle>
-                  <CardDescription>When your audience is most active</CardDescription>
+                  <CardDescription>Maximize reach by posting when your audience is most active</CardDescription>
                 </div>
                 <Button
                   onClick={() => triggerAnalysis("optimal-times")}
@@ -1770,7 +2770,7 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
                   ) : (
                     <RefreshCw className="h-4 w-4 mr-2" />
                   )}
-                  Analyze Times
+                  Update Schedule
                 </Button>
               </div>
             </CardHeader>
@@ -1781,47 +2781,54 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
                   <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                 </div>
               ) : optimalTimes?.data ? (
-                <div className="grid grid-cols-7 gap-2">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => {
-                    const dayData = optimalTimes.data.schedule?.find((d: any) =>
-                      d.day.toLowerCase().startsWith(day.toLowerCase()),
-                    )
+                <div className="space-y-4">
+                  <div className="grid grid-cols-7 gap-2">
+                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, index) => {
+                      const dayData = optimalTimes.data.schedule?.find((d: any) =>
+                        d.day.toLowerCase() === day.toLowerCase()
+                      )
 
-                    return (
-                      <div key={day} className="text-center">
-                        <div className="font-medium text-sm mb-2">{day}</div>
-                        <div className="space-y-1">
-                          {dayData?.times?.map((time: any, i: number) => (
-                            <div
-                              key={i}
-                              className={`${
-                                i % 2 === 0
-                                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                                  : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
-                              } text-xs p-1 rounded`}
-                            >
-                              {time}
-                            </div>
-                          )) || <div className="text-xs text-muted-foreground">Analyzing...</div>}
+                      return (
+                        <div key={day} className="text-center">
+                          <div className="font-medium text-sm mb-2">{day.slice(0, 3)}</div>
+                          <div className="space-y-1">
+                            {dayData?.times?.slice(0, 2).map((time: any, i: number) => (
+                              <div
+                                key={i}
+                                className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs p-1 rounded"
+                              >
+                                {time}
+                              </div>
+                            )) || <div className="text-xs text-muted-foreground">No data</div>}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
+                  {optimalTimes.data.insights && (
+                    <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                      <h4 className="font-medium mb-2">Key Insights:</h4>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        {optimalTimes.data.insights.map((insight: string, index: number) => (
+                          <li key={index}>• {insight}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Click &ldquo;Analyze Times&rdquo; to get AI-powered posting recommendations</p>
+                  <p>Click "Update Schedule" to get optimized posting times based on your audience activity</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Content Analysis Tab */}
-        <TabsContent value="content-analysis" className="space-y-6">
+        <TabsContent value="content-optimization" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Content Performance Analysis</h2>
+            <h2 className="text-xl font-semibold">Content Optimization</h2>
             <Button
               onClick={() => triggerAnalysis("content-strategy")}
               disabled={analysisState.isAnalyzing}
@@ -1832,124 +2839,187 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
               ) : (
                 <Lightbulb className="h-4 w-4 mr-2" />
               )}
-              Analyze Content
+              Analyze Content Strategy
             </Button>
           </div>
 
-          {/* Content Strategy Recommendations */}
-          {contentStrategy?.data && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5 text-yellow-600" />
-                    AI Recommendations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {contentStrategy.data.recommendations?.map((rec: any, index: number) => {
-                    const icons = [TrendingUp, Target, Sparkles]
-                    const colors = ["blue", "green", "purple"]
-                    const Icon = icons[index % icons.length]
-                    const color = colors[index % colors.length]
-
-                    return (
-                      <div
-                        key={index}
-                        className={`flex items-start gap-3 p-3 bg-${color}-50 dark:bg-${color}-950 rounded-lg`}
-                      >
-                        <Icon className={`h-5 w-5 text-${color}-600 mt-0.5`} />
-                        <div>
-                          <h4 className="font-medium">{rec.title}</h4>
-                          <p className="text-sm text-muted-foreground">{rec.description}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-blue-600" />
-                    Content Themes Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {contentStrategy.data.contentThemes?.map((theme: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{theme.theme}</h4>
-                        <p className="text-sm text-muted-foreground">{theme.performance}</p>
-                      </div>
-                      <Badge variant="secondary">{theme.performance}</Badge>
+          {contentStrategy?.data ? (
+            <div className="space-y-6">
+              {/* Content Performance Analysis */}
+              {contentStrategy.data.contentAnalysis && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-blue-600" />
+                      Content Performance Analysis
+                    </CardTitle>
+                    <CardDescription>Understanding what content drives the best results</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {contentStrategy.data.contentAnalysis.topPerformingTypes?.map((type: any, index: number) => {
+                        const colors = ["green", "blue", "purple"]
+                        const color = colors[index % colors.length]
+                        
+                        return (
+                          <div key={index} className={`p-4 bg-${color}-50 dark:bg-${color}-950 rounded-lg`}>
+                            <div className={`text-2xl font-bold text-${color}-600 mb-1`}>
+                              {type.avgEngagementRate}%
+                            </div>
+                            <div className="font-medium">{type.contentType}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {type.postCount} posts analyzed
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Strategic Recommendations */}
+              {contentStrategy.data.recommendations && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-green-600" />
+                      Content Strategy Recommendations
+                    </CardTitle>
+                    <CardDescription>Actionable insights to improve your content performance</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {contentStrategy.data.recommendations.map((rec: any, index: number) => {
+                      const impactColors = {
+                        high: "green",
+                        medium: "yellow",
+                        low: "gray"
+                      }
+                      const color = "blue"
+
+                      return (
+                        <div key={index} className="flex items-start gap-4 p-4 border rounded-lg">
+                          <div className={`w-3 h-3 bg-${color}-500 rounded-full mt-1.5 flex-shrink-0`} />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold">{rec.title}</h4>
+                              <Badge variant="outline">
+                                {rec.impact || "Medium"} Impact
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{rec.description}</p>
+                            {rec.actionableSteps && (
+                              <div className="text-xs text-muted-foreground">
+                                Next steps: {rec.actionableSteps}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Content Theme Analysis */}
+              {contentStrategy.data.themeAnalysis && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                      Content Theme Performance
+                    </CardTitle>
+                    <CardDescription>Which topics and themes resonate most with your audience</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {contentStrategy.data.themeAnalysis.map((theme: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="font-medium">{theme.theme}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {theme.postCount} posts • Avg engagement: {theme.avgEngagement}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`font-semibold ${
+                              theme.trend === 'up' ? 'text-green-600' : 
+                              theme.trend === 'down' ? 'text-red-600' : 'text-gray-600'
+                            }`}>
+                              {theme.engagementRate}%
+                            </div>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              {theme.trend === 'up' ? (
+                                <ArrowUpRight className="h-3 w-3 text-green-600" />
+                              ) : theme.trend === 'down' ? (
+                                <ArrowDownRight className="h-3 w-3 text-red-600" />
+                              ) : null}
+                              {theme.trendLabel}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-12">
+              <Lightbulb className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg mb-2">Content Strategy Analysis</p>
+              <p className="text-sm mb-4">Get insights on how to optimize your content for better engagement</p>
+              <Button onClick={() => triggerAnalysis("content-strategy")} disabled={analysisState.isAnalyzing}>
+                {analysisState.isAnalyzing ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Lightbulb className="h-4 w-4 mr-2" />
+                )}
+                Analyze Content Performance
+              </Button>
             </div>
           )}
 
-          {/* Content Trends */}
-          {contentTrends?.data && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  Content Trends & Opportunities
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {contentTrends.data.growthMetrics?.map((metric: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">{metric.name}</h4>
-                      <p className="text-sm text-muted-foreground">{metric.description}</p>
-                    </div>
-                    {metric.trend === "up" ? (
-                      <ArrowUp className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <ArrowDown className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Recent Posts Grid */}
+          {/* Recent Posts Performance Grid */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Posts Performance</CardTitle>
-              <CardDescription>Your latest content with engagement metrics</CardDescription>
+              <CardTitle>Recent Posts Analysis</CardTitle>
+              <CardDescription>Performance metrics for your latest content</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mediaData?.data?.slice(0, 9).map((post: any) => {
+                {mediaData?.data?.slice(0, 12).map((post: any) => {
                   const engagement = (post.like_count || 0) + (post.comments_count || 0)
-                  const engagementRate = realMetrics ? ((engagement / realMetrics.followerCount) * 100).toFixed(2) : "0"
+                  const engagementRate = businessMetrics ? ((engagement / businessMetrics.followerCount) * 100).toFixed(2) : "0"
+                  const isHighPerforming = parseFloat(engagementRate) > parseFloat(businessMetrics?.engagementRate || "0")
 
                   return (
-                    <div key={post.id} className="space-y-2">
+                    <div key={post.id} className="space-y-3 p-3 border rounded-lg">
                       <div
-                        className="aspect-square bg-cover bg-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity relative"
+                        className="aspect-square bg-cover bg-center rounded-lg relative"
                         style={{
                           backgroundImage: `url(${post.media_url || post.thumbnail_url || "/placeholder.svg?height=300&width=300"})`,
                         }}
                       >
-                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all flex items-center justify-center rounded-lg">
-                          <div className="opacity-0 hover:opacity-100 transition-opacity text-white text-center">
-                            <div className="text-sm font-medium">{engagement} total engagement</div>
-                            <div className="text-xs">{engagementRate}% rate</div>
+                        {isHighPerforming && (
+                          <div className="absolute top-2 right-2">
+                            <Badge className="bg-green-600 text-white">High Performer</Badge>
+                          </div>
+                        )}
+                        <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-60 text-white text-xs p-2 rounded">
+                          <div className="flex justify-between">
+                            <span>{post.like_count || 0} likes</span>
+                            <span>{post.comments_count || 0} comments</span>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm line-clamp-2">{post.caption || "No caption"}</p>
-                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                          <span>{post.like_count || 0} likes</span>
-                          <span>{post.comments_count || 0} comments</span>
+                        <p className="text-sm line-clamp-2 mb-2">
+                          {post.caption?.slice(0, 80)}
+                          {post.caption?.length > 80 ? "..." : ""}
+                        </p>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Engagement: {engagementRate}%</span>
                           <span>{new Date(post.timestamp).toLocaleDateString()}</span>
                         </div>
                       </div>
@@ -1959,87 +3029,6 @@ export default function EnhancedInstagramDashboard({ userId }: InstagramDashboar
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Competitive Intelligence Tab */}
-        <TabsContent value="competitive-intel" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Competitive Intelligence</h2>
-            <Button
-              onClick={() => triggerAnalysis("competitor-analysis")}
-              disabled={analysisState.isAnalyzing}
-              variant="outline"
-            >
-              {analysisState.isAnalyzing && analysisState.analysisType === "competitor-analysis" ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Trophy className="h-4 w-4 mr-2" />
-              )}
-              Analyze Competitors
-            </Button>
-          </div>
-
-          {competitorAnalysis?.data ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-amber-600" />
-                  Competitor Benchmarking
-                </CardTitle>
-                <CardDescription>How you compare to similar accounts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {competitorAnalysis.data.competitors?.map((competitor: any, index: number) => {
-                    const colors = [
-                      "from-pink-500 to-purple-500",
-                      "from-blue-500 to-cyan-500",
-                      "from-green-500 to-emerald-500",
-                      "from-orange-500 to-amber-500",
-                    ]
-
-                    return (
-                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 bg-gradient-to-r ${colors[index % colors.length]} rounded-full flex items-center justify-center text-white font-bold`}
-                          >
-                            {competitor.username.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <h4 className="font-medium">@{competitor.username}</h4>
-                            <p className="text-sm text-muted-foreground">{competitor.category}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium">Engagement: {competitor.engagementRate}</div>
-                          <div
-                            className={`text-xs ${competitor.comparison === "better" ? "text-green-600" : "text-muted-foreground"}`}
-                          >
-                            {competitor.comparisonText}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="text-center text-muted-foreground py-12">
-              <Trophy className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg mb-2">Competitive Analysis</p>
-              <p className="text-sm mb-4">Get AI-powered insights on how you compare to competitors</p>
-              <Button onClick={() => triggerAnalysis("competitor-analysis")} disabled={analysisState.isAnalyzing}>
-                {analysisState.isAnalyzing ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Trophy className="h-4 w-4 mr-2" />
-                )}
-                Start Analysis
-              </Button>
-            </div>
-          )}
         </TabsContent>
       </Tabs>
     </div>
