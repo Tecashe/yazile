@@ -402,7 +402,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         id: uuid(),
         label: "Crm",
         icon: icon(Save, "text-slate-600"),
-        description: "Connect social integrations whose interactions with your clients you want automated",
+        description: "Connect your crm to automatically fetch user data and sync qualified leads",
       },
     ],
   },

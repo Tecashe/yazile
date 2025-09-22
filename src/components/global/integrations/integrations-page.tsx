@@ -733,7 +733,6 @@ import { refreshInstagramData, onOAuthInstagram } from "@/actions/integrations"
 import { deauthorizeInstagram } from "@/lib/deauth"
 import RequirementsModal from "./requirements-modal"
 import AccountsList from "./accounts-list"
-import PlatformBenefits from "./platform-benefits"
 import ConnectionStatus from "./connection-status"
 import InstagramDashboard from "./my-info"
 import { useSearchParams } from "next/navigation"
@@ -1153,8 +1152,8 @@ export default function InstagramIntegrationPage() {
                 accounts={connectedAccounts.instagram.map((account) => ({
                   id: account.id,
                   title: account.username,
-                  subtitle: `@${account.username}`,
-                  avatar: account.avatar,
+                  subtitle: `${account.username}`,
+                  avatar: "",
                   isActive: account.isActive,
                   platform: "instagram",
                 }))}
@@ -1182,7 +1181,7 @@ export default function InstagramIntegrationPage() {
         </motion.div>
       </motion.div>
 
-      <PlatformBenefits platform="instagram" />
+      
 
       <InstagramDashboard userId={userData?.data?.clerkId || "1234556"} />
 
