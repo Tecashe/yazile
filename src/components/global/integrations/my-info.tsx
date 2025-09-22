@@ -2819,7 +2819,7 @@ export default function InstagramBusinessDashboard({ userId }: InstagramDashboar
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Click "Update Schedule" to get optimized posting times based on your audience activity</p>
+                  <p>Click &ldquo;Update Schedule&rdquo; to get optimized posting times based on your audience activity</p>
                 </div>
               )}
             </CardContent>
