@@ -300,6 +300,7 @@ import {
   Merge,
   LucideCreditCard,
   WrenchIcon,
+  Save,
 } from "lucide-react"
 import type React from "react"
 
@@ -388,20 +389,20 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
 
   {
     id: uuid(),
-    label: "Social Integrations",
+    label: "Integrations",
     description: "Connect and manage external services",
     items: [
       {
         id: uuid(),
-        label: "Integrations",
+        label: "Socials",
         icon: icon(Cpu, "text-slate-600"),
         description: "Connect social integrations whose interactions with your clients you want automated",
       },
-      {
+       {
         id: uuid(),
-        label: "Human-Handoff",
-        icon: icon(Merge, "text-slate-600"),
-        description: "Configure handoff rules between automated and manual processes",
+        label: "Crm",
+        icon: icon(Save, "text-slate-600"),
+        description: "Connect social integrations whose interactions with your clients you want automated",
       },
     ],
   },
@@ -416,23 +417,17 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         icon: icon(Users, "text-emerald-600"),
         description: "Manage and track your leads, prospects, and customer pipeline",
       },
-      // {
-      //   id: uuid(),
-      //   label: "Messages",
-      //   icon: icon(MessageCircle, "text-violet-600"),
-      //   description: "View and manage all conversations across integrated platforms",
-      // },
-      // {
-      //   id: uuid(),
-      //   label: "Pricing",
-      //   icon: icon(DollarSign, "text-green-700"),
-      //   description: "Manage your subscription, billing, and pricing plans",
-      // },
        {
         id: uuid(),
         label: "Tools",
         icon: icon(WrenchIcon, "text-yellow-600"),
         description: "Connect tools that you use everyday to automate processes",
+      },
+      {
+        id: uuid(),
+        label: "Human-Handoff",
+        icon: icon(Merge, "text-slate-600"),
+        description: "Configure handoff rules between automated and manual processes",
       },
       {
         id: uuid(),

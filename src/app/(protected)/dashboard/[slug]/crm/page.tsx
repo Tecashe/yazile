@@ -745,7 +745,7 @@ export default async function CRMIntegrationPage() {
           <div className="bg-card rounded-lg border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Integration Details</h2>
-              <div className="flex space-x-2">
+              {/* <div className="flex space-x-2">
                 <form action={testCRMConnection}>
                   <input type="hidden" name="userId" value={user.data.id} />
                   <button
@@ -764,7 +764,7 @@ export default async function CRMIntegrationPage() {
                     Disconnect
                   </button>
                 </form>
-              </div>
+              </div> */}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
