@@ -573,7 +573,7 @@ export function SlidingNotificationPanel() {
       
       {/* Sliding Panel */}
       <div className={`
-        fixed top-0 left-0 h-full w-full max-w-md bg-background/95 backdrop-blur-md border-r border-border z-50 
+        fixed top-0 right-0 h-full w-full max-w-md bg-background/95 backdrop-blur-md border-r border-border z-50 
         transform transition-transform duration-300 ease-in-out shadow-2xl
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>

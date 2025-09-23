@@ -1164,8 +1164,8 @@ export function NotificationCenter() {
       <NotificationBell />
       
       {/* Option 2: Use dropdown (uncomment if you want to keep dropdown instead) */}
-      <NotificationBell onClick={() => setIsDropdownOpen(!isDropdownOpen)} />
-      <NotificationPanel isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)} />
+      {/* <NotificationBell onClick={() => setIsDropdownOpen(!isDropdownOpen)} />
+      <NotificationPanel isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)} /> */}
     </div>
   )
 }
