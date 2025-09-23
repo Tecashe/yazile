@@ -1247,7 +1247,7 @@ export function NotificationBell({ onClick }: { onClick?: () => void }) {
     if (onClick) {
       onClick() // For dropdown functionality
     } else {
-      togglePanel() // For sliding panel functionality
+      togglePanel() // For sliding panel functionalit
     }
   }
   
