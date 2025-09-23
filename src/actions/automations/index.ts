@@ -119,6 +119,36 @@ export const saveTrigger = async (
       await updateAutomationQuery(automationId, {
         isFallback: data.isFallback,
         fallbackMessage: data.fallbackMessage,
+        buttons: data.buttons // Remove JSON.stringify - Prisma handles Json type automatically
+      })
+    }
+    
+    // Then save trigger types
+    const create = await addTrigger(automationId, data.types)
+    if (create) return { status: 200, data: 'Trigger saved' }
+    return { status: 404, data: 'Cannot save trigger' }
+  } catch (error) {
+    console.error('Error in saveTrigger:', error) // Add logging
+    return { status: 500, data: 'Oops! something went wrong' }
+  }
+}
+
+export const saveTriggerOriginal = async (
+  automationId: string, 
+  data: {
+    types: string[]; 
+    isFallback?: boolean; 
+    fallbackMessage?: string; 
+    buttons?: { name: string; payload: string }[]
+  }
+) => {
+  await onCurrentUser()
+  try {
+    // First update automation with fallback settings
+    if (data.isFallback !== undefined || data.fallbackMessage || data.buttons) {
+      await updateAutomationQuery(automationId, {
+        isFallback: data.isFallback,
+        fallbackMessage: data.fallbackMessage,
         buttons: data.buttons ? JSON.stringify(data.buttons) : undefined
       })
     }
