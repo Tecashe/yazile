@@ -169,7 +169,7 @@ export default function ScrollAnimatedFlowSection() {
       id: 1,
       title: "Instagram DMs Captured",
       description: "AI automatically responds to every Instagram DM with personalized, intelligent messages that engage your audience.",
-      image: "/three.png",
+      image: "/captured.png",
       icon: MessageSquare,
       color: "from-blue-500/20 to-cyan-500/20",
       position: "left"
@@ -178,7 +178,7 @@ export default function ScrollAnimatedFlowSection() {
       id: 2,
       title: "Leads Qualified with AI",
       description: "Smart algorithms analyze conversation patterns, sentiment, and intent to identify high-quality prospects.",
-      image: "/two.png",
+      image: "/qualified.png",
       icon: Target,
       color: "from-purple-500/20 to-pink-500/20",
       position: "center"
@@ -187,7 +187,7 @@ export default function ScrollAnimatedFlowSection() {
       id: 3,
       title: "Synced to Your CRM",
       description: "Qualified leads automatically flow into your CRM with complete conversation context and lead scoring.",
-      image: "/six.png",
+      image: "/synced.png",
       icon: Database,
       color: "from-green-500/20 to-emerald-500/20",
       position: "right"
