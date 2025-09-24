@@ -1375,7 +1375,10 @@ export const useTriggers = (id: string) => {
       types: string[]; 
       isFallback?: boolean; 
       fallbackMessage?: string; 
-      buttons?: { name: string; payload: string }[] 
+      buttons?: { name: string; payload: string }[] ;
+
+      listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
+      keywords?: string[]; // Add this
     }) => saveTrigger(id, data),
     "automation-info",
   )
@@ -1383,11 +1386,16 @@ export const useTriggers = (id: string) => {
   const onSaveTrigger = (data?: { 
     isFallback?: boolean; 
     fallbackMessage?: string; 
-    buttons?: { name: string; payload: string }[] 
+    buttons?: { name: string; payload: string }[];
+
+    listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
+    keywords?: string[]; // Add this
   }) => mutate({ types, ...data })
   
   return { types, onSetTrigger, onSaveTrigger, isPending }
 }
+
+
 
 export const useKeywords = (id: string) => {
   const [keyword, setKeyword] = useState("")

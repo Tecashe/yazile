@@ -109,7 +109,10 @@ export const saveTrigger = async (
     types: string[]; 
     isFallback?: boolean; 
     fallbackMessage?: string; 
-    buttons?: { name: string; payload: string }[]
+    buttons?: { name: string; payload: string }[];
+
+    listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
+    keywords?: string[]; // Add this
   }
 ) => {
   await onCurrentUser()
@@ -119,7 +122,8 @@ export const saveTrigger = async (
       await updateAutomationQuery(automationId, {
         isFallback: data.isFallback,
         fallbackMessage: data.fallbackMessage,
-        buttons: data.buttons
+        buttons: data.buttons,
+
       })
     }
     
@@ -135,6 +139,8 @@ export const saveTrigger = async (
     return { status: 500, data: 'Oops! something went wrong' }
   }
 }
+
+
 
 export const saveTriggerOriginal = async (
   automationId: string, 
