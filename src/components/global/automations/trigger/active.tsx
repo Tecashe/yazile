@@ -267,8 +267,6 @@
 
 // export default ActiveTrigger
 
-//Chernob
-
 "use client"
 import { InstagramBlue, PlaneBlue } from "@/icons"
 import { motion } from "framer-motion"
@@ -491,10 +489,11 @@ const ActiveTrigger = ({
                     ) : (
                       <Alert className="bg-purple-500/10 border-purple-500/30">
                         <Zap className="h-4 w-4 text-purple-500" />
-                        <AlertTitle className="text-purple-500 font-medium">Open Listener Mode</AlertTitle>
+                        <AlertTitle className="text-purple-500 font-medium">Smart AI Intent Detection</AlertTitle>
                         <AlertDescription className="text-purple-400">
-                          Your automation responds to any message from customers, allowing for natural conversation
-                          flow. Perfect for AI-powered responses that understand context.
+                          The AI will automatically detect the customer's intent and respond appropriately to any message 
+                          {type === "COMMENT" ? " comment on your post" : " sent to you"}. It understands context and 
+                          provides relevant responses without needing specific keywords.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -568,7 +567,7 @@ const ActiveTrigger = ({
                     >
                       <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
                       <span>
-                        {isKeywordMode ? "Triggers only on specific keywords" : "Responds to all incoming messages"}
+                        {isKeywordMode ? "Triggers only on specific keywords" : "AI detects intent from any message and responds intelligently"}
                       </span>
                     </motion.div>
                   </div>
@@ -583,5 +582,4 @@ const ActiveTrigger = ({
 }
 
 export default ActiveTrigger
-
 
