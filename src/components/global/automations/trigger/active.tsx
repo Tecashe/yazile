@@ -491,7 +491,7 @@ const ActiveTrigger = ({
                         <Zap className="h-4 w-4 text-purple-500" />
                         <AlertTitle className="text-purple-500 font-medium">Smart AI Intent Detection</AlertTitle>
                         <AlertDescription className="text-purple-400">
-                          The AI will automatically detect the customer's intent and respond appropriately to any message 
+                          The AI will automatically detect the customer&apos;s intent and respond appropriately to any message 
                           {type === "COMMENT" ? " comment on your post" : " sent to you"}. It understands context and 
                           provides relevant responses without needing specific keywords.
                         </AlertDescription>
