@@ -720,7 +720,6 @@ type Props = {
 }
 
 const Trigger = ({ id }: Props) => {
-  console.log('Trigger component received id:', id)
   const { types, onSetTrigger, onSaveTrigger, isPending } = useTriggers(id)
   const { data } = useQueryAutomation(id)
   const [showTip, setShowTip] = useState(true)

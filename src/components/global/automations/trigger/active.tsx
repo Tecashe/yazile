@@ -188,7 +188,7 @@ const ActiveTrigger = ({
                     )}
 
                     {/* Buttons Display */}
-                    {buttons && Array.isArray(buttons) && buttons.length > 0 && (
+                    {/* {buttons && Array.isArray(buttons) && buttons.length > 0 && (
                       <div className="mt-3">
                         <h6 className="text-sm font-medium text-white mb-2">Quick Reply Buttons</h6>
                         <div className="flex flex-wrap gap-2">
@@ -201,6 +201,34 @@ const ActiveTrigger = ({
                               {button.text || button.label || button}
                             </Badge>
                           ))}
+                        </div>
+                      </div>
+                    )} */}
+                    {buttons && Array.isArray(buttons) && buttons.length > 0 && (
+                      <div className="mt-3">
+                        <h6 className="text-sm font-medium text-white mb-2">Quick Reply Buttons</h6>
+                        <div className="flex flex-wrap gap-2">
+                          {buttons.map((button: any, index: number) => {
+                            // Handle different button structures safely
+                            let buttonText = '';
+                            
+                            if (typeof button === 'string') {
+                              buttonText = button;
+                            } else if (button && typeof button === 'object') {
+                              // Your buttons have {name, payload} structure
+                              buttonText = button.name || button.text || button.label || `Button ${index + 1}`;
+                            }
+
+                            return (
+                              <Badge 
+                                key={index}
+                                variant="outline" 
+                                className="bg-blue-500/20 text-blue-400 border-blue-500/30"
+                              >
+                                {buttonText}
+                              </Badge>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -255,3 +283,4 @@ const ActiveTrigger = ({
 }
 
 export default ActiveTrigger
+
