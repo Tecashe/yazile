@@ -770,7 +770,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import type { Conversation, Message } from "@/types/dashboard"
 import { fetchChatsAndBusinessVariables } from "@/actions/messageAction/messageAction"
-import { sendDMz } from "@/lib/fetch"
+import { sendDMs } from "@/lib/fetch"
 import { cn } from "@/lib/utils"
 import FancyLoader from "./fancy-loader"
 import ExampleConversations from "./exampleConvo"
@@ -1545,7 +1545,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId 
         hasToken: !!token,
       })
 
-      const result = await sendDMz(
+      const result = await sendDMs(
         pageId,
         chatState.selectedConversation.userId || "123456",
         newMessage,
