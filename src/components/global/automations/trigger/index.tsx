@@ -1636,10 +1636,9 @@ const Trigger = ({ id }: Props) => {
                   {listenMode === "KEYWORDS" && (
                     <div>
                       <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-lg font-medium">Configure Keywords</h3>
+                       <h3 className="text-lg font-medium">Configure Keywords</h3>
                         <KeywordsPopup
-                          keywords={keywords}
-                          onAddKeywords={setKeywords}
+                          id={id} // Use the id prop that's already passed to the Trigger component
                           trigger={
                             <Button variant="outline" size="sm">
                               <Plus className="h-4 w-4 mr-1" />
