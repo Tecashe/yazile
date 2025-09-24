@@ -1213,11 +1213,12 @@ const Trigger = ({ id }: Props) => {
     { name: "Pricing", payload: "pricing" },
     { name: "Support", payload: "support" },
   ])
-  const [keywords, setKeywords] = useState<string[]>([]) // Added keywords state
-  const [isEditing, setIsEditing] = useState(false) // Added editing state
+  const [isEditing, setIsEditing] = useState(false)
 
   const handleSaveTrigger = () => {
-    onSaveTrigger({ isFallback, fallbackMessage, buttons, listenMode, keywords })
+    // Get current keywords from the data
+    const currentKeywords = data?.data?.keywords?.map(k => k.word) || []
+    onSaveTrigger({ isFallback, fallbackMessage, buttons, listenMode, keywords: currentKeywords })
     setActiveTab("configure")
   }
 
@@ -1262,18 +1263,22 @@ const Trigger = ({ id }: Props) => {
     setActiveTab("configure")
   }
 
+  // Get current keywords from the query data
+  const currentKeywords = data?.data?.keywords || []
+  const hasKeywords = currentKeywords.length > 0
+
   if (data?.data && data?.data?.trigger.length > 0 && !isEditing) {
     return (
       <div className="flex flex-col items-center w-full">
         <ActiveTrigger
           type={data.data.trigger[0].type}
           keywords={data.data.keywords}
-         listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
+          listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
           isFallback={data.data.isFallback}
           fallbackMessage={data.data.fallbackMessage}
           buttons={data.data.buttons}
-          onEdit={handleEdit} // Pass edit handler
-          onUpdate={handleUpdate} // Pass update handler
+          onEdit={handleEdit}
+          onUpdate={handleUpdate}
         />
 
         {data?.data?.trigger.length > 1 && (
@@ -1287,7 +1292,7 @@ const Trigger = ({ id }: Props) => {
             <ActiveTrigger
               type={data.data.trigger[1].type}
               keywords={data.data.keywords}
-             listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
+              listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
               isFallback={data.data.isFallback}
               fallbackMessage={data.data.fallbackMessage}
               buttons={data.data.buttons}
@@ -1636,9 +1641,9 @@ const Trigger = ({ id }: Props) => {
                   {listenMode === "KEYWORDS" && (
                     <div>
                       <div className="flex justify-between items-center mb-3">
-                       <h3 className="text-lg font-medium">Configure Keywords</h3>
+                        <h3 className="text-lg font-medium">Configure Keywords</h3>
                         <KeywordsPopup
-                          id={id} // Use the id prop that's already passed to the Trigger component
+                          id={id}
                           trigger={
                             <Button variant="outline" size="sm">
                               <Plus className="h-4 w-4 mr-1" />
@@ -1650,10 +1655,10 @@ const Trigger = ({ id }: Props) => {
                       </div>
 
                       <div className="flex flex-wrap gap-2 min-h-[60px] p-3 bg-background-80 rounded-lg border-2 border-dashed border-muted-foreground/20">
-                        {keywords.length > 0 ? (
-                          keywords.map((keyword, index) => (
-                            <Badge key={index} variant="secondary">
-                              {keyword}
+                        {hasKeywords ? (
+                          currentKeywords.map((keywordObj) => (
+                            <Badge key={keywordObj.id} variant="secondary">
+                              {keywordObj.word}
                             </Badge>
                           ))
                         ) : (
@@ -1662,6 +1667,15 @@ const Trigger = ({ id }: Props) => {
                           </p>
                         )}
                       </div>
+
+                      {hasKeywords && (
+                        <div className="text-sm text-slate-400 mt-2">
+                          <span className="bg-light-blue/20 text-light-blue rounded-full w-4 h-4 inline-flex items-center justify-center mr-1 text-[10px]">
+                            ✓
+                          </span>
+                          {currentKeywords.length} keyword{currentKeywords.length !== 1 ? 's' : ''} configured. Your automation will trigger when customers use these words.
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1693,17 +1707,18 @@ const Trigger = ({ id }: Props) => {
 
             <Button
               onClick={() => {
-                onSaveTrigger({ isFallback, fallbackMessage, buttons, listenMode, keywords })
+                const currentKeywords = data?.data?.keywords?.map(k => k.word) || []
+                onSaveTrigger({ isFallback, fallbackMessage, buttons, listenMode, keywords: currentKeywords })
                 setIsEditing(false)
               }}
               disabled={
-                isFallback ? false : types?.length === 0 || (listenMode === "KEYWORDS" && keywords.length === 0)
+                isFallback ? false : types?.length === 0 || (listenMode === "KEYWORDS" && !hasKeywords)
               }
               className={cn(
                 "w-full py-6 text-white font-medium",
                 isFallback
                   ? "bg-gradient-to-br from-[#1C6ED8] to-[#0C4AA6]"
-                  : types?.length === 0 || (listenMode === "KEYWORDS" && keywords.length === 0)
+                  : types?.length === 0 || (listenMode === "KEYWORDS" && !hasKeywords)
                     ? "bg-in-active"
                     : listenMode === "ALL_MESSAGES"
                       ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480]"
@@ -1718,7 +1733,7 @@ const Trigger = ({ id }: Props) => {
 
           <TabsContent value="simulation">
             <SimulationTab
-              keywords={keywords}
+              keywords={currentKeywords.map(k => k.word)}
               responseMessage={data?.data?.listener?.prompt || ""}
               responseType={data?.data?.listener?.listener || "MESSAGE"}
             />
