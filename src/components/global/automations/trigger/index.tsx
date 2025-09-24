@@ -1659,7 +1659,7 @@ const Trigger = ({ id }: Props) => {
                           ))
                         ) : (
                           <p className="text-muted-foreground text-sm">
-                            No keywords added yet. Click "Manage Keywords" to add some.
+                            No keywords added yet. Click &ldquo;Manage Keywords&rdquo; to add some.
                           </p>
                         )}
                       </div>
