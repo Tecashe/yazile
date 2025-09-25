@@ -56,6 +56,14 @@ model User {
   revenueMetrics       RevenueMetrics[]
   revenueOpportunities RevenueOpportunity[]
 
+  
+   socialAccounts    SocialAccount[]
+   workflows         Workflows[]
+   workflowAnalytics WorkflowAnalytics[]
+   
+   apiIntegrations   ApiIntegration[]   @relation("UserApiIntegrations")
+   messageTemplates  MessageTemplates[] @relation("UserMessageTemplates")
+
   generalNotifications GeneralNotification[]
 
   webhookNotifications Notification[]
@@ -2017,4 +2025,197 @@ model WorkflowExecution {
   @@index([workflowId])
   @@index([status])
   @@index([startedAt])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////// workflows
+
+model SocialAccount {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @db.Uuid
+  platform     String   // "instagram", "twitter", "facebook", "tiktok", etc.
+  accountId    String   // Platform-specific account ID
+  username     String
+  accessToken  String?  // Encrypted access token
+  refreshToken String?  // Encrypted refresh token
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Workflows using this account
+  workflows Workflows[]
+
+  @@unique([userId, platform, accountId])
+  @@map("social_accounts")
+}
+
+model Workflows {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean  @default(false)
+  
+  // Social media configuration
+  socialAccountId String?  @db.Uuid // Fixed: Added @db.Uuid
+  triggerType     String   // "dm", "comment", "mention", "story_reply"
+  
+  // Workflow data
+  nodes       Json     // Serialized workflow nodes
+  connections Json     // Node connections
+  variables   Json?    // Custom variables
+  
+  // Metadata
+  version     String   @default("1.0.0")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastRunAt   DateTime?
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount? @relation(fields: [socialAccountId], references: [id])
+  
+  // Executions and analytics
+  executions WorkflowExecutions[]
+  analytics  WorkflowAnalytics[]
+
+  @@map("workflows")
+}
+
+model WorkflowExecutions {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId String   @db.Uuid
+  
+  // Trigger information
+  triggerData Json     // Original message/comment data
+  platform    String   // "instagram", "twitter", etc.
+  senderId    String   // Platform user ID who triggered
+  senderUsername String?
+  
+  // Execution details
+  status      String   // "running", "completed", "failed", "stopped"
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  errorMessage String?
+  
+  // Execution path
+  executedNodes Json    // Array of executed node IDs with timestamps
+  currentNode   String? // Current node being executed
+  
+  // Response data
+  responses Json?      // Generated responses sent
+  
+  workflow Workflows @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_executions")
+}
+
+model WorkflowAnalytics {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @db.Uuid
+  workflowId String   @db.Uuid // Fixed: Added @db.Uuid
+  
+  // Time period
+  date       DateTime @default(now())
+  
+  // Metrics
+  executions    Int @default(0)
+  completions   Int @default(0)
+  failures      Int @default(0)
+  avgDuration   Float? // Average execution time in seconds
+  
+  // Engagement metrics
+  responses     Int @default(0)
+  buttonClicks  Int @default(0)
+  conversions   Int @default(0)
+  
+  // Platform breakdown
+  platformStats Json? // Stats per platform
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow Workflows @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workflowId, date])
+  @@map("workflow_analytics")
+}
+
+model Template {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String
+  category    String   // "ecommerce", "customer_service", "lead_generation", etc.
+  
+  // Template data
+  nodes       Json     // Pre-built workflow nodes
+  connections Json     // Node connections
+  variables   Json?    // Template variables
+  
+  // Metadata
+  isPublic    Boolean  @default(true)
+  usageCount  Int      @default(0)
+  rating      Float?   // Average user rating
+  tags        String[] // Searchable tags
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("templates")
+}
+
+model ApiIntegration {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @db.Uuid
+  name        String
+  type        String   // "webhook", "rest_api", "graphql", etc.
+  
+  // Configuration
+  endpoint    String
+  method      String?  // "GET", "POST", "PUT", "DELETE"
+  headers     Json?    // Custom headers
+  authType    String?  // "none", "bearer", "api_key", "oauth"
+  authConfig  Json?    // Auth configuration (encrypted)
+  
+  // Usage
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation("UserApiIntegrations", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_integrations")
+}
+
+model MessageTemplates {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @db.Uuid
+  name        String
+  content     String
+  type        String   // "text", "image", "video", "carousel"
+  
+  // Template variables
+  variables   Json?    // Available variables like {{name}}, {{product}}
+  
+  // Usage tracking
+  usageCount  Int      @default(0)
+  lastUsedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation("UserMessageTemplates", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("message_templates")
 }
