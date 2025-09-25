@@ -248,7 +248,7 @@ function NodeContent({ node }: { node: WorkflowNode }) {
           <div className="text-xs">
             If message <Badge variant="outline">{node.data.condition || "contains"}</Badge>
           </div>
-          <div className="text-xs bg-background/20 rounded p-1">"{node.data.value || "keyword"}"</div>
+          <div className="text-xs bg-background/20 rounded p-1">&ldquo;{node.data.value || "keyword"}&rdquo;</div>
         </div>
       )
 
