@@ -7,12 +7,14 @@
 //     </div>
 //   )
 // }
- import { EnhancedWorkflowBuilder } from "@/components/global/workflows/enhanced-builder"
+
+import { EnhancedWorkflowBuilder } from "@/components/global/workflows/enhanced-builder"
+
 
 export default function WorkflowBuilderPage() {
   return (
-    <div className="h-[calc(100vh-8rem)] w-full -m-6">
-      {/* Negative margin to counteract the layout's p-6 padding */}
+    <div className="h-[calc(100vh-8rem)] w-full -m-6 overflow-hidden">
+      {/* Negative margin to counteract the layout's p-6 padding, overflow-hidden prevents horizontal scroll */}
       <EnhancedWorkflowBuilder />
     </div>
   )
