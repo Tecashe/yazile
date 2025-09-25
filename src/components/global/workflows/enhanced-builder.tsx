@@ -188,6 +188,42 @@
 // }
 
 
+// "use client"
+
+// import { useWorkflowStore } from "@/lib/workflow-store"
+// import { EnhancedWorkflowCanvas } from "./enhanced-workflow-canvas"
+// import { CollapsibleBlockPalette } from "./collapsible-block-palette"
+// import { EnhancedWorkflowHeader } from "./enhanced-workflow-header"
+// import { EnhancedRightPanel } from "./enhanced-right-panel"
+
+// export function EnhancedWorkflowBuilder() {
+//   const { sidebarCollapsed, rightPanelCollapsed } = useWorkflowStore()
+
+//   return (
+//     <div className="flex flex-col h-full min-h-[calc(100vh-8rem)] bg-background border rounded-lg overflow-hidden">
+//       {/* Workflow Header - Compact and integrated */}
+//       <EnhancedWorkflowHeader />
+
+//       {/* Main Workflow Area */}
+//       <div className="flex flex-1 relative">
+//         {/* Collapsible Block Palette - Left Side */}
+//         <CollapsibleBlockPalette />
+
+//         {/* Canvas Area - Takes remaining space */}
+//         <div
+//           className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? "ml-0" : "ml-0"} ${
+//             rightPanelCollapsed ? "mr-0" : "mr-0"
+//           }`}
+//         >
+//           <EnhancedWorkflowCanvas />
+//         </div>
+
+//         {/* Enhanced Right Panel - Right Side */}
+//         <EnhancedRightPanel />
+//       </div>
+//     </div>
+//   )
+// }
 "use client"
 
 import { useWorkflowStore } from "@/lib/workflow-store"
@@ -200,21 +236,18 @@ export function EnhancedWorkflowBuilder() {
   const { sidebarCollapsed, rightPanelCollapsed } = useWorkflowStore()
 
   return (
-    <div className="flex flex-col h-full min-h-[calc(100vh-8rem)] bg-background border rounded-lg overflow-hidden">
-      {/* Workflow Header - Compact and integrated */}
+    // Remove the min-h-[calc(100vh-8rem)] and use full available space within the layout
+    <div className="flex flex-col h-full bg-background border rounded-lg overflow-hidden">
+      {/* Workflow Header - Reduced height to work better with existing navbar */}
       <EnhancedWorkflowHeader />
 
-      {/* Main Workflow Area */}
-      <div className="flex flex-1 relative">
+      {/* Main Workflow Area - This will take the remaining height */}
+      <div className="flex flex-1 relative min-h-0">
         {/* Collapsible Block Palette - Left Side */}
         <CollapsibleBlockPalette />
 
         {/* Canvas Area - Takes remaining space */}
-        <div
-          className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? "ml-0" : "ml-0"} ${
-            rightPanelCollapsed ? "mr-0" : "mr-0"
-          }`}
-        >
+        <div className="flex-1 min-w-0 relative">
           <EnhancedWorkflowCanvas />
         </div>
 

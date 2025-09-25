@@ -1,8 +1,18 @@
-import { EnhancedWorkflowBuilder } from "@/components/global/workflows/enhanced-builder"
+// import { EnhancedWorkflowBuilder } from "@/components/global/workflows/enhanced-builder"
 
-export default function Home() {
+// export default function Home() {
+//   return (
+//     <div className="min-h-screen bg-background">
+//       <EnhancedWorkflowBuilder />
+//     </div>
+//   )
+// }
+ import { EnhancedWorkflowBuilder } from "@/components/global/workflows/enhanced-builder"
+
+export default function WorkflowBuilderPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-[calc(100vh-8rem)] w-full -m-6">
+      {/* Negative margin to counteract the layout's p-6 padding */}
       <EnhancedWorkflowBuilder />
     </div>
   )
