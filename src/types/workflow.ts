@@ -273,7 +273,93 @@
 // still in use - Central type definitions for the workflow builder
 
 
-export interface WorkflowNode {   
+// export interface WorkflowNode {   
+//   id: string
+//   type: "trigger" | "text" | "button" | "image" | "condition" | "delay" | "api" | "webhook"
+//   position: { x: number; y: number }
+//   data: any
+//   connections: string[]
+// }
+
+// export interface WorkflowConnection {
+//   from: string
+//   to: string
+// }
+
+// export interface WorkflowMetadata {
+//   id?: string
+//   name: string
+//   description: string
+//   version: string
+//   createdAt?: string
+//   updatedAt?: string
+//   userId?: string
+//   isActive?: boolean
+// }
+
+// export interface Workflow {
+//   id: string
+//   name: string
+//   description: string
+//   nodes: WorkflowNode[]
+//   connections: WorkflowConnection[]
+//   metadata: WorkflowMetadata
+//   isActive: boolean
+//   version: string
+//   createdAt: string
+//   updatedAt: string
+//   userId: string
+// }
+
+// export interface WorkflowExecution {
+//   id: string
+//   workflowId: string
+//   status: "pending" | "running" | "completed" | "failed"
+//   startedAt: string
+//   completedAt?: string
+//   input: any
+//   output?: any
+//   error?: string
+// }
+
+// export interface WorkflowAnalytics {
+//   workflowId: string
+//   totalExecutions: number
+//   successfulExecutions: number
+//   failedExecutions: number
+//   averageExecutionTime: number
+//   lastExecuted?: string
+// }
+
+// export interface BlockType {
+//   id: string
+//   name: string
+//   description: string
+//   icon: string
+//   category: "trigger" | "action" | "condition" | "integration"
+//   defaultData: any
+// }
+
+// export interface TestData {
+//   message?: string
+//   sender?: string
+//   platform?: string
+//   timestamp?: string
+//   metadata?: Record<string, any>
+// }
+
+// export interface ValidationError {
+//   nodeId: string
+//   field: string
+//   message: string
+// }
+
+// export interface WorkflowValidation {
+//   isValid: boolean
+//   errors: ValidationError[]
+//   warnings: string[]
+// }
+export interface WorkflowNode {
   id: string
   type: "trigger" | "text" | "button" | "image" | "condition" | "delay" | "api" | "webhook"
   position: { x: number; y: number }
@@ -282,8 +368,14 @@ export interface WorkflowNode {
 }
 
 export interface WorkflowConnection {
-  from: string
-  to: string
+  id?: string
+  source: string
+  target: string
+  sourceHandle?: string
+  targetHandle?: string
+  // Legacy support for existing code
+  from?: string
+  to?: string
 }
 
 export interface WorkflowMetadata {
@@ -358,4 +450,58 @@ export interface WorkflowValidation {
   isValid: boolean
   errors: ValidationError[]
   warnings: string[]
+}
+
+// Additional types for workflow execution context
+export interface WorkflowContext {
+  variables: Record<string, any>
+  triggerData: any
+  userId: string
+  workflowId: string
+  executionId: string
+  platform: string
+  senderId: string
+  senderUsername?: string
+}
+
+export interface NodeExecutionResult {
+  success: boolean
+  output?: any
+  nextNodeId?: string
+  error?: string
+  shouldStop?: boolean
+  responses?: WorkflowResponse[]
+}
+
+export interface WorkflowResponse {
+  type: "text" | "button" | "image" | "carousel"
+  text?: string
+  buttons?: WorkflowButton[]
+  quickReplies?: WorkflowQuickReply[]
+  carousel?: WorkflowCarouselElement[]
+  attachment?: WorkflowAttachment
+}
+
+export interface WorkflowButton {
+  title: string
+  payload: string
+  url?: string
+}
+
+export interface WorkflowQuickReply {
+  title: string
+  payload: string
+}
+
+export interface WorkflowCarouselElement {
+  title: string
+  subtitle?: string
+  image_url?: string
+  buttons?: WorkflowButton[]
+}
+
+export interface WorkflowAttachment {
+  type: "image" | "video" | "audio" | "file"
+  url: string
+  caption?: string
 }
