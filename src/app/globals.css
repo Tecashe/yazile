@@ -3,42 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -75,6 +39,7 @@
 }
 
 @theme inline {
+  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -113,6 +78,19 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -135,29 +113,60 @@
       transform: rotate(360deg);
     }
   }
+
+  /* Added subtle workflow canvas utilities */
+  .workflow-connection {
+    stroke: hsl(var(--muted-foreground));
+    stroke-width: 1.5px;
+    fill: none;
+    transition: stroke 0.2s ease;
+  }
+
+  .workflow-connection:hover {
+    stroke: hsl(var(--primary));
+    stroke-width: 2px;
+  }
+
+  .workflow-connection-active {
+    stroke: hsl(var(--primary));
+    stroke-width: 2px;
+    stroke-dasharray: 4, 4;
+    animation: dash 1s linear infinite;
+  }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -8;
+    }
+  }
+
+  .connection-handle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid hsl(var(--background));
+    background: hsl(var(--muted-foreground));
+    transition: all 0.2s ease;
+  }
+
+  .connection-handle:hover {
+    background: hsl(var(--primary));
+    transform: scale(1.2);
+  }
+
+  .connection-handle.active {
+    background: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsla(var(--primary), 0.2);
+  }
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: Arial, Helvetica, sans-serif;
-  }
   html {
     scroll-behavior: smooth;
   }
 }
 
-/* Workflow Canvas Styles */
-.workflow-canvas {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
+/* Added clean workflow node styles */
 .workflow-node {
   transition: all 0.2s ease;
   border-radius: 8px;
@@ -172,53 +181,6 @@
   box-shadow: 0 0 0 2px hsl(var(--primary));
 }
 
-/* Subtle connection arrows */
-.workflow-connection {
-  stroke: hsl(var(--muted-foreground));
-  stroke-width: 1.5px;
-  fill: none;
-  transition: stroke 0.2s ease;
-}
-
-.workflow-connection:hover {
-  stroke: hsl(var(--primary));
-  stroke-width: 2px;
-}
-
-.workflow-connection-active {
-  stroke: hsl(var(--primary));
-  stroke-width: 2px;
-  stroke-dasharray: 4, 4;
-  animation: dash 1s linear infinite;
-}
-
-@keyframes dash {
-  to {
-    stroke-dashoffset: -8;
-  }
-}
-
-/* Connection handles */
-.connection-handle {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid hsl(var(--background));
-  background: hsl(var(--muted-foreground));
-  transition: all 0.2s ease;
-}
-
-.connection-handle:hover {
-  background: hsl(var(--primary));
-  transform: scale(1.2);
-}
-
-.connection-handle.active {
-  background: hsl(var(--primary));
-  box-shadow: 0 0 0 4px hsla(var(--primary), 0.2);
-}
-
-/* Canvas controls */
 .canvas-controls {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
@@ -236,6 +198,7 @@
   scrollbar-width: thin; /* none | auto  */
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
+/* Firefox */
 
 /* Chrome, Edge, Safari */
 *::-webkit-scrollbar {
@@ -255,6 +218,54 @@
 
 *::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
+}
+
+.radial--gradient {
+  background-image: radial-gradient(ellipse farthest-side, rgba(51, 82, 204, 0.15) 20%, #09090b 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.radial--gradient--pink {
+  background-image: radial-gradient(at center, rgba(148, 52, 230, 0.1) 10%, transparent 50%);
+  background-size: 70% 80%;
+  background-repeat: no-repeat;
+}
+
+.radial--gradient--automations {
+  background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.05) 40%, #1d1d1d 60%);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+}
+
+.radial--double--gradient--cards--top {
+  background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.3) 50%, transparent 70%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.radial--double--gradient--cards--bottom {
+  background-image: radial-gradient(at bottom right, rgba(51, 82, 204, 0.1) 50%, transparent 70%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* In your global stylesheet or component style */
+@media (max-width: 640px) {
+  .notification-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .notification-item {
+    flex-direction: column; /* Stack the notification content vertically */
+    width: 100%; /* Make each notification take full width */
+  }
+
+  .notification-item img {
+    margin-bottom: 10px; /* Space out the avatar from the content */
+  }
 }
 
 @keyframes subtleShimmer {
@@ -285,6 +296,403 @@
   animation: automation-shimmer 3s infinite;
 }
 
+.staggeredFadeIn > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: automation-fadeIn 0.5s forwards;
+}
+
+.staggeredFadeIn > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.staggeredFadeIn > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.staggeredFadeIn > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.staggeredFadeIn > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.staggeredFadeIn > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.staggeredFadeIn > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+@keyframes automation-fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effects */
+.hoverScale {
+  transition: transform 0.2s ease-in-out;
+}
+
+.hoverScale:hover {
+  transform: scale(1.05);
+}
+
+/* Improve the hover scale effect for touch devices */
+@media (hover: none) {
+  .hoverScale:active {
+    transform: scale(1.05);
+  }
+}
+
+/* Glass effect for backgrounds */
+.glassEffect {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Add a mobile-friendly glass effect */
+.mobileGlassEffect {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@media (max-width: 640px) {
+  .glassEffect {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* 3D card effect */
+.card3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card3dContent {
+  transform: translateZ(20px);
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 15px rgba(51, 82, 204, 0.5);
+}
+
+.glowHover:hover {
+  box-shadow: 0 0 20px rgba(51, 82, 204, 0.7);
+}
+
+/* Radial menu animation */
+@keyframes radialExpand {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.radialExpand {
+  animation: radialExpand 0.3s forwards;
+}
+
+/* Floating animation */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Add these responsive styles */
+@media (max-width: 640px) {
+  .staggeredFadeIn > * {
+    animation-delay: 0.05s !important;
+  }
+
+  .shimmerBorder {
+    animation-duration: 2s;
+  }
+}
+
+/* Add these styles for the FloatingPanel */
+.floatingPanelBackdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@media (max-width: 640px) {
+  .floatingPanelContent {
+    width: 95vw;
+    max-height: 85vh;
+    padding: 16px;
+  }
+  .float {
+    animation-duration: 2s;
+  }
+
+  .shimmerBorder {
+    animation-duration: 2s;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.sidebar-transition {
+  transition: all 0.3s ease;
+}
+
+/* Improve sidebar transition */
+[data-sidebar-state="collapsed"] [data-sidebar-menu-button] span,
+[data-sidebar-state="collapsed"] [data-sidebar-menu-button] .ml-auto {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+[data-sidebar-state="expanded"] [data-sidebar-menu-button] span,
+[data-sidebar-state="expanded"] [data-sidebar-menu-button] .ml-auto {
+  opacity: 1;
+  transition: opacity 0.3s ease 0.1s;
+}
+
+/* Template Card specific animations - SUBTLE VERSION */
+.template-card-glow {
+  box-shadow: 0 0 15px 5px rgba(var(--primary), 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.template-card-glow:hover {
+  /* Subtle border glow increase */
+  box-shadow: 0 0 18px 5px rgba(var(--primary), 0.2);
+}
+
+/* 3D perspective effect */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, hsl(var(--primary)), transparent, hsl(var(--primary)));
+  background-size: 400% 400%;
+  z-index: -1;
+  animation: gradient-border-animation 3s ease infinite;
+  border-radius: inherit;
+}
+
+@keyframes gradient-border-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Staggered entrance animation for cards */
+.staggered-entrance {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggered-entrance-animation 0.5s forwards;
+}
+
+@keyframes staggered-entrance-animation {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Creative card shapes */
+.card-shape-marketing {
+  clip-path: polygon(0% 0%, 85% 0%, 100% 15%, 100% 100%, 0% 100%);
+}
+
+.card-shape-sales {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 15% 100%, 0% 85%);
+}
+
+.card-shape-customer-support {
+  clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 15%);
+}
+
+.card-shape-data-processing {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%);
+}
+
+.card-shape-document {
+  clip-path: polygon(5% 0%, 95% 0%, 100% 5%, 100% 95%, 95% 100%, 5% 100%, 0% 95%, 0% 5%);
+}
+
+.card-shape-social {
+  border-radius: 30px;
+}
+
+.card-shape-communication {
+  clip-path: polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 20%);
+}
+
+.card-shape-integration {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%);
+}
+
+.card-shape-utility {
+  clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
+}
+
+.card-shape-custom {
+  clip-path: polygon(5% 0%, 100% 0%, 100% 95%, 95% 100%, 0% 100%, 0% 5%);
+}
+
+/* Category-specific card styles - SUBTLE HOVER ENHANCEMENT */
+.card-border-marketing {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-marketing:hover {
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.25);
+}
+
+.card-border-sales {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-sales:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
+}
+
+.card-border-customer-support {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-customer-support:hover {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.25);
+}
+
+.card-border-data-processing {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-data-processing:hover {
+  border-color: rgba(6, 182, 212, 0.7);
+  box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+}
+
+.card-border-document {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-document:hover {
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
+}
+
+.card-border-social {
+  border-color: rgba(236, 72, 153, 0.5);
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-social:hover {
+  border-color: rgba(236, 72, 153, 0.7);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.25);
+}
+
+.card-border-communication {
+  border-color: rgba(20, 184, 166, 0.5);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-communication:hover {
+  border-color: rgba(20, 184, 166, 0.7);
+  box-shadow: 0 0 18px rgba(20, 184, 166, 0.25);
+}
+
+.card-border-integration {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-integration:hover {
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.25);
+}
+
+.card-border-utility {
+  border-color: rgba(100, 116, 139, 0.5);
+  box-shadow: 0 0 15px rgba(100, 116, 139, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-utility:hover {
+  border-color: rgba(100, 116, 139, 0.7);
+  box-shadow: 0 0 18px rgba(100, 116, 139, 0.25);
+}
+
+.card-border-custom {
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-border-custom:hover {
+  border-color: rgba(249, 115, 22, 0.7);
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.25);
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -301,4 +709,23 @@
   to {
     opacity: 1;
   }
+}
+
+.dark .glassEffect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(30, 30, 30, 0.7);
+  border-color: hsl(var(--border));
+}
+
+.dark .glow {
+  box-shadow: 0 0 15px rgba(51, 82, 204, 0.3);
+}
+
+.dark .glowHover:hover {
+  box-shadow: 0 0 20px rgba(51, 82, 204, 0.4);
+}
+
+/* Enhance the radial gradient for dark mode */
+.dark .radial--gradient--automations {
+  background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.08) 40%, hsl(var(--background)) 60%);
 }
