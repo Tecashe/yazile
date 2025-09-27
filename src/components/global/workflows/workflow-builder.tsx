@@ -12,36 +12,30 @@ export function WorkflowBuilder() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <div className="flex-shrink-0 z-50">
+      <div className="flex-shrink-0 z-50 border-b border-border">
         <WorkflowHeader />
       </div>
 
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {!sidebarCollapsed && (
             <>
-              <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="relative z-40">
-                <div className="h-full overflow-hidden">
-                  <BlockPalette />
-                </div>
+              <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+                <BlockPalette />
               </ResizablePanel>
-              <ResizableHandle className="z-30" />
+              <ResizableHandle />
             </>
           )}
 
-          <ResizablePanel defaultSize={rightPanelCollapsed ? 80 : 60} className="relative">
-            <div className="h-full w-full overflow-hidden">
-              <WorkflowCanvas />
-            </div>
+          <ResizablePanel defaultSize={rightPanelCollapsed ? 80 : 60}>
+            <WorkflowCanvas />
           </ResizablePanel>
 
           {!rightPanelCollapsed && (
             <>
-              <ResizableHandle className="z-30" />
-              <ResizablePanel defaultSize={20} minSize={15} maxSize={35} className="relative z-40">
-                <div className="h-full overflow-hidden">
-                  <ConfigurationPanel />
-                </div>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
+                <ConfigurationPanel />
               </ResizablePanel>
             </>
           )}
