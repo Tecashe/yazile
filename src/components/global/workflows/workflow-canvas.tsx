@@ -431,6 +431,9 @@
 //   }
 // }
 // Enhanced Canvas Component
+
+
+
 "use client"
 
 import type React from "react"
@@ -607,12 +610,6 @@ export function WorkflowCanvas() {
     [updateNode],
   )
 
-  const getConnectionPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
-    const dx = to.x - from.x
-    const controlOffset = Math.abs(dx) * 0.5
-    return `M ${from.x} ${from.y} C ${from.x + controlOffset} ${from.y}, ${to.x - controlOffset} ${to.y}, ${to.x} ${to.y}`
-  }
-
   const handleZoomIn = () => setCanvasZoom(Math.min(3, canvasZoom * 1.2))
   const handleZoomOut = () => setCanvasZoom(Math.max(0.1, canvasZoom * 0.8))
 
@@ -652,12 +649,19 @@ export function WorkflowCanvas() {
     })
   }
 
-  const deleteConnection = useCallback((connectionId: string) => {
+  // Simple bezier path
+  const getConnectionPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
+    const dx = to.x - from.x
+    const controlOffset = Math.abs(dx) * 0.5
+    return `M ${from.x} ${from.y} C ${from.x + controlOffset} ${from.y}, ${to.x - controlOffset} ${to.y}, ${to.x} ${to.y}`
+  }
+
+  const deleteConnection = (connectionId: string) => {
     const connection = connections.find(c => c.id === connectionId)
     if (connection && disconnectNodes) {
       disconnectNodes(connection.fromNodeId, connection.toNodeId, connection.fromHandle)
     }
-  }, [connections, disconnectNodes])
+  }
 
   return (
     <div className="relative w-full h-full bg-background overflow-hidden">
@@ -680,6 +684,7 @@ export function WorkflowCanvas() {
             transformOrigin: "0 0",
           }}
         >
+          {/* Grid */}
           {showGrid && (
             <div
               className="absolute inset-0 opacity-30"
@@ -697,71 +702,91 @@ export function WorkflowCanvas() {
             />
           )}
 
+          {/* Connection Lines - Fixed positioning */}
           <svg
-            className="absolute inset-0 pointer-events-none"
-            style={{ left: -5000, top: -5000, width: 10000, height: 10000 }}
+            className="absolute pointer-events-auto"
+            style={{ 
+              left: 0, 
+              top: 0, 
+              width: "100%", 
+              height: "100%",
+              position: "absolute",
+              zIndex: 1
+            }}
+            viewBox="0 0 3000 3000"
           >
             <defs>
-              <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L8,3 z" fill="hsl(var(--muted-foreground))" />
+              <marker 
+                id="arrowhead" 
+                markerWidth="10" 
+                markerHeight="7" 
+                refX="9" 
+                refY="3.5" 
+                orient="auto"
+              >
+                <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
               </marker>
             </defs>
 
-            {/* Connection lines */}
+            {/* Render all connections */}
             {connections.map((connection) => {
               const fromNode = nodes.find((n) => n.id === connection.fromNodeId)
               const toNode = nodes.find((n) => n.id === connection.toNodeId)
+              
               if (!fromNode || !toNode) return null
 
               const fromPoint = {
-                x: fromNode.position.x + 240,
-                y: fromNode.position.y + 50,
+                x: fromNode.position.x + 240, // Right edge of from node
+                y: fromNode.position.y + 50,  // Middle of from node
               }
               const toPoint = {
-                x: toNode.position.x,
-                y: toNode.position.y + 50,
+                x: toNode.position.x,         // Left edge of to node
+                y: toNode.position.y + 50,    // Middle of to node
               }
+
+              const pathD = getConnectionPath(fromPoint, toPoint)
 
               return (
                 <g key={connection.id}>
-                  {/* Invisible wider path for easier clicking */}
+                  {/* Wider invisible path for easier clicking */}
                   <path
-                    d={getConnectionPath(fromPoint, toPoint)}
+                    d={pathD}
                     stroke="transparent"
-                    strokeWidth="20"
+                    strokeWidth="15"
                     fill="none"
-                    className="pointer-events-stroke cursor-pointer"
+                    className="cursor-pointer"
                     onClick={() => deleteConnection(connection.id)}
                   />
                   {/* Visible connection line */}
                   <path
-                    d={getConnectionPath(fromPoint, toPoint)}
-                    stroke="hsl(var(--muted-foreground))"
+                    d={pathD}
+                    stroke="#6b7280"
                     strokeWidth="2"
                     fill="none"
                     markerEnd="url(#arrowhead)"
-                    className="hover:stroke-primary transition-colors pointer-events-none"
+                    className="pointer-events-none hover:stroke-blue-500 transition-colors"
                   />
                 </g>
               )
             })}
 
-            {/* Live connection line while connecting */}
+            {/* Live connection preview */}
             {connectionMode.active && connectionMode.fromNodeId && (
               <path
                 d={`M ${nodes.find((n) => n.id === connectionMode.fromNodeId)?.position.x! + 240} ${
                   nodes.find((n) => n.id === connectionMode.fromNodeId)?.position.y! + 50
                 } L ${mousePosition.x} ${mousePosition.y}`}
-                stroke="hsl(var(--primary))"
+                stroke="#3b82f6"
                 strokeWidth="2"
                 strokeDasharray="5,5"
                 fill="none"
                 opacity="0.7"
+                className="pointer-events-none"
               />
             )}
           </svg>
 
-          {/* Workflow nodes */}
+          {/* Nodes */}
           {nodes.map((node) => (
             <WorkflowNodeComponent
               key={node.id}
@@ -776,6 +801,7 @@ export function WorkflowCanvas() {
         </div>
       </div>
 
+      {/* Controls */}
       <div className="absolute bottom-4 left-4 flex flex-col gap-2">
         <div className="bg-card/95 border border-border rounded-lg p-2 backdrop-blur-sm shadow-sm">
           <div className="flex items-center gap-1">
@@ -809,6 +835,7 @@ export function WorkflowCanvas() {
         </div>
       </div>
 
+      {/* Status badges */}
       {connectionMode.active && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
           <Badge variant="default" className="bg-primary text-primary-foreground">
@@ -826,6 +853,13 @@ export function WorkflowCanvas() {
           </Badge>
         </div>
       )}
+
+      {/* Debug info */}
+      <div className="absolute top-4 left-4">
+        <Badge variant="outline">
+          Connections: {connections.length} | Nodes: {nodes.length}
+        </Badge>
+      </div>
     </div>
   )
 }
