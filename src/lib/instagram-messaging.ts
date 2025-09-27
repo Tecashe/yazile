@@ -1,8 +1,6 @@
 import axios, { type AxiosError, type AxiosResponse } from "axios"
 import { client } from "@/lib/prisma"
 
-///for testing
-
 // Enhanced types for Instagram messaging
 interface InstagramQuickReply {
   content_type: "text"

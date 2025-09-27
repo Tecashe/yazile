@@ -479,13 +479,9 @@ export async function validateWorkflow(
             errors.push(`Condition node "${node.id}" is missing required configuration`)
           }
           // Additional validation for condition nodes - check if they have both true and false connections
-          const trueConnection = connections.find(
-            (conn) => conn.fromNodeId === node.id && conn.fromHandle === "true"
-          )
-          const falseConnection = connections.find(
-            (conn) => conn.fromNodeId === node.id && conn.fromHandle === "false"
-          )
-          
+          const trueConnection = connections.find((conn) => conn.fromNodeId === node.id && conn.fromHandle === "true")
+          const falseConnection = connections.find((conn) => conn.fromNodeId === node.id && conn.fromHandle === "false")
+
           if (!trueConnection) {
             errors.push(`Condition node "${node.id}" is missing "true" path connection`)
           }

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Play, CheckCircle, XCircle, Clock, MessageSquare } from "lucide-react"
-import { testWorkflow, validateWorkflow, type TestResult } from "@/actions/workflows/test-actions"
+import { testWorkflow, validateWorkflow, type TestResult } from "@/actions/workflow/test-actions"
 import { useWorkflowStore } from "@/lib/workflow-store"
 
 export function WorkflowTester() {
