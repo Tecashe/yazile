@@ -256,7 +256,7 @@
 "use server"
 
 import { executeWorkflow } from "@/lib/workflow-engine"
-import type { WorkflowNode, WorkflowConnection } from "@/lib/workflow-store"
+import type { WorkflowNode, WorkflowConnection } from "@/lib/workflow-store-production"
 import { sendDMs } from "@/lib/instagram-messaging"
 
 export interface TestWorkflowData {

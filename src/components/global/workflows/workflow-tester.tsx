@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Play, CheckCircle, XCircle, Clock, MessageSquare } from "lucide-react"
 import { testWorkflow, validateWorkflow, type TestResult } from "@/actions/workflow/test-actions"
-import { useWorkflowStore } from "@/lib/workflow-store"
+import { useWorkflowStore } from "@/lib/workflow-store-production"
 
 export function WorkflowTester() {
   const { nodes, connections } = useWorkflowStore()
