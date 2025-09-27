@@ -3357,8 +3357,8 @@ class WorkflowHandler {
         quickReplies: primaryResponse.quickReplies,
         carousel: primaryResponse.carousel,
         attachment: primaryResponse.attachment,
-        variables: workflowResult.variables,
-        extractedData: this.extractCustomerDataFromWorkflow(workflowResult.variables),
+        // variables: workflowResult.variables,
+        // extractedData: this.extractCustomerDataFromWorkflow(workflowResult.variables),
         aiSystem: "workflow_engine",
       }
     } catch (error) {
