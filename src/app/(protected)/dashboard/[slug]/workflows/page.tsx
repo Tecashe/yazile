@@ -8,7 +8,7 @@
 //   )
 // }
 
-import { WorkflowBuilder } from "@/components/global/workflow/workflow-builder"
+import { WorkflowBuilder } from "@/components/global/workflows/workflow-builder"
 
 export default function Home() {
   return (
