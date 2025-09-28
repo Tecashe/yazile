@@ -1662,7 +1662,6 @@ import {
 import { analyzeLead } from "@/lib/lead-qualification"
 import { sendPrivateMessages, transformVoiceflowToInstagram } from "@/lib/fetch"
 import { sendDMs } from "@/lib/voiceflow"
-import { client } from "@/lib/prisma"
 import { storeConversationMessage } from "@/actions/chats/queries"
 import { handleInstagramDeauthWebhook, handleInstagramDataDeletionWebhook } from "@/lib/deauth"
 import { verifyInstagramWebhook } from "@/utils/instagram"
