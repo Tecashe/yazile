@@ -141,6 +141,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useWorkflowStore } from "@/lib/workflow-store-production"
+import { WorkflowSettings } from "./workflow-settings"
 import { WorkflowEngine, type WorkflowContext } from "@/lib/workflow-engine"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -148,10 +149,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { BlockConfiguration } from "./block-configuration" // Import the separate component
 import { 
   Settings, 
   TestTube, 
@@ -378,7 +378,7 @@ export function ConfigurationPanel() {
         currentNodeId = response.nextNodeId
       } else {
         const connection = connections.find(c => c.fromNodeId === currentNodeId)
-        currentNodeId = connection?.toNodeId ||""
+        currentNodeId = connection?.toNodeId || ""
       }
     }
   }
@@ -477,7 +477,7 @@ export function ConfigurationPanel() {
             <ScrollArea className="h-full">
               {selectedNodeData ? (
                 <div className="p-4">
-                  <NodeConfiguration node={selectedNodeData} />
+                  <BlockConfiguration node={selectedNodeData} />
                 </div>
               ) : (
                 <div className="p-6 text-center">
@@ -624,134 +624,6 @@ export function ConfigurationPanel() {
           </TabsContent>
         </div>
       </Tabs>
-    </div>
-  )
-}
-
-// Simple node configuration component
-function NodeConfiguration({ node }: { node: any }) {
-  const { updateNode } = useWorkflowStore()
-
-  const handleUpdateData = (updates: any) => {
-    updateNode(node.id, { data: { ...node.data, ...updates } })
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base capitalize">{node.type} Configuration</CardTitle>
-        <CardDescription>Configure this {node.type} node</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {node.type === 'trigger' && (
-          <>
-            <div className="space-y-2">
-              <Label>Trigger Title</Label>
-              <Input
-                value={node.data.title || ''}
-                onChange={(e) => handleUpdateData({ title: e.target.value })}
-                placeholder="Enter trigger name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={node.data.description || ''}
-                onChange={(e) => handleUpdateData({ description: e.target.value })}
-                placeholder="Describe when this trigger activates"
-              />
-            </div>
-          </>
-        )}
-
-        {node.type === 'text' && (
-          <div className="space-y-2">
-            <Label>Message Text</Label>
-            <Textarea
-              value={node.data.message || ''}
-              onChange={(e) => handleUpdateData({ message: e.target.value })}
-              placeholder="Enter your message text"
-              rows={3}
-            />
-          </div>
-        )}
-
-        {node.type === 'condition' && (
-          <>
-            <div className="space-y-2">
-              <Label>Condition Type</Label>
-              <select
-                className="w-full p-2 border rounded"
-                value={node.data.condition || 'contains'}
-                onChange={(e) => handleUpdateData({ condition: e.target.value })}
-              >
-                <option value="contains">Contains</option>
-                <option value="equals">Equals</option>
-                <option value="starts_with">Starts With</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label>Value to Check</Label>
-              <Input
-                value={node.data.value || ''}
-                onChange={(e) => handleUpdateData({ value: e.target.value })}
-                placeholder="Enter value to check for"
-              />
-            </div>
-          </>
-        )}
-
-        {node.type === 'delay' && (
-          <div className="space-y-2">
-            <Label>Delay Duration (seconds)</Label>
-            <Input
-              type="number"
-              value={node.data.duration || 1}
-              onChange={(e) => handleUpdateData({ duration: parseInt(e.target.value) || 1 })}
-              min="1"
-              max="300"
-            />
-          </div>
-        )}
-
-        {node.type === 'api' && (
-          <div className="space-y-2">
-            <Label>API Endpoint</Label>
-            <Input
-              value={node.data.endpoint || ''}
-              onChange={(e) => handleUpdateData({ endpoint: e.target.value })}
-              placeholder="https://api.example.com/endpoint"
-            />
-          </div>
-        )}
-
-        {node.type === 'webhook' && (
-          <div className="space-y-2">
-            <Label>Webhook URL</Label>
-            <Input
-              value={node.data.url || ''}
-              onChange={(e) => handleUpdateData({ url: e.target.value })}
-              placeholder="https://webhook.example.com"
-            />
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-function WorkflowSettings() {
-  return (
-    <div className="p-4 space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Workflow Settings</CardTitle>
-          <CardDescription>Configure your workflow preferences</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Settings panel - implement based on your needs</p>
-        </CardContent>
-      </Card>
     </div>
   )
 }
