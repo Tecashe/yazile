@@ -8,8 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 async function getHandoffData(userId: string) {
+
+  const  usersid  = await onUserInfor()
+  const userid = usersid.data?.clerkId
+
+
   const user = await client.user.findUnique({
-    where: { clerkId: userId },
+    where: { clerkId: userid },
     include: {
       businesses: { take: 1 },
       handoffSettings: true,
