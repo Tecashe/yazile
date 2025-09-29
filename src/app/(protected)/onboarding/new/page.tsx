@@ -1,5 +1,7 @@
 "use client"
 
+
+import Image from "next/image"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { motion } from "framer-motion"
 import {
@@ -298,18 +300,19 @@ const BusinessOnboarding = () => {
           transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
           className="absolute inset-0 bg-sidebar-primary/20 rounded-full blur-3xl"
         />
-        <div className="relative bg-sidebar-primary p-6 rounded-full w-24 h-24 mx-auto flex items-center justify-center">
-          <MessageSquare className="h-12 w-12 text-sidebar-primary-foreground" />
+       <div className="flex items-center gap-2">
+          <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
+          <span className="text-lg sm:text-xl font-bold">Yazzil</span>
         </div>
       </div>
 
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <h2 className="text-4xl font-bold text-foreground">Transform Your Instagram DMs</h2>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Join thousands of businesses using Voiceflow AI to automate Instagram DMs, increase sales, and provide 24/7
           customer support.
         </p>
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
         {[
