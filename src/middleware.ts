@@ -306,9 +306,100 @@
 // }
 
 
+// import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+// import { NextResponse } from "next/server"
+// import type { NextRequest } from "next/server"
+// import { hasAccess } from "@/lib/subscription"
+
+// const isProtectedRoute = createRouteMatcher([
+//   "/dashboard(.*)", 
+//   "/onboarding(.*)",
+//   "/api/payment(.*)", 
+//   "/callback(.*)",
+//   "/pro(.*)",
+//   "/ai-features(.*)",
+//   "/team(.*)"
+// ])
+
+// // Handle subscription-based route protection
+// async function handleSubscriptionProtection(request: NextRequest, userId: string) {
+//   const { pathname } = request.nextUrl
+
+//   // Check PRO routes
+//   if (pathname.startsWith("/pro") || pathname.startsWith("/ai-features")) {
+//     try {
+//       const hasProAccess = await hasAccess(userId, "PRO")
+      
+//       if (!hasProAccess) {
+//         return NextResponse.redirect(new URL("/upgrade", request.url))
+//       }
+//     } catch (error) {
+//       console.error("Error checking PRO access:", error)
+//       // Continue processing instead of failing
+//     }
+//   }
+  
+//   // Check TEAM routes
+//   if (pathname.startsWith("/team")) {
+//     try {
+//       const hasTeamAccess = await hasAccess(userId, "ENTERPRISE")
+      
+//       if (!hasTeamAccess) {
+//         return NextResponse.redirect(new URL("/upgrade?plan=team", request.url))
+//       }
+//     } catch (error) {
+//       console.error("Error checking TEAM access:", error)
+//       // Continue processing instead of failing
+//     }
+//   }
+
+//   return null // Return null to continue processing
+// }
+
+// // Main middleware using clerkMiddleware
+// export default clerkMiddleware(async (auth, req) => {
+//   try {
+//     // Protect routes that require authentication
+//     if (isProtectedRoute(req)) {
+//       const authResult = await auth.protect()
+//       const { userId } = authResult
+      
+//       // Handle subscription-based protection for authenticated users
+//       if (userId) {
+//         const subscriptionResponse = await handleSubscriptionProtection(req, userId)
+//         if (subscriptionResponse) {
+//           return subscriptionResponse
+//         }
+//       }
+//     }
+
+//     // Continue with normal request processing
+//     return NextResponse.next()
+//   } catch (error) {
+//     console.error("Middleware error:", error)
+    
+//     // Handle the specific "Body has already been consumed" error
+//     if (error instanceof Error && error.message?.includes("Body has already been consumed")) {
+//       console.error("Body consumption error in middleware - continuing with request")
+//       return NextResponse.next()
+//     }
+    
+//     // For other errors, continue processing to avoid breaking the app
+//     return NextResponse.next()
+//   }
+// })
+
+// export const config = {
+//   matcher: [
+//     // Skip Next.js internals and all static files, unless found in search params
+//     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+//     // Always run for API routes
+//     "/(api|trpc)(.*)",
+//   ],
+// }
+
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
 import { hasAccess } from "@/lib/subscription"
 
 const isProtectedRoute = createRouteMatcher([
@@ -321,79 +412,57 @@ const isProtectedRoute = createRouteMatcher([
   "/team(.*)"
 ])
 
-// Handle subscription-based route protection
-async function handleSubscriptionProtection(request: NextRequest, userId: string) {
-  const { pathname } = request.nextUrl
+const isProRoute = createRouteMatcher(["/pro(.*)", "/ai-features(.*)"])
+const isTeamRoute = createRouteMatcher(["/team(.*)"])
 
-  // Check PRO routes
-  if (pathname.startsWith("/pro") || pathname.startsWith("/ai-features")) {
-    try {
-      const hasProAccess = await hasAccess(userId, "PRO")
-      
-      if (!hasProAccess) {
-        return NextResponse.redirect(new URL("/upgrade", request.url))
-      }
-    } catch (error) {
-      console.error("Error checking PRO access:", error)
-      // Continue processing instead of failing
-    }
-  }
-  
-  // Check TEAM routes
-  if (pathname.startsWith("/team")) {
-    try {
-      const hasTeamAccess = await hasAccess(userId, "ENTERPRISE")
-      
-      if (!hasTeamAccess) {
-        return NextResponse.redirect(new URL("/upgrade?plan=team", request.url))
-      }
-    } catch (error) {
-      console.error("Error checking TEAM access:", error)
-      // Continue processing instead of failing
-    }
-  }
-
-  return null // Return null to continue processing
-}
-
-// Main middleware using clerkMiddleware
 export default clerkMiddleware(async (auth, req) => {
-  try {
-    // Protect routes that require authentication
-    if (isProtectedRoute(req)) {
-      const authResult = await auth.protect()
-      const { userId } = authResult
+  const { pathname } = req.nextUrl
+
+  // Protect routes that require authentication
+  if (isProtectedRoute(req)) {
+    // This will automatically redirect to sign-in if not authenticated
+    await auth.protect()
+    
+    // Only run subscription checks if user is authenticated
+    const { userId } = await auth()
+    
+    if (userId) {
+      // Check PRO access for PRO routes
+      if (isProRoute(req)) {
+        try {
+          const hasProAccess = await hasAccess(userId, "PRO")
+          
+          if (!hasProAccess) {
+            return NextResponse.redirect(new URL("/upgrade", req.url))
+          }
+        } catch (error) {
+          console.error("Error checking PRO access:", error)
+        }
+      }
       
-      // Handle subscription-based protection for authenticated users
-      if (userId) {
-        const subscriptionResponse = await handleSubscriptionProtection(req, userId)
-        if (subscriptionResponse) {
-          return subscriptionResponse
+      // Check ENTERPRISE access for team routes
+      if (isTeamRoute(req)) {
+        try {
+          const hasTeamAccess = await hasAccess(userId, "ENTERPRISE")
+          
+          if (!hasTeamAccess) {
+            const url = new URL("/upgrade", req.url)
+            url.searchParams.set("plan", "team")
+            return NextResponse.redirect(url)
+          }
+        } catch (error) {
+          console.error("Error checking TEAM access:", error)
         }
       }
     }
-
-    // Continue with normal request processing
-    return NextResponse.next()
-  } catch (error) {
-    console.error("Middleware error:", error)
-    
-    // Handle the specific "Body has already been consumed" error
-    if (error instanceof Error && error.message?.includes("Body has already been consumed")) {
-      console.error("Body consumption error in middleware - continuing with request")
-      return NextResponse.next()
-    }
-    
-    // For other errors, continue processing to avoid breaking the app
-    return NextResponse.next()
   }
+
+  return NextResponse.next()
 })
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 }

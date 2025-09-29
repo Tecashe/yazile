@@ -78,8 +78,8 @@ const BusinessOnboarding = () => {
   const steps = [
     {
       id: "welcome",
-      title: "Welcome to Instagram DM Automation",
-      subtitle: "Transform your Instagram DMs into a powerful business tool",
+      title: "Welcome Yazzil Automations",
+      subtitle: "Transform your DMs into a powerful business tool",
       icon: Sparkles,
       color: "bg-sidebar-primary",
     },
@@ -100,7 +100,7 @@ const BusinessOnboarding = () => {
     {
       id: "goals",
       title: "Automation Goals",
-      subtitle: "What do you want to achieve with Instagram DM automation?",
+      subtitle: "What do you want to achieve with DM automation?",
       icon: Zap,
       color: "bg-sidebar-primary",
     },
@@ -610,7 +610,6 @@ This detailed information helps our AI provide more accurate, personalized respo
       {/* Progress Bar */}
       <div className="max-w-4xl mx-auto mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-foreground">Instagram DM Automation Setup</h1>
           <span className="text-sm text-muted-foreground">
             Step {currentStep + 1} of {steps.length}
           </span>
