@@ -2186,6 +2186,7 @@ class GeminiProcessor {
       const response = await RetryManager.withRetry(
         () => TimeoutManager.withTimeout(
           generateGeminiResponse({
+            automationId: context.automation.id, // ADD THIS LINE
             userMessage: context.payload.userMessage,
             businessProfile: profile.profileContent,
             conversationHistory: history,
@@ -2217,6 +2218,55 @@ class GeminiProcessor {
     }
   }
 }
+// class GeminiProcessor {
+//   static async process(context: ProcessingContext): Promise<ProcessingResult> {
+//     try {
+//       Logger.info("Processing with Gemini", { automationId: context.automation.id })
+
+//       // Gather context
+//       const [profileResult, historyResult] = await Promise.allSettled([
+//         getBusinessProfileForAutomation(context.automation.id),
+//         buildConversationContext(context.payload.pageId, context.payload.senderId, context.automation.id),
+//       ])
+
+//       const profile = profileResult.status === "fulfilled" ? profileResult.value : { profileContent: "", businessContext: {} }
+//       const history = historyResult.status === "fulfilled" ? historyResult.value : []
+
+//       // Generate response
+//       const response = await RetryManager.withRetry(
+//         () => TimeoutManager.withTimeout(
+//           generateGeminiResponse({
+//             userMessage: context.payload.userMessage,
+//             businessProfile: profile.profileContent,
+//             conversationHistory: history,
+//             businessContext: profile.businessContext,
+//             isPROUser: false,
+//           }),
+//           CONFIG.TIMEOUTS.GEMINI,
+//           "Gemini API"
+//         ),
+//         "Gemini processing"
+//       )
+
+//       const responseText = typeof response === "string" ? response : ""
+//       if (!responseText.trim()) {
+//         throw new Error("Gemini returned empty response")
+//       }
+
+//       return {
+//         success: true,
+//         data: { text: responseText },
+//         aiSystem: "gemini",
+//       }
+//     } catch (error) {
+//       Logger.error("Gemini processing failed", error)
+//       return {
+//         success: false,
+//         error: `Gemini processing failed: ${(error as Error).message}`,
+//       }
+//     }
+//   }
+// }
 
 // ============================================================================
 // RESPONSE SENDER
