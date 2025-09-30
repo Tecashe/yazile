@@ -685,7 +685,7 @@ const PaymentForm = ({
     >
       <div className="text-center space-y-3">
         <p className="text-zinc-400">
-          You're upgrading to <span className="text-white font-medium">{plan.name}</span> plan
+          You&apos;re upgrading to <span className="text-white font-medium">{plan.name}</span> plan
         </p>
         <div className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-900 rounded-full">
           <span className="text-2xl font-bold text-white">{plan.price}</span>
@@ -775,7 +775,7 @@ const PaymentForm = ({
         </div>
 
         <p className="text-xs text-zinc-500 text-center">
-          🔒 Payments are secured by Pesapal. You'll be redirected to complete payment.
+          🔒 Payments are secured by Pesapal. You&apos;ll be redirected to complete payment.
         </p>
       </form>
     </motion.div>
