@@ -900,6 +900,9 @@ model Subscription {
   paymentMethodType  String?
   paymentMethodLast4 String?
 
+  paymentProvider    String?
+  orderTrackingId    String?
+
   // Trial information
   trialStart DateTime?
   trialEnd   DateTime?

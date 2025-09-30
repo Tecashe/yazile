@@ -1,7 +1,5 @@
 "use client"
 
-
-import Image from "next/image"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { motion } from "framer-motion"
 import {
@@ -300,13 +298,12 @@ const BusinessOnboarding = () => {
           transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
           className="absolute inset-0 bg-sidebar-primary/20 rounded-full blur-3xl"
         />
-       <div className="flex items-center gap-2">
-          <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
-          <span className="text-lg sm:text-xl font-bold">Yazzil</span>
-        </div>
+        {/* <div className="relative bg-sidebar-primary p-6 rounded-full w-24 h-24 mx-auto flex items-center justify-center">
+          <MessageSquare className="h-12 w-12 text-sidebar-primary-foreground" />
+        </div> */}
       </div>
-
-      {/* <div className="space-y-4">
+{/* 
+      <div className="space-y-4">
         <h2 className="text-4xl font-bold text-foreground">Transform Your Instagram DMs</h2>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Join thousands of businesses using Voiceflow AI to automate Instagram DMs, increase sales, and provide 24/7
@@ -418,19 +415,19 @@ const BusinessOnboarding = () => {
               className="w-full px-4 py-3 bg-input border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-sidebar-primary focus:ring-1 focus:ring-sidebar-primary transition-all h-48 resize-none"
               placeholder="Provide a comprehensive description of your business including:
 
-• What products or services you offer
-• Who your target customers are (demographics, interests, pain points)
-• Your unique value proposition and competitive advantages
-• Your business model and pricing structure
-• Key features or benefits that set you apart
-• Common customer questions or concerns you address
-• Your brand voice and communication style
-• Any specific industry terminology or jargon you use
-• Seasonal trends or patterns in your business
-• Geographic locations you serve
+                • What products or services you offer
+                • Who your target customers are (demographics, interests, pain points)
+                • Your unique value proposition and competitive advantages
+                • Your business model and pricing structure
+                • Key features or benefits that set you apart
+                • Common customer questions or concerns you address
+                • Your brand voice and communication style
+                • Any specific industry terminology or jargon you use
+                • Seasonal trends or patterns in your business
+                • Geographic locations you serve
 
-This detailed information helps our AI provide more accurate, personalized responses to your Instagram DM conversations and better represent your brand."
-            />
+                This detailed information helps our AI provide more accurate, personalized responses to your Instagram DM conversations and better represent your brand."
+              />
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-muted-foreground">
                 Detailed descriptions help our AI provide better, more personalized responses to your customers.
