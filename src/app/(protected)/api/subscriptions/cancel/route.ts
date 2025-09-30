@@ -1,7 +1,7 @@
 // app/api/subscriptions/cancel/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { onUserInfor } from "@/actions/user"
-import { cancelSubscription } from "@/lib/subscription"
+import { cancelSubscription } from "@/lib/pesapal-subs"
 
 export async function POST(req: NextRequest) {
   try {

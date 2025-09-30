@@ -795,7 +795,7 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
     setSelectedPlan(plan)
 
     if (plan.id === "enterprise") {
-      window.open("mailto:sales@example.com?subject=Enterprise Plan Inquiry", "_blank")
+      window.open("mailto:sales@yazzil.com?subject=Enterprise Plan Inquiry", "_blank")
       return
     }
 

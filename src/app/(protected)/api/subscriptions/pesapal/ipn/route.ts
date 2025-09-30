@@ -72,7 +72,7 @@
 // app/api/subscriptions/pesapal/ipn/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { pesapal } from "@/lib/pesapal-client"
-import { updateSubscriptionStatus } from "@/lib/subscription"
+import { updateSubscriptionStatus } from "@/lib/pesapal-subs"
 import type { SUBSCRIPTION_STATUS } from "@/contexts/subscription-context"
 
 export async function GET(req: NextRequest) {

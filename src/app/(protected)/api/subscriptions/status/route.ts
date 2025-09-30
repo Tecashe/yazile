@@ -119,7 +119,7 @@
 // app/api/subscriptions/status/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { onUserInfor } from "@/actions/user"
-import { getUserSubscription, getSubscriptionPlan, isSubscriptionActive } from "@/lib/subscription"
+import { getUserSubscription, getSubscriptionPlan, isSubscriptionActive } from "@/lib/pesapal-subs"
 import type { SUBSCRIPTION_PLAN, SUBSCRIPTION_STATUS } from "@/contexts/subscription-context"
 
 export async function GET(req: NextRequest) {
