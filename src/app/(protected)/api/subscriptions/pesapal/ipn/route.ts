@@ -161,6 +161,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Pesapal can send IPN via POST or GET, handle both the same way
+  // Pesapal can send IPN via POST or GET, handle both the same 
   return GET(req)
 }
