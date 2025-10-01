@@ -587,16 +587,16 @@
 
 
 //FOR PESAPAL
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { X, CreditCard, MessageSquare, CheckCircle, Loader2, Crown, Zap } from 'lucide-react'
+import { X, CreditCard, MessageSquare, CheckCircle, Loader2, Crown, Zap, MapPin } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSubscription } from "@/contexts/subscription-context"
+import { COUNTRIES, detectUserCountry, getCountryByCode } from "@/lib/countries"
 
 type PaymentPopupProps = {
   isOpen: boolean
@@ -608,7 +608,8 @@ const PLANS = [
   {
     id: "free",
     name: "Free",
-    price: "KES 0",
+    price: "$0",
+    priceKES: "KES 0",
     period: "forever",
     icon: CheckCircle,
     features: ["5 automations", "Basic pre-written reply", "20 DMs automated replies/day"],
@@ -617,7 +618,8 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro",
-    price: "KES 4,999",
+    price: "$49.99",
+    priceKES: "KES 4,999",
     period: "per month",
     icon: Zap,
     features: ["AI-powered Intelligent replies", "50 automations", "Detailed Sentiment Analysis","Lead Qualification and CRM intelligent syncing"],
@@ -627,6 +629,7 @@ const PLANS = [
     id: "enterprise",
     name: "Enterprise",
     price: "Custom",
+    priceKES: "Custom",
     period: "",
     icon: Crown,
     features: ["Everything in Pro", "Unlimited automations", "Dedicated support", "Custom integrations"],
@@ -634,15 +637,7 @@ const PLANS = [
   },
 ]
 
-const COUNTRIES = [
-  { code: "KE", name: "Kenya" },
-  { code: "UG", name: "Uganda" },
-  { code: "TZ", name: "Tanzania" },
-  { code: "RW", name: "Rwanda" },
-  { code: "BI", name: "Burundi" },
-  { code: "ET", name: "Ethiopia" },
-  { code: "SS", name: "South Sudan" },
-].sort((a, b) => a.name.localeCompare(b.name))
+const COUNTRIES_LIST = COUNTRIES
 
 const PaymentForm = ({
   onSubmit,
@@ -656,8 +651,29 @@ const PaymentForm = ({
   plan: (typeof PLANS)[number]
 }) => {
   const [phone, setPhone] = useState("")
-  const [country, setCountry] = useState("KE")
+  const [country, setCountry] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [isDetecting, setIsDetecting] = useState(true)
+
+  // Auto-detect country on mount
+  useEffect(() => {
+    detectCountry()
+  }, [])
+
+  const detectCountry = async () => {
+    setIsDetecting(true)
+    try {
+      const detectedCountry = await detectUserCountry()
+      setCountry(detectedCountry)
+    } catch (err) {
+      console.log("Could not detect country, using default")
+      setCountry("US")
+    } finally {
+      setIsDetecting(false)
+    }
+  }
+
+  const selectedCountry = getCountryByCode(country)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -687,9 +703,16 @@ const PaymentForm = ({
         <p className="text-zinc-400">
           You&apos;re upgrading to <span className="text-white font-medium">{plan.name}</span> plan
         </p>
-        <div className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-900 rounded-full">
-          <span className="text-2xl font-bold text-white">{plan.price}</span>
-          {plan.period && <span className="text-sm text-zinc-400">/{plan.period.replace('per ', '')}</span>}
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-900 rounded-full">
+            <span className="text-2xl font-bold text-white">{plan.price}</span>
+            {plan.period && <span className="text-sm text-zinc-400">/{plan.period.replace('per ', '')}</span>}
+          </div>
+          {plan.priceKES !== plan.price && (
+            <p className="text-xs text-zinc-500">
+              Equivalent to {plan.priceKES}
+            </p>
+          )}
         </div>
       </div>
 
@@ -699,12 +722,12 @@ const PaymentForm = ({
             <label htmlFor="country" className="text-sm font-medium text-zinc-300">
               Country
             </label>
-            <Select value={country} onValueChange={setCountry}>
+            <Select value={country} onValueChange={setCountry} disabled={isDetecting}>
               <SelectTrigger id="country" className="w-full h-12 bg-zinc-900 border-zinc-800 text-white rounded-xl">
-                <SelectValue placeholder="Select your country" />
+                <SelectValue placeholder={isDetecting ? "🌍 Detecting your location..." : "Select your country"} />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl">
-                {COUNTRIES.map((c) => (
+              <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl max-h-[300px]">
+                {COUNTRIES_LIST.map((c) => (
                   <SelectItem 
                     key={c.code} 
                     value={c.code} 
@@ -715,22 +738,42 @@ const PaymentForm = ({
                 ))}
               </SelectContent>
             </Select>
+            {isDetecting && (
+              <p className="text-xs text-zinc-400 flex items-center gap-1">
+                <MapPin className="h-3 w-3 animate-pulse" />
+                Auto-detecting your location...
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <label htmlFor="phone" className="text-sm font-medium text-zinc-300">
               Phone Number
             </label>
-            <input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full h-12 px-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:border-zinc-600 focus:outline-none transition-colors"
-              placeholder="e.g., +254712345678"
-              required
-            />
+            <div className="relative">
+              {selectedCountry?.phoneCode && (
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">
+                  {selectedCountry.phoneCode}
+                </span>
+              )}
+              <input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={cn(
+                  "w-full h-12 px-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:border-zinc-600 focus:outline-none transition-colors",
+                  selectedCountry?.phoneCode && "pl-20"
+                )}
+                placeholder={selectedCountry?.phoneCode ? "712345678" : "+1234567890"}
+                required
+              />
+            </div>
             <p className="text-xs text-zinc-500">
-              Include country code (e.g., +254 for Kenya)
+              {selectedCountry?.phoneCode 
+                ? `Enter your number without the country code (${selectedCountry.phoneCode})`
+                : "Include your country code, e.g., +1234567890"
+              }
             </p>
           </div>
         </div>
@@ -795,7 +838,7 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
     setSelectedPlan(plan)
 
     if (plan.id === "enterprise") {
-      window.open("mailto:sales@yazzil.com?subject=Enterprise Plan Inquiry", "_blank")
+      window.open("mailto:sales@example.com?subject=Enterprise Plan Inquiry", "_blank")
       return
     }
 
@@ -861,13 +904,24 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
 
       const data = await response.json()
 
+      // Log the response for debugging
+      console.log("Pesapal API response:", data)
+
       if (!data.success) {
         throw new Error(data.error || "Failed to create payment")
       }
 
+      // Validate redirect URL exists
+      if (!data.redirectUrl) {
+        console.error("No redirect URL in response:", data)
+        throw new Error("Payment redirect URL not received. Please try again.")
+      }
+
       // Redirect to Pesapal payment page
+      console.log("Redirecting to:", data.redirectUrl)
       window.location.href = data.redirectUrl
     } catch (error: any) {
+      console.error("Payment error:", error)
       toast({
         title: "Payment failed",
         description: error.message || "An error occurred while processing your payment",
@@ -1027,9 +1081,6 @@ const PaymentPopup = ({ isOpen, onClose, onSuccess }: PaymentPopupProps) => {
 }
 
 export default PaymentPopup
-
-
-
 
 
 
