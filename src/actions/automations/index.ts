@@ -110,24 +110,21 @@ export const saveTrigger = async (
     isFallback?: boolean; 
     fallbackMessage?: string; 
     buttons?: { name: string; payload: string }[];
-
-    listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
-    keywords?: string[]; // Add this
+    listenMode?: "KEYWORDS" | "ALL_MESSAGES";
+    keywords?: string[];
   }
 ) => {
   await onCurrentUser()
   try {
-    // First update automation with fallback settings
-    if (data.isFallback !== undefined || data.fallbackMessage || data.buttons) {
-      await updateAutomationQuery(automationId, {
-        isFallback: data.isFallback,
-        fallbackMessage: data.fallbackMessage,
-        buttons: data.buttons,
-
-      })
-    }
+    // Update automation with all settings including listenMode
+    await updateAutomationQuery(automationId, {
+      isFallback: data.isFallback,
+      fallbackMessage: data.fallbackMessage,
+      buttons: data.buttons,
+      listenMode: data.listenMode, // ✓ Add this
+    })
     
-    // Only save trigger types if they exist and are not empty
+    // Save trigger types if they exist
     if (data.types && data.types.length > 0) {
       const create = await addTrigger(automationId, data.types)
       if (!create) return { status: 404, data: 'Cannot save trigger' }
@@ -139,7 +136,6 @@ export const saveTrigger = async (
     return { status: 500, data: 'Oops! something went wrong' }
   }
 }
-
 
 
 export const saveTriggerOriginal = async (

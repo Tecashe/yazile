@@ -1154,6 +1154,10 @@
 // }
 
 // export default Trigger
+
+
+
+
 "use client"
 
 import { useState } from "react"
@@ -1272,7 +1276,7 @@ const Trigger = ({ id }: Props) => {
         <ActiveTrigger
           type={data.data.trigger[0].type}
           keywords={data.data.keywords}
-          listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
+          listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES")}
           isFallback={data.data.isFallback}
           fallbackMessage={data.data.fallbackMessage}
           buttons={data.data.buttons}
@@ -1291,7 +1295,7 @@ const Trigger = ({ id }: Props) => {
             <ActiveTrigger
               type={data.data.trigger[1].type}
               keywords={data.data.keywords}
-              listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
+              listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES")}
               isFallback={data.data.isFallback}
               fallbackMessage={data.data.fallbackMessage}
               buttons={data.data.buttons}

@@ -58,8 +58,34 @@ export const findAutomation = async (id: string) => {
   })
 }
 
-// Renamed to avoid conflict
+
+
 export const updateAutomationQuery = async (
+  id: string,
+  update: {
+    name?: string
+    active?: boolean
+    isFallback?: boolean
+    fallbackMessage?: string
+    buttons?: any
+    listenMode?: "KEYWORDS" | "ALL_MESSAGES" // ✓ Add this
+  }
+) => {
+  return await client.automation.update({
+    where: { id },
+    data: {
+      name: update.name,
+      active: update.active,
+      isFallback: update.isFallback,
+      fallbackMessage: update.fallbackMessage,
+      buttons: update.buttons,
+      listenMode: update.listenMode, // ✓ Add this
+    },
+  })
+}
+
+// Renamed to avoid conflict
+export const updateAutomationQueryORIGINAL = async (
   id: string,
   update: {
     name?: string
