@@ -1215,7 +1215,7 @@ const PaymentForm = ({
             </label>
             <Select value={country} onValueChange={setCountry} disabled={isDetecting}>
               <SelectTrigger id="country" className="w-full h-12 bg-zinc-900 border-zinc-800 text-white rounded-xl">
-                <SelectValue placeholder={isDetecting ? "🌍 Detecting your location..." : "Select your country"} />
+                <SelectValue placeholder={isDetecting ? "Geolocating..." : "Select your country"} />
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl max-h-[300px]">
                 {COUNTRIES.map((c) => (
