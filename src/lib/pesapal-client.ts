@@ -251,7 +251,7 @@ export const PLAN_CONFIGS = {
   PRO: {
     id: "pro",
     name: "Pro",
-    price: 100, // 49.99 USD ≈ 4999 KES (adjust as needed)
+    price: 20, // 49.99 USD ≈ 4999 KES (adjust as needed)
     currency: "KES",
     interval: "monthly",
   },
