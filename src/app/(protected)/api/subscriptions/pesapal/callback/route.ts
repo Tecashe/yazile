@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
 
     if (!orderTrackingId) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=failed&reason=missing_tracking_id`
+        `https://yazzil.com/dashboard?payment=failed&reason=missing_tracking_id`
       )
     }
 
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
 
     if (!userId) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=failed&reason=invalid_reference`
+        `https://yazzil.com/dashboard?payment=failed&reason=invalid_reference`
       )
     }
 
@@ -146,17 +146,17 @@ export async function GET(req: NextRequest) {
     // Redirect based on payment status
     if (shouldRedirectToSuccess) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`
+        `https://yazzil.com/dashboard?payment=success`
       )
     } else {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=failed&reason=payment_${transactionStatus.payment_status_code}`
+        `https://yazzil.com/dashboard?payment=failed&reason=payment_${transactionStatus.payment_status_code}`
       )
     }
   } catch (error: any) {
     console.error("Error processing Pesapal callback:", error)
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=error&reason=processing_failed`
+      `https://yazzil.com/dashboard?payment=error&reason=processing_failed`
     )
   }
 }

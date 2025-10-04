@@ -95,7 +95,7 @@ export async function hasAccess(userId: string, requiredPlan: "PRO" | "ENTERPRIS
 export async function createBillingPortalSession(customerId: string) {
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+    return_url: `https://yazzil.com/settings/billing`,
   })
   
   return session.url

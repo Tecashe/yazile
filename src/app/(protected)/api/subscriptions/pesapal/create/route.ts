@@ -142,7 +142,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { pesapal, PLAN_CONFIGS } from "@/lib/pesapal-client"
 import { onCurrentUser, onUserInfor } from "@/actions/user"
 import { upsertSubscription, createPesapalSubscriptionData, PESAPAL_PLAN_IDS } from "@/lib/pesapal-subs"
-import type { SUBSCRIPTION_PLAN } from "@/contexts/subscription-context"
+
 
 export async function POST(req: NextRequest) {
   try {
