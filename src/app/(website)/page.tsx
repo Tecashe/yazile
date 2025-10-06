@@ -1623,6 +1623,804 @@
 
 
 
+// "use client"
+
+// import Link from "next/link"
+// import Image from "next/image"
+// import { useState } from "react"
+// import { Button } from "@/components/ui/button"
+// import { Badge } from "@/components/ui/badge"
+// import { Card, CardContent } from "@/components/ui/card"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import {
+//   CheckCircle,
+//   ArrowRight,
+//   Instagram,
+//   Facebook,
+//   Twitter,
+//   Linkedin,
+//   MessageSquare,
+//   Users,
+//   BarChart3,
+//   Bot,
+//   Workflow,
+//   Database,
+//   Award,
+//   ChevronRight,
+//   Sparkles,
+//   Zap,
+//   Target,
+//   Crown,
+//   Menu,
+//   X,
+// } from "lucide-react"
+// import ScrollAnimatedFlowSection from "@/components/global/landing/ai-chat-demo"
+
+// export default function Home() {
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+//   const toggleMobileMenu = () => {
+//     setIsMobileMenuOpen(!isMobileMenuOpen)
+//   }
+
+//   const closeMobileMenu = () => {
+//     setIsMobileMenuOpen(false)
+//   }
+
+//   const PLANS = [
+//     {
+//       id: "free",
+//       name: "Free",
+//       price: "$0",
+//       period: "forever",
+//       icon: CheckCircle,
+//       features: ["5 automations", "Basic pre-written reply", "20 DMs automated replies/day"],
+//       description: "Perfect for getting started",
+//     },
+//     {
+//       id: "pro",
+//       name: "Pro",
+//       price: "$29.99",
+//       period: "per month",
+//       icon: Zap,
+//       features: ["AI-powered Intelligent replies", "50 automations", "Detailed Sentiment Analysis","Lead Qualification and CRM intelligent syncing"],
+//       description: "For power users and professionals",
+//     },
+//     {
+//       id: "enterprise",
+//       name: "Enterprise",
+//       price: "Custom",
+//       period: "",
+//       icon: Crown,
+//       features: ["Everything in Pro", "Unlimited automations", "Dedicated support", "Custom integrations"],
+//       description: "Enterprise-grade solutions",
+//     },
+//   ]
+
+//   return (
+//     <div className="flex min-h-screen flex-col dark">
+//       {/* Navigation */}
+//       <header className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
+//         <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
+//           <div className="flex items-center gap-2">
+//             <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
+//             <span className="text-lg sm:text-xl font-bold">Yazzil</span>
+//           </div>
+
+//           {/* Desktop Navigation */}
+//           <nav className="hidden lg:flex items-center gap-6">
+//             <Link
+//               href="#features"
+//               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+//             >
+//               Features
+//             </Link>
+//             <Link
+//               href="#solutions"
+//               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+//             >
+//               Solutions
+//             </Link>
+//             <Link
+//               href="#pricing"
+//               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+//             >
+//               Pricing
+//             </Link>
+//             <Link
+//               href="#testimonials"
+//               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+//             >
+//               Testimonials
+//             </Link>
+//           </nav>
+
+//           {/* Desktop CTA Buttons */}
+//           <div className="hidden md:flex items-center gap-3">
+//             <Link
+//               href="/dashboard"
+//               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+//             >
+//               Log in
+//             </Link>
+//             <Button asChild size="sm">
+//               <Link href="/dashboard">
+//                 Get Started
+//                 <ArrowRight className="ml-2 h-4 w-4" />
+//               </Link>
+//             </Button>
+//           </div>
+
+//           {/* Mobile Menu Button */}
+//           <button
+//             onClick={toggleMobileMenu}
+//             className="lg:hidden p-2 hover:bg-muted rounded-md transition-colors"
+//             aria-label="Toggle mobile menu"
+//           >
+//             {isMobileMenuOpen ? (
+//               <X className="h-5 w-5" />
+//             ) : (
+//               <Menu className="h-5 w-5" />
+//             )}
+//           </button>
+//         </div>
+
+//         {/* Mobile Navigation Menu */}
+//         {isMobileMenuOpen && (
+//           <div className="lg:hidden border-t border-border/40 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
+//             <nav className="container px-4 py-4 space-y-3">
+//               <Link
+//                 href="#features"
+//                 onClick={closeMobileMenu}
+//                 className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+//               >
+//                 Features
+//               </Link>
+//               <Link
+//                 href="#solutions"
+//                 onClick={closeMobileMenu}
+//                 className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+//               >
+//                 Solutions
+//               </Link>
+//               <Link
+//                 href="#pricing"
+//                 onClick={closeMobileMenu}
+//                 className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+//               >
+//                 Pricing
+//               </Link>
+//               <Link
+//                 href="#testimonials"
+//                 onClick={closeMobileMenu}
+//                 className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+//               >
+//                 Testimonials
+//               </Link>
+//               <div className="pt-3 border-t border-border/40 space-y-3">
+//                 <Link
+//                   href="/dashboard"
+//                   onClick={closeMobileMenu}
+//                   className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+//                 >
+//                   Log in
+//                 </Link>
+//                 <Button asChild className="w-full" onClick={closeMobileMenu}>
+//                   <Link href="/dashboard">
+//                     Get Started
+//                     <ArrowRight className="ml-2 h-4 w-4" />
+//                   </Link>
+//                 </Button>
+//               </div>
+//             </nav>
+//           </div>
+//         )}
+//       </header>
+
+//       <main className="flex-1 pt-16">
+//         {/* Hero Section */}
+//         <section className="relative overflow-hidden py-12 sm:py-16 md:py-20 lg:py-32">
+//           {/* Animated Background Elements */}
+//           <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+//           <div className="absolute inset-0">
+//             <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+//             <div className="absolute bottom-1/4 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+//             <div
+//               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] bg-gradient-conic from-primary/10 via-transparent to-blue-500/10 rounded-full blur-3xl animate-spin"
+//               style={{ animationDuration: "20s" }}
+//             />
+//           </div>
+
+//           <div className="container relative px-4 sm:px-6">
+//             <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+//               {/* Content Side */}
+//               <div className="flex flex-col justify-center space-y-6 text-center lg:text-left">
+//                 <div className="space-y-4">
+//                   <div className="space-y-2">
+//                     <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+//                       <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
+//                         Automate Your
+//                       </span>
+//                       <br />
+//                       <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+//                         Instagram DMs
+//                       </span>
+//                       <br />
+//                       <span className="text-muted-foreground text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-medium">
+//                         & Convert Leads
+//                       </span>
+//                     </h1>
+//                     <p className="max-w-[600px] text-muted-foreground text-sm sm:text-base md:text-lg lg:text-xl mx-auto lg:mx-0 leading-relaxed">
+//                       The all-in-one platform for businesses to automate Instagram DM responses, qualify leads with AI, and sync them directly to your CRM.
+//                     </p>
+//                   </div>
+//                 </div>
+
+//                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+//                   <Button
+//                     asChild
+//                     size="lg"
+//                     className="gap-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg hover:shadow-xl transition-all duration-300"
+//                   >
+//                     <Link href="/dashboard">
+//                       <Zap className="h-4 w-4" />
+//                       Start Free Trial
+//                       <ArrowRight className="h-4 w-4" />
+//                     </Link>
+//                   </Button>
+//                   <Button
+//                     asChild
+//                     size="lg"
+//                     variant="outline"
+//                     className="border-2 hover:bg-muted/50 transition-all duration-300"
+//                   >
+//                     <Link href="/dashboard">
+//                       <Users className="h-4 w-4 mr-2" />
+//                       Book a Demo
+//                     </Link>
+//                   </Button>
+//                 </div>
+
+//                 <div className="flex items-center gap-4 sm:gap-6 justify-center lg:justify-start pt-4">
+//                   <div className="flex -space-x-2 sm:-space-x-3">
+//                     {[1, 2, 3, 4, 5].map((i) => (
+//                       <div
+//                         key={i}
+//                         className="inline-block h-8 w-8 sm:h-10 sm:w-10 rounded-full border-2 sm:border-3 border-background bg-gradient-to-br from-primary/20 to-blue-500/20 overflow-hidden ring-2 ring-primary/20"
+//                       >
+//                         <Image
+//                           src={`/ten.png?height=40&width=40&text=${i}`}
+//                           alt={`Customer avatar ${i}`}
+//                           width={40}
+//                           height={40}
+//                           className="h-full w-full object-cover"
+//                         />
+//                       </div>
+//                     ))}
+//                   </div>
+//                   <div className="text-xs sm:text-sm">
+//                     <div className="font-semibold text-foreground">Let Your Business</div>
+//                     <div className="text-muted-foreground">Growing with Yazzil</div>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Visual Side - Mobile Responsive */}
+//               <div className="relative flex items-center justify-center lg:justify-end mt-8 lg:mt-0">
+//                 {/* Main Dashboard Screenshot - Responsive */}
+//                 <div className="relative group w-full max-w-lg lg:max-w-none">
+//                   <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-xl sm:rounded-2xl blur-lg sm:blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70" />
+//                   <div className="relative bg-background/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-border/50 shadow-xl sm:shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 p-1.5 sm:p-2">
+//                     <Image
+//                       src="/eight.png?height=400&width=600&text=Main+Dashboard"
+//                       alt="Yazzil Main Dashboard"
+//                       width={600}
+//                       height={400}
+//                       className="rounded-lg sm:rounded-xl w-full h-auto"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 {/* Floating Screenshots - Hidden on mobile for cleanr look */}
+//                 <div className="hidden lg:block absolute -top-8 -left-8 xl:-left-16">
+//                   <div className="relative group">
+//                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
+//                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-2">
+//                       <Image
+//                         src="/eleven.png?height=200&width=300&text=DM+Automation+Rules"
+//                         alt="DM Automation Rules Interface"
+//                         width={300}
+//                         height={200}
+//                         className="rounded-lg"
+//                       />
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <div className="hidden lg:block absolute -bottom-12 -right-4 xl:-right-12">
+//                   <div className="relative group">
+//                     <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
+//                     <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:-rotate-2">
+//                       <Image
+//                         src="/six.png?height=180&width=280&text=Lead+Qualification"
+//                         alt="Lead Qualification Tool"
+//                         width={280}
+//                         height={180}
+//                         className="rounded-lg"
+//                       />
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* Stats Section */}
+//         <section className="border-y border-border/50 bg-muted/30 py-8 sm:py-12">
+//           <div className="container px-4 sm:px-6">
+//             <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
+//               <div className="text-center">
+//                 <div className="text-2xl sm:text-3xl font-bold text-primary">50+</div>
+//                 <div className="text-xs sm:text-sm text-muted-foreground">Active Businesses</div>
+//               </div>
+//               <div className="text-center">
+//                 <div className="text-2xl sm:text-3xl font-bold text-primary">15,000+</div>
+//                 <div className="text-xs sm:text-sm text-muted-foreground">DMs Automated</div>
+//               </div>
+//               <div className="text-center">
+//                 <div className="text-2xl sm:text-3xl font-bold text-primary">2,500+</div>
+//                 <div className="text-xs sm:text-sm text-muted-foreground">Leads Qualified</div>
+//               </div>
+//               <div className="text-center">
+//                 <div className="text-2xl sm:text-3xl font-bold text-primary">98%</div>
+//                 <div className="text-xs sm:text-sm text-muted-foreground">Customer Satisfaction</div>
+//               </div>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* Features Section */}
+//         <section id="features" className="py-12 sm:py-16 md:py-24 bg-muted/30">
+//           <div className="container px-4 sm:px-6">
+//             <div className="flex flex-col items-center justify-center space-y-4 text-center">
+//               <div className="space-y-2">
+//                 <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+//                   Powerful Features
+//                 </Badge>
+//                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+//                   Everything you need to convert Instagram conversations into sales
+//                 </h2>
+//                 <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
+//                   Our platform combines Instagram DM automation and intelligent lead qualification in one powerful solution.
+//                 </p>
+//               </div>
+//             </div>
+//             <div className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-3 sm:space-y-4">
+//                     <Bot className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" />
+//                     <h3 className="text-lg sm:text-xl font-semibold">AI-Powered DM Automation</h3>
+//                     <p className="text-sm sm:text-base text-muted-foreground">
+//                       Automatically respond to Instagram DMs with intelligent, context-aware messages that feel natural and personal.
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-3 sm:space-y-4">
+//                     <Target className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+//                     <h3 className="text-lg sm:text-xl font-semibold">Smart Lead Qualification</h3>
+//                     <p className="text-sm sm:text-base text-muted-foreground">
+//                       AI analyzes conversations to automatically identify and score qualified leads based on engagement and intent.
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-3 sm:space-y-4">
+//                     <Database className="h-8 w-8 sm:h-10 sm:w-10 text-green-500" />
+//                     <h3 className="text-lg sm:text-xl font-semibold">CRM Integration</h3>
+//                     <p className="text-sm sm:text-base text-muted-foreground">
+//                       Seamlessly sync qualified leads directly to your existing CRM system for immediate follow-up.
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-3 sm:space-y-4">
+//                     <MessageSquare className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-500" />
+//                     <h3 className="text-lg sm:text-xl font-semibold">Instagram DM Management</h3>
+//                     <p className="text-sm sm:text-base text-muted-foreground">
+//                       Centralized dashboard to manage all your Instagram DM conversations and track engagement metrics.
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-3 sm:space-y-4">
+//                     <Workflow className="h-8 w-8 sm:h-10 sm:w-10 text-orange-500" />
+//                     <h3 className="text-lg sm:text-xl font-semibold">Custom Automation Workflows</h3>
+//                     <p className="text-sm sm:text-base text-muted-foreground">
+//                       Create sophisticated DM automation sequences with our visual workflow builder, no coding required.
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-3 sm:space-y-4">
+//                     <BarChart3 className="h-8 w-8 sm:h-10 sm:w-10 text-cyan-500" />
+//                     <h3 className="text-lg sm:text-xl font-semibold">Advanced Analytics</h3>
+//                     <p className="text-sm sm:text-base text-muted-foreground">
+//                       Track DM response rates, lead conversion metrics, and ROI with detailed analytics and reporting.
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             </div>
+//           </div>
+//         </section>
+
+
+//         <section>
+//           <ScrollAnimatedFlowSection />
+//         </section>
+
+    
+//         {/* Pricing Section */}
+//         <section id="pricing" className="py-12 sm:py-16 md:py-24">
+//           <div className="container px-4 sm:px-6">
+//             <div className="flex flex-col items-center justify-center space-y-4 text-center">
+//               <div className="space-y-2">
+//                 <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+//                   Simple Pricing
+//                 </Badge>
+//                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+//                   Choose the perfect plan for your business
+//                 </h2>
+//                 <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
+//                   Start free and scale as you grow. All plans include our core Instagram DM automation features.
+//                 </p>
+//               </div>
+//             </div>
+//             <div className="mt-8 sm:mt-12 grid gap-6 md:grid-cols-3">
+//               {PLANS.map((plan, index) => {
+//                 const IconComponent = plan.icon
+//                 const isPopular = plan.id === "pro"
+//                 return (
+//                   <Card 
+//                     key={plan.id} 
+//                     className={`relative border-border/50 bg-background/50 backdrop-blur-sm ${
+//                       isPopular ? "border-primary/50 shadow-lg md:scale-105" : ""
+//                     }`}
+//                   >
+//                     {isPopular && (
+//                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+//                         <Badge className="bg-gradient-to-r from-primary to-blue-600 text-white text-xs">
+//                           Most Popular
+//                         </Badge>
+//                       </div>
+//                     )}
+//                     <CardContent className="p-4 sm:p-6">
+//                       <div className="space-y-4 sm:space-y-6">
+//                         <div className="space-y-1">
+//                           <div className="flex items-baseline gap-1">
+//                             <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
+//                             {plan.period && (
+//                               <span className="text-xs sm:text-sm text-muted-foreground">/{plan.period}</span>
+//                             )}
+//                           </div>
+//                         </div>
+
+//                         <Button 
+//                           asChild
+//                           className={`w-full ${
+//                             isPopular 
+//                               ? "bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90" 
+//                               : plan.id === "enterprise" 
+//                                 ? "variant-outline" 
+//                                 : ""
+//                           }`}
+//                           variant={isPopular ? "default" : plan.id === "enterprise" ? "outline" : "default"}
+//                         >
+//                           <Link href="/dashboard">
+//                             {plan.id === "enterprise" ? "Contact Sales" : "Get Started"}
+//                             <ArrowRight className="ml-2 h-4 w-4" />
+//                           </Link>
+//                         </Button>
+
+//                         <div className="space-y-3">
+//                           <div className="text-xs sm:text-sm font-medium">What&apos;s included:</div>
+//                           <ul className="space-y-2">
+//                             {plan.features.map((feature, featureIndex) => (
+//                               <li key={featureIndex} className="flex items-start gap-2 text-xs sm:text-sm">
+//                                 <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 mt-0.5 flex-shrink-0" />
+//                                 <span>{feature}</span>
+//                               </li>
+//                             ))}
+//                           </ul>
+//                         </div>
+//                       </div>
+//                     </CardContent>
+//                   </Card>
+//                 )
+//               })}
+//             </div>
+            
+//             <div className="mt-8 sm:mt-12 text-center">
+//               <p className="text-xs sm:text-sm text-muted-foreground">
+//                 All plans include SSL security, 99.9% uptime, and email support. 
+//                 <Link href="#pricing" className="text-primary hover:underline ml-1">
+//                   View detailed comparison →
+//                 </Link>
+//               </p>
+//             </div>
+//           </div>
+//         </section>
+
+        
+
+//         {/* Testimonials Section */}
+//         <section id="testimonials" className="py-12 sm:py-16 md:py-24 bg-muted/30">
+//           <div className="container px-4 sm:px-6">
+//             <div className="flex flex-col items-center justify-center space-y-4 text-center">
+//               <div className="space-y-2">
+//                 <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+//                   Testimonials
+//                 </Badge>
+//                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+//                   Trusted by businesses worldwide
+//                 </h2>
+//                 <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
+//                   See what our customers have to say about how Yazzil has transformed their Instagram lead generation.
+//                 </p>
+//               </div>
+//             </div>
+//             <div className="mt-8 sm:mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-4">
+//                     <p className="text-sm sm:text-base text-muted-foreground italic">
+//                       &quot;Yazzil has completely transformed how we handle Instagram DMs. We&apos;re converting 3x more leads than before with automated responses.&quot;
+//                     </p>
+//                     <div>
+//                       <div className="font-semibold text-sm sm:text-base">Sarah Johnson</div>
+//                       <div className="text-xs sm:text-sm text-muted-foreground">Marketing Director, TechCorp</div>
+//                     </div>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-4">
+//                     <p className="text-sm sm:text-base text-muted-foreground italic">
+//                       &quot;The lead qualification is incredible. Every qualified lead automatically appears in our CRM with full conversation context.&quot;
+//                     </p>
+//                     <div>
+//                       <div className="font-semibold text-sm sm:text-base">Michael Chen</div>
+//                       <div className="text-xs sm:text-sm text-muted-foreground">Sales Manager, GrowthAgency</div>
+//                     </div>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//               <Card className="border-border/50 bg-background/50 backdrop-blur-sm md:col-span-2 lg:col-span-1">
+//                 <CardContent className="p-4 sm:p-6">
+//                   <div className="space-y-4">
+//                     <p className="text-sm sm:text-base text-muted-foreground italic">
+//                       &quot;We save 15+ hours per week on DM management and our Instagram lead conversion rate increased by 40%.&quot;
+//                     </p>
+//                     <div>
+//                       <div className="font-semibold text-sm sm:text-base">Jessica Williams</div>
+//                       <div className="text-xs sm:text-sm text-muted-foreground">CEO, DigitalBoost</div>
+//                     </div>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* CTA Section */}
+//         <section className="py-12 sm:py-16 md:py-24 bg-muted/30">
+//           <div className="container px-4 sm:px-6">
+//             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+//               <div className="flex flex-col justify-center space-y-4 text-center lg:text-left">
+//                 <div className="space-y-2">
+//                   <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary w-fit mx-auto lg:mx-0">
+//                     Get Started Today
+//                   </Badge>
+//                   <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+//                     Ready to transform your Instagram DMs into sales?
+//                   </h2>
+//                   <p className="max-w-[600px] text-muted-foreground text-sm sm:text-base md:text-xl mx-auto lg:mx-0">
+//                     Join thousands of businesses already using Yazzil to automate Instagram DMs and convert more leads.
+//                   </p>
+//                 </div>
+//                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+//                   <Button asChild size="lg" className="gap-1.5">
+//                     <Link href="/dashboard">
+//                       Start Free Trial
+//                       <ArrowRight className="h-4 w-4" />
+//                     </Link>
+//                   </Button>
+//                   <Button asChild size="lg" variant="outline">
+//                     <Link href="/dashboard">
+//                       Book a Demo
+//                     </Link>
+//                   </Button>
+//                 </div>
+//               </div>
+//               <div className="flex items-center justify-center">
+//                 <Card className="w-full border-primary/20 bg-primary/5">
+//                   <CardContent className="p-4 sm:p-6">
+//                     <div className="space-y-4">
+//                       <div className="flex items-center gap-2">
+//                         <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+//                         <h3 className="text-base sm:text-lg font-medium">No credit card required</h3>
+//                       </div>
+//                       <p className="text-xs sm:text-sm text-muted-foreground">
+//                         Start your 14-day free trial today. No credit card required. Cancel anytime.
+//                       </p>
+//                       <div className="flex items-center gap-2">
+//                         <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+//                         <h3 className="text-base sm:text-lg font-medium">Full access to all features</h3>
+//                       </div>
+//                       <p className="text-xs sm:text-sm text-muted-foreground">
+//                         Get complete access to all features during your trial period.
+//                       </p>
+//                       <div className="flex items-center gap-2">
+//                         <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+//                         <h3 className="text-base sm:text-lg font-medium">Dedicated support</h3>
+//                       </div>
+//                       <p className="text-xs sm:text-sm text-muted-foreground">
+//                         Our team is available to help you get the most out of Yazzil.
+//                       </p>
+//                     </div>
+//                   </CardContent>
+//                 </Card>
+//               </div>
+//             </div>
+//           </div>
+//         </section>
+//       </main>
+
+//       {/* Footer */}
+//       <footer className="border-t border-border/50 bg-background py-8 sm:py-12">
+//         <div className="container px-4 sm:px-6">
+//           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4">
+//             <div className="space-y-4">
+//               <div className="flex items-center gap-2">
+//                 <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-12 w-12 sm:h-16 sm:w-16" />
+//                 <span className="text-lg sm:text-xl font-bold">Yazzil</span>
+//               </div>
+//               <p className="text-xs sm:text-sm text-muted-foreground">
+//                 The all-in-one platform for Instagram DM automation and intelligent lead qualification.
+//               </p>
+//               <div className="flex gap-4">
+//                 <Link href="#" className="text-muted-foreground hover:text-foreground">
+//                   <Instagram className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#E4405F" }} />
+//                   <span className="sr-only">Instagram</span>
+//                 </Link>
+//                 <Link href="#" className="text-muted-foreground hover:text-foreground">
+//                   <Facebook className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#1877F2" }} />
+//                   <span className="sr-only">Facebook</span>
+//                 </Link>
+//                 <Link href="#" className="text-muted-foreground hover:text-foreground">
+//                   <Twitter className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#1DA1F2" }} />
+//                   <span className="sr-only">Twitter</span>
+//                 </Link>
+//                 <Link href="#" className="text-muted-foreground hover:text-foreground">
+//                   <Linkedin className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#0A66C2" }} />
+//                   <span className="sr-only">LinkedIn</span>
+//                 </Link>
+//               </div>
+//             </div>
+//             <div className="space-y-3 sm:space-y-4">
+//               <h3 className="text-base sm:text-lg font-medium">Product</h3>
+//               <ul className="space-y-2 text-xs sm:text-sm">
+//                 <li>
+//                   <Link href="#features" className="text-muted-foreground hover:text-foreground">
+//                     Features
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="#solutions" className="text-muted-foreground hover:text-foreground">
+//                     Solutions
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="#pricing" className="text-muted-foreground hover:text-foreground">
+//                     Pricing
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/integrations" className="text-muted-foreground hover:text-foreground">
+//                     Integrations
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/roadmap" className="text-muted-foreground hover:text-foreground">
+//                     Roadmap
+//                   </Link>
+//                 </li>
+//               </ul>
+//             </div>
+//             <div className="space-y-3 sm:space-y-4">
+//               <h3 className="text-base sm:text-lg font-medium">Resources</h3>
+//               <ul className="space-y-2 text-xs sm:text-sm">
+//                 <li>
+//                   <Link href="/blog" className="text-muted-foreground hover:text-foreground">
+//                     Blog
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/documentation" className="text-muted-foreground hover:text-foreground">
+//                     Documentation
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/guides" className="text-muted-foreground hover:text-foreground">
+//                     Guides
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/case-studies" className="text-muted-foreground hover:text-foreground">
+//                     Case Studies
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/help" className="text-muted-foreground hover:text-foreground">
+//                     Help Center
+//                   </Link>
+//                 </li>
+//               </ul>
+//             </div>
+//             <div className="space-y-3 sm:space-y-4">
+//               <h3 className="text-base sm:text-lg font-medium">Company</h3>
+//               <ul className="space-y-2 text-xs sm:text-sm">
+//                 <li>
+//                   <Link href="/about" className="text-muted-foreground hover:text-foreground">
+//                     About
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/careers" className="text-muted-foreground hover:text-foreground">
+//                     Careers
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/contact" className="text-muted-foreground hover:text-foreground">
+//                     Contact
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+//                     Privacy Policy
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+//                     Terms of Service
+//                   </Link>
+//                 </li>
+//               </ul>
+//             </div>
+//           </div>
+//           <div className="mt-8 sm:mt-12 border-t border-border/50 pt-4 sm:pt-6 text-center text-xs sm:text-sm text-muted-foreground">
+//             <p>© {new Date().getFullYear()} Yazzil. All rights reserved.</p>
+//           </div>
+//         </div>
+//       </footer>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import Link from "next/link"
@@ -1631,7 +2429,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   CheckCircle,
   ArrowRight,
@@ -1645,16 +2442,20 @@ import {
   Bot,
   Workflow,
   Database,
-  Award,
-  ChevronRight,
-  Sparkles,
   Zap,
   Target,
   Crown,
   Menu,
   X,
+  Sparkles,
+  Shield,
+  Rocket,
+  Star,
+  ChevronRight,
+  Play,
+  CheckCircle2,
+  MessageCircle,
 } from "lucide-react"
-import ScrollAnimatedFlowSection from "@/components/global/landing/ai-chat-demo"
 
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -1683,8 +2484,14 @@ export default function Home() {
       price: "$29.99",
       period: "per month",
       icon: Zap,
-      features: ["AI-powered Intelligent replies", "50 automations", "Detailed Sentiment Analysis","Lead Qualification and CRM intelligent syncing"],
+      features: [
+        "AI-powered Intelligent replies",
+        "50 automations",
+        "Detailed Sentiment Analysis",
+        "Lead Qualification and CRM intelligent syncing",
+      ],
       description: "For power users and professionals",
+      popular: true,
     },
     {
       id: "enterprise",
@@ -1697,13 +2504,82 @@ export default function Home() {
     },
   ]
 
+  const HOW_IT_WORKS = [
+    {
+      step: "1",
+      title: "Connect Instagram",
+      description: "Link your Instagram account securely in under 60 seconds",
+      icon: Instagram,
+      color: "from-pink-500 to-purple-500",
+    },
+    {
+      step: "2",
+      title: "Set Up Automation",
+      description: "Create custom DM responses with our AI-powered builder",
+      icon: Bot,
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      step: "3",
+      title: "Qualify Leads",
+      description: "AI analyzes conversations and scores lead quality automatically",
+      icon: Target,
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      step: "4",
+      title: "Sync to CRM",
+      description: "Qualified leads appear instantly in your CRM with full context",
+      icon: Database,
+      color: "from-green-500 to-emerald-500",
+    },
+  ]
+
+  const INTEGRATIONS = [
+    { name: "Salesforce", logo: "/placeholder.svg?height=40&width=120&text=Salesforce" },
+    { name: "HubSpot", logo: "/placeholder.svg?height=40&width=120&text=HubSpot" },
+    { name: "Pipedrive", logo: "/placeholder.svg?height=40&width=120&text=Pipedrive" },
+    { name: "Zoho", logo: "/placeholder.svg?height=40&width=120&text=Zoho" },
+    { name: "Monday", logo: "/placeholder.svg?height=40&width=120&text=Monday" },
+    { name: "Slack", logo: "/placeholder.svg?height=40&width=120&text=Slack" },
+  ]
+
+  const FAQS = [
+    {
+      question: "How does the AI-powered DM automation work?",
+      answer:
+        "Our AI analyzes incoming DMs, understands context and intent, then generates natural, personalized responses based on your brand voice and predefined rules.",
+    },
+    {
+      question: "Can I customize the automation rules?",
+      answer:
+        "You have full control over automation triggers, response templates, and lead qualification criteria through our intuitive visual builder.",
+    },
+    {
+      question: "Which CRM platforms do you integrate with?",
+      answer:
+        "We integrate with all major CRM platforms including Salesforce, HubSpot, Pipedrive, Zoho, and more. Custom integrations are available for Enterprise plans.",
+    },
+    {
+      question: "Is my Instagram account safe?",
+      answer:
+        "Yes! We use Instagram's official API with OAuth 2.0 authentication. We never store your password and you can revoke access anytime.",
+    },
+  ]
+
   return (
     <div className="flex min-h-screen flex-col dark">
       {/* Navigation */}
-      <header className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
+      <header className="fixed top-0 w-full z-50 border-b border-border/40 glass-effect">
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
+            <Image
+              src="/yazzil-logos.png"
+              alt="Yazzil logo"
+              width={64}
+              height={64}
+              className="h-12 w-12 sm:h-16 sm:w-16"
+            />
             <span className="text-lg sm:text-xl font-bold">Yazzil</span>
           </div>
 
@@ -1716,10 +2592,10 @@ export default function Home() {
               Features
             </Link>
             <Link
-              href="#solutions"
+              href="#how-it-works"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Solutions
+              How It Works
             </Link>
             <Link
               href="#pricing"
@@ -1743,7 +2619,7 @@ export default function Home() {
             >
               Log in
             </Link>
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="shadow-glow-primary">
               <Link href="/dashboard">
                 Get Started
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -1757,17 +2633,13 @@ export default function Home() {
             className="lg:hidden p-2 hover:bg-muted rounded-md transition-colors"
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-border/40 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
+          <div className="lg:hidden border-t border-border/40 glass-effect-strong">
             <nav className="container px-4 py-4 space-y-3">
               <Link
                 href="#features"
@@ -1777,11 +2649,11 @@ export default function Home() {
                 Features
               </Link>
               <Link
-                href="#solutions"
+                href="#how-it-works"
                 onClick={closeMobileMenu}
                 className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
               >
-                Solutions
+                How It Works
               </Link>
               <Link
                 href="#pricing"
@@ -1805,7 +2677,7 @@ export default function Home() {
                 >
                   Log in
                 </Link>
-                <Button asChild className="w-full" onClick={closeMobileMenu}>
+                <Button asChild className="w-full shadow-glow-primary" onClick={closeMobileMenu}>
                   <Link href="/dashboard">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -1820,14 +2692,13 @@ export default function Home() {
       <main className="flex-1 pt-16">
         {/* Hero Section */}
         <section className="relative overflow-hidden py-12 sm:py-16 md:py-20 lg:py-32">
-          {/* Animated Background Elements */}
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+          {/* Animated Background */}
+          <div className="absolute inset-0 gradient-mesh" />
           <div className="absolute inset-0">
-            <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
+            <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-72 sm:h-72 gradient-radial-primary animate-pulse-glow" />
             <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] bg-gradient-conic from-primary/10 via-transparent to-blue-500/10 rounded-full blur-3xl animate-spin"
-              style={{ animationDuration: "20s" }}
+              className="absolute bottom-1/4 right-1/4 w-64 h-64 sm:w-96 sm:h-96 gradient-radial-blue animate-pulse-glow"
+              style={{ animationDelay: "1s" }}
             />
           </div>
 
@@ -1836,13 +2707,20 @@ export default function Home() {
               {/* Content Side */}
               <div className="flex flex-col justify-center space-y-6 text-center lg:text-left">
                 <div className="space-y-4">
+                  <Badge
+                    variant="outline"
+                    className="border-primary/30 bg-primary/10 text-primary shadow-glow-primary w-fit mx-auto lg:mx-0"
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    AI-Powered Automation
+                  </Badge>
                   <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
                       <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
                         Automate Your
                       </span>
                       <br />
-                      <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                      <span className="text-glow-blue bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
                         Instagram DMs
                       </span>
                       <br />
@@ -1851,7 +2729,8 @@ export default function Home() {
                       </span>
                     </h1>
                     <p className="max-w-[600px] text-muted-foreground text-sm sm:text-base md:text-lg lg:text-xl mx-auto lg:mx-0 leading-relaxed">
-                      The all-in-one platform for businesses to automate Instagram DM responses, qualify leads with AI, and sync them directly to your CRM.
+                      The all-in-one platform for businesses to automate Instagram DM responses, qualify leads with AI,
+                      and sync them directly to your CRM.
                     </p>
                   </div>
                 </div>
@@ -1860,7 +2739,7 @@ export default function Home() {
                   <Button
                     asChild
                     size="lg"
-                    className="gap-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="gap-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-glow-primary-lg hover-lift"
                   >
                     <Link href="/dashboard">
                       <Zap className="h-4 w-4" />
@@ -1872,11 +2751,11 @@ export default function Home() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="border-2 hover:bg-muted/50 transition-all duration-300"
+                    className="border-2 glass-effect hover-lift bg-transparent"
                   >
                     <Link href="/dashboard">
-                      <Users className="h-4 w-4 mr-2" />
-                      Book a Demo
+                      <Play className="h-4 w-4 mr-2" />
+                      Watch Demo
                     </Link>
                   </Button>
                 </div>
@@ -1886,7 +2765,7 @@ export default function Home() {
                     {[1, 2, 3, 4, 5].map((i) => (
                       <div
                         key={i}
-                        className="inline-block h-8 w-8 sm:h-10 sm:w-10 rounded-full border-2 sm:border-3 border-background bg-gradient-to-br from-primary/20 to-blue-500/20 overflow-hidden ring-2 ring-primary/20"
+                        className="inline-block h-8 w-8 sm:h-10 sm:w-10 rounded-full border-2 sm:border-3 border-background bg-gradient-to-br from-primary/20 to-blue-500/20 overflow-hidden ring-2 ring-primary/20 shadow-depth-md"
                       >
                         <Image
                           src={`/ten.png?height=40&width=40&text=${i}`}
@@ -1899,18 +2778,21 @@ export default function Home() {
                     ))}
                   </div>
                   <div className="text-xs sm:text-sm">
-                    <div className="font-semibold text-foreground">Let Your Business</div>
-                    <div className="text-muted-foreground">Growing with Yazzil</div>
+                    <div className="font-semibold text-foreground flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                      4.9/5 Rating
+                    </div>
+                    <div className="text-muted-foreground">From 500+ businesses</div>
                   </div>
                 </div>
               </div>
 
-              {/* Visual Side - Mobile Responsive */}
+              {/* Visual Side */}
               <div className="relative flex items-center justify-center lg:justify-end mt-8 lg:mt-0">
-                {/* Main Dashboard Screenshot - Responsive */}
+                {/* Main Dashboard Screenshot */}
                 <div className="relative group w-full max-w-lg lg:max-w-none">
-                  <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-xl sm:rounded-2xl blur-lg sm:blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70" />
-                  <div className="relative bg-background/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-border/50 shadow-xl sm:shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 p-1.5 sm:p-2">
+                  <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-xl sm:rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70" />
+                  <div className="relative glass-effect-strong rounded-xl sm:rounded-2xl shadow-depth-2xl hover:shadow-glow-primary transition-all duration-500 hover-lift p-1.5 sm:p-2">
                     <Image
                       src="/eight.png?height=400&width=600&text=Main+Dashboard"
                       alt="Yazzil Main Dashboard"
@@ -1921,11 +2803,11 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Floating Screenshots - Hidden on mobile for cleanr look */}
-                <div className="hidden lg:block absolute -top-8 -left-8 xl:-left-16">
+                {/* Floating Screenshots */}
+                <div className="hidden lg:block absolute -top-8 -left-8 xl:-left-16 animate-float">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
-                    <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:rotate-2">
+                    <div className="relative glass-effect rounded-xl shadow-depth-lg hover:shadow-glow-green transition-all duration-300 hover-scale p-1.5">
                       <Image
                         src="/eleven.png?height=200&width=300&text=DM+Automation+Rules"
                         alt="DM Automation Rules Interface"
@@ -1937,10 +2819,10 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="hidden lg:block absolute -bottom-12 -right-4 xl:-right-12">
+                <div className="hidden lg:block absolute -bottom-12 -right-4 xl:-right-12 animate-float-slow">
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-60" />
-                    <div className="relative bg-background/90 backdrop-blur-sm rounded-xl border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 p-1.5 hover:-rotate-2">
+                    <div className="relative glass-effect rounded-xl shadow-depth-lg hover:shadow-glow-purple transition-all duration-300 hover-scale p-1.5">
                       <Image
                         src="/six.png?height=180&width=280&text=Lead+Qualification"
                         alt="Lead Qualification Tool"
@@ -1957,23 +2839,31 @@ export default function Home() {
         </section>
 
         {/* Stats Section */}
-        <section className="border-y border-border/50 bg-muted/30 py-8 sm:py-12">
+        <section className="border-y border-border/50 glass-effect py-8 sm:py-12">
           <div className="container px-4 sm:px-6">
-            <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4 stagger-fade-in">
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">50+</div>
+                <div className="text-2xl sm:text-3xl font-bold text-glow-blue bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                  50+
+                </div>
                 <div className="text-xs sm:text-sm text-muted-foreground">Active Businesses</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">15,000+</div>
+                <div className="text-2xl sm:text-3xl font-bold text-glow-blue bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                  15,000+
+                </div>
                 <div className="text-xs sm:text-sm text-muted-foreground">DMs Automated</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">2,500+</div>
+                <div className="text-2xl sm:text-3xl font-bold text-glow-blue bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                  2,500+
+                </div>
                 <div className="text-xs sm:text-sm text-muted-foreground">Leads Qualified</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">98%</div>
+                <div className="text-2xl sm:text-3xl font-bold text-glow-blue bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                  98%
+                </div>
                 <div className="text-xs sm:text-sm text-muted-foreground">Customer Satisfaction</div>
               </div>
             </div>
@@ -1981,48 +2871,59 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-12 sm:py-16 md:py-24 bg-muted/30">
-          <div className="container px-4 sm:px-6">
+        <section id="features" className="py-12 sm:py-16 md:py-24 relative overflow-hidden">
+          <div className="absolute inset-0 gradient-mesh opacity-50" />
+          <div className="container relative px-4 sm:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary shadow-glow-primary">
+                  <Sparkles className="h-3 w-3 mr-1" />
                   Powerful Features
                 </Badge>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Everything you need to convert Instagram conversations into sales
                 </h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
-                  Our platform combines Instagram DM automation and intelligent lead qualification in one powerful solution.
+                  Our platform combines Instagram DM automation and intelligent lead qualification in one powerful
+                  solution.
                 </p>
               </div>
             </div>
-            <div className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+            <div className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 stagger-fade-in">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift group">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <Bot className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" />
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center shadow-glow-blue group-hover:shadow-glow-primary transition-all">
+                      <Bot className="h-6 w-6 text-blue-500" />
+                    </div>
                     <h3 className="text-lg sm:text-xl font-semibold">AI-Powered DM Automation</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      Automatically respond to Instagram DMs with intelligent, context-aware messages that feel natural and personal.
+                      Automatically respond to Instagram DMs with intelligent, context-aware messages that feel natural
+                      and personal.
                     </p>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift group">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <Target className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500" />
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center shadow-glow-purple group-hover:shadow-glow-primary transition-all">
+                      <Target className="h-6 w-6 text-purple-500" />
+                    </div>
                     <h3 className="text-lg sm:text-xl font-semibold">Smart Lead Qualification</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      AI analyzes conversations to automatically identify and score qualified leads based on engagement and intent.
+                      AI analyzes conversations to automatically identify and score qualified leads based on engagement
+                      and intent.
                     </p>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift group">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <Database className="h-8 w-8 sm:h-10 sm:w-10 text-green-500" />
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center shadow-glow-green group-hover:shadow-glow-primary transition-all">
+                      <Database className="h-6 w-6 text-green-500" />
+                    </div>
                     <h3 className="text-lg sm:text-xl font-semibold">CRM Integration</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       Seamlessly sync qualified leads directly to your existing CRM system for immediate follow-up.
@@ -2030,10 +2931,12 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift group">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <MessageSquare className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-500" />
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 flex items-center justify-center shadow-glow-green group-hover:shadow-glow-primary transition-all">
+                      <MessageSquare className="h-6 w-6 text-emerald-500" />
+                    </div>
                     <h3 className="text-lg sm:text-xl font-semibold">Instagram DM Management</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       Centralized dashboard to manage all your Instagram DM conversations and track engagement metrics.
@@ -2041,10 +2944,12 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift group">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <Workflow className="h-8 w-8 sm:h-10 sm:w-10 text-orange-500" />
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center shadow-glow-primary group-hover:shadow-glow-primary transition-all">
+                      <Workflow className="h-6 w-6 text-orange-500" />
+                    </div>
                     <h3 className="text-lg sm:text-xl font-semibold">Custom Automation Workflows</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       Create sophisticated DM automation sequences with our visual workflow builder, no coding required.
@@ -2052,10 +2957,12 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift group">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <BarChart3 className="h-8 w-8 sm:h-10 sm:w-10 text-cyan-500" />
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 flex items-center justify-center shadow-glow-blue group-hover:shadow-glow-primary transition-all">
+                      <BarChart3 className="h-6 w-6 text-cyan-500" />
+                    </div>
                     <h3 className="text-lg sm:text-xl font-semibold">Advanced Analytics</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       Track DM response rates, lead conversion metrics, and ROI with detailed analytics and reporting.
@@ -2067,18 +2974,106 @@ export default function Home() {
           </div>
         </section>
 
+        {/* How It Works Section */}
+        <section id="how-it-works" className="py-12 sm:py-16 md:py-24 glass-effect border-y border-border/50">
+          <div className="container px-4 sm:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+              <div className="space-y-2">
+                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary shadow-glow-primary">
+                  <Rocket className="h-3 w-3 mr-1" />
+                  How It Works
+                </Badge>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                  Get started in 4 simple steps
+                </h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
+                  From setup to conversion in minutes, not hours
+                </p>
+              </div>
+            </div>
 
-        <section>
-          <ScrollAnimatedFlowSection />
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {HOW_IT_WORKS.map((item, index) => {
+                const IconComponent = item.icon
+                return (
+                  <div key={index} className="relative group">
+                    {/* Connecting Line */}
+                    {index < HOW_IT_WORKS.length - 1 && (
+                      <div className="hidden lg:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/50 to-transparent" />
+                    )}
+
+                    <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift h-full">
+                      <CardContent className="p-6 space-y-4">
+                        <div className="relative">
+                          <div
+                            className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-depth-md group-hover:shadow-glow-primary transition-all mx-auto`}
+                          >
+                            <IconComponent className="h-8 w-8 text-white" />
+                          </div>
+                          <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-glow-primary">
+                            {item.step}
+                          </div>
+                        </div>
+                        <div className="text-center space-y-2">
+                          <h3 className="text-lg font-semibold">{item.title}</h3>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </section>
 
-    
+        {/* Integrations Section */}
+        <section className="py-12 sm:py-16 md:py-24 relative overflow-hidden">
+          <div className="absolute inset-0 gradient-mesh opacity-30" />
+          <div className="container relative px-4 sm:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+              <div className="space-y-2">
+                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary shadow-glow-primary">
+                  <Database className="h-3 w-3 mr-1" />
+                  Integrations
+                </Badge>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                  Works with your favorite tools
+                </h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
+                  Seamlessly integrate with the CRM and tools you already use
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {INTEGRATIONS.map((integration, index) => (
+                <Card
+                  key={index}
+                  className="border-border/50 glass-effect shadow-depth-md hover:shadow-depth-lg hover-lift group"
+                >
+                  <CardContent className="p-6 flex items-center justify-center">
+                    <Image
+                      src={integration.logo || "/placeholder.svg"}
+                      alt={integration.name}
+                      width={120}
+                      height={40}
+                      className="opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0"
+                    />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Pricing Section */}
-        <section id="pricing" className="py-12 sm:py-16 md:py-24">
+        <section id="pricing" className="py-12 sm:py-16 md:py-24 glass-effect border-y border-border/50">
           <div className="container px-4 sm:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary shadow-glow-primary">
+                  <Crown className="h-3 w-3 mr-1" />
                   Simple Pricing
                 </Badge>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -2092,40 +3087,47 @@ export default function Home() {
             <div className="mt-8 sm:mt-12 grid gap-6 md:grid-cols-3">
               {PLANS.map((plan, index) => {
                 const IconComponent = plan.icon
-                const isPopular = plan.id === "pro"
+                const isPopular = plan.popular
                 return (
-                  <Card 
-                    key={plan.id} 
-                    className={`relative border-border/50 bg-background/50 backdrop-blur-sm ${
-                      isPopular ? "border-primary/50 shadow-lg md:scale-105" : ""
+                  <Card
+                    key={plan.id}
+                    className={`relative border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift ${
+                      isPopular ? "border-primary/50 md:scale-105 shadow-glow-primary" : ""
                     }`}
                   >
                     {isPopular && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <Badge className="bg-gradient-to-r from-primary to-blue-600 text-white text-xs">
+                        <Badge className="bg-gradient-to-r from-primary to-blue-600 text-white text-xs shadow-glow-primary">
+                          <Star className="h-3 w-3 mr-1 fill-white" />
                           Most Popular
                         </Badge>
                       </div>
                     )}
                     <CardContent className="p-4 sm:p-6">
                       <div className="space-y-4 sm:space-y-6">
+                        <div className="space-y-2">
+                          <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center shadow-depth-md">
+                            <IconComponent className="h-6 w-6 text-primary" />
+                          </div>
+                          <h3 className="text-xl font-bold">{plan.name}</h3>
+                          <p className="text-sm text-muted-foreground">{plan.description}</p>
+                        </div>
+
                         <div className="space-y-1">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
-                            {plan.period && (
-                              <span className="text-xs sm:text-sm text-muted-foreground">/{plan.period}</span>
-                            )}
+                            <span className="text-3xl font-bold">{plan.price}</span>
+                            {plan.period && <span className="text-sm text-muted-foreground">/{plan.period}</span>}
                           </div>
                         </div>
 
-                        <Button 
+                        <Button
                           asChild
                           className={`w-full ${
-                            isPopular 
-                              ? "bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90" 
-                              : plan.id === "enterprise" 
-                                ? "variant-outline" 
-                                : ""
+                            isPopular
+                              ? "bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-glow-primary"
+                              : plan.id === "enterprise"
+                                ? "variant-outline glass-effect"
+                                : "glass-effect"
                           }`}
                           variant={isPopular ? "default" : plan.id === "enterprise" ? "outline" : "default"}
                         >
@@ -2136,11 +3138,11 @@ export default function Home() {
                         </Button>
 
                         <div className="space-y-3">
-                          <div className="text-xs sm:text-sm font-medium">What&apos;s included:</div>
+                          <div className="text-sm font-medium">What&apos;s included:</div>
                           <ul className="space-y-2">
                             {plan.features.map((feature, featureIndex) => (
-                              <li key={featureIndex} className="flex items-start gap-2 text-xs sm:text-sm">
-                                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                              <li key={featureIndex} className="flex items-start gap-2 text-sm">
+                                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                                 <span>{feature}</span>
                               </li>
                             ))}
@@ -2152,10 +3154,10 @@ export default function Home() {
                 )
               })}
             </div>
-            
+
             <div className="mt-8 sm:mt-12 text-center">
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                All plans include SSL security, 99.9% uptime, and email support. 
+              <p className="text-sm text-muted-foreground">
+                All plans include SSL security, 99.9% uptime, and email support.
                 <Link href="#pricing" className="text-primary hover:underline ml-1">
                   View detailed comparison →
                 </Link>
@@ -2164,14 +3166,14 @@ export default function Home() {
           </div>
         </section>
 
-        
-
         {/* Testimonials Section */}
-        <section id="testimonials" className="py-12 sm:py-16 md:py-24 bg-muted/30">
-          <div className="container px-4 sm:px-6">
+        <section id="testimonials" className="py-12 sm:py-16 md:py-24 relative overflow-hidden">
+          <div className="absolute inset-0 gradient-mesh opacity-50" />
+          <div className="container relative px-4 sm:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
+                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary shadow-glow-primary">
+                  <Users className="h-3 w-3 mr-1" />
                   Testimonials
                 </Badge>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -2183,41 +3185,68 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-8 sm:mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                      ))}
+                    </div>
                     <p className="text-sm sm:text-base text-muted-foreground italic">
-                      &quot;Yazzil has completely transformed how we handle Instagram DMs. We&apos;re converting 3x more leads than before with automated responses.&quot;
+                      &quot;Yazzil has completely transformed how we handle Instagram DMs. We&apos;re converting 3x more
+                      leads than before with automated responses.&quot;
                     </p>
-                    <div>
-                      <div className="font-semibold text-sm sm:text-base">Sarah Johnson</div>
-                      <div className="text-xs sm:text-sm text-muted-foreground">Marketing Director, TechCorp</div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 shadow-depth-md" />
+                      <div>
+                        <div className="font-semibold text-sm sm:text-base">Sarah Johnson</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Marketing Director, TechCorp</div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                      ))}
+                    </div>
                     <p className="text-sm sm:text-base text-muted-foreground italic">
-                      &quot;The lead qualification is incredible. Every qualified lead automatically appears in our CRM with full conversation context.&quot;
+                      &quot;The lead qualification is incredible. Every qualified lead automatically appears in our CRM
+                      with full conversation context.&quot;
                     </p>
-                    <div>
-                      <div className="font-semibold text-sm sm:text-base">Michael Chen</div>
-                      <div className="text-xs sm:text-sm text-muted-foreground">Sales Manager, GrowthAgency</div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 shadow-depth-md" />
+                      <div>
+                        <div className="font-semibold text-sm sm:text-base">Michael Chen</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Sales Manager, GrowthAgency</div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 bg-background/50 backdrop-blur-sm md:col-span-2 lg:col-span-1">
+              <Card className="border-border/50 glass-effect shadow-depth-lg hover:shadow-depth-xl hover-lift md:col-span-2 lg:col-span-1">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-4">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                      ))}
+                    </div>
                     <p className="text-sm sm:text-base text-muted-foreground italic">
-                      &quot;We save 15+ hours per week on DM management and our Instagram lead conversion rate increased by 40%.&quot;
+                      &quot;We save 15+ hours per week on DM management and our Instagram lead conversion rate increased
+                      by 40%.&quot;
                     </p>
-                    <div>
-                      <div className="font-semibold text-sm sm:text-base">Jessica Williams</div>
-                      <div className="text-xs sm:text-sm text-muted-foreground">CEO, DigitalBoost</div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 shadow-depth-md" />
+                      <div>
+                        <div className="font-semibold text-sm sm:text-base">Jessica Williams</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">CEO, DigitalBoost</div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -2226,97 +3255,164 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-12 sm:py-16 md:py-24 bg-muted/30">
+        {/* FAQ Section */}
+        <section className="py-12 sm:py-16 md:py-24 glass-effect border-y border-border/50">
           <div className="container px-4 sm:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="flex flex-col justify-center space-y-4 text-center lg:text-left">
-                <div className="space-y-2">
-                  <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary w-fit mx-auto lg:mx-0">
-                    Get Started Today
-                  </Badge>
-                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                    Ready to transform your Instagram DMs into sales?
-                  </h2>
-                  <p className="max-w-[600px] text-muted-foreground text-sm sm:text-base md:text-xl mx-auto lg:mx-0">
-                    Join thousands of businesses already using Yazzil to automate Instagram DMs and convert more leads.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                  <Button asChild size="lg" className="gap-1.5">
-                    <Link href="/dashboard">
-                      Start Free Trial
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button asChild size="lg" variant="outline">
-                    <Link href="/dashboard">
-                      Book a Demo
-                    </Link>
-                  </Button>
-                </div>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+              <div className="space-y-2">
+                <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary shadow-glow-primary">
+                  <MessageCircle className="h-3 w-3 mr-1" />
+                  FAQ
+                </Badge>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                  Frequently asked questions
+                </h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground text-sm sm:text-base md:text-xl">
+                  Everything you need to know about Yazzil
+                </p>
               </div>
-              <div className="flex items-center justify-center">
-                <Card className="w-full border-primary/20 bg-primary/5">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                        <h3 className="text-base sm:text-lg font-medium">No credit card required</h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Start your 14-day free trial today. No credit card required. Cancel anytime.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                        <h3 className="text-base sm:text-lg font-medium">Full access to all features</h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Get complete access to all features during your trial period.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                        <h3 className="text-base sm:text-lg font-medium">Dedicated support</h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Our team is available to help you get the most out of Yazzil.
-                      </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto space-y-4">
+              {FAQS.map((faq, index) => (
+                <Card
+                  key={index}
+                  className="border-border/50 glass-effect shadow-depth-md hover:shadow-depth-lg transition-all"
+                >
+                  <CardContent className="p-6">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold flex items-start gap-2">
+                        <ChevronRight className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        {faq.question}
+                      </h3>
+                      <p className="text-sm text-muted-foreground pl-7">{faq.answer}</p>
                     </div>
                   </CardContent>
                 </Card>
-              </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-12 sm:py-16 md:py-24 relative overflow-hidden">
+          <div className="absolute inset-0 gradient-mesh" />
+          <div className="container relative px-4 sm:px-6">
+            <div className="max-w-4xl mx-auto">
+              <Card className="border-primary/20 glass-effect-strong shadow-depth-2xl shadow-glow-primary">
+                <CardContent className="p-8 sm:p-12">
+                  <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+                    <div className="flex flex-col justify-center space-y-4 text-center lg:text-left">
+                      <div className="space-y-2">
+                        <Badge
+                          variant="outline"
+                          className="border-primary/20 bg-primary/10 text-primary w-fit mx-auto lg:mx-0 shadow-glow-primary"
+                        >
+                          <Rocket className="h-3 w-3 mr-1" />
+                          Get Started Today
+                        </Badge>
+                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                          Ready to transform your Instagram DMs into sales?
+                        </h2>
+                        <p className="max-w-[600px] text-muted-foreground text-sm sm:text-base md:text-xl mx-auto lg:mx-0">
+                          Join thousands of businesses already using Yazzil to automate Instagram DMs and convert more
+                          leads.
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                        <Button asChild size="lg" className="gap-1.5 shadow-glow-primary-lg hover-lift">
+                          <Link href="/dashboard">
+                            <Zap className="h-4 w-4" />
+                            Start Free Trial
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button asChild size="lg" variant="outline" className="glass-effect hover-lift bg-transparent">
+                          <Link href="/dashboard">
+                            <Users className="h-4 w-4 mr-2" />
+                            Book a Demo
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <div className="space-y-4 w-full">
+                        <div className="flex items-center gap-2 glass-effect p-4 rounded-lg shadow-depth-md">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center shadow-glow-green">
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-medium">No credit card required</h3>
+                            <p className="text-xs text-muted-foreground">Start your 14-day free trial today</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 glass-effect p-4 rounded-lg shadow-depth-md">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center shadow-glow-blue">
+                            <Sparkles className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-medium">Full access to all features</h3>
+                            <p className="text-xs text-muted-foreground">Complete access during trial period</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 glass-effect p-4 rounded-lg shadow-depth-md">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-glow-purple">
+                            <Shield className="h-5 w-5 text-purple-500" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-medium">Dedicated support</h3>
+                            <p className="text-xs text-muted-foreground">Our team is here to help you succeed</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 bg-background py-8 sm:py-12">
+      <footer className="border-t border-border/50 glass-effect py-8 sm:py-12">
         <div className="container px-4 sm:px-6">
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-12 w-12 sm:h-16 sm:w-16" />
+                <img
+                  src="/yazzil-logos.png"
+                  alt="Yazzil logo"
+                  className="h-12 w-12 sm:h-16 sm:w-16 shadow-depth-md rounded-lg"
+                />
                 <span className="text-lg sm:text-xl font-bold">Yazzil</span>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 The all-in-one platform for Instagram DM automation and intelligent lead qualification.
               </p>
               <div className="flex gap-4">
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <Instagram className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#E4405F" }} />
+                <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors hover-scale">
+                  <div className="h-8 w-8 rounded-lg glass-effect flex items-center justify-center shadow-depth-sm hover:shadow-depth-md">
+                    <Instagram className="h-4 w-4" style={{ color: "#E4405F" }} />
+                  </div>
                   <span className="sr-only">Instagram</span>
                 </Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <Facebook className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#1877F2" }} />
+                <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors hover-scale">
+                  <div className="h-8 w-8 rounded-lg glass-effect flex items-center justify-center shadow-depth-sm hover:shadow-depth-md">
+                    <Facebook className="h-4 w-4" style={{ color: "#1877F2" }} />
+                  </div>
                   <span className="sr-only">Facebook</span>
                 </Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <Twitter className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#1DA1F2" }} />
+                <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors hover-scale">
+                  <div className="h-8 w-8 rounded-lg glass-effect flex items-center justify-center shadow-depth-sm hover:shadow-depth-md">
+                    <Twitter className="h-4 w-4" style={{ color: "#1DA1F2" }} />
+                  </div>
                   <span className="sr-only">Twitter</span>
                 </Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                  <Linkedin className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#0A66C2" }} />
+                <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors hover-scale">
+                  <div className="h-8 w-8 rounded-lg glass-effect flex items-center justify-center shadow-depth-sm hover:shadow-depth-md">
+                    <Linkedin className="h-4 w-4" style={{ color: "#0A66C2" }} />
+                  </div>
                   <span className="sr-only">LinkedIn</span>
                 </Link>
               </div>
@@ -2325,27 +3421,27 @@ export default function Home() {
               <h3 className="text-base sm:text-lg font-medium">Product</h3>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
-                  <Link href="#features" className="text-muted-foreground hover:text-foreground">
+                  <Link href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="#solutions" className="text-muted-foreground hover:text-foreground">
-                    Solutions
+                  <Link href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                    How It Works
                   </Link>
                 </li>
                 <li>
-                  <Link href="#pricing" className="text-muted-foreground hover:text-foreground">
+                  <Link href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link href="/integrations" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/integrations" className="text-muted-foreground hover:text-foreground transition-colors">
                     Integrations
                   </Link>
                 </li>
                 <li>
-                  <Link href="/roadmap" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/roadmap" className="text-muted-foreground hover:text-foreground transition-colors">
                     Roadmap
                   </Link>
                 </li>
@@ -2355,27 +3451,27 @@ export default function Home() {
               <h3 className="text-base sm:text-lg font-medium">Resources</h3>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
-                  <Link href="/blog" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="/documentation" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/documentation" className="text-muted-foreground hover:text-foreground transition-colors">
                     Documentation
                   </Link>
                 </li>
                 <li>
-                  <Link href="/guides" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/guides" className="text-muted-foreground hover:text-foreground transition-colors">
                     Guides
                   </Link>
                 </li>
                 <li>
-                  <Link href="/case-studies" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/case-studies" className="text-muted-foreground hover:text-foreground transition-colors">
                     Case Studies
                   </Link>
                 </li>
                 <li>
-                  <Link href="/help" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/help" className="text-muted-foreground hover:text-foreground transition-colors">
                     Help Center
                   </Link>
                 </li>
@@ -2385,27 +3481,27 @@ export default function Home() {
               <h3 className="text-base sm:text-lg font-medium">Company</h3>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
-                  <Link href="/about" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
                     About
                   </Link>
                 </li>
                 <li>
-                  <Link href="/careers" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors">
                     Careers
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                     Contact
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+                  <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
                     Terms of Service
                   </Link>
                 </li>
@@ -2420,4 +3516,3 @@ export default function Home() {
     </div>
   )
 }
-

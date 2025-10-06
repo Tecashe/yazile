@@ -2475,7 +2475,7 @@ export default function InstagramBusinessDashboard({ userId }: InstagramDashboar
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Posting Frequency</p>
-                        <p className="text-2xl font-bold text-orange-600">{businessMetrics.postsPerWeek}</p>
+                        <p className="text-2xl font-bold text-orange-600">{businessMetrics.totalPosts}</p>
                         <p className="text-xs text-muted-foreground">Posts per week</p>
                       </div>
                       <Calendar className="h-6 w-6 text-orange-600" />
