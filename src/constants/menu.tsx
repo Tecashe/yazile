@@ -301,6 +301,7 @@ import {
   LucideCreditCard,
   WrenchIcon,
   Save,
+  CalculatorIcon,
 } from "lucide-react"
 import type React from "react"
 
@@ -422,6 +423,12 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
         label: "Tools",
         icon: icon(WrenchIcon, "text-yellow-600"),
         description: "Connect tools that you use everyday to automate processes",
+      },
+       {
+        id: uuid(),
+        label: "Analytics",
+        icon: icon(CalculatorIcon, "text-yellow-600"),
+        description: "Analytic data for your socials",
       },
       {
         id: uuid(),

@@ -1441,7 +1441,7 @@ import { deauthorizeInstagram } from "@/lib/deauth"
 import RequirementsModal from "./requirements-modal"
 import AccountsList from "./accounts-list"
 import ConnectionStatus from "./connection-status"
-import InstagramDashboard from "./my-info"
+
 import { useSearchParams } from "next/navigation"
 
 // Custom WhatsApp icon component
@@ -1492,17 +1492,17 @@ const socialPlatforms: SocialPlatform[] = [
     category: 'messaging',
     comingSoon: true
   },
-  {
-    id: 'telegram',
-    name: 'TELEGRAM',
-    displayName: 'Telegram',
-    icon: TelegramIcon,
-    description: 'Create bots and automate channel management',
-    features: ['Bot automation', 'Channel management', 'Group moderation', 'Custom commands'],
-    requirements: ['Telegram account', 'Bot token from BotFather', 'Channel/group admin rights'],
-    category: 'messaging',
-    comingSoon: true
-  },
+  // {
+  //   id: 'telegram',
+  //   name: 'TELEGRAM',
+  //   displayName: 'Telegram',
+  //   icon: TelegramIcon,
+  //   description: 'Create bots and automate channel management',
+  //   features: ['Bot automation', 'Channel management', 'Group moderation', 'Custom commands'],
+  //   requirements: ['Telegram account', 'Bot token from BotFather', 'Channel/group admin rights'],
+  //   category: 'messaging',
+  //   comingSoon: true
+  // },
   {
     id: 'facebook',
     name: 'FACEBOOK',
@@ -1514,39 +1514,39 @@ const socialPlatforms: SocialPlatform[] = [
     category: 'social',
     comingSoon: true
   },
-  {
-    id: 'twitter',
-    name: 'TWITTER',
-    displayName: 'X (Twitter)',
-    icon: Twitter,
-    description: 'Automate tweets and engage with your audience',
-    features: ['Tweet scheduling', 'DM automation', 'Engagement tracking', 'Hashtag monitoring'],
-    requirements: ['Twitter account', 'API access approval', 'Verified account (recommended)'],
-    category: 'social',
-    comingSoon: true
-  },
-  {
-    id: 'linkedin',
-    name: 'LINKEDIN',
-    displayName: 'LinkedIn',
-    icon: Linkedin,
-    description: 'Professional networking and content automation',
-    features: ['Post scheduling', 'Connection automation', 'Lead generation', 'Company page management'],
-    requirements: ['LinkedIn account', 'Premium or Sales Navigator (recommended)', 'Company page access'],
-    category: 'social',
-    comingSoon: true
-  },
-  {
-    id: 'youtube',
-    name: 'YOUTUBE',
-    displayName: 'YouTube',
-    icon: Youtube,
-    description: 'Video content management and audience engagement',
-    features: ['Video scheduling', 'Comment moderation', 'Analytics tracking', 'Community management'],
-    requirements: ['YouTube channel', 'Google account', 'Channel verification'],
-    category: 'video',
-    comingSoon: true
-  }
+  // {
+  //   id: 'X',
+  //   name: 'TWITTER',
+  //   displayName: 'X (Twitter)',
+  //   icon: Twitter,
+  //   description: 'Automate tweets and engage with your audience',
+  //   features: ['Tweet scheduling', 'DM automation', 'Engagement tracking', 'Hashtag monitoring'],
+  //   requirements: ['Twitter account', 'API access approval', 'Verified account (recommended)'],
+  //   category: 'social',
+  //   comingSoon: true
+  // },
+  // {
+  //   id: 'linkedin',
+  //   name: 'LINKEDIN',
+  //   displayName: 'LinkedIn',
+  //   icon: Linkedin,
+  //   description: 'Professional networking and content automation',
+  //   features: ['Post scheduling', 'Connection automation', 'Lead generation', 'Company page management'],
+  //   requirements: ['LinkedIn account', 'Premium or Sales Navigator (recommended)', 'Company page access'],
+  //   category: 'social',
+  //   comingSoon: true
+  // },
+  // {
+  //   id: 'youtube',
+  //   name: 'YOUTUBE',
+  //   displayName: 'YouTube',
+  //   icon: Youtube,
+  //   description: 'Video content management and audience engagement',
+  //   features: ['Video scheduling', 'Comment moderation', 'Analytics tracking', 'Community management'],
+  //   requirements: ['YouTube channel', 'Google account', 'Channel verification'],
+  //   category: 'video',
+  //   comingSoon: true
+  // }
 ]
 
 export default function SocialIntegrationsPage() {
@@ -2042,8 +2042,7 @@ export default function SocialIntegrationsPage() {
         })}
       </motion.div>
 
-      <InstagramDashboard userId={userData?.data?.clerkId || "1234556"} />
-
+      
       {showRequirements && (
         <RequirementsModal
           platform={showRequirements}
