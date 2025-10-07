@@ -2504,7 +2504,7 @@ export default function IntegrationsPage() {
           <DialogHeader>
             <DialogTitle>Automate {selectedIntegrationForAutomation?.name}</DialogTitle>
             <DialogDescription>
-              Set up automation for this integration. We'll send you setup instructions via email.
+              Set up automation for this integration. We&apos;ll send you setup instructions via email.
             </DialogDescription>
           </DialogHeader>
 
@@ -2519,7 +2519,7 @@ export default function IntegrationsPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isSubmitting}
               />
-              <FieldDescription>We'll send automation setup instructions to this email</FieldDescription>
+              <FieldDescription>We&apos;ll send automation setup instructions to this email</FieldDescription>
             </Field>
 
             <Field>
