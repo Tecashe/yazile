@@ -32,7 +32,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background radial--gradient--automations">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         {/* Header Section */}
         <div className="text-center mb-12 staggeredFadeIn">
