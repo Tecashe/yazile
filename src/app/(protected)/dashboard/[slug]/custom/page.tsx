@@ -437,7 +437,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            {/* FAQ Hint Card */}
+            {/* FAQ Hint Car */}
             <Card className="glassEffect border-border/50 shimmerBorder">
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground text-center">
