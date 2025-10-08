@@ -65,7 +65,9 @@ const PostNode = ({ id, theme = { id: "blue", name: "Blue", primary: "light-blue
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Left section - Stats */}
             <div className="lg:col-span-1">
-              <div className="bg-background-90 rounded-xl p-4 staggeredFadeIn">
+
+              
+              {/* <div className="bg-background-90 rounded-xl p-4 staggeredFadeIn">
                 <h4 className="text-lg font-medium mb-4">Post Metrics</h4>
 
                 <div className="space-y-4">
@@ -116,7 +118,10 @@ const PostNode = ({ id, theme = { id: "blue", name: "Blue", primary: "light-blue
                     View Detailed Analytics
                   </Button>
                 </div>
-              </div>
+              </div> */}
+
+
+
             </div>
 
             {/* Right section - Posts Grid */}
