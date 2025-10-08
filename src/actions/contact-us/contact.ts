@@ -13,7 +13,7 @@ export async function sendContactEmail(formData: {
   try {
     const { data, error } = await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
-      to: ["support@yazzil.com"],
+      to: ["goergesmmns"],
       replyTo: formData.email,
       subject: `Contact Form: ${formData.subject}`,
       html: `
@@ -43,13 +43,13 @@ export async function sendContactEmail(formData: {
     })
 
     if (error) {
-      console.error("[v0] Resend error:", error)
+      console.error("Yazzil Resend error:", error)
       return { success: false, error: error.message }
     }
-//yguygud
+
     return { success: true, data }
   } catch (error) {
-    console.error("[v0] Failed to send email:", error)
+    console.error("Yazzil Failed to send email:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to send email",
