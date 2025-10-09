@@ -16,30 +16,6 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Clean Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Automations</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your automated workflows
-              {isFetching && <span className="text-primary"> • Syncing...</span>}
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {/* Simple Status Badge */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg">
-              <Activity className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium">
-                {activeCount} of {automations.length} active
-              </span>
-            </div>
-            
-            {/* Create Button */}
-            <CreateAutomation />
-          </div>
-        </div>
-
         {/* Main Content - Full Width */}
         <div className="space-y-6">
           {/* Key Metrics - Simplified */}

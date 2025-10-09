@@ -329,7 +329,7 @@ const AutomationList = ({ id }: Props) => {
   }
 
   return (
-    <div className="min-h-screen bg-background radial--gradient--automations">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12 staggeredFadeIn">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
