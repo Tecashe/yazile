@@ -334,7 +334,7 @@ const AutomationList = ({ id }: Props) => {
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12 staggeredFadeIn">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-3 text-balance">Your Automations</h1>
+              <h3 className="text-4xl md:text-5xl font-bold mb-3 text-balance">Your Automations</h3>
               <p className="text-muted-foreground text-lg">Manage and monitor your automated workflows</p>
             </div>
             <CreateAutomation />
