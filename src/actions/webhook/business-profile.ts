@@ -72,7 +72,7 @@ export async function getOrCreateDefaultAutomation(pageId: string) {
   try {
     // Find user by Instagram page ID
     const integration = await client.integrations.findFirst({
-      where: { instagramId: pageId },
+      where: { pageId: pageId },
       include: {
         User: {
           include: {
