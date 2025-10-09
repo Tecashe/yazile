@@ -352,6 +352,7 @@
 
 // export default CreateAutomation
 
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -367,11 +368,16 @@ import { useSubscription } from "@/contexts/subscription-context"
 // Configuration for plan limits
 const PLAN_LIMITS = {
   FREE: 2,
-  PRO: 10,
-  ENTERPRISE: 30,
+  PRO: 50,
+  ENTERPRISE: 999,
 }
 
-const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCount?: number }) => {
+type CreateAutomationProps = {
+  currentAutomationCount?: number
+  onUpgradeClick?: () => void
+}
+
+const CreateAutomation = ({ currentAutomationCount = 0, onUpgradeClick }: CreateAutomationProps) => {
   const mutationId = useMemo(() => v4(), [])
   const router = useRouter()
   const pathname = usePathname()
@@ -388,9 +394,15 @@ const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCou
   const isNearLimit = remainingAutomations <= 1 && remainingAutomations > 0
 
   const handleCreateAutomation = () => {
+    // If at limit, show warning and trigger upgrade popup
     if (isAtLimit) {
       setShowLimitWarning(true)
       setTimeout(() => setShowLimitWarning(false), 3000)
+      
+      // Trigger the upgrade popup if callback provided
+      if (onUpgradeClick) {
+        onUpgradeClick()
+      }
       return
     }
 
@@ -538,7 +550,7 @@ const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCou
       >
         <div className="flex-1">
           {/* Progress Bar */}
-          <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="relative h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ 
@@ -558,7 +570,7 @@ const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCou
           {/* Usage Text */}
           <div className="flex items-center justify-between mt-1.5">
             <span className={`text-xs font-medium ${
-              isAtLimit ? "text-red-600" : isNearLimit ? "text-yellow-600" : "text-gray-600"
+              isAtLimit ? "text-red-600" : isNearLimit ? "text-yellow-600" : "text-gray-600 dark:text-gray-400"
             }`}>
               {currentAutomationCount} / {automationLimit} automations
             </span>
@@ -567,7 +579,7 @@ const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCou
         </div>
       </motion.div>
 
-      {/* Upgrade Prompt - Shows when at or near limit */}
+      {/* Upgrade Prompt - Shows when at or near limit on FREE plan */}
       <AnimatePresence>
         {(isAtLimit || isNearLimit) && currentPlan === "FREE" && (
           <motion.div
@@ -576,32 +588,32 @@ const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCou
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             className={`mt-3 p-3 rounded-lg border ${
               isAtLimit
-                ? "bg-red-50 border-red-200"
-                : "bg-yellow-50 border-yellow-200"
+                ? "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50"
+                : "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900/50"
             }`}
           >
             <div className="flex items-start gap-2">
               <AlertCircle 
                 size={16} 
-                className={isAtLimit ? "text-red-600 mt-0.5" : "text-yellow-600 mt-0.5"} 
+                className={isAtLimit ? "text-red-600 dark:text-red-400 mt-0.5" : "text-yellow-600 dark:text-yellow-400 mt-0.5"} 
               />
               <div className="flex-1">
                 <p className={`text-sm font-medium ${
-                  isAtLimit ? "text-red-900" : "text-yellow-900"
+                  isAtLimit ? "text-red-900 dark:text-red-300" : "text-yellow-900 dark:text-yellow-300"
                 }`}>
                   {isAtLimit 
                     ? "You've reached your automation limit" 
-                    : "Almost at your limit!"}
+                    : `Only ${remainingAutomations} automation${remainingAutomations === 1 ? '' : 's'} left!`}
                 </p>
                 <p className={`text-xs mt-1 ${
-                  isAtLimit ? "text-red-700" : "text-yellow-700"
+                  isAtLimit ? "text-red-700 dark:text-red-400" : "text-yellow-700 dark:text-yellow-400"
                 }`}>
                   Upgrade to Pro for 50 automations and unlock advanced features.
                 </p>
                 <Button
                   size="sm"
                   className="mt-2 h-7 text-xs bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  onClick={() => router.push("/dashboard/billing")}
+                  onClick={onUpgradeClick || (() => router.push("/dashboard/billing"))}
                 >
                   <Crown size={12} className="mr-1" />
                   Upgrade Now
@@ -616,7 +628,6 @@ const CreateAutomation = ({ currentAutomationCount = 0 }: { currentAutomationCou
 }
 
 export default CreateAutomation
-
 
 // "use client"
 
