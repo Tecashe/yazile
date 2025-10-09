@@ -173,7 +173,7 @@ export function MorphingTestimonials() {
 
                     {/* Quote */}
                     <p className="text-2xl md:text-3xl font-medium text-neutral-800 mb-8 leading-relaxed">
-                      "{current.quote}"
+                      &ldquo;{current.quote}&rdquo;
                     </p>
 
                     {/* Author */}
