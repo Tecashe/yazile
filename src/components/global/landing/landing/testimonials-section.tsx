@@ -61,7 +61,7 @@ export function TestimonialsSection() {
                   ))}
                 </div>
 
-                <p className="text-card-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                <p className="text-card-foreground mb-6 leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
 
                 <div className="flex items-center gap-4">
                   <img
