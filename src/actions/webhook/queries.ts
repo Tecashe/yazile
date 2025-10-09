@@ -563,7 +563,7 @@ export const updateWebhookPerformance = async (
 }
 
 // FIXED: Enhanced trigger decision system with proper schema understanding
-export const decideTriggerAction = async (
+export const decideTriggerActionOriginal = async (
   pageId: string,
   senderId: string,
   userMessage: string,
@@ -786,5 +786,168 @@ export const getRecentResponseCount = async (
   } catch (error) {
     console.error("Error getting recent response count:", error)
     return 0
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////
+
+export const decideTriggerAction = async (
+  pageId: string,
+  senderId: string,
+  userMessage: string,
+  messageType: "DM" | "COMMENT",
+) => {
+  const userId = `${pageId}_${senderId}`
+
+  // 1. KEYWORD MATCH (highest priority)
+  const keywordMatch = await matchKeyword(userMessage)
+  if (keywordMatch?.automationId) {
+    const triggerForMessageType = keywordMatch.Automation?.trigger?.find(
+      (t) => t.type === messageType && t.isActive
+    )
+    return {
+      triggerType: "KEYWORD" as const,
+      automationId: keywordMatch.automationId,
+      triggerId: triggerForMessageType?.id || null,
+      reason: `Keyword match: "${keywordMatch.word}"`,
+      confidence: 1.0,
+    }
+  }
+
+  // 2. ACTIVE CONVERSATION
+  const conversationState = await client.conversationState.findUnique({
+    where: { userId },
+  })
+  if (conversationState?.isActive && conversationState.automationId) {
+    const automation = await getAutomationWithTriggers(conversationState.automationId, messageType)
+    const actualTriggerId = automation?.trigger?.[0]?.id || null
+    return {
+      triggerType: "CONVERSATION_CONTINUE" as const,
+      automationId: conversationState.automationId,
+      triggerId: actualTriggerId,
+      reason: "Active conversation continuation",
+      confidence: 0.9,
+    }
+  }
+
+  // 3. 🆕 SEMANTIC MATCHING (AI-powered automation selection)
+  const semanticMatch = await findBestMatchingAutomation(pageId, userMessage, messageType)
+  if (semanticMatch) {
+    const actualTriggerId = semanticMatch.automation.trigger?.[0]?.id || null
+    return {
+      triggerType: "SEMANTIC" as const,
+      automationId: semanticMatch.automation.id,
+      triggerId: actualTriggerId,
+      reason: semanticMatch.reason,
+      confidence: semanticMatch.confidence,
+    }
+  }
+
+  // 4. FALLBACK AUTOMATION
+  const fallbackAutomation = await getFallbackAutomation(pageId, messageType)
+  if (fallbackAutomation) {
+    const actualTriggerId = fallbackAutomation.trigger?.[0]?.id || null
+    return {
+      triggerType: "FALLBACK" as const,
+      automationId: fallbackAutomation.id,
+      triggerId: actualTriggerId,
+      reason: "Fallback automation triggered",
+      confidence: 0.5,
+    }
+  }
+
+  // 5. CHAT HISTORY
+  const chatHistory = await getChatHistory(pageId, senderId)
+  if (chatHistory.history.length > 0 && chatHistory.automationId) {
+    const automation = await getAutomationWithTriggers(chatHistory.automationId, messageType)
+    const actualTriggerId = automation?.trigger?.[0]?.id || null
+    return {
+      triggerType: "HISTORY_CONTINUE" as const,
+      automationId: chatHistory.automationId,
+      triggerId: actualTriggerId,
+      reason: "Existing chat history found",
+      confidence: 0.7,
+    }
+  }
+
+  // 6. NO MATCH (will use default automation)
+  return {
+    triggerType: "NO_MATCH" as const,
+    automationId: null,
+    triggerId: null,
+    reason: "No matching triggers found",
+    confidence: 0.0,
+  }
+}
+
+
+
+// Get ALL active automations that listen to all messages (no keywords)
+export const getSemanticListeningAutomations = async (pageId: string) => {
+  return await client.automation.findMany({
+    where: {
+      active: true,
+      User: {
+        integrations: {
+          some: { instagramId: pageId }
+        }
+      },
+      // Automations with no keywords OR explicitly set to listen to all messages
+      OR: [
+        { keywords: { none: {} } },
+        { listenMode: "ALL_MESSAGES" }
+      ]
+    },
+    include: {
+      trigger: { where: { isActive: true } },
+      listener: true,
+      User: {
+        select: {
+          subscription: { select: { plan: true } },
+          integrations: { select: { token: true } }
+        }
+      }
+    }
+  })
+}
+
+// NEW: AI-powered automation selector
+export const findBestMatchingAutomation = async (
+  pageId: string,
+  userMessage: string,
+  messageType: "DM" | "COMMENT"
+) => {
+  const semanticAutomations = await getSemanticListeningAutomations(pageId)
+  
+  if (semanticAutomations.length === 0) return null
+  
+  // If only one automation, use it
+  if (semanticAutomations.length === 1) {
+    return {
+      automation: semanticAutomations[0],
+      confidence: 0.8,
+      reason: "Single semantic automation available"
+    }
+  }
+  
+  // TODO: Use AI to rank automations by relevance
+  // For now, return the first one or most recently used
+  return {
+    automation: semanticAutomations[0],
+    confidence: 0.6,
+    reason: "Multiple automations available, selected first"
   }
 }
