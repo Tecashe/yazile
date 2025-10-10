@@ -143,7 +143,7 @@ const Layout = async ({ children, params }: Props) => {
                   </main>
                 </SubscriptionProvider>
                 
-                <UserChat userId={user.id} userName={user.fullName} />
+                {/* <UserChat userId={user.id} userName={user.fullName} /> */}
               </div>
             </SidebarInset>
             
