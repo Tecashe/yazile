@@ -80,7 +80,7 @@ export const WebhookNode = ({
                     <span className="text-green-400">&ldquo;2025-01-10...&rdquo;</span>
                   </div>
                   <div>
-                    <span className="text-blue-400">&ldquo;keyword"</span>: <span className="text-green-400">&ldquo;pricing&rdquo;</span>
+                    <span className="text-blue-400">&ldquo;keyword&rdquo;</span>: <span className="text-green-400">&ldquo;pricing&rdquo;</span>
                   </div>
                 </div>
               </div>
