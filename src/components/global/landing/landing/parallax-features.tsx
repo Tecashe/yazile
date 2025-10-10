@@ -492,7 +492,7 @@ function StackingCard({ feature, index, total }: { feature: (typeof features)[0]
               </div>
             </div>
 
-            {/* Image */}
+            {/* Image*/}
             <motion.div
               whileHover={{ scale: 1.05, rotate: 2 }}
               transition={{ type: "spring", stiffness: 300 }}
