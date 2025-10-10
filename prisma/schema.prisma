@@ -256,6 +256,7 @@ model Automation {
   id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name            String             @default("New Automation")
   createdAt       DateTime           @default(now())
+  deletedAt       DateTime?
   isFallback      Boolean            @default(false)
   active          Boolean            @default(false)
   platform        INTEGRATIONS       @default(INSTAGRAM) // Added to specify which platform this automation is for
@@ -281,6 +282,7 @@ model Automation {
   sentimentAnalyses           SentimentAnalysis[]
   businessProfilesDescription Business?
 }
+
 
 model Message {
   id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
