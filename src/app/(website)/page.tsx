@@ -2440,7 +2440,7 @@ export default function Home() {
   return (
     <>
       <MouseFollower />
-      <ScrollProgress />
+      {/* <ScrollProgress /> */}
       <main className="min-h-screen bg-background overflow-hidden">
         <Navbar />
         <AdvancedHero />
