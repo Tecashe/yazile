@@ -11,7 +11,12 @@ import { useToast } from "@/hooks/use-toast"
 export const useQueryTrashedAutomations = () => {
   return useQuery({
     queryKey: ["trashed-automations"],
-    queryFn: getAllTrashedAutomations,
+    queryFn: async () => {
+      console.log("[v0] useQueryTrashedAutomations: Fetching trashed automations")
+      const result = await getAllTrashedAutomations()
+      console.log("[v0] useQueryTrashedAutomations: Result:", result)
+      return result
+    },
   })
 }
 

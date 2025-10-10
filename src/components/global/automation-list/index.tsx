@@ -1018,6 +1018,9 @@ const getSafeRelativeTime = (date?: Date | string | null): string => {
 const AutomationList = ({ id }: Props) => {
   const { data, refetch } = useQueryAutomations()
   const { data: trashedData, refetch: refetchTrashed } = useQueryTrashedAutomations()
+
+  console.log("[v0] AutomationList: trashedData:", trashedData)
+
   const { mutate: restoreAutomation } = useRestoreAutomation()
   const { mutate: permanentlyDelete } = usePermanentlyDeleteAutomation()
 
@@ -1044,6 +1047,7 @@ const AutomationList = ({ id }: Props) => {
 
   useEffect(() => {
     if (trashedData?.data) {
+      console.log("[v0] Setting trashed automations:", trashedData.data)
       setTrashedAutomations(trashedData.data)
     }
   }, [trashedData])
