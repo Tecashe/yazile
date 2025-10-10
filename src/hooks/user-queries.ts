@@ -202,9 +202,3 @@ export const useQueryDebug = () => {
     posts: postsQuery,
   }
 }
-
-
-
-
-
-
