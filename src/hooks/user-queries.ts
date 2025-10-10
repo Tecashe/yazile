@@ -37,6 +37,12 @@
 //   })
 // }
 
+
+
+
+//LATEST 100
+
+
 import { getAllAutomations, getAutomationInfo, getProfilePosts } from "@/actions/automations"
 import { onUserInfo } from "@/actions/user"
 import { useQuery } from "@tanstack/react-query"
@@ -196,6 +202,7 @@ export const useQueryDebug = () => {
     posts: postsQuery,
   }
 }
+
 
 
 

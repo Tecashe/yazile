@@ -3500,7 +3500,6 @@
 
 // export default FancyAutomationBox
 
-
 "use client"
 
 import type React from "react"
@@ -3512,6 +3511,13 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ActiveIndicator } from "../indicators/active-indicator"
 import { InactiveIndicator } from "../indicators/inactive-indicator"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import {
   Sparkles,
   Zap,
@@ -3529,6 +3535,7 @@ import {
   ImageIcon,
   Calendar,
   Play,
+  MoreVertical,
 } from "lucide-react"
 import AutomationStats from "./automation-stats"
 import AutomationChats from "./automationChats"
@@ -3578,6 +3585,7 @@ interface Automation {
 interface FancyAutomationBoxProps {
   automation: Automation
   onDelete: () => void
+  onPermanentDelete?: () => void
   pathname: string
   isOptimistic?: boolean
 }
@@ -3610,12 +3618,14 @@ const getSafeRelativeTime = (createdAt?: string | Date): string => {
 export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
   automation,
   onDelete,
+  onPermanentDelete,
   pathname,
   isOptimistic,
 }) => {
   const isOptimisticState = isOptimistic || automation._isOptimistic
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showPermanentDeleteConfirm, setShowPermanentDeleteConfirm] = useState(false)
   const [showChats, setShowChats] = useState(false)
   const [showAttachedPosts, setShowAttachedPosts] = useState(false)
 
@@ -3934,16 +3944,44 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
 
         <div className="mt-4 flex justify-between items-center">
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-destructive/30 text-destructive hover:bg-destructive/10 bg-transparent"
-              onClick={() => setShowDeleteConfirm(true)}
-              disabled={isOptimisticState}
-            >
-              <Trash2 size={16} className="mr-2" />
-              Delete
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10 bg-transparent"
+                  disabled={isOptimisticState}
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  Delete
+                  <MoreVertical size={14} className="ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="text-orange-600 focus:text-orange-600 focus:bg-orange-50 dark:focus:bg-orange-950/20"
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">Move to Trash</span>
+                    <span className="text-xs text-muted-foreground">Can be restored later</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowPermanentDeleteConfirm(true)}
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                  <AlertTriangle size={16} className="mr-2" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">Delete Forever</span>
+                    <span className="text-xs text-muted-foreground">Cannot be undone</span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button
               variant="outline"
               size="sm"
@@ -3969,24 +4007,70 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
         </div>
 
         {showDeleteConfirm && (
-          <div className="mt-4 p-4 border border-destructive/30 rounded-md bg-destructive/10">
-            <p className="text-sm text-destructive mb-2">Are you sure you want to delete this automation?</p>
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="mt-4 p-4 border border-orange-500/30 rounded-md bg-orange-500/10"
+          >
+            <p className="text-sm text-orange-600 dark:text-orange-400 mb-2">
+              Move this automation to trash? You can restore it later from the trash page.
+            </p>
             <div className="flex space-x-2">
-              <Button variant="destructive" size="sm" onClick={onDelete}>
-                Confirm Delete
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDelete}
+                className="border-orange-500/30 text-orange-600 hover:bg-orange-500/10 bg-transparent"
+              >
+                Move to Trash
               </Button>
               <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(false)}>
                 Cancel
               </Button>
             </div>
-          </div>
+          </motion.div>
+        )}
+
+        {showPermanentDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="mt-4 p-4 border-2 border-destructive/30 rounded-md bg-destructive/10"
+          >
+            <div className="flex items-start gap-3 mb-3">
+              <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-destructive mb-1">Permanently delete this automation?</p>
+                <p className="text-sm text-muted-foreground">
+                  This action cannot be undone. All data including keywords, posts, and conversation history will be
+                  lost forever.
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  if (onPermanentDelete) {
+                    onPermanentDelete()
+                  }
+                  setShowPermanentDeleteConfirm(false)
+                }}
+              >
+                Delete Forever
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowPermanentDeleteConfirm(false)}>
+                Cancel
+              </Button>
+            </div>
+          </motion.div>
         )}
 
         <div className="mt-6 space-y-4">
           <div className="flex items-center space-x-2 text-muted-foreground">
             <Clock size={16} />
             <p className="text-sm font-medium">
-              {/* This is the line that was causing the error - now using safe helper */}
               {isOptimisticState ? "Creating..." : `Created ${getSafeRelativeTime(automation.createdAt)}`}
             </p>
           </div>

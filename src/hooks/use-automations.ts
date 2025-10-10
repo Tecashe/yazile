@@ -1112,14 +1112,444 @@
 // }
 
 //LATEST AS OF THE 100
+// "use client"
+
+// import type React from "react"
+
+// import { z } from "zod"
+// import {
+//   createAutomations,
+//   deleteAutomation,
+//   deleteKeyword,
+//   saveKeyword,
+//   saveListener,
+//   savePosts,
+//   saveScheduledPosts,
+//   saveTrigger,
+//   updateAutomation,
+// } from "@/actions/automations"
+// import { useMutationData } from "./use-mutation-data"
+// import { useEffect, useRef, useState } from "react"
+// import useZodForm from "./use-zod-form"
+// import { type AppDispatch, useAppSelector } from "@/redux/store"
+// import { useDispatch } from "react-redux"
+// import { TRIGGER } from "@/redux/slices/automation"
+// import type { ScheduledPost } from "@/actions/schedule/schedule-post"
+// import { useQueryClient } from "@tanstack/react-query"
+// import { useToast } from "@/hooks/use-toast"
+
+// // Simplified version of useCreateAutomation without complex optimistic updates
+// export const useCreateAutomation = (id?: string) => {
+//   const queryClient = useQueryClient()
+//   const { toast } = useToast()
+
+//   const { isPending, mutate: originalMutate } = useMutationData(
+//     ["create-automation"],
+//     () => createAutomations(id),
+//     "user-automations",
+//   )
+
+//   const mutate = (variables: any, options?: any) => {
+//     // Clean the variables to ensure no problematic data types
+//     const cleanVariables = {
+//       name: variables.name || "Untitled",
+//       keywords: variables.keywords || [],
+//       active: variables.active || false,
+//       listener: variables.listener || null,
+//       // Don't include createdAt - let backend handle it
+//       // Don't include id if it's a temp id
+//     }
+
+//     console.log("Creating automation with data:", cleanVariables)
+
+//     return originalMutate(cleanVariables, {
+//       ...options,
+//       onSuccess: (data: any) => {
+//         console.log("Automation creation success:", data)
+        
+//         // Invalidate and refetch queries to get fresh data
+//         queryClient.invalidateQueries({ queryKey: ["user-automations"] })
+
+//         toast({
+//           title: "Automation created",
+//           description: "Your automation has been created successfully.",
+//           variant: "default",
+//         })
+
+//         if (options?.onSuccess) {
+//           options.onSuccess(data)
+//         }
+//       },
+//       onError: (error: any) => {
+//         console.error("Automation creation error:", error)
+        
+//         toast({
+//           title: "Failed to create automation",
+//           description: "There was an error creating your automation. Please try again.",
+//           variant: "destructive",
+//         })
+
+//         if (options?.onError) {
+//           options.onError(error)
+//         }
+//       },
+//     })
+//   }
+
+//   return { isPending, mutate }
+// }
+
+// // Keep the original complex version as backup
+// export const useCreateAutomationComplex = (id?: string) => {
+//   const queryClient = useQueryClient()
+//   const { toast } = useToast()
+
+//   const { isPending, mutate: originalMutate } = useMutationData(
+//     ["create-automation"],
+//     () => createAutomations(id),
+//     "user-automations",
+//   )
+
+//   const mutate = (variables: any, options?: any) => {
+//     const tempId = id || `temp-${Date.now()}`
+
+//     const optimisticAutomation = {
+//       ...variables,
+//       id: tempId,
+//       active: false,
+//       keywords: variables.keywords || [],
+//       listener: null,
+//       _isOptimistic: true,
+//     }
+
+//     queryClient.setQueryData(["user-automations"], (old: any) => {
+//       if (!old) {
+//         return {
+//           data: [optimisticAutomation],
+//           status: 200,
+//         }
+//       }
+      
+//       return {
+//         ...old,
+//         data: [optimisticAutomation, ...(old.data || [])],
+//       }
+//     })
+
+//     return originalMutate(variables, {
+//       ...options,
+//       onSuccess: (data: any) => {
+//         queryClient.setQueryData(["user-automations"], (old: any) => {
+//           if (!old) return old
+//           return {
+//             ...old,
+//             data: old.data ? old.data.filter((item: any) => item.id !== tempId) : [],
+//           }
+//         })
+
+//         if (data?.data) {
+//           queryClient.setQueryData(["user-automations"], (old: any) => {
+//             if (!old) {
+//               return {
+//                 data: [data.data],
+//                 status: 200,
+//               }
+//             }
+            
+//             const existingIds = old.data?.map((item: any) => item.id) || []
+//             const newAutomation = Array.isArray(data.data) ? data.data[0] : data.data
+            
+//             if (!existingIds.includes(newAutomation.id)) {
+//               return {
+//                 ...old,
+//                 data: [newAutomation, ...(old.data || [])],
+//               }
+//             }
+            
+//             return old
+//           })
+//         }
+
+//         toast({
+//           title: "Automation created",
+//           description: "Your automation has been created successfully.",
+//           variant: "default",
+//         })
+
+//         if (options?.onSuccess) {
+//           options.onSuccess(data)
+//         }
+//       },
+//       onError: (error: any) => {
+//         queryClient.setQueryData(["user-automations"], (old: any) => {
+//           if (!old) return old
+//           return {
+//             ...old,
+//             data: old.data ? old.data.filter((item: any) => item.id !== tempId) : [],
+//           }
+//         })
+
+//         toast({
+//           title: "Failed to create automation",
+//           description: "There was an error creating your automation. Please try again.",
+//           variant: "destructive",
+//         })
+
+//         if (options?.onError) {
+//           options.onError(error)
+//         }
+//       },
+//     })
+//   }
+
+//   return { isPending, mutate }
+// }
+
+// export const useEditAutomation = (automationId: string) => {
+//   const [edit, setEdit] = useState(false)
+//   const inputRef = useRef<HTMLInputElement | null>(null)
+//   const enableEdit = () => setEdit(true)
+//   const disableEdit = () => setEdit(false)
+
+//   const { isPending, mutate } = useMutationData(
+//     ["update-automation"],
+//     (data: { name: string }) => updateAutomation(automationId, { name: data.name }),
+//     "automation-info",
+//     disableEdit,
+//   )
+
+//   useEffect(() => {
+//     const handleClickOutside = (event: MouseEvent) => {
+//       if (inputRef.current && !inputRef.current.contains(event.target as Node | null)) {
+//         if (inputRef.current.value !== "") {
+//           mutate({ name: inputRef.current.value })
+//         } else {
+//           disableEdit()
+//         }
+//       }
+//     }
+
+//     document.addEventListener("mousedown", handleClickOutside)
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside)
+//     }
+//   }, [mutate])
+
+//   return {
+//     edit,
+//     enableEdit,
+//     disableEdit,
+//     inputRef,
+//     isPending,
+//   }
+// }
+
+// export const useListener = (id: string) => {
+//   const [listener, setListener] = useState<"MESSAGE" | "SMARTAI" | null>(null)
+
+//   const promptSchema = z.object({
+//     prompt: z.string().min(1),
+//     reply: z.string(),
+//   })
+
+//   const { isPending, mutate } = useMutationData(
+//     ["create-listener"],
+//     (data: { prompt: string; reply: string }) => saveListener(id, listener || "MESSAGE", data.prompt, data.reply),
+//     "automation-info",
+//   )
+
+//   const { errors, onFormSubmit, register, reset, watch } = useZodForm(promptSchema, mutate)
+
+//   const onSetListener = (type: "SMARTAI" | "MESSAGE") => setListener(type)
+//   return { onSetListener, register, onFormSubmit, listener, isPending }
+// }
+
+// export const useTriggers = (id: string) => {
+//   const types = useAppSelector((state) => state.AutmationReducer.trigger?.types)
+//   const dispatch: AppDispatch = useDispatch()
+//   const onSetTrigger = (type: "COMMENT" | "DM") => dispatch(TRIGGER({ trigger: { type } }))
+
+//   const { isPending, mutate } = useMutationData(
+//     ["add-trigger"],
+//     (data: { 
+//       types: string[]; 
+//       isFallback?: boolean; 
+//       fallbackMessage?: string; 
+//       buttons?: { name: string; payload: string }[] ;
+
+//       listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
+//       keywords?: string[]; // Add this
+//     }) => saveTrigger(id, data),
+//     "automation-info",
+//   )
+
+//   const onSaveTrigger = (data?: { 
+//     isFallback?: boolean; 
+//     fallbackMessage?: string; 
+//     buttons?: { name: string; payload: string }[];
+
+//     listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
+//     keywords?: string[]; // Add this
+//   }) => mutate({ types, ...data })
+  
+//   return { types, onSetTrigger, onSaveTrigger, isPending }
+// }
+
+
+
+// export const useKeywords = (id: string) => {
+//   const [keyword, setKeyword] = useState("")
+//   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)
+
+//   const { mutate } = useMutationData(
+//     ["add-keyword"],
+//     (data: { keyword: string }) => saveKeyword(id, data.keyword),
+//     "automation-info",
+//     () => setKeyword(""),
+//   )
+
+//   const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+//     if (e.key === "Enter") {
+//       mutate({ keyword })
+//       setKeyword("")
+//     }
+//   }
+
+//   const { mutate: deleteMutation } = useMutationData(
+//     ["delete-keyword"],
+//     (data: { id: string }) => deleteKeyword(data.id),
+//     "automation-info",
+//   )
+
+//   const addKeyword = (newKeyword: string) => {
+//     if (newKeyword.trim()) {
+//       mutate({ keyword: newKeyword })
+//     }
+//   }
+
+//   return { keyword, onValueChange, onKeyPress, deleteMutation, addKeyword }
+// }
+
+// export const useAutomationPosts = (id: string) => {
+//   const queryClient = useQueryClient()
+//   const { toast } = useToast()
+//   const [posts, setPosts] = useState<
+//     {
+//       postid: string
+//       caption?: string
+//       media: string
+//       mediaType: "IMAGE" | "VIDEO" | "CAROSEL_ALBUM"
+//     }[]
+//   >([])
+
+//   const [scheduledPosts, setScheduledPosts] = useState<string[]>([])
+
+//   const onSelectPost = (post: {
+//     postid: string
+//     caption?: string
+//     media: string
+//     mediaType: "IMAGE" | "VIDEO" | "CAROSEL_ALBUM"
+//   }) => {
+//     setPosts((prevItems) => {
+//       if (prevItems.find((p) => p.postid === post.postid)) {
+//         return prevItems.filter((item) => item.postid !== post.postid)
+//       } else {
+//         return [...prevItems, post]
+//       }
+//     })
+//   }
+
+//   const onSelectScheduledPost = (post: ScheduledPost) => {
+//     if (!post.id) return
+
+//     setScheduledPosts((prevItems) => {
+//       if (prevItems.includes(post.id)) {
+//         return prevItems.filter((item) => item !== post.id)
+//       } else {
+//         return [...prevItems, post.id]
+//       }
+//     })
+//   }
+
+//   const { mutate, isPending } = useMutationData(
+//     ["attach-posts"],
+//     async (data?: { posts?: typeof posts; scheduledPostIds?: string[] }) => {
+//       const postsToSave = data?.posts || posts
+//       const scheduledPostIdsToSave = data?.scheduledPostIds || scheduledPosts
+
+//       const publishedResult = await savePosts(id, postsToSave)
+//       await saveScheduledPosts(id, scheduledPostIdsToSave)
+
+//       return publishedResult
+//     },
+//     "automation-info",
+//     () => {
+//       setPosts([])
+//       setScheduledPosts([])
+//     },
+//   )
+
+//   // Simplified delete mutation without complex optimistic updates
+//   const { mutate: originalDeleteMutation, isPending: isDeleting } = useMutationData(
+//     ["delete-automation"],
+//     async (data: { id: string }) => {
+//       try {
+//         const response = await deleteAutomation(data.id)
+//         if (response.status !== 200) throw new Error("Failed to delete automation")
+//         return response
+//       } catch (err) {
+//         console.error("Error deleting automation:", err)
+//         throw err
+//       }
+//     },
+//     "user-automations", // Changed to user-automations to match the list
+//     () => {
+//       // This onSuccess callback will be called after the mutation succeeds
+//       toast({
+//         title: "Automation deleted",
+//         description: "Your automation has been deleted successfully.",
+//         variant: "default",
+//       })
+//     }
+//   )
+
+//   // Create a wrapper function to handle additional logic
+//   const deleteMutation = (variables: { id: string }, options?: any) => {
+//     return originalDeleteMutation(variables, {
+//       ...options,
+//       onError: (error: any) => {
+//         toast({
+//           title: "Failed to delete automation",
+//           description: "There was an error deleting your automation. Please try again.",
+//           variant: "destructive",
+//         })
+
+//         if (options?.onError) {
+//           options.onError(error)
+//         }
+//       },
+//     })
+//   }
+
+//   return {
+//     posts,
+//     onSelectPost,
+//     scheduledPosts,
+//     onSelectScheduledPost,
+//     mutate,
+//     isPending,
+//     deleteMutation,
+//     isDeleting,
+//   }
+// }
+
+
 "use client"
 
 import type React from "react"
-
 import { z } from "zod"
 import {
   createAutomations,
-  deleteAutomation,
   deleteKeyword,
   saveKeyword,
   saveListener,
@@ -1127,7 +1557,9 @@ import {
   saveScheduledPosts,
   saveTrigger,
   updateAutomation,
+  permanentlyDeleteAutomation, // Import permanent delete action
 } from "@/actions/automations"
+import { moveToTrash } from "@/actions/automations/trash-actions"
 import { useMutationData } from "./use-mutation-data"
 import { useEffect, useRef, useState } from "react"
 import useZodForm from "./use-zod-form"
@@ -1138,7 +1570,6 @@ import type { ScheduledPost } from "@/actions/schedule/schedule-post"
 import { useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
 
-// Simplified version of useCreateAutomation without complex optimistic updates
 export const useCreateAutomation = (id?: string) => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
@@ -1150,24 +1581,16 @@ export const useCreateAutomation = (id?: string) => {
   )
 
   const mutate = (variables: any, options?: any) => {
-    // Clean the variables to ensure no problematic data types
     const cleanVariables = {
       name: variables.name || "Untitled",
       keywords: variables.keywords || [],
       active: variables.active || false,
       listener: variables.listener || null,
-      // Don't include createdAt - let backend handle it
-      // Don't include id if it's a temp id
     }
-
-    console.log("Creating automation with data:", cleanVariables)
 
     return originalMutate(cleanVariables, {
       ...options,
       onSuccess: (data: any) => {
-        console.log("Automation creation success:", data)
-        
-        // Invalidate and refetch queries to get fresh data
         queryClient.invalidateQueries({ queryKey: ["user-automations"] })
 
         toast({
@@ -1181,114 +1604,6 @@ export const useCreateAutomation = (id?: string) => {
         }
       },
       onError: (error: any) => {
-        console.error("Automation creation error:", error)
-        
-        toast({
-          title: "Failed to create automation",
-          description: "There was an error creating your automation. Please try again.",
-          variant: "destructive",
-        })
-
-        if (options?.onError) {
-          options.onError(error)
-        }
-      },
-    })
-  }
-
-  return { isPending, mutate }
-}
-
-// Keep the original complex version as backup
-export const useCreateAutomationComplex = (id?: string) => {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
-
-  const { isPending, mutate: originalMutate } = useMutationData(
-    ["create-automation"],
-    () => createAutomations(id),
-    "user-automations",
-  )
-
-  const mutate = (variables: any, options?: any) => {
-    const tempId = id || `temp-${Date.now()}`
-
-    const optimisticAutomation = {
-      ...variables,
-      id: tempId,
-      active: false,
-      keywords: variables.keywords || [],
-      listener: null,
-      _isOptimistic: true,
-    }
-
-    queryClient.setQueryData(["user-automations"], (old: any) => {
-      if (!old) {
-        return {
-          data: [optimisticAutomation],
-          status: 200,
-        }
-      }
-      
-      return {
-        ...old,
-        data: [optimisticAutomation, ...(old.data || [])],
-      }
-    })
-
-    return originalMutate(variables, {
-      ...options,
-      onSuccess: (data: any) => {
-        queryClient.setQueryData(["user-automations"], (old: any) => {
-          if (!old) return old
-          return {
-            ...old,
-            data: old.data ? old.data.filter((item: any) => item.id !== tempId) : [],
-          }
-        })
-
-        if (data?.data) {
-          queryClient.setQueryData(["user-automations"], (old: any) => {
-            if (!old) {
-              return {
-                data: [data.data],
-                status: 200,
-              }
-            }
-            
-            const existingIds = old.data?.map((item: any) => item.id) || []
-            const newAutomation = Array.isArray(data.data) ? data.data[0] : data.data
-            
-            if (!existingIds.includes(newAutomation.id)) {
-              return {
-                ...old,
-                data: [newAutomation, ...(old.data || [])],
-              }
-            }
-            
-            return old
-          })
-        }
-
-        toast({
-          title: "Automation created",
-          description: "Your automation has been created successfully.",
-          variant: "default",
-        })
-
-        if (options?.onSuccess) {
-          options.onSuccess(data)
-        }
-      },
-      onError: (error: any) => {
-        queryClient.setQueryData(["user-automations"], (old: any) => {
-          if (!old) return old
-          return {
-            ...old,
-            data: old.data ? old.data.filter((item: any) => item.id !== tempId) : [],
-          }
-        })
-
         toast({
           title: "Failed to create automation",
           description: "There was an error creating your automation. Please try again.",
@@ -1371,31 +1686,27 @@ export const useTriggers = (id: string) => {
 
   const { isPending, mutate } = useMutationData(
     ["add-trigger"],
-    (data: { 
-      types: string[]; 
-      isFallback?: boolean; 
-      fallbackMessage?: string; 
-      buttons?: { name: string; payload: string }[] ;
-
-      listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
-      keywords?: string[]; // Add this
+    (data: {
+      types: string[]
+      isFallback?: boolean
+      fallbackMessage?: string
+      buttons?: { name: string; payload: string }[]
+      listenMode?: "KEYWORDS" | "ALL_MESSAGES"
+      keywords?: string[]
     }) => saveTrigger(id, data),
     "automation-info",
   )
 
-  const onSaveTrigger = (data?: { 
-    isFallback?: boolean; 
-    fallbackMessage?: string; 
-    buttons?: { name: string; payload: string }[];
-
-    listenMode?: "KEYWORDS" | "ALL_MESSAGES"; // Add this
-    keywords?: string[]; // Add this
+  const onSaveTrigger = (data?: {
+    isFallback?: boolean
+    fallbackMessage?: string
+    buttons?: { name: string; payload: string }[]
+    listenMode?: "KEYWORDS" | "ALL_MESSAGES"
+    keywords?: string[]
   }) => mutate({ types, ...data })
-  
+
   return { types, onSetTrigger, onSaveTrigger, isPending }
 }
-
-
 
 export const useKeywords = (id: string) => {
   const [keyword, setKeyword] = useState("")
@@ -1489,37 +1800,95 @@ export const useAutomationPosts = (id: string) => {
     },
   )
 
-  // Simplified delete mutation without complex optimistic updates
   const { mutate: originalDeleteMutation, isPending: isDeleting } = useMutationData(
-    ["delete-automation"],
+    ["move-to-trash"],
     async (data: { id: string }) => {
-      try {
-        const response = await deleteAutomation(data.id)
-        if (response.status !== 200) throw new Error("Failed to delete automation")
-        return response
-      } catch (err) {
-        console.error("Error deleting automation:", err)
-        throw err
-      }
+      const response = await moveToTrash(data.id)
+      if (response.status !== 200) throw new Error("Failed to move automation to trash")
+      return response
     },
-    "user-automations", // Changed to user-automations to match the list
-    () => {
-      // This onSuccess callback will be called after the mutation succeeds
-      toast({
-        title: "Automation deleted",
-        description: "Your automation has been deleted successfully.",
-        variant: "default",
-      })
-    }
+    "user-automations",
   )
 
-  // Create a wrapper function to handle additional logic
   const deleteMutation = (variables: { id: string }, options?: any) => {
+    const currentData = queryClient.getQueryData(["user-automations"])
+
+    queryClient.setQueryData(["user-automations"], (old: any) => {
+      if (!old) return old
+      return {
+        ...old,
+        data: old.data ? old.data.filter((automation: any) => automation.id !== variables.id) : [],
+      }
+    })
+
     return originalDeleteMutation(variables, {
       ...options,
-      onError: (error: any) => {
+      onSuccess: (data: any) => {
         toast({
-          title: "Failed to delete automation",
+          title: "Moved to trash",
+          description: "Automation moved to trash successfully. You can restore it from the trash page.",
+          variant: "default",
+        })
+
+        if (options?.onSuccess) {
+          options.onSuccess(data)
+        }
+      },
+      onError: (error: any) => {
+        queryClient.setQueryData(["user-automations"], currentData)
+
+        toast({
+          title: "Failed to move to trash",
+          description: "There was an error moving your automation to trash. Please try again.",
+          variant: "destructive",
+        })
+
+        if (options?.onError) {
+          options.onError(error)
+        }
+      },
+    })
+  }
+
+  const { mutate: originalPermanentDeleteMutation, isPending: isPermanentlyDeleting } = useMutationData(
+    ["permanently-delete-automation"],
+    async (data: { id: string }) => {
+      const response = await permanentlyDeleteAutomation(data.id)
+      if (response.status !== 200) throw new Error("Failed to permanently delete automation")
+      return response
+    },
+    "user-automations",
+  )
+
+  const permanentDeleteMutation = (variables: { id: string }, options?: any) => {
+    const currentData = queryClient.getQueryData(["user-automations"])
+
+    queryClient.setQueryData(["user-automations"], (old: any) => {
+      if (!old) return old
+      return {
+        ...old,
+        data: old.data ? old.data.filter((automation: any) => automation.id !== variables.id) : [],
+      }
+    })
+
+    return originalPermanentDeleteMutation(variables, {
+      ...options,
+      onSuccess: (data: any) => {
+        toast({
+          title: "Permanently deleted",
+          description: "Automation has been permanently deleted.",
+          variant: "default",
+        })
+
+        if (options?.onSuccess) {
+          options.onSuccess(data)
+        }
+      },
+      onError: (error: any) => {
+        queryClient.setQueryData(["user-automations"], currentData)
+
+        toast({
+          title: "Failed to delete",
           description: "There was an error deleting your automation. Please try again.",
           variant: "destructive",
         })
@@ -1540,10 +1909,10 @@ export const useAutomationPosts = (id: string) => {
     isPending,
     deleteMutation,
     isDeleting,
+    permanentDeleteMutation,
+    isPermanentlyDeleting,
   }
 }
-
-
 
 
 
