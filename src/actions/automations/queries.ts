@@ -384,7 +384,35 @@ export const addTrigger = async (automationId: string, trigger: string[]) => {
   })
 }
 
+export const addKeyWordORIGINAL = async (automationId: string, keyword: string) => {
+  return client.automation.update({
+    where: {
+      id: automationId,
+    },
+    data: {
+      keywords: {
+        create: {
+          word: keyword,
+        },
+      },
+    },
+  })
+}
+
+
 export const addKeyWord = async (automationId: string, keyword: string) => {
+  // Check if keyword already exists
+  const existingKeyword = await client.keyword.findFirst({
+    where: {
+      automationId,
+      word: keyword,
+    },
+  })
+
+  if (existingKeyword) {
+    return null // Or throw an error
+  }
+
   return client.automation.update({
     where: {
       id: automationId,
