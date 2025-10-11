@@ -418,7 +418,7 @@ export const saveTrigger = async (
   }
 }
 
-export const saveKeyword = async (automationId: string, keyword: string) => {
+export const saveKeywordORIGINAL = async (automationId: string, keyword: string) => {
   await onCurrentUser()
   try {
     const create = await addKeyWord(automationId, keyword)
@@ -427,6 +427,26 @@ export const saveKeyword = async (automationId: string, keyword: string) => {
 
     return { status: 404, data: "Cannot add this keyword" }
   } catch (error) {
+    return { status: 500, data: "Oops! something went wrong" }
+  }
+}
+
+export const saveKeyword = async (automationId: string, keyword: string) => {
+  await onCurrentUser()
+  try {
+    const create = await addKeyWord(automationId, keyword)
+
+    if (create) return { status: 200, data: "Keyword added successfully" }
+
+    return { status: 404, data: "Cannot add this keyword" }
+  } catch (error: any) {
+    console.error("Error saving keyword:", error)
+    
+    // Prisma unique constraint violation error code
+    if (error.code === 'P2002') {
+      return { status: 409, data: "This keyword already exists for this automation" }
+    }
+    
     return { status: 500, data: "Oops! something went wrong" }
   }
 }

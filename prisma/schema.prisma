@@ -390,13 +390,14 @@ model Trigger {
   @@index([isActive])
 }
 
-model Keyword {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  word         String
-  Automation   Automation? @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  automationId String?     @db.Uuid
 
-  @@unique([automationId, word]) //this constraints ensure user cant use the same keyword on multiple automations
+model Keyword {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  word         String
+  Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  automationId String     @db.Uuid  // Remove the ? to make it required
+  
+  @@unique([automationId, word])
 }
 
 enum INTEGRATIONS {
