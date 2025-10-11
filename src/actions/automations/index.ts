@@ -434,7 +434,7 @@ export const saveTrigger = async (
 
 export const saveKeyword = async (automationId: string, keyword: string) => {
   const user = await onUserInfor()
-  const userid = user.data?.clerkId
+  const userid = user.data?.id
   try {
     const create = await addKeyWord(automationId, keyword, userid||"")
 
