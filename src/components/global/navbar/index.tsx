@@ -119,7 +119,7 @@ const Navbar = ({ slug }: Props) => {
               </Link>
             </Button>
             <NotificationCenter />
-            <CreateAutomation />
+            {/* <CreateAutomation /> */}
             <Search/>
           </div>
         </div>
