@@ -1713,27 +1713,12 @@ export const useTriggers = (id: string) => {
 
 export const useKeywords = (id: string) => {
   const [keyword, setKeyword] = useState("")
-  const { toast } = useToast()
   
   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)
 
   const { mutate } = useMutationData(
     ["add-keyword"],
-    async (data: { keyword: string }) => {
-      const result = await saveKeyword(id, data.keyword)
-      
-      // Handle conflict status
-      if (result.status === 409) {
-        toast({
-          title: "Keyword already in use",
-          description: result.data,
-          variant: "destructive",
-        })
-        throw new Error(result.data)
-      }
-      
-      return result
-    },
+    (data: { keyword: string }) => saveKeyword(id, data.keyword),
     "automation-info",
     () => setKeyword(""),
   )
