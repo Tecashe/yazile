@@ -6010,7 +6010,7 @@ async function trackEnhancedAnalytics(userId: string, analysis: any) {
 }
 
 /**
- * Enhanced lead analysis with comprehensive n8n integration
+ * Enhanced lead analysis with comprehensive n8n integratio
  */
 export async function analyzeLead(params: {
   userId: string
