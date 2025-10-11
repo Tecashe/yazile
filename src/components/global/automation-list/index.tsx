@@ -1138,7 +1138,42 @@ const AutomationList = ({ id }: Props) => {
   const totalMessages =
     optimisticUiData.data.reduce((acc, a) => acc + (a.listener?.dmCount || 0) + (a.listener?.commentCount || 0), 0) || 0
 
-  if (!automations.length) {
+  // if (!automations.length) {
+  //   return (
+  //     <div className="min-h-screen bg-background">
+  //       <div className="container mx-auto px-4 py-12">
+  //         <motion.div
+  //           initial={{ opacity: 0, y: 20 }}
+  //           animate={{ opacity: 1, y: 0 }}
+  //           className="h-[70vh] flex justify-center items-center flex-col gap-y-6"
+  //         >
+  //           <div className="relative">
+  //             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
+  //             <Bot className="w-24 h-24 text-primary relative z-10" />
+  //           </div>
+  //           <div className="text-center space-y-3">
+  //             <h3 className="text-3xl font-bold text-foreground">No Automations Yet</h3>
+  //             <p className="text-lg text-muted-foreground max-w-md">
+  //               Start automating your workflow by creating your first automation
+  //             </p>
+  //           </div>
+  //           <CreateAutomation currentAutomationCount={0} onUpgradeClick={() => setShowPaymentPopup(true)} />
+  //         </motion.div>
+  //       </div>
+
+  //       <PaymentPopup
+  //         isOpen={showPaymentPopup}
+  //         onClose={() => setShowPaymentPopup(false)}
+  //         onSuccess={() => {
+  //           setShowPaymentPopup(false)
+  //           refetch()
+  //         }}
+  //       />
+  //     </div>
+  //   )
+  // }
+
+  if (!data?.data || data.data.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-12">
