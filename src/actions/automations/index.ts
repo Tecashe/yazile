@@ -269,7 +269,7 @@
 
 "use server"
 
-import { onCurrentUser } from "../user"
+import { onCurrentUser, onUserInfor } from "../user"
 import { findUser } from "../user/queries"
 import {
   addKeyWord,
@@ -418,35 +418,38 @@ export const saveTrigger = async (
   }
 }
 
-export const saveKeywordORIGINAL = async (automationId: string, keyword: string) => {
-  await onCurrentUser()
-  try {
-    const create = await addKeyWord(automationId, keyword)
+// export const saveKeywordORIGINAL = async (automationId: string, keyword: string) => {
+//   await onCurrentUser()
+//   try {
+//     const create = await addKeyWord(automationId, keyword)
 
-    if (create) return { status: 200, data: "Keyword added successfully" }
+//     if (create) return { status: 200, data: "Keyword added successfully" }
 
-    return { status: 404, data: "Cannot add this keyword" }
-  } catch (error) {
-    return { status: 500, data: "Oops! something went wrong" }
-  }
-}
+//     return { status: 404, data: "Cannot add this keyword" }
+//   } catch (error) {
+//     return { status: 500, data: "Oops! something went wrong" }
+//   }
+// }
+
 
 export const saveKeyword = async (automationId: string, keyword: string) => {
-  await onCurrentUser()
+  const user = await onUserInfor()
+  const userid = user.data?.clerkId
   try {
-    const create = await addKeyWord(automationId, keyword)
+    const create = await addKeyWord(automationId, keyword, userid||"")
+
+    if (create === null) {
+      return { 
+        status: 409, 
+        data: "You've already used this keyword in another automation. Please use a different keyword." 
+      }
+    }
 
     if (create) return { status: 200, data: "Keyword added successfully" }
 
     return { status: 404, data: "Cannot add this keyword" }
   } catch (error: any) {
     console.error("Error saving keyword:", error)
-    
-    // Prisma unique constraint violation error code
-    if (error.code === 'P2002') {
-      return { status: 409, data: "This keyword already exists for this automation" }
-    }
-    
     return { status: 500, data: "Oops! something went wrong" }
   }
 }

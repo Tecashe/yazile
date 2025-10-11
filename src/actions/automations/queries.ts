@@ -268,6 +268,9 @@ export const createAutomation = async (clerkId: string, id?: string) => {
   })
 }
 
+
+
+
 export const getAutomations = async (clerkId: string) => {
   return await client.user.findUnique({
     where: {
@@ -399,20 +402,22 @@ export const addKeyWordORIGINAL = async (automationId: string, keyword: string) 
   })
 }
 
-
-export const addKeyWord = async (automationId: string, keyword: string) => {
-  // Check if keyword already exists
+export const addKeyWord = async (automationId: string, keyword: string, userId: string) => {
+  // First, check if this user already has this keyword in any of their automations
   const existingKeyword = await client.keyword.findFirst({
     where: {
-      automationId,
       word: keyword,
+      Automation: {
+        userId: userId,
+      },
     },
   })
 
   if (existingKeyword) {
-    return null // Or throw an error
+    return null // Keyword already exists for this user
   }
 
+  // If not, create the keyword
   return client.automation.update({
     where: {
       id: automationId,

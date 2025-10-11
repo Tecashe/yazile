@@ -1708,7 +1708,67 @@ export const useTriggers = (id: string) => {
   return { types, onSetTrigger, onSaveTrigger, isPending }
 }
 
+
+
+
+
+
+
+
 export const useKeywords = (id: string) => {
+  const [keyword, setKeyword] = useState("")
+  const { toast } = useToast()
+  
+  const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)
+
+  const { mutate } = useMutationData(
+    ["add-keyword"],
+    async (data: { keyword: string }) => {
+      const result = await saveKeyword(id, data.keyword)
+      
+      // Handle conflict status
+      if (result.status === 409) {
+        toast({
+          title: "Keyword already in use",
+          description: result.data,
+          variant: "destructive",
+        })
+        throw new Error(result.data)
+      }
+      
+      return result
+    },
+    "automation-info",
+    () => setKeyword(""),
+  )
+
+  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      if (keyword.trim()) {
+        mutate({ keyword: keyword.trim().toLowerCase() })
+        setKeyword("")
+      }
+    }
+  }
+
+  const { mutate: deleteMutation } = useMutationData(
+    ["delete-keyword"],
+    (data: { id: string }) => deleteKeyword(data.id),
+    "automation-info",
+  )
+
+  const addKeyword = (newKeyword: string) => {
+    if (newKeyword.trim()) {
+      mutate({ keyword: newKeyword.trim().toLowerCase() })
+    }
+  }
+
+  return { keyword, onValueChange, onKeyPress, deleteMutation, addKeyword }
+}
+
+
+
+export const useKeywordsORIGINAL = (id: string) => {
   const [keyword, setKeyword] = useState("")
   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)
 
