@@ -68,11 +68,11 @@ export async function getBusinessProfileForAutomation(automationId: string) {
 }
 
 // Get or create default automation for unmatched messages
-export async function getOrCreateDefaultAutomation(pageId: string) {
+export async function getOrCreateDefaultAutomation(instagramId: string) {
   try {
     // Find user by Instagram page ID
     const integration = await client.integrations.findFirst({
-      where: { pageId: pageId },
+      where: { instagramId: instagramId },
       include: {
         User: {
           include: {
@@ -83,7 +83,7 @@ export async function getOrCreateDefaultAutomation(pageId: string) {
     })
 
     if (!integration?.User) {
-      console.log("❌ No user found for page ID:", pageId)
+      console.log("❌ No user found for page ID:", instagramId)
       return null
     }
 
