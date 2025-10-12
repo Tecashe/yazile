@@ -115,7 +115,7 @@ let defaultAutomation = await client.automation.findFirst({
     userId: integration.User.id,
     isFallback: true,
     platform: "INSTAGRAM", // Match the platform
-    active: true,
+  
   },
   include: {
     User: {
