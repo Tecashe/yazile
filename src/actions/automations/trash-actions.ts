@@ -25,17 +25,17 @@ export const moveToTrash = async (automationId: string) => {
 export const getAllTrashedAutomations = async () => {
   const user = await onCurrentUser()
   try {
-    console.log("[v0] Fetching trashed automations for user:", user.id)
+    // console.log("[v0] Fetching trashed automations for user:", user.id)
     const automations = await getTrashedAutomations(user.id)
-    console.log("[v0] Trashed automations result:", automations)
+    // console.log("[v0] Trashed automations result:", automations)
 
     if (automations) {
-      console.log("[v0] Returning trashed automations:", automations.automations)
+      // console.log("[v0] Returning trashed automations:", automations.automations)
       return { status: 200, data: automations.automations }
     }
     return { status: 404, data: [] }
   } catch (error) {
-    console.error("[v0] Error fetching trashed automations:", error)
+    // console.error("[v0] Error fetching trashed automations:", error)
     return { status: 500, data: [] }
   }
 }
