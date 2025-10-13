@@ -119,179 +119,91 @@
 
 
 
-// import type { Config } from "tailwindcss";
-// import tailwindScrollbar from 'tailwind-scrollbar';
-
-// const config = {
-//   darkMode: ["class"],
-//   content: [
-//     "./pages/**/*.{ts,tsx}",
-//     "./components/**/*.{ts,tsx}",
-//     "./app/**/*.{ts,tsx}",
-//     "./src/**/*.{ts,tsx}",
-//     "*.{js,ts,jsx,tsx,mdx}",
-//   ],
-//   prefix: "",
-//   theme: {
-//     container: {
-//       center: true,
-//       padding: "2rem",
-//       screens: {
-//         "2xl": "1400px",
-//       },
-//     },
-//     extend: {
-//       colors: {
-//         "in-active": "#545454",
-//         connector: "#F0F1F6",
-//         "keyword-yellow": "#E1CE26",
-//         "keyword-purple": "#7C21D6",
-//         "keyword-red": "#EB441F",
-//         "keyword-green": "#2FE699",
-//         "light-blue": "#3352CC",
-//         "background-90": "#1D1D1D",
-//         "background-80": "#252525",
-//         "text-secondary": "#9B9CA0",
-//         border: "hsl(var(--border))",
-//         input: "hsl(var(--input))",
-//         ring: "hsl(var(--ring))",
-//         background: "hsl(var(--background))",
-//         foreground: "hsl(var(--foreground))",
-//         primary: {
-//           DEFAULT: "hsl(var(--primary))",
-//           foreground: "hsl(var(--primary-foreground))",
-//         },
-//         secondary: {
-//           DEFAULT: "hsl(var(--secondary))",
-//           foreground: "hsl(var(--secondary-foreground))",
-//         },
-//         destructive: {
-//           DEFAULT: "hsl(var(--destructive))",
-//           foreground: "hsl(var(--destructive-foreground))",
-//         },
-//         muted: {
-//           DEFAULT: "hsl(var(--muted))",
-//           foreground: "hsl(var(--muted-foreground))",
-//         },
-//         accent: {
-//           DEFAULT: "hsl(var(--accent))",
-//           foreground: "hsl(var(--accent-foreground))",
-//         },
-//         popover: {
-//           DEFAULT: "hsl(var(--popover))",
-//           foreground: "hsl(var(--popover-foreground))",
-//         },
-//         card: {
-//           DEFAULT: "hsl(var(--card))",
-//           foreground: "hsl(var(--card-foreground))",
-//         },
-//         chart: {
-//           "1": "hsl(var(--chart-1))",
-//           "2": "hsl(var(--chart-2))",
-//           "3": "hsl(var(--chart-3))",
-//           "4": "hsl(var(--chart-4))",
-//           "5": "hsl(var(--chart-5))",
-//         },
-//         sidebar: {
-//           DEFAULT: "hsl(var(--sidebar-background))",
-//           foreground: "hsl(var(--sidebar-foreground))",
-//           primary: "hsl(var(--sidebar-primary))",
-//           "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-//           accent: "hsl(var(--sidebar-accent))",
-//           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-//           border: "hsl(var(--sidebar-border))",
-//           ring: "hsl(var(--sidebar-ring))",
-//         },
-//       },
-      
-//       borderRadius: {
-//         lg: "var(--radius)",
-//         md: "calc(var(--radius) - 2px)",
-//         sm: "calc(var(--radius) - 4px)",
-//       },
-//       keyframes: {
-//         "accordion-down": {
-//           from: { height: "0" },
-//           to: { height: "var(--radix-accordion-content-height)" },
-//         },
-//         "accordion-up": {
-//           from: { height: "var(--radix-accordion-content-height)" },
-//           to: { height: "0" },
-//         },
-//       },
-//       animation: {
-//         "accordion-down": "accordion-down 0.2s ease-out",
-//         "accordion-up": "accordion-up 0.2s ease-out",
-//         'spin-slow': 'spin 2.5s linear infinite',
-//       },
-//       boxShadow: {
-//         'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-//         'glow': '0 0 15px rgba(51, 82, 204, 0.3)',
-//         'glow-hover': '0 0 20px rgba(51, 82, 204, 0.4)',
-//       },
-//     },
-//   },
-//   plugins: [require("tailwindcss-animate"), tailwindScrollbar],
-// } satisfies Config;
-
-// export default config;
-
 import type { Config } from "tailwindcss";
+import tailwindScrollbar from 'tailwind-scrollbar';
 
-const config: Config = {
+const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+    "*.{js,ts,jsx,tsx,mdx}",
   ],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
-        // Bright custom colors for yazzil
-        orange: "rgb(var(--color-orange) / <alpha-value>)",
-        green: "rgb(var(--color-green) / <alpha-value>)",
-        red: "rgb(var(--color-red) / <alpha-value>)",
-        yellow: "rgb(var(--color-yellow) / <alpha-value>)",
-        maroon: "rgb(var(--color-maroon) / <alpha-value>)",
-        brown: "rgb(var(--color-brown) / <alpha-value>)",
-        purple: "rgb(var(--color-purple) / <alpha-value>)",
-        
-        // Shadcn UI colors
-        background: "rgb(var(--background) / <alpha-value>)",
-        foreground: "rgb(var(--foreground) / <alpha-value>)",
-        card: {
-          DEFAULT: "rgb(var(--card) / <alpha-value>)",
-          foreground: "rgb(var(--card-foreground) / <alpha-value>)",
-        },
-        popover: {
-          DEFAULT: "rgb(var(--popover) / <alpha-value>)",
-          foreground: "rgb(var(--popover-foreground) / <alpha-value>)",
-        },
+        "in-active": "#545454",
+        connector: "#F0F1F6",
+        "keyword-yellow": "#E1CE26",
+        "keyword-purple": "#7C21D6",
+        "keyword-red": "#EB441F",
+        "keyword-green": "#2FE699",
+        "light-blue": "#3352CC",
+        "background-90": "#1D1D1D",
+        "background-80": "#252525",
+        "text-secondary": "#9B9CA0",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "rgb(var(--primary) / <alpha-value>)",
-          foreground: "rgb(var(--primary-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "rgb(var(--secondary) / <alpha-value>)",
-          foreground: "rgb(var(--secondary-foreground) / <alpha-value>)",
-        },
-        muted: {
-          DEFAULT: "rgb(var(--muted) / <alpha-value>)",
-          foreground: "rgb(var(--muted-foreground) / <alpha-value>)",
-        },
-        accent: {
-          DEFAULT: "rgb(var(--accent) / <alpha-value>)",
-          foreground: "rgb(var(--accent-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "rgb(var(--destructive) / <alpha-value>)",
-          foreground: "rgb(var(--destructive-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
-        border: "rgb(var(--border) / <alpha-value>)",
-        input: "rgb(var(--input) / <alpha-value>)",
-        ring: "rgb(var(--ring) / <alpha-value>)",
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
       },
+      
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -306,40 +218,20 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-20px)" },
-        },
-        "slide-left": {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-100%)" },
-        },
-        "slide-right": {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(0)" },
-        },
-        "data-flow": {
-          "0%": { transform: "translateX(-100%)", opacity: "0" },
-          "50%": { opacity: "1" },
-          "100%": { transform: "translateX(100%)", opacity: "0" },
-        },
-        "cursor-blink": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        float: "float 3s ease-in-out infinite",
-        "slide-left": "slide-left 20s linear infinite",
-        "slide-right": "slide-right 20s linear infinite",
-        "data-flow": "data-flow 2s ease-in-out infinite",
-        "cursor-blink": "cursor-blink 1s step-end infinite",
+        'spin-slow': 'spin 2.5s linear infinite',
+      },
+      boxShadow: {
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        'glow': '0 0 15px rgba(51, 82, 204, 0.3)',
+        'glow-hover': '0 0 20px rgba(51, 82, 204, 0.4)',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-};
+  plugins: [require("tailwindcss-animate"), tailwindScrollbar],
+} satisfies Config;
 
 export default config;
