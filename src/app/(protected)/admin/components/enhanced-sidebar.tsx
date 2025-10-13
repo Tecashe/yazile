@@ -166,7 +166,7 @@ export function EnhancedSidebar() {
         )}
       </div>
 
-      <div className="flex-1 overflow-auto py-2 scrollbar-thin">
+      <div className="flex-1 overflow-auto py-2 custom-scrollbar">
         <nav className="grid gap-1 px-2">
           <div className="py-2">
             {!isCollapsed && (
