@@ -28,66 +28,147 @@ body {
       transform: rotate(360deg);
     }
   }
-}
 
+  /* Mobile-first responsive text utilities */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl md:text-3xl;
+  }
+
+  /* Mobile-optimized spacing */
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+}
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    /* Enhanced v4-inspired color palette - Dark theme optimized */
+    --background: 10 10% 4%;
+    --foreground: 0 0% 98%;
+    
+    --card: 10 10% 8%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 10 10% 8%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Primary: Vibrant Orange */
+    --primary: 14 100% 60%;
+    --primary-foreground: 10 10% 4%;
+    
+    /* Secondary: Darker shade */
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    
+    /* Muted tones */
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 64%;
+    
+    /* Accent: Bright Green */
+    --accent: 166 100% 43%;
+    --accent-foreground: 10 10% 4%;
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --radius: 0.65rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-  }
-
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 14 100% 60%;
+    
+    --radius: 1rem;
+    
+    /* Additional vibrant accent colors from v4 */
+    --color-orange: 14 100% 60%;
+    --color-green: 166 100% 43%;
+    --color-red: 348 100% 60%;
+    --color-yellow: 48 100% 62%;
+    --color-maroon: 356 82% 43%;
+    --color-brown: 25 52% 41%;
+    --color-purple: 270 77% 60%;
+    
+    /* Chart colors */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    
+    /* Sidebar variables */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 0 0% 4%;
+    --sidebar-primary: 0 0% 21%;
+    --sidebar-primary-foreground: 0 0% 99%;
+    --sidebar-accent: 0 0% 97%;
+    --sidebar-accent-foreground: 0 0% 21%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 0 0% 71%;
+  }
+
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 14 100% 60%;
+    --primary-foreground: 0 0% 4%;
+    
+    --secondary: 0 0% 27%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 27%;
+    --muted-foreground: 0 0% 71%;
+    
+    --accent: 166 100% 43%;
+    --accent-foreground: 0 0% 4%;
+    
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 27%;
+    --input: 0 0% 27%;
+    --ring: 0 0% 44%;
+    
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    
+    --sidebar: 0 0% 21%;
+    --sidebar-foreground: 0 0% 99%;
+    --sidebar-primary: 220 70% 50%;
+    --sidebar-primary-foreground: 0 0% 99%;
+    --sidebar-accent: 0 0% 27%;
+    --sidebar-accent-foreground: 0 0% 99%;
+    --sidebar-border: 0 0% 27%;
+    --sidebar-ring: 0 0% 44%;
   }
 }
-
 
 @layer base {
   * {
@@ -95,6 +176,9 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -104,15 +188,14 @@ body {
 
 /* Firefox */
 * {
-  scrollbar-width: thin; /* none | auto  */
+  scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
-/* Firefox */
 
 /* Chrome, Edge, Safari */
 *::-webkit-scrollbar {
-  width: var(--scrollbar-width); /* vertical scrollbar */
-  height: var(--scrollbar-width); /* horizontal scrollbar */
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
 }
 
 *::-webkit-scrollbar-track {
@@ -159,7 +242,6 @@ body {
   background-repeat: no-repeat;
 }
 
-/* In your global stylesheet or component style */
 @media (max-width: 640px) {
   .notification-container {
     display: flex;
@@ -168,18 +250,12 @@ body {
   }
 
   .notification-item {
-    flex-direction: column; /* Stack the notification content vertically */
-    width: 100%; /* Make each notification take full width */
+    flex-direction: column;
+    width: 100%;
   }
 
   .notification-item img {
-    margin-bottom: 10px; /* Space out the avatar from the content */
-  }
-}
-
-@layer base {
-  html {
-    scroll-behavior: smooth;
+    margin-bottom: 10px;
   }
 }
 
@@ -243,7 +319,6 @@ body {
   }
 }
 
-/* Hover effects */
 .hoverScale {
   transition: transform 0.2s ease-in-out;
 }
@@ -252,20 +327,17 @@ body {
   transform: scale(1.05);
 }
 
-/* Improve the hover scale effect for touch devices */
 @media (hover: none) {
   .hoverScale:active {
     transform: scale(1.05);
   }
 }
 
-/* Glass effect for backgrounds */
 .glassEffect {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Add a mobile-friendly glass effect */
 .mobileGlassEffect {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -278,7 +350,6 @@ body {
   }
 }
 
-/* 3D card effect */
 .card3d {
   transform-style: preserve-3d;
   perspective: 1000px;
@@ -288,7 +359,6 @@ body {
   transform: translateZ(20px);
 }
 
-/* Glow effect */
 .glow {
   box-shadow: 0 0 15px rgba(51, 82, 204, 0.5);
 }
@@ -297,7 +367,6 @@ body {
   box-shadow: 0 0 20px rgba(51, 82, 204, 0.7);
 }
 
-/* Radial menu animation */
 @keyframes radialExpand {
   0% {
     transform: scale(0);
@@ -313,7 +382,6 @@ body {
   animation: radialExpand 0.3s forwards;
 }
 
-/* Floating animation */
 @keyframes float {
   0% {
     transform: translateY(0px);
@@ -330,7 +398,6 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Add these responsive styles */
 @media (max-width: 640px) {
   .staggeredFadeIn > * {
     animation-delay: 0.05s !important;
@@ -341,7 +408,6 @@ body {
   }
 }
 
-/* Add these styles for the FloatingPanel */
 .floatingPanelBackdrop {
   background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
@@ -376,7 +442,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Improve sidebar transition */
 [data-sidebar-state="collapsed"] [data-sidebar-menu-button] span,
 [data-sidebar-state="collapsed"] [data-sidebar-menu-button] .ml-auto {
   opacity: 0;
@@ -389,18 +454,15 @@ body {
   transition: opacity 0.3s ease 0.1s;
 }
 
-/* Template Card specific animations - SUBTLE VERSION */
 .template-card-glow {
   box-shadow: 0 0 15px 5px rgba(var(--primary), 0.15);
   transition: box-shadow 0.3s ease;
 }
 
 .template-card-glow:hover {
-  /* Subtle border glow increase */
   box-shadow: 0 0 18px 5px rgba(var(--primary), 0.2);
 }
 
-/* 3D perspective effect */
 .perspective-1000 {
   perspective: 1000px;
 }
@@ -409,7 +471,6 @@ body {
   backface-visibility: hidden;
 }
 
-/* Animated gradient border */
 .gradient-border {
   position: relative;
   border: 2px solid transparent;
@@ -442,7 +503,6 @@ body {
   }
 }
 
-/* Staggered entrance animation for cards */
 .staggered-entrance {
   opacity: 0;
   transform: translateY(20px);
@@ -456,7 +516,6 @@ body {
   }
 }
 
-/* Enhanced template card styles - REMOVED HOVER EFFECTS */
 .template-icon-container {
   position: relative;
   overflow: hidden;
@@ -464,7 +523,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Creative card shapes */
 .card-shape-marketing {
   clip-path: polygon(0% 0%, 85% 0%, 100% 15%, 100% 100%, 0% 100%);
 }
@@ -505,7 +563,6 @@ body {
   clip-path: polygon(5% 0%, 100% 0%, 100% 95%, 95% 100%, 0% 100%, 0% 5%);
 }
 
-/* Category-specific card styles - SUBTLE HOVER ENHANCEMENT */
 .card-border-marketing {
   border-color: rgba(59, 130, 246, 0.5);
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
@@ -634,6 +691,133 @@ body {
   }
 }
 
+/* v4-inspired scroll animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.6s ease-out;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes cursor-move {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(5px, 5px);
+  }
+  50% {
+    transform: translate(10px, 2px);
+  }
+  75% {
+    transform: translate(3px, 8px);
+  }
+}
+
+.cursor-animate {
+  animation: cursor-move 3s ease-in-out infinite;
+}
+
+@keyframes typing {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
 .dark .glassEffect {
   backdrop-filter: blur(10px);
   background-color: rgba(30, 30, 30, 0.7);
@@ -648,9 +832,6 @@ body {
   box-shadow: 0 0 20px rgba(51, 82, 204, 0.4);
 }
 
-/* Enhance the radial gradient for dark mode */
 .dark .radial--gradient--automations {
   background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.08) 40%, hsl(var(--background)) 60%);
 }
-
-
