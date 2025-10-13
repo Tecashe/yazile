@@ -444,15 +444,6 @@ export function IntegrationsSection() {
 
   const currentScenario = scenarios[activeScenario]
 
-  const integrations = [
-    { id: "ecommerce", name: "Shopify", icon: ShoppingCart, color: "green", position: "top-left" },
-    { id: "payment", name: "Stripe", icon: CreditCard, color: "purple", position: "top-right" },
-    { id: "booking", name: "Calendly", icon: Calendar, color: "yellow", position: "middle-left" },
-    { id: "crm", name: "HubSpot", icon: Users, color: "red", position: "middle-right" },
-    { id: "video", name: "Zoom", icon: Video, color: "muted", position: "bottom-left" },
-    { id: "sales", name: "Salesforce", icon: Users, color: "muted", position: "bottom-right" },
-  ]
-
   return (
     <section ref={sectionRef} className="section-padding relative overflow-hidden">
       {/* Background decoration */}
@@ -535,7 +526,14 @@ export function IntegrationsSection() {
 
           {/* Integration Icons Grid */}
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-            {integrations.map((integration) => {
+            {[
+              { id: "ecommerce", name: "Shopify", icon: ShoppingCart, color: "green" },
+              { id: "payment", name: "Stripe", icon: CreditCard, color: "purple" },
+              { id: "booking", name: "Calendly", icon: Calendar, color: "yellow" },
+              { id: "crm", name: "HubSpot", icon: Users, color: "red" },
+              { id: "video", name: "Zoom", icon: Video, color: "muted" },
+              { id: "sales", name: "Salesforce", icon: Users, color: "muted" },
+            ].map((integration) => {
               const Icon = integration.icon
               const isActive = currentScenario === integration.id
               const colorClass = integration.color
@@ -567,11 +565,20 @@ export function IntegrationsSection() {
           </div>
         </div>
 
-        {/* Desktop Layout with advanced connecting lines */}
-        <div className="hidden lg:block relative max-w-7xl mx-auto h-[700px] scroll-reveal">
-          {/* Center - DM Interface */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
-            <div className="w-96 bg-card border-4 border-orange/30 rounded-3xl overflow-hidden shadow-2xl">
+        {/* Desktop Layout - PERFECT GEOMETRY */}
+        <div className="hidden lg:block relative max-w-[1200px] mx-auto h-[800px] scroll-reveal">
+          {/* PERFECTLY CENTERED DM INTERFACE - 384px width, positioned at exact center */}
+          <div 
+            className="absolute z-30"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '384px',
+              height: '320px'
+            }}
+          >
+            <div className="w-full h-full bg-card border-4 border-orange/30 rounded-3xl overflow-hidden shadow-2xl">
               {/* DM Header */}
               <div className="bg-muted px-5 py-4 border-b border-border flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-logo">
@@ -587,7 +594,7 @@ export function IntegrationsSection() {
               </div>
 
               {/* DM Content */}
-              <div className="p-5 space-y-3 min-h-[240px] bg-gradient-to-b from-background/50 to-background/80">
+              <div className="p-5 space-y-3 h-[calc(100%-80px)] bg-gradient-to-b from-background/50 to-background/80">
                 {currentScenario === "ecommerce" && (
                   <>
                     <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 border border-border/50 animate-slide-in-left">
@@ -632,10 +639,15 @@ export function IntegrationsSection() {
             </div>
           </div>
 
-          {/* SVG for beautiful flowing connectors */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" xmlns="http://www.w3.org/2000/svg">
+          {/* SVG Layer with PERFECT connection points */}
+          <svg 
+            className="absolute inset-0 w-full h-full pointer-events-none z-20" 
+            viewBox="0 0 1200 800"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid meet"
+          >
             <defs>
-              {/* Gradient definitions for each integration */}
+              {/* Glowing gradients */}
               <linearGradient id="greenGlow" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#00d9a3" stopOpacity="0" />
                 <stop offset="50%" stopColor="#00d9a3" stopOpacity="1" />
@@ -657,20 +669,27 @@ export function IntegrationsSection() {
                 <stop offset="100%" stopColor="#ff3366" stopOpacity="0" />
               </linearGradient>
 
-              {/* Filter for glow effect */}
+              {/* Enhanced glow filter */}
               <filter id="glow">
-                <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                <feGaussianBlur stdDeviation="5" result="coloredBlur" />
                 <feMerge>
+                  <feMergeNode in="coloredBlur" />
                   <feMergeNode in="coloredBlur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
             </defs>
 
-            {/* Shopify - Top Left - Smooth bezier curve */}
+            {/* CENTER BOX: 600,400 center, 384px wide, 320px tall
+                 Left edge: 408, Right edge: 792
+                 Top edge: 240, Bottom edge: 560 */}
+
+            {/* SHOPIFY - Top Left (140, 140) center of 128px box
+                 Connection point: right edge at 204, center at 140 */}
             <g>
+              {/* Base line */}
               <path
-                d="M 600 350 Q 500 280, 280 200"
+                d="M 204 140 C 280 140, 350 200, 408 260"
                 stroke="#262626"
                 strokeWidth="2"
                 fill="none"
@@ -679,34 +698,45 @@ export function IntegrationsSection() {
               />
               {currentScenario === "ecommerce" && (
                 <>
+                  {/* Glowing animated line */}
                   <path
-                    d="M 600 350 Q 500 280, 280 200"
+                    d="M 204 140 C 280 140, 350 200, 408 260"
                     stroke="url(#greenGlow)"
-                    strokeWidth="4"
+                    strokeWidth="5"
                     fill="none"
                     strokeLinecap="round"
                     filter="url(#glow)"
-                    className="data-flow-line"
                   >
-                    <animate attributeName="stroke-dasharray" values="0 1000; 1000 0" dur="2s" repeatCount="indefinite" />
+                    <animate 
+                      attributeName="stroke-dasharray" 
+                      values="0 500; 500 0" 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                    />
                     <animate
                       attributeName="stroke-dashoffset"
-                      values="1000; 0"
+                      values="500; 0"
                       dur="2s"
                       repeatCount="indefinite"
                     />
                   </path>
+                  {/* Traveling particle */}
                   <circle r="8" fill="#00d9a3" filter="url(#glow)">
-                    <animateMotion dur="2s" repeatCount="indefinite" path="M 600 350 Q 500 280, 280 200" />
+                    <animateMotion 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                      path="M 204 140 C 280 140, 350 200, 408 260" 
+                    />
                   </circle>
                 </>
               )}
             </g>
 
-            {/* Stripe - Top Right */}
+            {/* STRIPE - Top Right (1060, 140)
+                 Connection point: left edge at 996, center at 140 */}
             <g>
               <path
-                d="M 600 350 Q 700 280, 920 200"
+                d="M 996 140 C 920 140, 850 200, 792 260"
                 stroke="#262626"
                 strokeWidth="2"
                 fill="none"
@@ -716,33 +746,42 @@ export function IntegrationsSection() {
               {currentScenario === "payment" && (
                 <>
                   <path
-                    d="M 600 350 Q 700 280, 920 200"
+                    d="M 996 140 C 920 140, 850 200, 792 260"
                     stroke="url(#purpleGlow)"
-                    strokeWidth="4"
+                    strokeWidth="5"
                     fill="none"
                     strokeLinecap="round"
                     filter="url(#glow)"
-                    className="data-flow-line"
                   >
-                    <animate attributeName="stroke-dasharray" values="0 1000; 1000 0" dur="2s" repeatCount="indefinite" />
+                    <animate 
+                      attributeName="stroke-dasharray" 
+                      values="0 500; 500 0" 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                    />
                     <animate
                       attributeName="stroke-dashoffset"
-                      values="1000; 0"
+                      values="500; 0"
                       dur="2s"
                       repeatCount="indefinite"
                     />
                   </path>
                   <circle r="8" fill="#9d4edd" filter="url(#glow)">
-                    <animateMotion dur="2s" repeatCount="indefinite" path="M 600 350 Q 700 280, 920 200" />
+                    <animateMotion 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                      path="M 996 140 C 920 140, 850 200, 792 260" 
+                    />
                   </circle>
                 </>
               )}
             </g>
 
-            {/* Calendly - Middle Left - Elegant S-curve */}
+            {/* CALENDLY - Middle Left (140, 400)
+                 Connection point: right edge at 204, center at 400 */}
             <g>
               <path
-                d="M 600 350 Q 450 350, 280 360"
+                d="M 204 400 C 280 400, 340 400, 408 400"
                 stroke="#262626"
                 strokeWidth="2"
                 fill="none"
@@ -752,33 +791,42 @@ export function IntegrationsSection() {
               {currentScenario === "booking" && (
                 <>
                   <path
-                    d="M 600 350 Q 450 350, 280 360"
+                    d="M 204 400 C 280 400, 340 400, 408 400"
                     stroke="url(#yellowGlow)"
-                    strokeWidth="4"
+                    strokeWidth="5"
                     fill="none"
                     strokeLinecap="round"
                     filter="url(#glow)"
-                    className="data-flow-line"
                   >
-                    <animate attributeName="stroke-dasharray" values="0 1000; 1000 0" dur="2s" repeatCount="indefinite" />
+                    <animate 
+                      attributeName="stroke-dasharray" 
+                      values="0 500; 500 0" 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                    />
                     <animate
                       attributeName="stroke-dashoffset"
-                      values="1000; 0"
+                      values="500; 0"
                       dur="2s"
                       repeatCount="indefinite"
                     />
                   </path>
                   <circle r="8" fill="#ffd93d" filter="url(#glow)">
-                    <animateMotion dur="2s" repeatCount="indefinite" path="M 600 350 Q 450 350, 280 360" />
+                    <animateMotion 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                      path="M 204 400 C 280 400, 340 400, 408 400" 
+                    />
                   </circle>
                 </>
               )}
             </g>
 
-            {/* HubSpot - Middle Right */}
+            {/* HUBSPOT - Middle Right (1060, 400)
+                 Connection point: left edge at 996, center at 400 */}
             <g>
               <path
-                d="M 600 350 Q 750 350, 920 360"
+                d="M 996 400 C 920 400, 860 400, 792 400"
                 stroke="#262626"
                 strokeWidth="2"
                 fill="none"
@@ -788,32 +836,41 @@ export function IntegrationsSection() {
               {currentScenario === "crm" && (
                 <>
                   <path
-                    d="M 600 350 Q 750 350, 920 360"
+                    d="M 996 400 C 920 400, 860 400, 792 400"
                     stroke="url(#redGlow)"
-                    strokeWidth="4"
+                    strokeWidth="5"
                     fill="none"
                     strokeLinecap="round"
                     filter="url(#glow)"
-                    className="data-flow-line"
                   >
-                    <animate attributeName="stroke-dasharray" values="0 1000; 1000 0" dur="2s" repeatCount="indefinite" />
+                    <animate 
+                      attributeName="stroke-dasharray" 
+                      values="0 500; 500 0" 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                    />
                     <animate
                       attributeName="stroke-dashoffset"
-                      values="1000; 0"
+                      values="500; 0"
                       dur="2s"
                       repeatCount="indefinite"
                     />
                   </path>
                   <circle r="8" fill="#ff3366" filter="url(#glow)">
-                    <animateMotion dur="2s" repeatCount="indefinite" path="M 600 350 Q 750 350, 920 360" />
+                    <animateMotion 
+                      dur="2s" 
+                      repeatCount="indefinite" 
+                      path="M 996 400 C 920 400, 860 400, 792 400" 
+                    />
                   </circle>
                 </>
               )}
             </g>
 
-            {/* Zoom - Bottom Left */}
+            {/* ZOOM - Bottom Left (140, 660)
+                 Connection point: right edge at 204, center at 660 */}
             <path
-              d="M 600 350 Q 500 420, 280 520"
+              d="M 204 660 C 280 660, 350 600, 408 540"
               stroke="#262626"
               strokeWidth="2"
               fill="none"
@@ -821,9 +878,10 @@ export function IntegrationsSection() {
               opacity="0.3"
             />
 
-            {/* Salesforce - Bottom Right */}
+            {/* SALESFORCE - Bottom Right (1060, 660)
+                 Connection point: left edge at 996, center at 660 */}
             <path
-              d="M 600 350 Q 700 420, 920 520"
+              d="M 996 660 C 920 660, 850 600, 792 540"
               stroke="#262626"
               strokeWidth="2"
               fill="none"
@@ -832,11 +890,20 @@ export function IntegrationsSection() {
             />
           </svg>
 
-          {/* Integration icons positioned around center */}
-          {/* Top Left - Shopify */}
-          <div className="absolute top-16 left-16 animate-float">
+          {/* Integration icons - PERFECTLY POSITIONED at exact coordinates */}
+          
+          {/* Top Left - Shopify at (140, 140) */}
+          <div 
+            className="absolute animate-float"
+            style={{
+              left: '76px', // 140 - 64 (half of 128px)
+              top: '76px',  // 140 - 64
+              width: '128px',
+              height: '128px'
+            }}
+          >
             <div
-              className={`w-32 h-32 bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
+              className={`w-full h-full bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
                 currentScenario === "ecommerce"
                   ? "border-green scale-110 bg-green/5 shadow-green/40"
                   : "border-border hover:scale-105"
@@ -857,10 +924,18 @@ export function IntegrationsSection() {
             </div>
           </div>
 
-          {/* Top Right - Stripe */}
-          <div className="absolute top-16 right-16 animate-float-delayed">
+          {/* Top Right - Stripe at (1060, 140) */}
+          <div 
+            className="absolute animate-float-delayed"
+            style={{
+              left: '996px', // 1060 - 64
+              top: '76px',
+              width: '128px',
+              height: '128px'
+            }}
+          >
             <div
-              className={`w-32 h-32 bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
+              className={`w-full h-full bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
                 currentScenario === "payment"
                   ? "border-purple scale-110 bg-purple/5 shadow-purple/40"
                   : "border-border hover:scale-105"
@@ -881,10 +956,18 @@ export function IntegrationsSection() {
             </div>
           </div>
 
-          {/* Middle Left - Calendly */}
-          <div className="absolute top-1/2 -translate-y-1/2 left-12 animate-float">
+          {/* Middle Left - Calendly at (140, 400) */}
+          <div 
+            className="absolute animate-float"
+            style={{
+              left: '76px', // 140 - 64
+              top: '336px', // 400 - 64
+              width: '128px',
+              height: '128px'
+            }}
+          >
             <div
-              className={`w-32 h-32 bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
+              className={`w-full h-full bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
                 currentScenario === "booking"
                   ? "border-yellow scale-110 bg-yellow/5 shadow-yellow/40"
                   : "border-border hover:scale-105"
@@ -905,10 +988,18 @@ export function IntegrationsSection() {
             </div>
           </div>
 
-          {/* Middle Right - HubSpot */}
-          <div className="absolute top-1/2 -translate-y-1/2 right-12 animate-float-delayed">
+          {/* Middle Right - HubSpot at (1060, 400) */}
+          <div 
+            className="absolute animate-float-delayed"
+            style={{
+              left: '996px', // 1060 - 64
+              top: '336px',  // 400 - 64
+              width: '128px',
+              height: '128px'
+            }}
+          >
             <div
-              className={`w-32 h-32 bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
+              className={`w-full h-full bg-card border-3 rounded-3xl flex flex-col items-center justify-center shadow-2xl transition-all duration-500 ${
                 currentScenario === "crm"
                   ? "border-red scale-110 bg-red/5 shadow-red/40"
                   : "border-border hover:scale-105"
@@ -929,17 +1020,33 @@ export function IntegrationsSection() {
             </div>
           </div>
 
-          {/* Bottom Left - Zoom */}
-          <div className="absolute bottom-16 left-16 animate-float">
-            <div className="w-32 h-32 bg-card border-3 border-border rounded-3xl flex flex-col items-center justify-center shadow-2xl hover:scale-105 transition-all duration-500">
+          {/* Bottom Left - Zoom at (140, 660) */}
+          <div 
+            className="absolute animate-float"
+            style={{
+              left: '76px',  // 140 - 64
+              top: '596px',  // 660 - 64
+              width: '128px',
+              height: '128px'
+            }}
+          >
+            <div className="w-full h-full bg-card border-3 border-border rounded-3xl flex flex-col items-center justify-center shadow-2xl hover:scale-105 transition-all duration-500">
               <Video className="w-12 h-12 text-muted-foreground" />
               <p className="text-sm mt-3 font-semibold text-muted-foreground">Zoom</p>
             </div>
           </div>
 
-          {/* Bottom Right - Salesforce */}
-          <div className="absolute bottom-16 right-16 animate-float-delayed">
-            <div className="w-32 h-32 bg-card border-3 border-border rounded-3xl flex flex-col items-center justify-center shadow-2xl hover:scale-105 transition-all duration-500">
+          {/* Bottom Right - Salesforce at (1060, 660) */}
+          <div 
+            className="absolute animate-float-delayed"
+            style={{
+              left: '996px', // 1060 - 64
+              top: '596px',  // 660 - 64
+              width: '128px',
+              height: '128px'
+            }}
+          >
+            <div className="w-full h-full bg-card border-3 border-border rounded-3xl flex flex-col items-center justify-center shadow-2xl hover:scale-105 transition-all duration-500">
               <Users className="w-12 h-12 text-muted-foreground" />
               <p className="text-sm mt-3 font-semibold text-muted-foreground">Salesforce</p>
             </div>
