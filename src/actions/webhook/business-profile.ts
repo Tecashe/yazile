@@ -305,62 +305,57 @@ export async function getBusinessProfileForAutomation(automationId: string) {
   }
 }
 
-// Get or create default automation for unmatched messages
-export async function getOrCreateDefaultAutomation(instagramId: string) {
+// Get or create fallback automation by Instagram page ID
+export async function getOrCreateDefaultAutomation(
+  pageId: string, 
+  platform: "INSTAGRAM" | "WHATSAPP" | "FACEBOOK" = "INSTAGRAM"
+) {
   try {
-    console.log("🔍 Looking for integration with instagramId:", instagramId)
-    
-    // Find user by Instagram page ID - try both instagramId and pageId
+    console.log(`🔍 Looking up user for pageId: ${pageId}`)
+
+    // Find user through integration - try multiple ID fields
     const integration = await client.integrations.findFirst({
       where: { 
         OR: [
-          { instagramId: instagramId },
-          { pageId: instagramId }, // Facebook/Instagram pages might use pageId
+          { instagramId: pageId },
+          { pageId: pageId },
         ]
       },
-      include: {
+      select: {
+        userId: true,
         User: {
-          include: {
-            subscription: true,
+          select: {
+            id: true,
+            subscription: { select: { plan: true } },
+            integrations: { select: { token: true } },
           },
         },
       },
     })
 
-    if (!integration) {
-      console.log("❌ No integration found for ID:", instagramId)
+    if (!integration?.userId) {
+      console.log("❌ No user found for page ID:", pageId)
       
-      // Debug: Let's see what integrations exist
-      const allIntegrations = await client.integrations.findMany({
-        select: {
-          id: true,
-          instagramId: true,
-          pageId: true,
-          name: true,
-          userId: true,
-        },
-        take: 5,
+      // Debug: Show what integrations exist
+      const sampleIntegrations = await client.integrations.findMany({
+        select: { id: true, instagramId: true, pageId: true, userId: true },
+        take: 3,
       })
-      console.log("📋 Sample integrations in DB:", JSON.stringify(allIntegrations, null, 2))
+      console.log("📋 Sample integrations in DB:", JSON.stringify(sampleIntegrations, null, 2))
       
       return null
     }
 
-    if (!integration.User) {
-      console.log("❌ Integration found but no user linked:", integration.id)
-      return null
-    }
+    console.log("✅ Found userId:", integration.userId, "for pageId:", pageId)
 
-    console.log("✅ Found user:", integration.User.id, "for Instagram ID:", instagramId)
-
-    // Look for existing fallback automation for this platform
+    // Look for existing fallback automation for this user and platform
     let defaultAutomation = await client.automation.findFirst({
       where: {
-        userId: integration.User.id,
+        userId: integration.userId,
         isFallback: true,
-        platform: "INSTAGRAM", // This matches the INTEGRATIONS enum value
-        active: true, // CRITICAL: Only get active automations
-        deletedAt: null, // Make sure it's not soft-deleted
+        platform: platform,
+        active: true,
+        deletedAt: null,
       },
       include: {
         User: {
@@ -375,60 +370,55 @@ export async function getOrCreateDefaultAutomation(instagramId: string) {
       },
     })
 
-    console.log("🔍 Fallback automation search result:", defaultAutomation ? `Found: ${defaultAutomation.id}` : "Not found")
-
-    // Create default automation if it doesn't exist
-    if (!defaultAutomation) {
-      console.log("🔧 Creating default fallback automation for user:", integration.User.id)
-
-      try {
-        defaultAutomation = await client.automation.create({
-          data: {
-            name: "Default Conversation Handler",
-            active: true,
-            isFallback: true,
-            platform: "INSTAGRAM",
-            userId: integration.User.id,
-            listener: {
-              create: {
-                listener: "SMARTAI",
-                prompt:
-                  "You are a helpful customer service representative. Respond naturally and professionally to customer inquiries.",
-              },
-            },
-            trigger: {
-              create: [
-                {
-                  type: "DM",
-                  isActive: true,
-                },
-                {
-                  type: "COMMENT",
-                  isActive: true,
-                },
-              ],
-            },
-          },
-          include: {
-            User: {
-              select: {
-                id: true,
-                subscription: { select: { plan: true } },
-                integrations: { select: { token: true } },
-              },
-            },
-            listener: true,
-            trigger: true,
-          },
-        })
-
-        console.log("✅ Default fallback automation created:", defaultAutomation.id)
-      } catch (createError) {
-        console.error("❌ Error creating default automation:", createError)
-        throw createError
-      }
+    if (defaultAutomation) {
+      console.log("✅ Found existing fallback automation:", defaultAutomation.id)
+      return defaultAutomation
     }
 
+    // Create default automation if it doesn't exist
+    console.log(`🔧 Creating fallback automation for user: ${integration.userId}, platform: ${platform}`)
+
+    defaultAutomation = await client.automation.create({
+      data: {
+        name: `Default ${platform} Handler`,
+        active: true,
+        isFallback: true,
+        platform: platform,
+        userId: integration.userId,
+        listener: {
+          create: {
+            listener: "SMARTAI",
+            prompt:
+              "You are a helpful customer service representative. Respond naturally and professionally to customer inquiries.",
+          },
+        },
+        trigger: {
+          create: [
+            {
+              type: "DM",
+              isActive: true,
+            },
+            {
+              type: "COMMENT",
+              isActive: true,
+            },
+          ],
+        },
+      },
+      include: {
+        User: {
+          select: {
+            id: true,
+            subscription: { select: { plan: true } },
+            integrations: { select: { token: true } },
+          },
+        },
+        listener: true,
+        trigger: true,
+      },
+    })
+
+    console.log("✅ Fallback automation created:", defaultAutomation.id)
     return defaultAutomation
   } catch (error) {
     console.error("❌ Error in getOrCreateDefaultAutomation:", error)
