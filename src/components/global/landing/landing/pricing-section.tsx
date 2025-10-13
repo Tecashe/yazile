@@ -1,128 +1,190 @@
 "use client"
 
-import { ScrollAnimation } from "./scroll-animation"
+import { useEffect, useRef } from "react"
+import { Check, Zap, Rocket, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Check } from "lucide-react"
+import Link from "next/link"
 
 const plans = [
   {
     name: "Starter",
-    price: "$49",
-    period: "/month",
-    description: "Perfect for small businesses getting started",
+    price: "$29",
+    description: "Perfect for small businesses just getting started",
+    icon: Zap,
+    color: "green",
     features: [
-      "Up to 1,000 DMs/month",
-      "AI-powered responses",
+      "1,000 automated conversations/month",
+      "DM automation",
+      "Story reply automation",
+      "Comment automation",
       "Basic analytics",
       "Email support",
-      "1 Instagram account",
+      "2 Instagram accounts",
     ],
-    color: "var(--bright-cyan)",
+    cta: "Start Free Trial",
     popular: false,
   },
   {
-    name: "Professional",
-    price: "$149",
-    period: "/month",
-    description: "For growing businesses that need more",
+    name: "Growth",
+    price: "$79",
+    description: "For growing businesses ready to scale",
+    icon: Rocket,
+    color: "orange",
     features: [
-      "Up to 10,000 DMs/month",
-      "Advanced AI training",
-      "Full analytics dashboard",
+      "10,000 automated conversations/month",
+      "Everything in Starter",
+      "Advanced analytics & reports",
+      "A/B testing",
       "Priority support",
-      "3 Instagram accounts",
-      "CRM integration",
-      "Custom workflows",
+      "10 Instagram accounts",
+      "Custom integrations",
+      "Team collaboration",
     ],
-    color: "var(--bright-orange)",
+    cta: "Start Free Trial",
     popular: true,
   },
   {
     name: "Enterprise",
-    price: "Custom",
-    period: "",
-    description: "For large teams with custom needs",
+    price: "$199",
+    description: "For agencies and large businesses",
+    icon: Crown,
+    color: "purple",
     features: [
-      "Unlimited DMs",
-      "Dedicated AI model",
-      "White-label solution",
-      "24/7 phone support",
-      "Unlimited accounts",
-      "API access",
-      "Custom integrations",
+      "Unlimited conversations",
+      "Everything in Growth",
       "Dedicated account manager",
+      "24/7 phone support",
+      "Unlimited Instagram accounts",
+      "White-label options",
+      "Custom development",
+      "SLA guarantee",
     ],
-    color: "var(--bright-green)",
+    cta: "Contact Sales",
     popular: false,
   },
 ]
 
 export function PricingSection() {
-  return (
-    <section id="pricing" className="py-16 md:py-24 lg:py-32 bg-muted/30">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <ScrollAnimation animation="fadeUp">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 text-balance">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-              Choose the plan that fits your business. All plans include a 14-day free trial.
-            </p>
-          </div>
-        </ScrollAnimation>
+  const sectionRef = useRef<HTMLDivElement>(null)
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {plans.map((plan, index) => (
-            <ScrollAnimation key={index} animation="scale" delay={index * 100}>
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed")
+          }
+        })
+      },
+      { threshold: 0.1 },
+    )
+
+    const elements = sectionRef.current?.querySelectorAll(".scroll-reveal")
+    elements?.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <section ref={sectionRef} className="py-20 md:py-32 relative overflow-hidden" id="pricing">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="text-center mb-20 scroll-reveal">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            Simple, <span className="text-orange">Transparent</span> Pricing
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Start free for 14 days. No credit card required. Cancel anytime.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
+          {plans.map((plan, index) => {
+            const Icon = plan.icon
+            return (
               <div
-                className={`relative bg-card rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border-2 ${
-                  plan.popular ? "scale-105 lg:scale-110 shadow-xl" : "hover:scale-105"
-                }`}
-                style={{
-                  borderColor: plan.popular ? plan.color : "var(--border)",
-                }}
+                key={plan.name}
+                className={`scroll-reveal relative bg-card border-2 ${plan.popular ? `border-${plan.color} md:scale-105` : "border-border"} rounded-3xl p-6 md:p-8 hover:border-${plan.color} transition-all duration-300 group`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
+                {/* Popular badge */}
                 {plan.popular && (
                   <div
-                    className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold text-accent-foreground"
-                    style={{ backgroundColor: plan.color }}
+                    className={`absolute -top-4 left-1/2 -translate-x-1/2 bg-${plan.color} text-black px-6 py-2 rounded-full text-sm font-bold`}
                   >
-                    MOST POPULAR
+                    Most Popular
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-card-foreground mb-2">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm">{plan.description}</p>
+                {/* Icon */}
+                <div className={`w-16 h-16 bg-${plan.color}/10 rounded-2xl flex items-center justify-center mb-6`}>
+                  <Icon className={`w-8 h-8 text-${plan.color}`} />
                 </div>
 
-                <div className="mb-6">
-                  <span className="text-5xl font-bold text-card-foreground">{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
+                {/* Plan name */}
+                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <span className="text-5xl font-bold">{plan.price}</span>
+                  <span className="text-muted-foreground">/month</span>
                 </div>
 
-                <Button
-                  className="w-full mb-8 text-accent-foreground"
-                  size="lg"
-                  style={{
-                    backgroundColor: plan.color,
-                  }}
-                >
-                  {plan.name === "Enterprise" ? "Contact Sales" : "Start Free Trial"}
-                </Button>
+                {/* CTA */}
+                {plan.cta === "Contact Sales" ? (
+                  <a
+                    href="https://calendly.com/your-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mb-8"
+                  >
+                    <Button
+                      className={`w-full ${plan.popular ? `bg-${plan.color} text-black hover:bg-${plan.color}/90` : "bg-card border-2 border-border hover:border-${plan.color} hover:text-${plan.color}"}`}
+                      size="lg"
+                    >
+                      {plan.cta}
+                    </Button>
+                  </a>
+                ) : (
+                  <Link href="/dashboard" className="block mb-8">
+                    <Button
+                      className={`w-full ${plan.popular ? `bg-${plan.color} text-black hover:bg-${plan.color}/90` : "bg-card border-2 border-border hover:border-${plan.color} hover:text-${plan.color}"}`}
+                      size="lg"
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
+                )}
 
-                <ul className="space-y-4">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-3">
-                      <Check size={20} className="flex-shrink-0 mt-0.5" style={{ color: plan.color }} />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
+                {/* Features */}
+                <div className="space-y-4">
+                  {plan.features.map((feature, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div
+                        className={`w-5 h-5 rounded-full bg-${plan.color}/10 flex items-center justify-center flex-shrink-0 mt-0.5`}
+                      >
+                        <Check className={`w-3 h-3 text-${plan.color}`} />
+                      </div>
+                      <span className="text-sm text-muted-foreground">{feature}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
-            </ScrollAnimation>
-          ))}
+            )
+          })}
+        </div>
+
+        {/* Money-back guarantee */}
+        <div className="text-center mt-16 scroll-reveal">
+          <div className="inline-flex items-center gap-3 px-6 py-4 bg-card border-2 border-green/20 rounded-2xl">
+            <div className="w-12 h-12 bg-green/10 rounded-full flex items-center justify-center">
+              <Check className="w-6 h-6 text-green" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold">30-Day Money-Back Guarantee</p>
+              <p className="text-sm text-muted-foreground">Not satisfied? Get a full refund, no questions asked.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
