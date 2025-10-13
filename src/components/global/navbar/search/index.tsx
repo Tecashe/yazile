@@ -1170,7 +1170,7 @@ const Search = () => {
           >
             <ul
               ref={listRef}
-              className="max-h-60 overflow-y-auto divide-y divide-gray-700 custom-scrollbar-dark"
+              className="max-h-60 overflow-y-auto divide-y divide-gray-700 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800"
             >
               {filteredAutomations.map((automation, index) => (
                 <motion.li

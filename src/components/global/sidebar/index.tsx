@@ -593,8 +593,8 @@ const Sidebar = ({ slug }: Props) => {
           {/* <ChatalLogo width={60} height={60} color="#0066cc" /> */}
         </div>
 
-        {/* <div className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"> */}
-        <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+       
           {SIDEBAR_MENU.map((group) => renderGroup(group))}
         </div>
         {/* 
