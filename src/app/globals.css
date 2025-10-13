@@ -4,52 +4,61 @@
 
 :root {
   /* Dark theme - almost black */
-  --background: #0a0a0a;
-  --foreground: #fafafa;
+  --background: 0 0% 4%;
+  --foreground: 0 0% 98%;
 
   /* Bright accent colors - no gradients! */
-  --color-orange: #ff6b35;
-  --color-green: #00d9a3;
-  --color-red: #ff3366;
-  --color-yellow: #ffd93d;
-  --color-maroon: #c1121f;
-  --color-brown: #a0522d;
-  --color-purple: #9d4edd;
+  --color-orange: 14 100% 60%;
+  --color-green: 166 100% 43%;
+  --color-red: 348 100% 60%;
+  --color-yellow: 47 100% 62%;
+  --color-maroon: 355 82% 44%;
+  --color-brown: 25 52% 40%;
+  --color-purple: 269 63% 58%;
 
   /* Card backgrounds */
-  --card: #141414;
-  --card-foreground: #fafafa;
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 98%;
 
   /* Muted colors */
-  --muted: #1f1f1f;
-  --muted-foreground: #a3a3a3;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 64%;
 
-  --border: #262626;
-  --input: #262626;
-  --ring: #ff6b35;
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --ring: 14 100% 60%;
 
   --radius: 1rem;
 
-  --primary: #ff6b35;
-  --primary-foreground: #0a0a0a;
+  --primary: 14 100% 60%;
+  --primary-foreground: 0 0% 4%;
 
-  --secondary: #1f1f1f;
-  --secondary-foreground: #fafafa;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 98%;
 
-  --accent: #00d9a3;
-  --accent-foreground: #0a0a0a;
+  --accent: 166 100% 43%;
+  --accent-foreground: 0 0% 4%;
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
 
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 98%;
+
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 0 0% 9%;
+  --sidebar-primary: 0 0% 13%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 0 0% 95%;
+  --sidebar-accent-foreground: 0 0% 13%;
+  --sidebar-border: 0 0% 91%;
+  --sidebar-ring: 0 0% 65%;
+
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
 }
 
 .dark {
