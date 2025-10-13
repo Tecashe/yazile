@@ -1,14 +1,113 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "tw-animate-css";
 
+@layer base {
+  :root {
+    /* Dark theme - almost black */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+
+    /* Card backgrounds */
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+
+    /* Popover */
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary - Orange */
+    --primary: 14 100% 60%;
+    --primary-foreground: 0 0% 4%;
+
+    /* Secondary */
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Muted colors */
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 64%;
+
+    /* Accent - Green */
+    --accent: 166 100% 43%;
+    --accent-foreground: 0 0% 4%;
+
+    /* Destructive - Red */
+    --destructive: 348 100% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border and input */
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 14 100% 60%;
+
+    /* Border radius */
+    --radius: 1rem;
+
+    /* Chart colors */
+    --chart-1: 264 78% 48%;
+    --chart-2: 162 85% 56%;
+    --chart-3: 70 76% 60%;
+    --chart-4: 304 68% 52%;
+    --chart-5: 16 82% 56%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 0 0% 13%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 0 0% 60%;
+  }
+
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 13%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 86% 67%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 35%;
+    --chart-1: 264 78% 48%;
+    --chart-2: 162 85% 56%;
+    --chart-3: 70 76% 60%;
+    --chart-4: 304 68% 52%;
+    --chart-5: 16 82% 56%;
+    --sidebar-background: 0 0% 13%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 264 78% 48%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 0 0% 35%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom color variables for direct use */
 :root {
-  /* Dark theme - almost black */
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-
-  /* Bright accent colors - no gradients! */
   --color-orange: #ff6b35;
   --color-green: #00d9a3;
   --color-red: #ff3366;
@@ -16,85 +115,6 @@
   --color-maroon: #c1121f;
   --color-brown: #a0522d;
   --color-purple: #9d4edd;
-
-  /* Card backgrounds */
-  --card: #141414;
-  --card-foreground: #fafafa;
-
-  /* Muted colors */
-  --muted: #1f1f1f;
-  --muted-foreground: #a3a3a3;
-
-  --border: #262626;
-  --input: #262626;
-  --ring: #ff6b35;
-
-  --radius: 1rem;
-
-  --primary: #ff6b35;
-  --primary-foreground: #0a0a0a;
-
-  --secondary: #1f1f1f;
-  --secondary-foreground: #fafafa;
-
-  --accent: #00d9a3;
-  --accent-foreground: #0a0a0a;
-
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }
 
 /* Scroll animations */
@@ -115,7 +135,6 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -259,46 +278,4 @@
   .container-padding {
     @apply px-4 sm:px-6 lg:px-8;
   }
-}
-
-/* Custom scrollbar styles */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(75 85 99) transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgb(75 85 99);
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(107 114 128);
-}
-
-/* For search component with darker scrollbar */
-.custom-scrollbar-dark {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(55 65 81) rgb(31 41 55);
-}
-
-.custom-scrollbar-dark::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar-dark::-webkit-scrollbar-track {
-  background: rgb(31 41 55);
-}
-
-.custom-scrollbar-dark::-webkit-scrollbar-thumb {
-  background-color: rgb(55 65 81);
-  border-radius: 4px;
 }
