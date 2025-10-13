@@ -235,6 +235,7 @@
 //   }
 // }
 
+
 "use server"
 
 import { client } from "@/lib/prisma"
@@ -307,9 +308,16 @@ export async function getBusinessProfileForAutomation(automationId: string) {
 // Get or create default automation for unmatched messages
 export async function getOrCreateDefaultAutomation(instagramId: string) {
   try {
-    // Find user by Instagram page ID
+    console.log("🔍 Looking for integration with instagramId:", instagramId)
+    
+    // Find user by Instagram page ID - try both instagramId and pageId
     const integration = await client.integrations.findFirst({
-      where: { instagramId: instagramId },
+      where: { 
+        OR: [
+          { instagramId: instagramId },
+          { pageId: instagramId }, // Facebook/Instagram pages might use pageId
+        ]
+      },
       include: {
         User: {
           include: {
@@ -319,8 +327,27 @@ export async function getOrCreateDefaultAutomation(instagramId: string) {
       },
     })
 
-    if (!integration?.User) {
-      console.log("❌ No user found for page ID:", instagramId)
+    if (!integration) {
+      console.log("❌ No integration found for ID:", instagramId)
+      
+      // Debug: Let's see what integrations exist
+      const allIntegrations = await client.integrations.findMany({
+        select: {
+          id: true,
+          instagramId: true,
+          pageId: true,
+          name: true,
+          userId: true,
+        },
+        take: 5,
+      })
+      console.log("📋 Sample integrations in DB:", JSON.stringify(allIntegrations, null, 2))
+      
+      return null
+    }
+
+    if (!integration.User) {
+      console.log("❌ Integration found but no user linked:", integration.id)
       return null
     }
 
@@ -332,6 +359,7 @@ export async function getOrCreateDefaultAutomation(instagramId: string) {
         userId: integration.User.id,
         isFallback: true,
         platform: "INSTAGRAM", // This matches the INTEGRATIONS enum value
+        active: true, // CRITICAL: Only get active automations
         deletedAt: null, // Make sure it's not soft-deleted
       },
       include: {
