@@ -145,10 +145,10 @@ export function HeroSection() {
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-orange/20 animate-fade-in-up">
+            {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-orange/20 animate-fade-in-up">
               <Sparkles className="w-4 h-4 text-orange" />
               <span className="text-sm font-medium text-muted-foreground">10,000+ businesses trust yazzil</span>
-            </div>
+            </div> */}
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] animate-fade-in-up">
               Turn Instagram DMs Into{" "}
