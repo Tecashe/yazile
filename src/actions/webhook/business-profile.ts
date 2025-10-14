@@ -427,9 +427,11 @@
 // }
 
 
+
 "use server"
 
 import { client } from "@/lib/prisma"
+import { onUserInfor } from "../user/index"
 
 export async function getBusinessProfileForAutomation(automationId: string) {
   try {
@@ -444,13 +446,6 @@ export async function getBusinessProfileForAutomation(automationId: string) {
     })
 
     console.log("📊 [getBusinessProfile] Business found:", business ? "YES" : "NO")
-    if (business) {
-      console.log("📊 [getBusinessProfile] Business details:", {
-        id: business.id,
-        businessName: business.businessName,
-        hasDescription: !!business.businessDescription,
-      })
-    }
 
     if (!business) {
       console.log("🔄 [getBusinessProfile] Falling back to automation lookup")
@@ -468,9 +463,6 @@ export async function getBusinessProfileForAutomation(automationId: string) {
       })
 
       console.log("📊 [getBusinessProfile] Automation found:", automation ? "YES" : "NO")
-      if (automation) {
-        console.log("📊 [getBusinessProfile] Automation user businesses count:", automation.User?.businesses?.length || 0)
-      }
 
       const fallbackBusiness = automation?.User?.businesses?.[0]
 
@@ -514,94 +506,32 @@ export async function getBusinessProfileForAutomation(automationId: string) {
   }
 }
 
-// Get or create fallback automation by Instagram page ID
+// SIMPLIFIED: Get or create default automation for current user by platform only
 export async function getOrCreateDefaultAutomation(
-  pageId: string, 
   platform: "INSTAGRAM" | "WHATSAPP" | "FACEBOOK" = "INSTAGRAM"
 ) {
   try {
     console.log("🚀 [getOrCreateDefault] ============ STARTING ============")
-    console.log("🚀 [getOrCreateDefault] PageId:", pageId)
     console.log("🚀 [getOrCreateDefault] Platform:", platform)
 
-    // Find user through integration - try multiple ID fields
-    const integration = await client.integrations.findFirst({
-      where: { 
-        OR: [
-          { instagramId: pageId },
-          { pageId: pageId },
-        ]
-      },
-      select: {
-        userId: true,
-        instagramId: true,
-        pageId: true,
-        User: {
-          select: {
-            id: true,
-            subscription: { select: { plan: true } },
-            integrations: { select: { token: true } },
-          },
-        },
-      },
-    })
-
-    console.log("📊 [getOrCreateDefault] Integration found:", integration ? "YES" : "NO")
-    if (integration) {
-      console.log("📊 [getOrCreateDefault] Integration details:", {
-        userId: integration.userId,
-        instagramId: integration.instagramId,
-        pageId: integration.pageId,
-      })
-    }
-
-    if (!integration?.userId) {
-      console.log("❌ [getOrCreateDefault] No user found for page ID:", pageId)
-      
-      // Debug: Show what integrations exist
-      const sampleIntegrations = await client.integrations.findMany({
-        select: { id: true, instagramId: true, pageId: true, userId: true },
-        take: 5,
-      })
-      console.log("📋 [getOrCreateDefault] Sample integrations in DB:", JSON.stringify(sampleIntegrations, null, 2))
-      
+    // STEP 1: Get current user
+    const userInfo = await onUserInfor()
+    
+    if (userInfo.status !== 200 || !userInfo.data?.id) {
+      console.log("❌ [getOrCreateDefault] Failed to get user info:", userInfo.status)
       return null
     }
 
-    console.log("✅ [getOrCreateDefault] Found userId:", integration.userId)
+    const userId = userInfo.data.id
+    console.log("✅ [getOrCreateDefault] Current user ID:", userId)
 
-    // Debug: Show ALL automations for this user
-    const allUserAutomations = await client.automation.findMany({
-      where: { userId: integration.userId },
-      select: { 
-        id: true, 
-        name: true,
-        isFallback: true, 
-        platform: true, 
-        active: true, 
-        deletedAt: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-    console.log("📋 [getOrCreateDefault] ALL automations for user:", JSON.stringify(allUserAutomations, null, 2))
-    console.log("📋 [getOrCreateDefault] Total automations count:", allUserAutomations.length)
-
-    // Show what we're searching for
-    console.log("🔍 [getOrCreateDefault] Search criteria:")
-    console.log("   - userId:", integration.userId)
-    console.log("   - isFallback:", true)
-    console.log("   - platform:", platform)
-    console.log("   - active:", true)
-    console.log("   - deletedAt:", null)
-
-    // Look for existing fallback automation for this user and platform
+    // STEP 2: Look for existing fallback automation for this user and platform
     let defaultAutomation = await client.automation.findFirst({
       where: {
-        userId: integration.userId,
-        isFallback: true,
+        userId: userId,
         platform: platform,
-        active: true,
+        isFallback: true,
+        // active: true,
         deletedAt: null,
       },
       include: {
@@ -615,7 +545,7 @@ export async function getOrCreateDefaultAutomation(
         listener: true,
         trigger: true,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     })
 
     if (defaultAutomation) {
@@ -626,31 +556,26 @@ export async function getOrCreateDefaultAutomation(
         platform: defaultAutomation.platform,
         isFallback: defaultAutomation.isFallback,
         active: defaultAutomation.active,
-        deletedAt: defaultAutomation.deletedAt,
-        hasListener: !!defaultAutomation.listener,
-        triggerCount: defaultAutomation.trigger?.length || 0,
       })
       console.log("🏁 [getOrCreateDefault] ============ COMPLETED (FOUND) ============\n")
       return defaultAutomation
     }
 
-    console.log("⚠️ [getOrCreateDefault] No fallback automation found, creating new one...")
+    console.log("⚠️ [getOrCreateDefault] No fallback found for platform:", platform)
+    console.log("🔧 [getOrCreateDefault] Creating new fallback automation...")
 
-    // Create default automation if it doesn't exist
-    console.log(`🔧 [getOrCreateDefault] Creating fallback automation for user: ${integration.userId}, platform: ${platform}`)
-
+    // STEP 3: Create fallback automation for this user and platform
     defaultAutomation = await client.automation.create({
       data: {
         name: `Default ${platform} Handler`,
         active: true,
         isFallback: true,
         platform: platform,
-        userId: integration.userId,
+        userId: userId,
         listener: {
           create: {
             listener: "SMARTAI",
-            prompt:
-              "You are a helpful customer service representative. Respond naturally and professionally to customer inquiries.",
+            prompt: "You are a helpful customer service representative. Respond naturally and professionally to customer inquiries.",
           },
         },
         trigger: {
@@ -680,14 +605,21 @@ export async function getOrCreateDefaultAutomation(
     })
 
     console.log("✅ [getOrCreateDefault] Fallback automation created!")
-    console.log("📊 [getOrCreateDefault] New automation ID:", defaultAutomation.id)
+    console.log("📊 [getOrCreateDefault] New automation:", {
+      id: defaultAutomation.id,
+      name: defaultAutomation.name,
+      platform: defaultAutomation.platform,
+    })
     console.log("🏁 [getOrCreateDefault] ============ COMPLETED (CREATED) ============\n")
     
     return defaultAutomation
   } catch (error) {
     console.error("❌ [getOrCreateDefault] ============ ERROR ============")
-    console.error("❌ [getOrCreateDefault] Error details:", error)
-    console.error("❌ [getOrCreateDefault] Stack:", error instanceof Error ? error.stack : "No stack trace")
+    console.error("❌ [getOrCreateDefault] Error:", error)
+    if (error instanceof Error) {
+      console.error("❌ [getOrCreateDefault] Message:", error.message)
+      console.error("❌ [getOrCreateDefault] Stack:", error.stack)
+    }
     console.log("🏁 [getOrCreateDefault] ============ FAILED ============\n")
     return null
   }
