@@ -2517,7 +2517,7 @@ class MessageProcessor {
 
       if (triggerDecision.triggerType === "NO_MATCH") {
         // Get or create default automation
-        automation = await getOrCreateDefaultAutomation(payload.senderId)
+        automation = await getOrCreateDefaultAutomation(payload.pageId)
         if (!automation) {
           Logger.warn("No default automation available")
           return null
@@ -2532,7 +2532,7 @@ class MessageProcessor {
         if (!automation) {
           Logger.warn(`Automation not found: ${triggerDecision.automationId}`)
           // Fallback to default
-          automation = await getOrCreateDefaultAutomation(payload.senderId)
+          automation = await getOrCreateDefaultAutomation(payload.pageId)
           if (!automation) return null
         }
       }
