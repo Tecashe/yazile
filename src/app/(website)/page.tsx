@@ -2452,6 +2452,97 @@
 
 
 
+// import { Header } from "@/components/global/landing/landing/header"
+// import { HeroSection } from "@/components/global/landing/landing/hero-section"
+// import { StatsSection } from "@/components/global/landing/landing/stats-section"
+// import { FeaturesGrid } from "@/components/global/landing/landing/features-grid"
+// import { VideoShowcasePremium } from "@/components/global/landing/landing/video-showcase-premium"
+// import { AdvancedDMSimulation } from "@/components/global/landing/landing/advanced-dm-simulation"
+// import { MetaTrustSection } from "@/components/global/landing/landing/meta-trust-section"
+// import { IntegrationsSection } from "@/components/global/landing/landing/integrations-section"
+// import { HowItWorks } from "@/components/global/landing/landing/how-it-works"
+// import { UseCasesSection } from "@/components/global/landing/landing/use-cases-section"
+// import { ResultsSection } from "@/components/global/landing/landing/results-section"
+// import { TestimonialsSection } from "@/components/global/landing/landing/testimonials-section"
+// import { ROICalculator } from "@/components/global/landing/landing/roi-calculator"
+// import { PricingSection } from "@/components/global/landing/landing/pricing-section"
+// import { FAQSection } from "@/components/global/landing/landing/faq-section"
+// import { FinalCTA } from "@/components/global/landing/landing/final-cta"
+// import { Footer } from "@/components/global/landing/landing/footer"
+// import { HorizontalScroll } from "@/components/global/landing/landing/horizontal-scroll"
+
+// export default function Home() {
+//   return (
+//     <main className="min-h-screen">
+//       <Header />
+//       <HeroSection />
+//       <StatsSection />
+//       <MetaTrustSection />
+
+//       {/* Video showcase - Floating style */}
+//       <VideoShowcasePremium
+//         title="See yazzil Transform Your Instagram DMs"
+//         description="Watch how businesses automate thousands of conversations and close more sales"
+//         accent="orange"
+//         style="floating"
+//       />
+
+//       <FeaturesGrid />
+
+//       <HorizontalScroll />
+
+//       <AdvancedDMSimulation />
+
+//       {/* Video showcase - Split style */}
+//       <VideoShowcasePremium
+//         title="Connect Everything in Seconds"
+//         description="See how easy it is to integrate yazzil with your favorite tools"
+//         accent="green"
+//         style="split"
+//       />
+
+//       <IntegrationsSection />
+//       <HowItWorks />
+
+//       {/* Video showcase - Card style */}
+//       <VideoShowcasePremium
+//         title="Real Businesses, Real Results"
+//         description="Hear success stories from businesses just like yours"
+//         accent="purple"
+//         style="card"
+//       />
+
+//       <UseCasesSection />
+//       <ResultsSection />
+
+//       {/* Video showcase - Fullwidth style */}
+//       <VideoShowcasePremium
+//         title="Why Top Brands Choose yazzil"
+//         description="Discover what makes yazzil the #1 Instagram automation platform"
+//         accent="red"
+//         style="fullwidth"
+//       />
+
+//       <TestimonialsSection />
+//       <ROICalculator />
+
+//       {/* Video showcase - Floating style */}
+//       <VideoShowcasePremium
+//         title="Get Started in Under 2 Minutes"
+//         description="Watch our quick setup guide and start automating today"
+//         accent="yellow"
+//         style="floating"
+//       />
+
+//       <PricingSection />
+//       <FAQSection />
+//       <FinalCTA />
+//       <Footer />
+//     </main>
+//   )
+// }
+
+
 import { Header } from "@/components/global/landing/landing/header"
 import { HeroSection } from "@/components/global/landing/landing/hero-section"
 import { StatsSection } from "@/components/global/landing/landing/stats-section"
@@ -2470,6 +2561,9 @@ import { FAQSection } from "@/components/global/landing/landing/faq-section"
 import { FinalCTA } from "@/components/global/landing/landing/final-cta"
 import { Footer } from "@/components/global/landing/landing/footer"
 import { HorizontalScroll } from "@/components/global/landing/landing/horizontal-scroll"
+import { AutomationReels } from "@/components/global/landing/landing/automation-reels"
+import { SuccessStories } from "@/components/global/landing/landing/success-stories"
+
 
 export default function Home() {
   return (
@@ -2493,6 +2587,8 @@ export default function Home() {
 
       <AdvancedDMSimulation />
 
+      <AutomationReels />
+
       {/* Video showcase - Split style */}
       <VideoShowcasePremium
         title="Connect Everything in Seconds"
@@ -2503,6 +2599,8 @@ export default function Home() {
 
       <IntegrationsSection />
       <HowItWorks />
+
+      <SuccessStories />
 
       {/* Video showcase - Card style */}
       <VideoShowcasePremium
