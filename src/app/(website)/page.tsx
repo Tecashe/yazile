@@ -2674,6 +2674,7 @@ export default function Home() {
       <VideoShowcasePremium
         title="See yazzil Transform Your Instagram DMs"
         description="Watch how businesses automate thousands of conversations and close more sales"
+        videoUrl="/my-video.mp4"
         accent="orange"
         style="floating"
       />
