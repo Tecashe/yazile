@@ -2001,8 +2001,8 @@ const Trigger = ({ id }: Props) => {
 
           <TabsContent value="configure" className="space-y-4">
             <div>
-              <h3 className="text-lg font-medium mb-2">How Should This Automation Trigger?</h3>
-              <p className="text-sm text-slate-400 mb-4">
+              <h3 className="text-base sm:text-lg font-medium mb-2">How Should This Automation Trigger?</h3>
+              <p className="text-xs sm:text-sm text-slate-400 mb-4 leading-relaxed">
                 Choose when your automation should respond to customer messages
               </p>
 
@@ -2023,32 +2023,34 @@ const Trigger = ({ id }: Props) => {
                         <KeySquare className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h4 className="font-semibold text-white text-base sm:text-lg">Specific Keywords</h4>
-                          <Badge
-                            variant="outline"
-                            className="bg-green-500/20 text-green-300 text-xs border-green-500/30"
-                          >
-                            Recommended
-                          </Badge>
-                          {triggerMode === "KEYWORDS" && <CheckCircle2 className="h-5 w-5 text-green-400 ml-auto" />}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold text-white text-base sm:text-lg">Specific Keywords</h4>
+                            <Badge
+                              variant="outline"
+                              className="bg-green-500/20 text-green-300 text-xs border-green-500/30"
+                            >
+                              Recommended
+                            </Badge>
+                          </div>
+                          {triggerMode === "KEYWORDS" && <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />}
                         </div>
-                        <p className="text-sm text-slate-300 mb-3">
+                        <p className="text-xs sm:text-sm text-slate-300 mb-3 leading-relaxed">
                           Trigger only when customers use specific keywords like &ldquo;help&rdquo;,
                           &ldquo;pricing&rdquo;, or &ldquo;support&rdquo;
                         </p>
                         <div className="space-y-1.5 text-xs text-slate-400">
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0"></div>
-                            <span>Targeted, relevant responses</span>
+                          <div className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0 mt-1.5"></div>
+                            <span className="leading-relaxed">Targeted, relevant responses</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0"></div>
-                            <span>Full control over when automation triggers</span>
+                          <div className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0 mt-1.5"></div>
+                            <span className="leading-relaxed">Full control over when automation triggers</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0"></div>
-                            <span>Prevents unwanted or irrelevant responses</span>
+                          <div className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0 mt-1.5"></div>
+                            <span className="leading-relaxed">Prevents unwanted or irrelevant responses</span>
                           </div>
                         </div>
                       </div>
@@ -2072,33 +2074,35 @@ const Trigger = ({ id }: Props) => {
                         <MessageSquare className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h4 className="font-semibold text-white text-base sm:text-lg">Listen to Everything</h4>
-                          <Badge
-                            variant="outline"
-                            className="bg-purple-500/20 text-purple-300 text-xs border-purple-500/30"
-                          >
-                            Advanced
-                          </Badge>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold text-white text-base sm:text-lg">Listen to Everything</h4>
+                            <Badge
+                              variant="outline"
+                              className="bg-purple-500/20 text-purple-300 text-xs border-purple-500/30"
+                            >
+                              Advanced
+                            </Badge>
+                          </div>
                           {triggerMode === "ALL_MESSAGES" && (
-                            <CheckCircle2 className="h-5 w-5 text-purple-400 ml-auto" />
+                            <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
                           )}
                         </div>
-                        <p className="text-sm text-slate-300 mb-3">
+                        <p className="text-xs sm:text-sm text-slate-300 mb-3 leading-relaxed">
                           Respond to any message from customers, perfect for AI-powered conversations
                         </p>
                         <div className="space-y-1.5 text-xs text-slate-400">
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0"></div>
-                            <span>Natural, flowing conversations</span>
+                          <div className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0 mt-1.5"></div>
+                            <span className="leading-relaxed">Natural, flowing conversations</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0"></div>
-                            <span>AI detects intent automatically</span>
+                          <div className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0 mt-1.5"></div>
+                            <span className="leading-relaxed">AI detects intent automatically</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0"></div>
-                            <span>Works as fallback for unmatched messages</span>
+                          <div className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0 mt-1.5"></div>
+                            <span className="leading-relaxed">Works as fallback for unmatched messages</span>
                           </div>
                         </div>
                       </div>
