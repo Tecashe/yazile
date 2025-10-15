@@ -28,36 +28,6 @@ body {
       transform: rotate(360deg);
     }
   }
-
-  /* Mobile-first responsive text utilities */
-  .text-responsive-xs {
-    @apply text-xs sm:text-sm;
-  }
-
-  .text-responsive-sm {
-    @apply text-sm sm:text-base;
-  }
-
-  .text-responsive-base {
-    @apply text-base sm:text-lg;
-  }
-
-  .text-responsive-lg {
-    @apply text-lg sm:text-xl md:text-2xl;
-  }
-
-  .text-responsive-xl {
-    @apply text-xl sm:text-2xl md:text-3xl;
-  }
-
-  /* Mobile-optimized spacing */
-  .section-padding {
-    @apply py-12 md:py-16 lg:py-20;
-  }
-
-  .container-padding {
-    @apply px-4 sm:px-6 lg:px-8;
-  }
 }
 
 
@@ -88,32 +58,6 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-
-    /* Bright accent colors */
-    --color-orange: 14 100% 60%;
-    --color-green: 168 100% 43%;
-    --color-red: 348 100% 60%;
-    --color-yellow: 48 100% 62%;
-    --color-maroon: 356 84% 43%;
-    --color-brown: 25 56% 41%;
-    --color-purple: 274 63% 58%;
-
-    /* Sidebar colors */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 3.9%;
-    --sidebar-primary: 0 0% 96.1%;
-    --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 0 0% 96.1%;
-    --sidebar-accent-foreground: 0 0% 9%;
-    --sidebar-border: 0 0% 89.8%;
-    --sidebar-ring: 14 100% 60%; /* orange */
-
-    /* Scrollbar variables */
-    --scrollbar-width: 8px;
-    --scrollbar-track: transparent;
-    --scrollbar-thumb: hsl(0 0% 80%);
-    --scrollbar-thumb-hover: hsl(0 0% 70%);
-    --page-background: hsl(0 0% 100%);
   }
 
   .dark {
@@ -141,30 +85,6 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-
-    /* Dark mode accent colors */
-    --color-orange: 14 100% 60%;
-    --color-green: 168 100% 43%;
-    --color-red: 348 100% 60%;
-    --color-yellow: 48 100% 62%;
-    --color-maroon: 356 84% 43%;
-    --color-brown: 25 56% 41%;
-    --color-purple: 274 63% 58%;
-
-    /* Dark mode sidebar colors */
-    --sidebar-background: 0 0% 3.9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 14.9%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 14.9%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 14.9%;
-    --sidebar-ring: 14 100% 60%; /* orange */
-
-    /* Dark mode scrollbar */
-    --scrollbar-thumb: hsl(0 0% 20%);
-    --scrollbar-thumb-hover: hsl(0 0% 30%);
-    --page-background: hsl(0 0% 3.9%);
   }
 }
 
@@ -175,9 +95,6 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-  }
-  html {
-    scroll-behavior: smooth;
   }
 }
 
@@ -260,135 +177,10 @@ body {
   }
 }
 
-/* ============================================
-   SCROLL ANIMATIONS
-   ============================================ */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+@layer base {
+  html {
+    scroll-behavior: smooth;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out;
-}
-
-.animate-slide-in-left {
-  animation: slide-in-left 0.6s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.6s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.6s ease-out;
-}
-
-/* Scroll reveal utility */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.scroll-reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ============================================
-   CURSOR & TYPING ANIMATIONS
-   ============================================ */
-@keyframes cursor-move {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(5px, 5px);
-  }
-  50% {
-    transform: translate(10px, 2px);
-  }
-  75% {
-    transform: translate(3px, 8px);
-  }
-}
-
-.cursor-animate {
-  animation: cursor-move 3s ease-in-out infinite;
-}
-
-@keyframes typing {
-  0%, 100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.typing-dot {
-  animation: typing 1.4s ease-in-out infinite;
-}
-
-.typing-dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-dot:nth-child(3) {
-  animation-delay: 0.4s;
 }
 
 @keyframes subtleShimmer {
@@ -861,27 +653,4 @@ body {
   background-image: radial-gradient(at top left, rgba(51, 82, 204, 0.08) 40%, hsl(var(--background)) 60%);
 }
 
-/* ============================================
-   FLOAT ANIMATIONS FOR INTEGRATIONS
-   ============================================ */
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
 
-.animate-float-delayed {
-  animation: float-delayed 4s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-/* ============================================
-   DATA FLOW LINE ANIMATIONS
-   ============================================ */
-.data-flow-line {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-}
