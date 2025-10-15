@@ -490,3 +490,59 @@ export const addScheduledPosts = async (automationId: string, scheduledPostIds: 
     },
   })
 }
+
+/////////////////
+
+
+
+export const disableOtherDefaultAutomations = async (userId: string, currentAutomationId: string) => {
+  // Find all automations for this user that have isFallback = true, excluding the current one
+  const defaultAutomations = await client.automation.findMany({
+    where: {
+      userId,
+      isFallback: true,
+      id: {
+        not: currentAutomationId,
+      },
+      deletedAt: null,
+    },
+  })
+
+  // If any exist, set their isFallback to false
+  if (defaultAutomations.length > 0) {
+    await client.automation.updateMany({
+      where: {
+        id: {
+          in: defaultAutomations.map((a) => a.id),
+        },
+      },
+      data: {
+        isFallback: false,
+        listenMode: "KEYWORDS", // Reset to keywords mode
+      },
+    })
+  }
+
+  return defaultAutomations.length
+}
+
+export const getDefaultAutomation = async (clerkId: string, excludeId?: string) => {
+  return await client.automation.findFirst({
+    where: {
+      User: {
+        clerkId,
+      },
+      isFallback: true,
+      deletedAt: null,
+      ...(excludeId && {
+        id: {
+          not: excludeId,
+        },
+      }),
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  })
+}

@@ -1749,7 +1749,6 @@
 
 // export default Trigger
 
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -1775,6 +1774,8 @@ import {
   ChevronLeft,
   Plus,
   CheckCircle2,
+  AlertCircle,
+  Lock,
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FloatingPanel from "../../panel"
@@ -1785,6 +1786,7 @@ import { WebsiteAnalyzer } from "../analyzer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useDefaultAutomation } from "@/hooks/use-create-automations"
 
 type Props = {
   id: string
@@ -1793,12 +1795,14 @@ type Props = {
 const Trigger = ({ id }: Props) => {
   const { types, onSetTrigger, onSaveTrigger, isPending } = useTriggers(id)
   const { data } = useQueryAutomation(id)
+  const { data: existingDefault } = useDefaultAutomation(id)
   const [showTip, setShowTip] = useState(true)
   const [activeTab, setActiveTab] = useState("setup")
   const [triggerMode, setTriggerMode] = useState<"KEYWORDS" | "ALL_MESSAGES">("KEYWORDS")
   const [isEditing, setIsEditing] = useState(false)
 
   const isFallback = triggerMode === "ALL_MESSAGES"
+  const hasExistingDefault = !!existingDefault && existingDefault.id !== id
 
   useEffect(() => {
     if (data?.data?.listenMode) {
@@ -2061,17 +2065,26 @@ const Trigger = ({ id }: Props) => {
                 {/* Listen to Everything Mode */}
                 <Card
                   className={cn(
-                    "cursor-pointer transition-all duration-200 relative overflow-hidden",
+                    "transition-all duration-200 relative overflow-hidden",
+                    hasExistingDefault ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
                     triggerMode === "ALL_MESSAGES"
                       ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480] border-[#7C21D6] ring-2 ring-[#7C21D6]/50"
                       : "bg-background-80 hover:bg-background-70 border-background-70",
                   )}
-                  onClick={() => setTriggerMode("ALL_MESSAGES")}
+                  onClick={() => {
+                    if (!hasExistingDefault) {
+                      setTriggerMode("ALL_MESSAGES")
+                    }
+                  }}
                 >
                   <CardContent className="p-4 sm:p-5">
                     <div className="flex items-start gap-3">
                       <div className="p-2 sm:p-3 bg-black/20 rounded-lg shrink-0">
-                        <MessageSquare className="h-5 w-5 text-white" />
+                        {hasExistingDefault ? (
+                          <Lock className="h-5 w-5 text-white" />
+                        ) : (
+                          <MessageSquare className="h-5 w-5 text-white" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-2">
@@ -2084,7 +2097,7 @@ const Trigger = ({ id }: Props) => {
                               Advanced
                             </Badge>
                           </div>
-                          {triggerMode === "ALL_MESSAGES" && (
+                          {triggerMode === "ALL_MESSAGES" && !hasExistingDefault && (
                             <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
                           )}
                         </div>
@@ -2110,6 +2123,19 @@ const Trigger = ({ id }: Props) => {
                   </CardContent>
                 </Card>
               </div>
+
+              {hasExistingDefault && (
+                <Alert className="bg-orange-500/10 border-orange-500/30 mb-4">
+                  <AlertCircle className="h-4 w-4 text-orange-500" />
+                  <AlertTitle className="text-orange-500 font-medium">Default Automation Already Set</AlertTitle>
+                  <AlertDescription className="text-orange-400 text-sm leading-relaxed">
+                    You already have a default automation set:{" "}
+                    <span className="font-semibold">&ldquo;{existingDefault?.name || "Untitled"}&rdquo;</span>. Only one
+                    automation can listen to all messages at a time. To use this option, please edit or delete your
+                    existing default automation first.
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {triggerMode === "KEYWORDS" && (
                 <div className="space-y-3">
