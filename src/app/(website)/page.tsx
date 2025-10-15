@@ -2690,9 +2690,11 @@ export default function Home() {
       <VideoShowcasePremium
         title="Connect Everything in Seconds"
         description="See how easy it is to integrate yazzil with your favorite tools"
+        videoUrl="/my-video.mp4"
         accent="green"
         style="split"
       />
+      
 
       <IntegrationsSection />
       <HowItWorks />
@@ -2703,6 +2705,7 @@ export default function Home() {
       <VideoShowcasePremium
         title="Real Businesses, Real Results"
         description="Hear success stories from businesses just like yours"
+        videoUrl="/my-video.mp4"
         accent="purple"
         style="card"
       />
@@ -2714,6 +2717,7 @@ export default function Home() {
       <VideoShowcasePremium
         title="Why Top Brands Choose yazzil"
         description="Discover what makes yazzil the #1 Instagram automation platform"
+        videoUrl="/my-video.mp4"
         accent="red"
         style="fullwidth"
       />
@@ -2725,6 +2729,7 @@ export default function Home() {
       <VideoShowcasePremium
         title="Get Started in Under 2 Minutes"
         description="Watch our quick setup guide and start automating today"
+        videoUrl="/my-video.mp4" 
         accent="yellow"
         style="floating"
       />

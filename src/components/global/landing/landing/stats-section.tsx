@@ -66,7 +66,7 @@ export function StatsSection() {
       label: "Active Users",
       description: "Instagram businesses trust yazzil",
       color: "#ff6b35", // orange
-      icon: "👥",
+      icon: "",
     },
     {
       value: 5,
@@ -74,7 +74,7 @@ export function StatsSection() {
       label: "Messages Automated",
       description: "Every single month",
       color: "#00d9a3", // green
-      icon: "💬",
+      icon: "",
     },
     {
       value: 300,
@@ -82,7 +82,7 @@ export function StatsSection() {
       label: "Avg. Engagement Boost",
       description: "Within first 30 days",
       color: "#ff3366", // red
-      icon: "📈",
+      icon: "",
     },
     {
       value: 24,
@@ -90,7 +90,7 @@ export function StatsSection() {
       label: "Always Active",
       description: "Never miss a customer",
       color: "#ffd23f", // yellow
-      icon: "⚡",
+      icon: "",
     },
   ]
 
