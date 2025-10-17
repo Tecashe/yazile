@@ -2679,9 +2679,9 @@ export default function Home() {
         style="floating"
       />
 
-      <FeaturesGrid />
+      {/* <FeaturesGrid /> */}
 
-      <HorizontalScroll />
+      {/* <HorizontalScroll /> */}
 
       <AdvancedDMSimulation />
 
