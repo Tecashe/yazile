@@ -69,6 +69,12 @@ model User {
   webhookNotifications Notification[]
   alerts               Alert[]
   WhatsAppAccount      WhatsAppAccount[]
+
+
+
+  
+  linkedInAccounts      LinkedInAccount[]   @relation("LinkedInAccounts")
+  facebookPages         FacebookPage[]      @relation("FacebookPages")
 }
 
 enum AutomationGoalType {
@@ -2221,4 +2227,533 @@ model MessageTemplates {
   user User @relation("UserMessageTemplates", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("message_templates")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================================
+// LINKEDIN MODELS
+// ============================================================================
+
+model LinkedInAccount {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String    @db.Uuid
+  
+  // LinkedIn OAuth credentials
+  linkedInId            String    @unique
+  accessToken           String    @db.Text
+  refreshToken          String?   @db.Text
+  expiresAt             DateTime?
+  
+  // Account metadata
+  profileUrl            String?
+  firstName             String?
+  lastName              String?
+  headline              String?
+  profilePicture        String?
+  
+  // Webhook configuration
+  webhookToken          String?   @unique
+  
+  // Status and tracking
+  status                String    @default("pending") // pending, verified, suspended, inactive
+  isActive              Boolean   @default(true)
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  user                  User      @relation("LinkedInAccounts", fields: [userId], references: [id], onDelete: Cascade)
+  messages              LinkedInMessage[]
+  contacts              LinkedInContact[]
+  campaigns             LinkedInCampaign[]
+  automationRules       LinkedInAutomationRule[]
+  webhookLogs           LinkedInWebhookLog[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([isActive])
+  @@map("linkedin_accounts")
+}
+
+model LinkedInMessage {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  linkedInAccountId     String    @db.Uuid
+  
+  // Message identifiers
+  messageId             String?
+  conversationId        String
+  
+  // Message content
+  senderId              String
+  recipientId           String
+  content               String    @db.Text
+  messageType           String    @default("text") // text, image, video, document, template
+  
+  // Message metadata
+  direction             String    @default("inbound") // inbound, outbound
+  status                String    @default("sent") // sent, delivered, read, failed
+  
+  // Tracking
+  campaignId            String?   @db.Uuid
+  automationRuleId      String?   @db.Uuid
+  
+  // Timestamps
+  timestamp             DateTime  @default(now())
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  linkedInAccount       LinkedInAccount @relation(fields: [linkedInAccountId], references: [id], onDelete: Cascade)
+  campaign              LinkedInCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  automationRule        LinkedInAutomationRule? @relation(fields: [automationRuleId], references: [id], onDelete: SetNull)
+  
+  @@index([linkedInAccountId])
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+  @@index([direction])
+  @@map("linkedin_messages")
+}
+
+model LinkedInContact {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  linkedInAccountId     String    @db.Uuid
+  
+  // Contact identifiers
+  linkedInId            String
+  profileUrl            String?
+  
+  // Contact information
+  firstName             String
+  lastName              String
+  headline              String?
+  company               String?
+  industry              String?
+  location              String?
+  profilePicture        String?
+  
+  // Relationship status
+  connectionStatus      String    @default("not_connected") // not_connected, pending, connected
+  
+  // Engagement tracking
+  tags                  String[]  @default([])
+  customFields          Json?
+  lastMessageAt         DateTime?
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  linkedInAccount       LinkedInAccount @relation(fields: [linkedInAccountId], references: [id], onDelete: Cascade)
+  
+  @@index([linkedInAccountId])
+  @@index([linkedInId])
+  @@index([connectionStatus])
+  @@unique([linkedInAccountId, linkedInId])
+  @@map("linkedin_contacts")
+}
+
+model LinkedInCampaign {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  linkedInAccountId     String    @db.Uuid
+  
+  // Campaign metadata
+  name                  String
+  description           String?   @db.Text
+  campaignType          String    @default("outreach") // outreach, nurture, engagement
+  
+  // Targeting
+  targetAudience        Json      // { industries: [], titles: [], companies: [], locations: [] }
+  messageTemplate       String    @db.Text
+  
+  // Campaign status
+  status                String    @default("draft") // draft, scheduled, running, paused, completed
+  scheduledAt           DateTime?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  
+  // Metrics
+  totalTargets          Int       @default(0)
+  sentCount             Int       @default(0)
+  deliveredCount        Int       @default(0)
+  readCount             Int       @default(0)
+  repliedCount          Int       @default(0)
+  failedCount           Int       @default(0)
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  linkedInAccount       LinkedInAccount @relation(fields: [linkedInAccountId], references: [id], onDelete: Cascade)
+  messages              LinkedInMessage[]
+  
+  @@index([linkedInAccountId])
+  @@index([status])
+  @@index([campaignType])
+  @@map("linkedin_campaigns")
+}
+
+model LinkedInAutomationRule {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  linkedInAccountId     String    @db.Uuid
+  
+  // Rule configuration
+  name                  String
+  trigger               String    // connection_request, profile_view, message_keyword, welcome_message
+  triggerValue          String?   @db.Text // keyword or condition
+  
+  // Response configuration
+  responseType          String    @default("text") // text, template, transfer
+  responseContent       String    @db.Text
+  
+  // Rule settings
+  isActive              Boolean   @default(true)
+  businessHoursOnly     Boolean   @default(false)
+  priority              Int       @default(0)
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  linkedInAccount       LinkedInAccount @relation(fields: [linkedInAccountId], references: [id], onDelete: Cascade)
+  messages              LinkedInMessage[]
+  
+  @@index([linkedInAccountId])
+  @@index([trigger])
+  @@index([isActive])
+  @@map("linkedin_automation_rules")
+}
+
+model LinkedInWebhookLog {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  linkedInAccountId     String?   @db.Uuid
+  
+  // Webhook event
+  eventType             String
+  payload               Json
+  
+  // Processing
+  processed             Boolean   @default(false)
+  processingError       String?   @db.Text
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  
+  // Relations
+  linkedInAccount       LinkedInAccount? @relation(fields: [linkedInAccountId], references: [id], onDelete: Cascade)
+  
+  @@index([linkedInAccountId])
+  @@index([eventType])
+  @@index([processed])
+  @@map("linkedin_webhook_logs")
+}
+
+// ============================================================================
+// FACEBOOK MODELS
+// ============================================================================
+
+model FacebookPage {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String    @db.Uuid
+  
+  // Facebook credentials
+  pageId                String    @unique
+  accessToken           String    @db.Text
+  refreshToken          String?   @db.Text
+  expiresAt             DateTime?
+  
+  // Page metadata
+  pageName              String
+  category              String?
+  profilePicture        String?
+  isVerified            Boolean   @default(false)
+  
+  // Webhook configuration
+  webhookToken          String?   @unique
+  
+  // Status and tracking
+  status                String    @default("pending") // pending, verified, suspended, inactive
+  isActive              Boolean   @default(true)
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  user                  User      @relation("FacebookPages", fields: [userId], references: [id], onDelete: Cascade)
+  messages              FacebookMessage[]
+  contacts              FacebookContact[]
+  campaigns             FacebookCampaign[]
+  automationRules       FacebookAutomationRule[]
+  webhookLogs           FacebookWebhookLog[]
+  comments              FacebookComment[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([isActive])
+  @@map("facebook_pages")
+}
+
+model FacebookMessage {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebookPageId        String    @db.Uuid
+  
+  // Message identifiers
+  messageId             String?
+  conversationId        String
+  
+  // Message content
+  senderId              String
+  recipientId           String
+  content               String    @db.Text
+  messageType           String    @default("text") // text, image, video, template, quick_reply
+  
+  // Message metadata
+  direction             String    @default("inbound") // inbound, outbound
+  status                String    @default("sent") // sent, delivered, read, failed
+  source                String    @default("messenger") // messenger, comment_reply
+  
+  // Tracking
+  campaignId            String?   @db.Uuid
+  automationRuleId      String?   @db.Uuid
+  
+  // Timestamps
+  timestamp             DateTime  @default(now())
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  facebookPage          FacebookPage @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  campaign              FacebookCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  automationRule        FacebookAutomationRule? @relation(fields: [automationRuleId], references: [id], onDelete: SetNull)
+  
+  @@index([facebookPageId])
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+  @@index([source])
+  @@map("facebook_messages")
+}
+
+model FacebookContact {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebookPageId        String    @db.Uuid
+  
+  // Contact identifiers
+  facebookUserId        String
+  
+  // Contact information
+  name                  String?
+  email                 String?
+  phone                 String?
+  profilePicture        String?
+  
+  // Engagement tracking
+  tags                  String[]  @default([])
+  customFields          Json?
+  lastMessageAt         DateTime?
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  facebookPage          FacebookPage @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  
+  @@index([facebookPageId])
+  @@index([facebookUserId])
+  @@unique([facebookPageId, facebookUserId])
+  @@map("facebook_contacts")
+}
+
+model FacebookComment {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebookPageId        String    @db.Uuid
+  
+  // Comment identifiers
+  commentId             String    @unique
+  postId                String
+  
+  // Comment content
+  userId                String
+  content               String    @db.Text
+  
+  // Comment hierarchy
+  parentCommentId       String?
+  
+  // Status
+  status                String    @default("pending") // pending, replied, archived
+  repliedAt             DateTime?
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  facebookPage          FacebookPage @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  
+  @@index([facebookPageId])
+  @@index([postId])
+  @@index([userId])
+  @@index([status])
+  @@map("facebook_comments")
+}
+
+model FacebookCampaign {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebookPageId        String    @db.Uuid
+  
+  // Campaign metadata
+  name                  String
+  description           String?   @db.Text
+  campaignType          String    @default("messenger") // messenger, comment_reply, broadcast
+  
+  // Targeting
+  targetAudience        Json      // { interests: [], demographics: [], behaviors: [] }
+  messageTemplate       String    @db.Text
+  
+  // Campaign status
+  status                String    @default("draft") // draft, scheduled, running, paused, completed
+  scheduledAt           DateTime?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  
+  // Metrics
+  totalTargets          Int       @default(0)
+  sentCount             Int       @default(0)
+  deliveredCount        Int       @default(0)
+  readCount             Int       @default(0)
+  repliedCount          Int       @default(0)
+  failedCount           Int       @default(0)
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  facebookPage          FacebookPage @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  messages              FacebookMessage[]
+  
+  @@index([facebookPageId])
+  @@index([status])
+  @@index([campaignType])
+  @@map("facebook_campaigns")
+}
+
+model FacebookAutomationRule {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebookPageId        String    @db.Uuid
+  
+  // Rule configuration
+  name                  String
+  trigger               String    // message_keyword, comment_keyword, welcome_message, comment_reply
+  triggerValue          String?   @db.Text // keyword or condition
+  
+  // Response configuration
+  responseType          String    @default("text") // text, template, transfer
+  responseContent       String    @db.Text
+  
+  // Rule settings
+  isActive              Boolean   @default(true)
+  businessHoursOnly     Boolean   @default(false)
+  priority              Int       @default(0)
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  facebookPage          FacebookPage @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  messages              FacebookMessage[]
+  
+  @@index([facebookPageId])
+  @@index([trigger])
+  @@index([isActive])
+  @@map("facebook_automation_rules")
+}
+
+model FacebookWebhookLog {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  facebookPageId        String?   @db.Uuid
+  
+  // Webhook event
+  eventType             String
+  payload               Json
+  
+  // Processing
+  processed             Boolean   @default(false)
+  processingError       String?   @db.Text
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  
+  // Relations
+  facebookPage          FacebookPage? @relation(fields: [facebookPageId], references: [id], onDelete: Cascade)
+  
+  @@index([facebookPageId])
+  @@index([eventType])
+  @@index([processed])
+  @@map("facebook_webhook_logs")
 }

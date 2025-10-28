@@ -70,6 +70,11 @@ model User {
   webhookNotifications Notification[]
   alerts               Alert[]
   WhatsAppAccount      WhatsAppAccount[]
+
+
+
+  linkedInAccounts      LinkedInAccount[]   @relation("LinkedInAccounts")
+  facebookPages         FacebookPage[]      @relation("FacebookPages")
 }
 
 enum AutomationGoalType {
@@ -2219,3 +2224,42 @@ model MessageTemplates {
 
   @@map("message_templates")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
