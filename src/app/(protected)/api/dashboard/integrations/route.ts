@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     const tenant = await getTenantByUserId(user.data?.id || "")
 
     if (!tenant) {
-      return NextResponse.json({ error: "Tenant not found" }, { status: 404 })
+      return NextResponse.json({ error: "Tenant not found!!!!" }, { status: 404 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     const tenant = await getTenantByUserId(user.data?.id || "")
 
     if (!tenant) {
-      return NextResponse.json({ error: "Tenant not found" }, { status: 404 })
+      return NextResponse.json({ error: "Tenant not found !!" }, { status: 404 })
     }
 
     const body = await request.json()
