@@ -1906,7 +1906,7 @@ export default function SocialIntegrationsPage() {
       <Alert className="float bg-accent border-border">
         <Zap className="h-4 w-4 text-primary" />
         <AlertTitle className="text-accent-foreground">Automation Benefits</AlertTitle>
-        <AlertDescription className="text-muted-foreground">
+        <AlertDescription className="text-accent-foreground">
           Connect your social media accounts to enable automated posting, customer support, engagement tracking, 
           and comprehensive content management across all platforms.
         </AlertDescription>
