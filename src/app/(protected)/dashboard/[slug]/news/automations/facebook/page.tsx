@@ -48,24 +48,6 @@ export default function FacebookAutomationsPage() {
     }
   }, [selectedPage])
 
-  // async function fetchPages() {
-  //   try {
-  //     setLoading(true)
-  //     const result = await onGetFacebookPages()
-  //     if (result.status === 200) {
-  //       setPages(result.data || [])
-  //       if (result.data?.length > 0) {
-  //         setSelectedPage(result.data[0].id)
-  //       }
-  //     } else {
-  //       setError(result.error || "Failed to fetch pages")
-  //     }
-  //   } catch (err) {
-  //     setError("An error occurred")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
 
   async function fetchPages() {
     try {

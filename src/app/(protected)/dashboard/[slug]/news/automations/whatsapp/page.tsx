@@ -47,17 +47,7 @@ export default function WhatsAppAutomationsPage() {
     delayMinutes: 0,
     maxResponses: undefined,
   })
-  // const [formData, setFormData] = useState({
-  //   name: "",
-  //   trigger: "keyword",
-  //   triggerValue: "",
-  //   responseType: "text",
-  //   responseContent: "",
-  //   isActive: true,
-  //   businessHoursOnly: false,
-  //   delayMinutes: 0,
-  //   maxResponses: undefined,
-  // })
+  
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
