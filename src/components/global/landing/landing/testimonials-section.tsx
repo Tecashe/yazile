@@ -147,6 +147,16 @@ export function TestimonialsSection() {
         {/* Trust badges */}
         <div className="mt-20 text-center scroll-reveal">
           <p className="text-sm text-muted-foreground mb-6">Trusted by leading brands worldwide</p>
+          <div className="flex flex-wrap justify-center gap-12 items-center opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
+            <img src="/shopify-logo.png" alt="Shopify" className="h-8 object-contain" />
+            <img src="/zoho.png" alt="Stripe" className="h-8 object-contain" />
+            <img src="/airtable.png" alt="Meta" className="h-8 object-contain" />
+            <img src="/salesforce.png" alt="Salesforce" className="h-8 object-contain" />
+            <img src="/hubspot.png" alt="HubSpot" className="h-8 object-contain" />
+          </div>
+        </div>
+        {/* <div className="mt-20 text-center scroll-reveal">
+          <p className="text-sm text-muted-foreground mb-6">Trusted by leading brands worldwide</p>
           <div className="flex flex-wrap justify-center gap-8 items-center opacity-50">
             {["Brand 1", "Brand 2", "Brand 3", "Brand 4", "Brand 5"].map((brand) => (
               <div key={brand} className="text-2xl font-bold text-muted-foreground">
@@ -154,7 +164,7 @@ export function TestimonialsSection() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   )

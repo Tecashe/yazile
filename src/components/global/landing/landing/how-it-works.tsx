@@ -18,7 +18,7 @@ const steps = [
     title: "Set Up Automation",
     description: "Create custom flows for DMs, story replies, and comments with our visual builder.",
     icon: Zap,
-    color: "green",
+    color: "red",
   },
   {
     number: "03",

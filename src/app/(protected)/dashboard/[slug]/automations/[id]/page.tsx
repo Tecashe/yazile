@@ -102,13 +102,6 @@ export default Page
 
 
 
-
-
-
-
-
-
-
 //WITH ADDITIONAL NODES
 // import { getAutomationInfo } from "@/actions/automations"
 // import PostNode from "@/components/global/automations/post/node"
