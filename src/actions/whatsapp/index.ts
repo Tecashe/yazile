@@ -1,6 +1,6 @@
 "use server"
 
-import { onCurrentUser } from "../user"
+import { onUserInfor } from "../user"
 import {
   createWhatsAppAccount,
   getWhatsAppAccountsByUser,
@@ -28,8 +28,8 @@ export async function onConnectWhatsAppAccount(data: {
   webhookToken?: string
 }) {
   try {
-    const user = await onCurrentUser()
-    const account = await createWhatsAppAccount(user.id, data)
+    const user = await onUserInfor()
+    const account = await createWhatsAppAccount(user.data?.id||"", data)
     return { status: 200, data: account }
   } catch (error) {
     console.error("Error connecting WhatsApp account:", error)
@@ -39,8 +39,8 @@ export async function onConnectWhatsAppAccount(data: {
 
 export async function onGetWhatsAppAccounts() {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     return { status: 200, data: accounts }
   } catch (error) {
     console.error("Error fetching WhatsApp accounts:", error)
@@ -50,8 +50,8 @@ export async function onGetWhatsAppAccounts() {
 
 export async function onDisconnectWhatsAppAccount(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     await deleteWhatsAppAccount(accountId)
@@ -80,8 +80,8 @@ export async function onCreateWhatsAppTemplate(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const template = await createWhatsAppTemplate(accountId, data)
@@ -94,8 +94,8 @@ export async function onCreateWhatsAppTemplate(
 
 export async function onGetWhatsAppTemplates(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const templates = await getWhatsAppTemplates(accountId)
@@ -122,8 +122,8 @@ export async function onCreateWhatsAppAutomation(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const rule = await createWhatsAppAutomationRule(accountId, data)
@@ -136,8 +136,8 @@ export async function onCreateWhatsAppAutomation(
 
 export async function onGetWhatsAppAutomations(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const rules = await getWhatsAppAutomationRules(accountId)
@@ -180,8 +180,8 @@ export async function onCreateWhatsAppCampaign(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const campaign = await createWhatsAppCampaign(accountId, data)
@@ -194,8 +194,8 @@ export async function onCreateWhatsAppCampaign(
 
 export async function onGetWhatsAppCampaigns(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getWhatsAppAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getWhatsAppAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const campaigns = await getWhatsAppCampaigns(accountId)

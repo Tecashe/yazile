@@ -1,6 +1,6 @@
 // "use server"
 
-// import { onCurrentUser } from "../user"
+// import { onUserInfor } from "../user"
 // import {
 //   createLinkedInAccount,
 //   getLinkedInAccountsByUser,
@@ -162,7 +162,7 @@
 
 "use server"
 
-import { onCurrentUser } from "../user"
+import { onUserInfor } from "../user"
 import {
   createLinkedInAccount,
   getLinkedInAccountsByUser,
@@ -187,8 +187,8 @@ export async function onConnectLinkedInAccount(data: {
   profilePicture?: string
 }) {
   try {
-    const user = await onCurrentUser()
-    const account = await createLinkedInAccount(user.id, data)
+    const user = await onUserInfor()
+    const account = await createLinkedInAccount(user.data?.id||"", data)
     return { status: 200, data: account }
   } catch (error) {
     console.error("Error connecting LinkedIn account:", error)
@@ -198,8 +198,8 @@ export async function onConnectLinkedInAccount(data: {
 
 export async function onGetLinkedInAccounts() {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getLinkedInAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getLinkedInAccountsByUser(user.data?.id||"")
     return { status: 200, data: accounts }
   } catch (error) {
     console.error("Error fetching LinkedIn accounts:", error)
@@ -209,8 +209,8 @@ export async function onGetLinkedInAccounts() {
 
 export async function onDisconnectLinkedInAccount(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const account = await getLinkedInAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const account = await getLinkedInAccountsByUser(user.data?.id||"")
     const exists = account.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     await deleteLinkedInAccount(accountId)
@@ -238,8 +238,8 @@ export async function onCreateLinkedInAutomation(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getLinkedInAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getLinkedInAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
 
@@ -271,8 +271,8 @@ export async function onCreateLinkedInAutomation(
 
 export async function onGetLinkedInAutomations(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getLinkedInAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getLinkedInAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const rules = await getLinkedInAutomationRules(accountId)
@@ -285,7 +285,7 @@ export async function onGetLinkedInAutomations(accountId: string) {
 
 export async function onUpdateLinkedInAutomation(ruleId: string, data: Partial<any>) {
   try {
-    const user = await onCurrentUser()
+    const user = await onUserInfor()
     const rule = await updateLinkedInAutomationRule(ruleId, data)
     return { status: 200, data: rule }
   } catch (error) {
@@ -317,8 +317,8 @@ export async function onCreateLinkedInCampaign(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getLinkedInAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getLinkedInAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const campaign = await createLinkedInCampaign(accountId, data)
@@ -331,8 +331,8 @@ export async function onCreateLinkedInCampaign(
 
 export async function onGetLinkedInCampaigns(accountId: string) {
   try {
-    const user = await onCurrentUser()
-    const accounts = await getLinkedInAccountsByUser(user.id)
+    const user = await onUserInfor()
+    const accounts = await getLinkedInAccountsByUser(user.data?.id||"")
     const exists = accounts.some((a) => a.id === accountId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const campaigns = await getLinkedInCampaigns(accountId)
@@ -342,3 +342,4 @@ export async function onGetLinkedInCampaigns(accountId: string) {
     return { status: 500, error: "Failed to fetch campaigns" }
   }
 }
+
