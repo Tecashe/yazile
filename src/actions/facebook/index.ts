@@ -1,6 +1,6 @@
 "use server"
 
-import { onCurrentUser } from "../user"
+import { onUserInfor } from "../user"
 import {
   createFacebookPage,
   getFacebookPagesByUser,
@@ -24,8 +24,8 @@ export async function onConnectFacebookPage(data: {
   webhookToken?: string
 }) {
   try {
-    const user = await onCurrentUser()
-    const page = await createFacebookPage(user.id, data)
+    const user = await onUserInfor()
+    const page = await createFacebookPage(user.data?.id||"", data)
     return { status: 200, data: page }
   } catch (error) {
     console.error("Error connecting Facebook page:", error)
@@ -35,8 +35,8 @@ export async function onConnectFacebookPage(data: {
 
 export async function onGetFacebookPages() {
   try {
-    const user = await onCurrentUser()
-    const pages = await getFacebookPagesByUser(user.id)
+    const user = await onUserInfor()
+    const pages = await getFacebookPagesByUser(user.data?.id||"")
     return { status: 200, data: pages }
   } catch (error) {
     console.error("Error fetching Facebook pages:", error)
@@ -46,8 +46,8 @@ export async function onGetFacebookPages() {
 
 export async function onDisconnectFacebookPage(pageId: string) {
   try {
-    const user = await onCurrentUser()
-    const pages = await getFacebookPagesByUser(user.id)
+    const user = await onUserInfor()
+    const pages = await getFacebookPagesByUser(user.data?.id||"")
     const exists = pages.some((p) => p.id === pageId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     await deleteFacebookPage(pageId)
@@ -72,8 +72,8 @@ export async function onCreateFacebookAutomation(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const pages = await getFacebookPagesByUser(user.id)
+    const user = await onUserInfor()
+    const pages = await getFacebookPagesByUser(user.data?.id||"")
     const exists = pages.some((p) => p.id === pageId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const rule = await createFacebookAutomationRule(pageId, data)
@@ -86,8 +86,8 @@ export async function onCreateFacebookAutomation(
 
 export async function onGetFacebookAutomations(pageId: string) {
   try {
-    const user = await onCurrentUser()
-    const pages = await getFacebookPagesByUser(user.id)
+    const user = await onUserInfor()
+    const pages = await getFacebookPagesByUser(user.data?.id||"")
     const exists = pages.some((p) => p.id === pageId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const rules = await getFacebookAutomationRules(pageId)
@@ -131,8 +131,8 @@ export async function onCreateFacebookCampaign(
   },
 ) {
   try {
-    const user = await onCurrentUser()
-    const pages = await getFacebookPagesByUser(user.id)
+    const user = await onUserInfor()
+    const pages = await getFacebookPagesByUser(user.data?.id||"")
     const exists = pages.some((p) => p.id === pageId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const campaign = await createFacebookCampaign(pageId, data)
@@ -145,8 +145,8 @@ export async function onCreateFacebookCampaign(
 
 export async function onGetFacebookCampaigns(pageId: string) {
   try {
-    const user = await onCurrentUser()
-    const pages = await getFacebookPagesByUser(user.id)
+    const user = await onUserInfor()
+    const pages = await getFacebookPagesByUser(user.data?.id||"")
     const exists = pages.some((p) => p.id === pageId)
     if (!exists) return { status: 403, error: "Unauthorized" }
     const campaigns = await getFacebookCampaigns(pageId)

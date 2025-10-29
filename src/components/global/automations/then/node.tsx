@@ -10,7 +10,7 @@ import {
   MessageSquare,
   Zap,
   Clock,
-  Settings,
+  Settings,  
   Copy,
   CheckCircle,
   Edit,
