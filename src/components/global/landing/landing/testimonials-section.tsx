@@ -150,7 +150,7 @@ export function TestimonialsSection() {
           <div className="flex flex-wrap justify-center gap-12 items-center opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
             <img src="/shopify-logo.png" alt="Shopify" className="h-8 object-contain" />
             <img src="/zoho.png" alt="Stripe" className="h-8 object-contain" />
-            <img src="/airtable.png" alt="Meta" className="h-8 object-contain" />
+            <img src="/airtable.png" alt="airtable" className="h-8 object-contain" />
             <img src="/salesforce.png" alt="Salesforce" className="h-8 object-contain" />
             <img src="/hubspot.png" alt="HubSpot" className="h-8 object-contain" />
           </div>

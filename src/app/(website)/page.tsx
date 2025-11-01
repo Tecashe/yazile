@@ -2688,13 +2688,13 @@ export default function Home() {
       <AutomationReels />
 
       {/* Video showcase - Split style */}
-      <VideoShowcasePremium
+      {/* <VideoShowcasePremium
         title="Connect Everything in Seconds"
         description="See how easy it is to integrate yazzil with your favorite tools"
         videoUrl="/my-video.mp4"
         accent="green"
         style="split"
-      />
+      /> */}
       
 
       <IntegrationsSection />
@@ -2703,37 +2703,37 @@ export default function Home() {
       <VideoCarousel />
 
       {/* Video showcase - Card style */}
-      <VideoShowcasePremium
+      {/* <VideoShowcasePremium
         title="Real Businesses, Real Results"
         description="Hear success stories from businesses just like yours"
         videoUrl="/my-video.mp4"
         accent="purple"
         style="card"
-      />
+      /> */}
 
       <UseCasesSection />
       <ResultsSection />
 
       {/* Video showcase - Fullwidth style */}
-      <VideoShowcasePremium
+      {/* <VideoShowcasePremium
         title="Why Top Brands Choose yazzil"
         description="Discover what makes yazzil the #1 Instagram automation platform"
         videoUrl="/my-video.mp4"
         accent="red"
         style="fullwidth"
-      />
+      /> */}
 
       <TestimonialsSection />
       <ROICalculator />
 
       {/* Video showcase - Floating style */}
-      <VideoShowcasePremium
+      {/* <VideoShowcasePremium
         title="Get Started in Under 2 Minutes"
         description="Watch our quick setup guide and start automating today"
         videoUrl="/my-video.mp4" 
         accent="yellow"
         style="floating"
-      />
+      /> */}
 
       <PricingSection />
       <FAQSection />
