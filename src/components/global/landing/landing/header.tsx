@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { Instagram, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -34,8 +35,9 @@ export function Header() {
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-orange blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative bg-orange w-11 h-11 rounded-xl flex items-center justify-center shadow-[0_4px_12px_rgba(255,107,53,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] group-hover:scale-110 transition-transform">
-                  <Instagram className="w-6 h-6 text-black" />
+                <div className="flex items-center gap-2">
+                  <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
+                  <span className="text-lg sm:text-xl font-bold">Yazzil</span>
                 </div>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">yazzil</span>
