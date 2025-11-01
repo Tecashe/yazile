@@ -1,4 +1,5 @@
 import { Instagram, Twitter, Linkedin, Youtube } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -8,8 +9,8 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-orange w-10 h-10 rounded-xl flex items-center justify-center">
-                <Instagram className="w-6 h-6 text-black" />
+              <div className="flex items-center gap-2">
+              <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
               </div>
               <span className="text-2xl font-bold text-white">yazzil</span>
             </div>
