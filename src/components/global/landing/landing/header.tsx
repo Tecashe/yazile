@@ -37,13 +37,13 @@ export function Header() {
                 <div className="absolute inset-0 bg-orange blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
                 <div className="flex items-center gap-2">
                   <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
-                  <span className="text-lg sm:text-xl font-bold">Yazzil</span>
                 </div>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">yazzil</span>
             </Link>
 
             {/* Desktop Navigation */}
+            
             <nav className="hidden md:flex items-center gap-1 bg-muted/50 rounded-xl p-1 border border-border/50">
               <a
                 href="#features"
