@@ -51,7 +51,7 @@ export function FinalCTA() {
           <p className="text-sm text-muted-foreground">No credit card required • Setup in 2 minutes • Cancel anytime</p>
 
           {/* Trust badges */}
-          <div className="mt-16 pt-16 border-t border-border">
+          {/* <div className="mt-16 pt-16 border-t border-border">
             <p className="text-sm text-muted-foreground mb-6">Trusted by leading Instagram brands</p>
             <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12 opacity-30">
               <div className="text-2xl font-bold text-muted-foreground">BRAND</div>
@@ -60,7 +60,7 @@ export function FinalCTA() {
               <div className="text-2xl font-bold text-muted-foreground">BRAND</div>
               <div className="text-2xl font-bold text-muted-foreground">BRAND</div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
