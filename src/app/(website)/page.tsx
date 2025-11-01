@@ -2685,7 +2685,7 @@ export default function Home() {
 
       <AdvancedDMSimulation />
 
-      <AutomationReels />
+      {/* <AutomationReels /> */}
 
       {/* Video showcase - Split style */}
       {/* <VideoShowcasePremium
