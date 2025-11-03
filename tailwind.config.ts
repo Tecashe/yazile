@@ -553,7 +553,6 @@
 // export default config;
 
 
-
 import type { Config } from "tailwindcss";
 import tailwindScrollbar from 'tailwind-scrollbar';
 
@@ -587,6 +586,8 @@ const config = {
         "background-90": "#1D1D1D",
         "background-80": "#252525",
         "text-secondary": "#9B9CA0",
+        // Blue theme color
+        "blue-accent": "#4A90E2", // The blue color replacing orange
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -661,8 +662,9 @@ const config = {
       },
       boxShadow: {
         'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 15px rgba(51, 82, 204, 0.3)',
-        'glow-hover': '0 0 20px rgba(51, 82, 204, 0.4)',
+        // Updated glow shadows to use blue instead of the original color
+        'glow': '0 0 15px rgba(74, 144, 226, 0.3)', // Blue glow
+        'glow-hover': '0 0 20px rgba(74, 144, 226, 0.4)', // Blue glow on hover
       },
     },
   },
