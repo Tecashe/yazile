@@ -30,7 +30,7 @@ body {
 
     --border: 0 0% 15%; /* #262626 */
     --input: 0 0% 15%;
-    --ring: 14 100% 60%; /* orange */
+    --ring: 217 91% 60%; /* orange */
 
     --radius: 1rem;
 
@@ -40,7 +40,7 @@ body {
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
 
-    --accent: 14 100% 60%; /* orange */
+    --accent: 217 91% 60%; /* orange */
     --accent-foreground: 0 0% 4%;
 
     --destructive: 0 84.2% 60.2%;
@@ -81,19 +81,19 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 14 100% 60%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 4%;
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 12%;
     --muted-foreground: 0 0% 64%;
-    --accent: 14 100% 60%; /* orange */
+    --accent: 217 91% 60%; /* orange */
     --accent-foreground: 0 0% 4%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15%;
     --input: 0 0% 15%;
-    --ring: 14 100% 60%;
+    --ring: 217 91% 60%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
