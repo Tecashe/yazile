@@ -12,8 +12,8 @@ body {
     --background: 0 0% 4%; /* #0a0a0a */
     --foreground: 0 0% 98%; /* #fafafa */
 
-    /* Bright accent colors - converted to HSL */
-    --color-orange: 14 100% 60%; /* #ff6b35 */
+    /* Bright accent colors - Names stay the same, but orange is now blue */
+    --color-orange: 217 91% 60%; /* #4A90E2 - blue color */
     --color-red: 348 100% 60%; /* #ff3366 */
     --color-yellow: 48 100% 62%; /* #ffd93d */
     --color-maroon: 356 84% 43%; /* #c1121f */
@@ -30,17 +30,17 @@ body {
 
     --border: 0 0% 15%; /* #262626 */
     --input: 0 0% 15%;
-    --ring: 14 100% 60%; /* orange */
+    --ring: 217 91% 60%; /* blue color */
 
     --radius: 1rem;
 
-    --primary: 14 100% 60%; /* orange */
+    --primary: 217 91% 60%; /* blue color */
     --primary-foreground: 0 0% 4%;
 
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
 
-    --accent: 14 100% 60%; /* orange */
+    --accent: 217 91% 60%; /* blue color */
     --accent-foreground: 0 0% 4%;
 
     --destructive: 0 84.2% 60.2%;
@@ -81,19 +81,19 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 14 100% 60%;
+    --primary: 217 91% 60%; /* blue color */
     --primary-foreground: 0 0% 4%;
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 12%;
     --muted-foreground: 0 0% 64%;
-    --accent: 14 100% 60%; /* orange */
+    --accent: 217 91% 60%; /* blue color */
     --accent-foreground: 0 0% 4%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15%;
     --input: 0 0% 15%;
-    --ring: 14 100% 60%;
+    --ring: 217 91% 60%; /* blue color */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -106,7 +106,7 @@ body {
     --sidebar-accent: 0 0% 12%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 14 100% 60%;
+    --sidebar-ring: 217 91% 60%; /* blue color */
   }
 
   * {
@@ -848,8 +848,6 @@ body {
 .animate-fade {
   animation: fade 0.5s ease-in-out;
 }
-
-
 
 /* ============================================
    FLOAT ANIMATIONS FOR INTEGRATIONS
