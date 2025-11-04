@@ -856,7 +856,7 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border">
+      
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -876,7 +876,7 @@ export function AgentDashboard({ onEdit }: AgentDashboardProps) {
             </Button>
           </div>
         </div>
-      </div>
+      
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
