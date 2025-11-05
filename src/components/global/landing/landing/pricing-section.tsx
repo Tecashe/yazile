@@ -7,45 +7,41 @@ import Link from "next/link"
 
 const plans = [
   {
-    name: "Starter",
-    price: "$29",
+    name: "Free",
+    price: "$0",
     description: "Perfect for small businesses just getting started",
     icon: Zap,
     color: "green",
     features: [
-      "1,000 automated conversations/month",
+      "Unlimited automated conversations/month",
       "DM automation",
-      "Story reply automation",
       "Comment automation",
       "Basic analytics",
-      "Email support",
-      "2 Instagram accounts",
+      
     ],
-    cta: "Start Free Trial",
+    cta: "Start for Free",
     popular: false,
   },
   {
-    name: "Growth",
-    price: "$79",
+    name: "Pro",
+    price: "$15",
     description: "For growing businesses ready to scale",
     icon: Rocket,
     color: "orange",
     features: [
-      "10,000 automated conversations/month",
-      "Everything in Starter",
+      "Unlimited automated conversations/month",
+      "Everything in Free",
       "Advanced analytics & reports",
-      "A/B testing",
+      "AI sentiment analysis",
+      "Intelligent DM replies based on sentiment",
       "Priority support",
-      "10 Instagram accounts",
-      "Custom integrations",
-      "Team collaboration",
     ],
     cta: "Start Free Trial",
     popular: true,
   },
   {
     name: "Enterprise",
-    price: "$199",
+    price: "Custom",
     description: "For agencies and large businesses",
     icon: Crown,
     color: "purple",
@@ -54,10 +50,10 @@ const plans = [
       "Everything in Growth",
       "Dedicated account manager",
       "24/7 phone support",
-      "Unlimited Instagram accounts",
-      "White-label options",
       "Custom development",
-      "SLA guarantee",
+      "Human handoff integration",
+      "Unlimited integrations with all your tools",
+      
     ],
     cta: "Contact Sales",
     popular: false,
@@ -93,7 +89,7 @@ export function PricingSection() {
             Simple, <span className="text-orange">Transparent</span> Pricing
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start free for 14 days. No credit card required. Cancel anytime.
+            Start with a free plan. No credit card required.
           </p>
         </div>
 
@@ -133,7 +129,7 @@ export function PricingSection() {
                 {/* CTA */}
                 {plan.cta === "Contact Sales" ? (
                   <a
-                    href="https://calendly.com/your-link"
+                    href="https://calendly.com/tecashe111/30min"  
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block mb-8"

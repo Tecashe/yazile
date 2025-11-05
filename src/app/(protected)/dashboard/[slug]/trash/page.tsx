@@ -409,9 +409,9 @@ const TrashPage = () => {
             </div>
 
             <div className="flex gap-3">
-              <Button variant="outline" asChild>
+              {/* <Button variant="outline" asChild>
                 <Link href="/automations">Back to Automations</Link>
-              </Button>
+              </Button> */}
               {trashedAutomations.length > 0 && (
                 <Button variant="destructive" onClick={() => setShowEmptyConfirm(true)} disabled={isEmptying}>
                   {isEmptying ? (
