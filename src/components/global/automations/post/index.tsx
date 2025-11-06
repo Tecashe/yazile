@@ -107,6 +107,18 @@ const PostButton = ({
     }
   }
 
+  const getPostThumbnail = (post: InstagramPostProps) => {
+  if (post.media_type === "VIDEO") {
+    return post.thumbnail_url || post.media_url || "/placeholder.svg"
+  }
+  if (post.media_type === "CAROSEL_ALBUM") {
+    // Get first image from carousel
+    return post.children?.data?.[0]?.media_url || post.media_url || "/placeholder.svg"
+  }
+  // IMAGE type
+  return post.media_url || "/placeholder.svg"
+}
+
   // Handle scheduled post selection
   const handleSelectScheduledPost = (post: ScheduledPost) => {
     // Update the hook state
@@ -246,10 +258,17 @@ const PostButton = ({
                       </div>
                     )}
 
-                    <Image
+                    {/* <Image
                       fill
                       sizes="100vw"
                       src={post.media_url || "/placeholder.svg"}
+                      alt="post image"
+                      className="object-cover transition-all duration-300 group-hover:scale-110"
+                    /> */}
+                    <Image
+                      fill
+                      sizes="100vw"
+                      src={getPostThumbnail(post)}
                       alt="post image"
                       className="object-cover transition-all duration-300 group-hover:scale-110"
                     />

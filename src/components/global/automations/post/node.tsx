@@ -26,6 +26,19 @@ const PostNode = ({ id, theme = { id: "blue", name: "Blue", primary: "light-blue
     return null
   }
 
+  const getPostThumbnail = (post: any) => {
+    // For saved posts in database, we store it as 'media' not 'media_url'
+    const mediaUrl = post.media || post.media_url
+    
+    if (post.mediaType === "VIDEO") {
+      return post.thumbnail_url || mediaUrl || "/placeholder.svg"
+    }
+    if (post.mediaType === "CAROUSEL_ALBUM" || post.mediaType === "CAROSEL_ALBUM") {
+      return post.children?.data?.[0]?.media_url || mediaUrl || "/placeholder.svg"
+    }
+    return mediaUrl || "/placeholder.svg"
+  }
+
   // Check if there are any posts (published or scheduled)
   const hasPublishedPosts = data.data.posts && data.data.posts.length > 0
   const hasScheduledPosts = data.data.scheduledPosts && data.data.scheduledPosts.length > 0
@@ -151,10 +164,17 @@ const PostNode = ({ id, theme = { id: "blue", name: "Blue", primary: "light-blue
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                        <Image
+                        {/* <Image
                           fill
                           sizes="100vw"
                           src={post.media || "/placeholder.svg"}
+                          alt="post image"
+                          className="object-cover transition-all duration-300 group-hover:scale-110"
+                        /> */}
+                        <Image
+                          fill
+                          sizes="100vw"
+                          src={getPostThumbnail(post)}
                           alt="post image"
                           className="object-cover transition-all duration-300 group-hover:scale-110"
                         />
