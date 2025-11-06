@@ -518,13 +518,33 @@ export const saveScheduledPosts = async (automationId: string, scheduledPostIds:
   }
 }
 
+// export const getProfilePosts = async () => {
+//   const user = await onCurrentUser()
+//   try {
+//     const profile = await findUser(user.id)
+//     const posts = await fetch(
+//       `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0].token}`,
+//     )
+//     const parsed = await posts.json()
+//     if (parsed) return { status: 200, data: parsed }
+//     console.log("🔴 Error in getting posts")
+//     return { status: 404 }
+//   } catch (error) {
+//     console.log("🔴 server side Error in getting posts ", error)
+//     return { status: 500 }
+//   }
+// }
+
 export const getProfilePosts = async () => {
   const user = await onCurrentUser()
   try {
     const profile = await findUser(user.id)
+    
+    // ✅ Updated to include fields for all media types
     const posts = await fetch(
-      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp&limit=10&access_token=${profile?.integrations[0].token}`,
+      `${process.env.INSTAGRAM_BASE_URL}/me/media?fields=id,caption,media_url,media_type,timestamp,permalink,thumbnail_url,children{id,media_url,media_type,thumbnail_url}&limit=10&access_token=${profile?.integrations[0].token}`,
     )
+    
     const parsed = await posts.json()
     if (parsed) return { status: 200, data: parsed }
     console.log("🔴 Error in getting posts")
@@ -534,5 +554,4 @@ export const getProfilePosts = async () => {
     return { status: 500 }
   }
 }
-
 
