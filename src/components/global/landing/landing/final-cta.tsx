@@ -28,12 +28,12 @@ export function FinalCTA() {
                 size="lg"
                 className="bg-orange text-black hover:bg-orange/90 text-base md:text-lg px-8 md:px-10 py-6 md:py-7 h-auto font-semibold w-full sm:w-auto"
               >
-                Start Free 14-Day Trial
+                Start with a FREE plan
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <a
-              href="https://calendly.com/your-link"
+              href="https://calendly.com/tecashe111/30min"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto"
@@ -48,7 +48,7 @@ export function FinalCTA() {
             </a>
           </div>
 
-          <p className="text-sm text-muted-foreground">No credit card required • Setup in 2 minutes • Cancel anytime</p>
+          <p className="text-sm text-muted-foreground">No credit card required • Setup in 2 minutes </p>
 
           {/* Trust badges */}
           {/* <div className="mt-16 pt-16 border-t border-border">

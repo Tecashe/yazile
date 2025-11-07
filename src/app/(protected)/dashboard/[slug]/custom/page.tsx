@@ -398,7 +398,7 @@ export default function ContactPage() {
                 <Button
                   variant="outline"
                   className="w-full glowHover bg-transparent"
-                  onClick={() => window.open("https://calendly.com/your-calendly-link", "_blank")}
+                  onClick={() => window.open("https://calendly.com/tecashe111/30min", "_blank")}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   Open Calendly

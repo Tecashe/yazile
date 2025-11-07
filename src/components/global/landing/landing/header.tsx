@@ -36,7 +36,7 @@ export function Header() {
               <div className="relative">
                 <div className="absolute inset-0 bg-orange blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
                 <div className="flex items-center gap-2">
-                  <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
+                  <Image src="/branded-original.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
                 </div>
               </div>
               <span className="text-2xl font-bold text-white tracking-tight">yazzil</span>

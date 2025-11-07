@@ -574,7 +574,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <img src="/yazzil-logos.png" alt="Yazzil logo" className="h-16 w-16" />
+                <img src="/branded-original.png" alt="Yazzil logo" className="h-16 w-16" />
               </div>
 
               <p className="text-sm text-muted-foreground">

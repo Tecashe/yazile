@@ -201,7 +201,7 @@ export function HeroSection() {
                 </Button>
               </Link>
               <a
-                href="https://calendly.com/your-link"
+                href="https://calendly.com/tecashe111/30min"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"

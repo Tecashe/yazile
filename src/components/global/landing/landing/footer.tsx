@@ -10,7 +10,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center gap-2">
-              <Image src="/yazzil-logos.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
+              <Image src="/branded-original.png" alt="Yazzil logo" width={64} height={64} className="h-12 w-12 sm:h-16 sm:w-16" />
               </div>
               <span className="text-2xl font-bold text-white">yazzil</span>
             </div>
