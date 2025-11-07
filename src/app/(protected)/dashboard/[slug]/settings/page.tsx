@@ -3111,7 +3111,7 @@ export default function AIAgentPersonalityPage() {
   return (
     <div className="min-h-screen bg-background dark">
       {/* Header */}
-      <div className="border-b border-border bg-card">
+      <div className="border-b border-border bg-background">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
