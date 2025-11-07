@@ -2667,7 +2667,7 @@ export default function Home() {
     <main className="min-h-screen">
       <Header />
       <HeroSection />
-      <StatsSection />
+      {/* <StatsSection /> */}
       <MetaTrustSection />
 
       {/* Video showcase - Floating style */}

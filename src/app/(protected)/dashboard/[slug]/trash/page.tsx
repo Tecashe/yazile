@@ -456,9 +456,9 @@ const TrashPage = () => {
             </div>
             <h3 className="text-2xl font-semibold mb-2">Trash is empty</h3>
             <p className="text-muted-foreground mb-6">Deleted automations will appear here</p>
-            <Button variant="outline" asChild>
+            {/* <Button variant="outline" asChild>
               <Link href="/automations">Go to Automations</Link>
-            </Button>
+            </Button> */}
           </motion.div>
         ) : (
           <div className="space-y-4">

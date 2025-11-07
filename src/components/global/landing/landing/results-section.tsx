@@ -128,15 +128,15 @@ export function ResultsSection() {
                 <div className="relative w-12 h-12 rounded-full overflow-hidden bg-green">
                   <Image
                     src="/professional-woman-smiling.png"
-                    alt="Sarah Chen"
+                    alt="Maryann"
                     fill
                     className="object-cover"
                     sizes="48px"
                   />
                 </div>
                 <div>
-                  <div className="font-semibold">Sarah Chen</div>
-                  <div className="text-sm text-muted-foreground">Founder, FashionHub</div>
+                  <div className="font-semibold">Maryann</div>
+                  <div className="text-sm text-muted-foreground">Founder, Vavi Handmade</div>
                 </div>
               </div>
             </div>

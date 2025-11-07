@@ -11,7 +11,7 @@ const plans = [
     price: "$0",
     description: "Perfect for small businesses just getting started",
     icon: Zap,
-    color: "green",
+    color: "yellow",
     features: [
       "Unlimited automated conversations/month",
       "DM automation",
@@ -172,9 +172,9 @@ export function PricingSection() {
 
         {/* Money-back guarantee */}
         <div className="text-center mt-16 scroll-reveal">
-          <div className="inline-flex items-center gap-3 px-6 py-4 bg-card border-2 border-green/20 rounded-2xl">
-            <div className="w-12 h-12 bg-green/10 rounded-full flex items-center justify-center">
-              <Check className="w-6 h-6 text-green" />
+          <div className="inline-flex items-center gap-3 px-6 py-4 bg-card border-2 border-yellow/20 rounded-2xl">
+            <div className="w-12 h-12 bg-yellow/10 rounded-full flex items-center justify-center">
+              <Check className="w-6 h-6 text-yellow" />
             </div>
             <div className="text-left">
               <p className="font-semibold">30-Day Money-Back Guarantee</p>

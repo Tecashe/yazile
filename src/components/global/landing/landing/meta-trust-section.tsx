@@ -52,7 +52,7 @@ export function MetaTrustSection() {
 
         {/* Trust cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          <div className="bg-card border-2 border-green/20 rounded-2xl p-6 scroll-reveal hover:border-green transition-colors">
+          <div className="bg-card border-2 border-yellow/20 rounded-2xl p-6 scroll-reveal hover:border-yellow transition-colors">
             <div className="w-12 h-12 bg-green/20 rounded-xl flex items-center justify-center mb-4">
               <CheckCircle2 className="w-6 h-6 text-green" />
             </div>
@@ -96,9 +96,9 @@ export function MetaTrustSection() {
         {/* Bottom statement */}
         <div className="text-center mt-16 scroll-reveal">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-muted rounded-full">
-            <CheckCircle2 className="w-5 h-5 text-green" />
+            <CheckCircle2 className="w-5 h-5 text-yellow" />
             <p className="text-sm font-medium">
-              Trusted by <span className="text-green font-bold">10,000+</span> businesses worldwide
+              Trusted by <span className="text-yellow font-bold">10,000+</span> businesses worldwide
             </p>
           </div>
         </div>

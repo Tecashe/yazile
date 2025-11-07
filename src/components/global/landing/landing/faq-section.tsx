@@ -9,33 +9,19 @@ const faqs = [
   {
     question: "How does yazzil work with Instagram's API?",
     answer:
-      "yazzil is built using Instagram's official Graph API, which means your account is 100% safe and compliant with all platform guidelines. We follow all of Meta's best practices to ensure your automation is secure and won't risk your account.",
-  },
-  {
-    question: "Can I try yazzil before committing?",
-    answer:
-      "We offer a 14-day free trial with full access to all features. No credit card required. You can test everything and see real results before making any commitment.",
+    "yazzil is built using Instagram's official Graph API, which means your account is 100% safe and compliant with all platform guidelines. We follow all of Meta's best practices to ensure your automation is secure and won't risk your account.",
   },
   {
     question: "How long does setup take?",
     answer:
       "Most users are up and running in under 2 minutes. Simply connect your Instagram account, set up your first automation flow using our visual builder, and you're done. We also provide templates to make it even faster.",
   },
-  {
-    question: "What happens if I exceed my plan's conversation limit?",
-    answer:
-      "We'll notify you when you're approaching your limit. You can either upgrade to a higher plan or purchase additional conversations as needed. Your automation will never stop working unexpectedly.",
-  },
-  {
-    question: "Can I use yazzil for multiple Instagram accounts?",
-    answer:
-      "Yes! All plans support multiple Instagram accounts. The Starter plan includes 2 accounts, Growth includes 10, and Enterprise includes unlimited accounts. Perfect for agencies and businesses with multiple brands.",
-  },
-  {
-    question: "How is yazzil different from Manychat?",
-    answer:
-      "yazzil is built specifically for Instagram, while Manychat is a multi-platform tool. This means we offer deeper Instagram integration, faster setup, better story and comment automation, and a more intuitive interface designed specifically for Instagram businesses.",
-  },
+  
+  // {
+  //   question: "How is yazzil different from Manychat?",
+  //   answer:
+  //     "yazzil is built specifically for Instagram, while Manychat is a multi-platform tool. This means we offer deeper Instagram integration, faster setup, better story and comment automation, and a more intuitive interface designed specifically for Instagram businesses.",
+  // },
   {
     question: "Do you offer refunds?",
     answer:

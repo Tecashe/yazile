@@ -735,10 +735,10 @@ export function AdvancedDMSimulation() {
   ]
 
   const scenarioConfig = {
-    ecommerce: { name: "Luxury Boutique", icon: ShoppingBag, color: "orange" },
-    story: { name: "Fashion Brand", icon: ImageIcon, color: "purple" },
-    comment: { name: "Fitness Studio", icon: Heart, color: "red" },
-    booking: { name: "Beauty Salon", icon: Calendar, color: "green" },
+    ecommerce: { name: "Boutique", icon: ShoppingBag, color: "orange" },
+    story: { name: "Fashion", icon: ImageIcon, color: "purple" },
+    comment: { name: "Fitness", icon: Heart, color: "red" },
+    booking: { name: "Beauty", icon: Calendar, color: "green" },
     support: { name: "Tech Support", icon: MessageCircle, color: "yellow" },
   }
 
@@ -1092,7 +1092,7 @@ export function AdvancedDMSimulation() {
                     <>
                       {step >= 1 && (
                         <div className="flex gap-3 justify-end animate-slide-in-right">
-                          <div className="bg-green rounded-2xl rounded-tr-sm px-3 md:px-5 py-2 md:py-3 max-w-[85%]">
+                          <div className="bg-yellow rounded-2xl rounded-tr-sm px-3 md:px-5 py-2 md:py-3 max-w-[85%]">
                             <p className="text-xs md:text-sm text-black font-medium">
                               Hi! I&apos;d like to book a haircut 💇‍♀️
                             </p>
@@ -1102,7 +1102,7 @@ export function AdvancedDMSimulation() {
 
                       {step >= 2 && (
                         <div className="flex gap-2 md:gap-3 animate-slide-in-left">
-                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-yellow flex items-center justify-center flex-shrink-0">
                             <Calendar className="w-4 h-4 md:w-5 md:h-5 text-black" />
                           </div>
                           <div className="bg-muted rounded-2xl rounded-tl-sm px-3 md:px-5 py-2 md:py-3 max-w-[85%]">
@@ -1121,7 +1121,7 @@ export function AdvancedDMSimulation() {
                                   <p className="text-xs font-semibold">Tomorrow</p>
                                   <p className="text-xs text-muted-foreground">2:00 PM</p>
                                 </div>
-                                <button className="bg-green text-black px-3 py-1 rounded-full text-xs font-medium hover:bg-green/90 transition-colors">
+                                <button className="bg-yellow text-black px-3 py-1 rounded-full text-xs font-medium hover:bg-yellow/90 transition-colors">
                                   Book
                                 </button>
                               </div>
@@ -1130,7 +1130,7 @@ export function AdvancedDMSimulation() {
                                   <p className="text-xs font-semibold">Friday</p>
                                   <p className="text-xs text-muted-foreground">10:00 AM</p>
                                 </div>
-                                <button className="bg-green text-black px-3 py-1 rounded-full text-xs font-medium hover:bg-green/90 transition-colors">
+                                <button className="bg-green text-black px-3 py-1 rounded-full text-xs font-medium hover:bg-yellow/90 transition-colors">
                                   Book
                                 </button>
                               </div>
@@ -1139,7 +1139,7 @@ export function AdvancedDMSimulation() {
                                   <p className="text-xs font-semibold">Saturday</p>
                                   <p className="text-xs text-muted-foreground">3:30 PM</p>
                                 </div>
-                                <button className="bg-green text-black px-3 py-1 rounded-full text-xs font-medium hover:bg-green/90 transition-colors">
+                                <button className="bg-green text-black px-3 py-1 rounded-full text-xs font-medium hover:bg-yellow/90 transition-colors">
                                   Book
                                 </button>
                               </div>
