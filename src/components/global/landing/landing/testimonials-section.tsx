@@ -5,7 +5,7 @@ import { Star, Quote } from "lucide-react"
 
 const testimonials = [
   {
-    name: "Sarah Chen",
+    name: "Sarah Wokabi",
     role: "E-commerce Owner",
     company: "Luxe Boutique",
     image: "/professional-woman-smiling.png",
