@@ -286,14 +286,35 @@ import {
 } from "./queries"
 import { permanentlyDeleteAutomationQuery } from "./trash-queries"
 
+// export const createAutomations = async (id?: string) => {
+//   const user = await onCurrentUser()
+//   try {
+//     const create = await createAutomation(user.id, id)
+//     if (create) return { status: 200, data: "Automation created", res: create }
+
+//     return { status: 404, data: "Oops! something went wrong" }
+//   } catch (error) {
+//     return { status: 500, data: "Try refreshing the page first" }
+//   }
+// }
 export const createAutomations = async (id?: string) => {
   const user = await onCurrentUser()
   try {
     const create = await createAutomation(user.id, id)
-    if (create) return { status: 200, data: "Automation created", res: create }
+    if (create) {
+      // ✅ Return the full automation object with ID
+      return { 
+        status: 200, 
+        data: "Automation created", 
+        res: create,
+        // ✅ Also include the automation in a data field for easier access
+        // automation: create.automations?.[0] || create
+      }
+    }
 
     return { status: 404, data: "Oops! something went wrong" }
   } catch (error) {
+    console.error("Error creating automation:", error)
     return { status: 500, data: "Try refreshing the page first" }
   }
 }

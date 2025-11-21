@@ -8,7 +8,7 @@ const testimonials = [
     name: "Sarah Wokabi",
     role: "E-commerce Owner",
     company: "Luxe Boutique",
-    image: "/professional-woman-smiling.png",
+    image: "/wokabi.png",
     content:
       "yazzil transformed our Instagram sales. We went from manually responding to 50 DMs a day to automating 500+ conversations. Our revenue tripled in 2 months!",
     rating: 5,
@@ -18,17 +18,17 @@ const testimonials = [
     name: "Marcus Johnson",
     role: "Fitness Coach",
     company: "FitLife Training",
-    image: "/fitness-coach-man.jpg",
+    image: "/coach.jpg",
     content:
       "I was skeptical about automation, but yazzil feels so natural. My clients love the instant responses, and I've booked 3x more consultations without lifting a finger.",
     rating: 5,
     color: "green",
   },
   {
-    name: "Priya Patel",
+    name: "Priya P",
     role: "Social Media Manager",
     company: "Digital Growth Agency",
-    image: "/professional-woman-glasses.png",
+    image: "/priya.png",
     content:
       "Managing 20+ client accounts was overwhelming. yazzil's automation saved us 30 hours per week. It's like having a full-time team working 24/7.",
     rating: 5,
@@ -38,7 +38,7 @@ const testimonials = [
     name: "Alex Rivera",
     role: "Restaurant Owner",
     company: "Taco Paradise",
-    image: "/smiling-chef.png",
+    image: "/rivera.png",
     content:
       "We use yazzil for reservations and catering inquiries. Response time went from hours to seconds. Customer satisfaction is through the roof!",
     rating: 5,
@@ -48,7 +48,7 @@ const testimonials = [
     name: "Emma Thompson",
     role: "Beauty Influencer",
     company: "@GlowWithEmma",
-    image: "/beauty-influencer-woman.jpg",
+    image: "/emma.jpg",
     content:
       "With 500K followers, I couldn't keep up with DMs. yazzil handles brand inquiries, fan questions, and product recommendations automatically. Game changer!",
     rating: 5,
@@ -58,7 +58,7 @@ const testimonials = [
     name: "David Kim",
     role: "Real Estate Agent",
     company: "Prime Properties",
-    image: "/real-estate-agent-man.png",
+    image: "/kim.png",
     content:
       "yazzil qualifies leads while I'm showing properties. I close more deals because I'm talking to serious buyers, not answering basic questions all day.",
     rating: 5,

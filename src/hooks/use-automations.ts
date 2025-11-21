@@ -1557,7 +1557,7 @@ import {
   saveScheduledPosts,
   saveTrigger,
   updateAutomation,
-  permanentlyDeleteAutomation, // Import permanent delete action
+  permanentlyDeleteAutomation, 
 } from "@/actions/automations"
 import { moveToTrash } from "@/actions/automations/trash-actions"
 import { useMutationData } from "./use-mutation-data"
@@ -1590,8 +1590,12 @@ export const useCreateAutomation = (id?: string) => {
 
     return originalMutate(cleanVariables, {
       ...options,
-      onSuccess: (data: any) => {
-        queryClient.invalidateQueries({ queryKey: ["user-automations"] })
+      onSuccess: async (data: any) => {
+        // ✅ CRITICAL: Wait for the query to be invalidated and refetched
+        await queryClient.invalidateQueries({ queryKey: ["user-automations"] })
+        
+        // ✅ Wait for the refetch to complete before navigating
+        await queryClient.refetchQueries({ queryKey: ["user-automations"] })
 
         toast({
           title: "Automation created",
@@ -1619,6 +1623,56 @@ export const useCreateAutomation = (id?: string) => {
 
   return { isPending, mutate }
 }
+
+// export const useCreateAutomation = (id?: string) => {
+//   const queryClient = useQueryClient()
+//   const { toast } = useToast()
+
+//   const { isPending, mutate: originalMutate } = useMutationData(
+//     ["create-automation"],
+//     () => createAutomations(id),
+//     "user-automations",
+//   )
+
+//   const mutate = (variables: any, options?: any) => {
+//     const cleanVariables = {
+//       name: variables.name || "Untitled",
+//       keywords: variables.keywords || [],
+//       active: variables.active || false,
+//       listener: variables.listener || null,
+//     }
+
+//     return originalMutate(cleanVariables, {
+//       ...options,
+//       onSuccess: (data: any) => {
+//         queryClient.invalidateQueries({ queryKey: ["user-automations"] })
+
+//         toast({
+//           title: "Automation created",
+//           description: "Your automation has been created successfully.",
+//           variant: "default",
+//         })
+
+//         if (options?.onSuccess) {
+//           options.onSuccess(data)
+//         }
+//       },
+//       onError: (error: any) => {
+//         toast({
+//           title: "Failed to create automation",
+//           description: "There was an error creating your automation. Please try again.",
+//           variant: "destructive",
+//         })
+
+//         if (options?.onError) {
+//           options.onError(error)
+//         }
+//       },
+//     })
+//   }
+
+//   return { isPending, mutate }
+// }
 
 export const useEditAutomation = (automationId: string) => {
   const [edit, setEdit] = useState(false)
