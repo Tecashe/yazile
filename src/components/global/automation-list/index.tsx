@@ -3139,7 +3139,6 @@ import {
   RotateCcw,
   AlertTriangle,
   Archive,
-  CheckCircle2,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import PaymentPopup from "../stripe/payment-popup"
@@ -3215,35 +3214,10 @@ const AutomationList = ({ id }: Props) => {
 
   // ✅ New state for highlighting newly created automation
   const [newlyCreatedId, setNewlyCreatedId] = useState<string | null>(null)
-  const [showNewAutomationBanner, setShowNewAutomationBanner] = useState(false)
   const newAutomationRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (data?.data) {
-      const previousIds = new Set(automations.map((a) => a.id))
-      const newAutomations = data.data.filter((a) => !previousIds.has(a.id))
-
-      // ✅ If there's a new automation, highlight it
-      if (newAutomations.length > 0) {
-        const newestAutomation = newAutomations[0]
-        setNewlyCreatedId(newestAutomation.id)
-        setShowNewAutomationBanner(true)
-
-        // ✅ Scroll to the new automation after a brief delay
-        setTimeout(() => {
-          newAutomationRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          })
-        }, 300)
-
-        // ✅ Remove highlight after 5 seconds
-        setTimeout(() => {
-          setNewlyCreatedId(null)
-          setShowNewAutomationBanner(false)
-        }, 5000)
-      }
-
       setAutomations(data.data)
     }
   }, [data])
@@ -3253,6 +3227,34 @@ const AutomationList = ({ id }: Props) => {
       setTrashedAutomations(trashedData.data)
     }
   }, [trashedData])
+
+  useEffect(() => {
+    if (latestVariable && latestVariable.status === "success" && automations.length > 0) {
+      // Get the most recently created automation
+      const sortedByDate = [...automations].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      const newestAutomation = sortedByDate[0]
+
+      // Only highlight if it's actually new (created in last 5 seconds)
+      const createdAt = new Date(newestAutomation.createdAt).getTime()
+      const now = Date.now()
+      if (now - createdAt < 5000) {
+        setNewlyCreatedId(newestAutomation.id)
+
+        setTimeout(() => {
+          newAutomationRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          })
+        }, 300)
+
+        setTimeout(() => {
+          setNewlyCreatedId(null)
+        }, 8000)
+      }
+    }
+  }, [latestVariable, automations])
 
   const handleDelete = (automationId: string, type: "trash" | "permanent") => {
     if (type === "trash") {
@@ -3300,16 +3302,8 @@ const AutomationList = ({ id }: Props) => {
     )
   }
 
-  const optimisticUiData = useMemo(() => {
-    if (latestVariable?.variables && data) {
-      const test = [latestVariable.variables, ...automations]
-      return { data: test as Automation[] }
-    }
-    return { data: automations }
-  }, [latestVariable, automations])
-
   const filteredAutomations = useMemo(() => {
-    let filtered = optimisticUiData.data
+    let filtered = automations
 
     if (filterMode === "active") {
       filtered = filtered.filter((a) => a.active)
@@ -3326,13 +3320,13 @@ const AutomationList = ({ id }: Props) => {
     }
 
     return filtered
-  }, [optimisticUiData.data, filterMode, searchQuery])
+  }, [automations, filterMode, searchQuery])
 
-  const activeAutomations = optimisticUiData.data.filter((automation) => automation.active)
-  const inactiveAutomations = optimisticUiData.data.filter((automation) => !automation.active)
-  const smartAICount = optimisticUiData.data.filter((a) => a.listener?.listener === "SMARTAI").length
+  const activeAutomations = automations.filter((automation) => automation.active)
+  const inactiveAutomations = automations.filter((automation) => !automation.active)
+  const smartAICount = automations.filter((a) => a.listener?.listener === "SMARTAI").length
   const totalMessages =
-    optimisticUiData.data.reduce((acc, a) => acc + (a.listener?.dmCount || 0) + (a.listener?.commentCount || 0), 0) || 0
+    automations.reduce((acc, a) => acc + (a.listener?.dmCount || 0) + (a.listener?.commentCount || 0), 0) || 0
 
   const filteredTrashAutomations = useMemo(() => {
     if (!trashSearchQuery) return trashedAutomations
@@ -3398,50 +3392,13 @@ const AutomationList = ({ id }: Props) => {
             />
           </div>
 
-          {/* ✅ New Automation Success Banner */}
-          <AnimatePresence>
-            {showNewAutomationBanner && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                className="mb-6"
-              >
-                <Card className="p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent animate-pulse" />
-                  <div className="relative flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-green-500/20 border border-green-500/30">
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-green-600 dark:text-green-400">
-                        Automation created successfully!
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Your new automation is highlighted below. Click on it to configure.
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowNewAutomationBanner(false)}
-                      className="text-green-600 hover:text-green-700 hover:bg-green-500/10"
-                    >
-                      Dismiss
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card className="glassEffect border-border/50 glow p-6 float">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total Automations</p>
-                  <p className="text-3xl font-bold">{optimisticUiData.data.length}</p>
+                  <p className="text-3xl font-bold">{automations.length}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
                   <Activity className="w-6 h-6 text-blue-400" />

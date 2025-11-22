@@ -912,7 +912,6 @@
 // }
 
 // export default CreateAutomation
-
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -968,34 +967,30 @@ const CreateAutomation = ({ currentAutomationCount = 0, onUpgradeClick }: Create
 
     const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
     const slug = slugMatch ? slugMatch[1] : ""
-    const newAutomationId = `temp-${Date.now()}`
 
     mutate(
       {
         name: "Untitled",
-        id: newAutomationId,
-        keywords: [],
-        active: false,
-        listener: null,
       },
       {
         onSuccess: (data: any) => {
-          setShowSuccess(true)
+          console.log("[v0] Automation created successfully:", data)
 
-          // ✅ Navigate after a short delay to ensure the UI updates
-          if (data?.data?.id || data?.res?.id) {
-            const automationId = data?.data?.id || data?.res?.id
+          const automationId = data?.res?.automations?.[0]?.id || data?.data?.id || data?.res?.id
+
+          if (automationId) {
+            setShowSuccess(true)
 
             setTimeout(() => {
-              setShowSuccess(false)
               router.push(`/dashboard/${slug}/automations/${automationId}`)
-            }, 1500) // Reduced delay since we're now waiting for refetch
+            }, 800)
           } else {
-            // If no ID is returned, just close the success state
-            setTimeout(() => {
-              setShowSuccess(false)
-            }, 2000)
+            console.error("[v0] No automation ID returned from server:", data)
+            setShowSuccess(false)
           }
+        },
+        onError: (error: any) => {
+          console.error("[v0] Error creating automation:", error)
         },
       },
     )
