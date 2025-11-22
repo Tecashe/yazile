@@ -7491,6 +7491,21 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
     return "pending"
   }
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const prompt = formData.get("prompt") as string
+
+    // Call the original onFormSubmit with all the data
+    onFormSubmit({
+      prompt,
+      reply: baseCommentReply,
+      replyVariations: replyVariations.length > 0 ? replyVariations : undefined,
+    })
+
+    handleAutomationSetup()
+  }
+
   return (
     <FloatingPanel
       title="Business Knowledge Hub"
@@ -7968,13 +7983,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                 )}
               </div>
 
-              <form
-                onSubmit={(e) => {
-                  onFormSubmit(e)
-                  handleAutomationSetup()
-                }}
-                className="flex flex-col gap-4 mt-2"
-              >
+              <form onSubmit={handleFormSubmit} className="flex flex-col gap-4 mt-2">
                 {Listener && (
                   <div className="bg-background-90 p-4 rounded-xl mb-2">
                     <div className="flex items-center justify-between mb-3">
@@ -8029,21 +8038,23 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                   <Textarea
                     {...register("prompt")}
                     id="prompt"
+                    name="prompt"
                     placeholder="e.g., Respond professionally and provide our service details..."
                     className="min-h-[100px] resize-none"
                     rows={4}
                   />
                 </div>
 
-                {/* CHANGE: Replaced simple textarea with AI-powered variations manager */}
-                <div className="space-y-3">
-                  <ReplyVariationsManager
-                    baseReply={baseCommentReply}
-                    onBaseReplyChange={setBaseCommentReply}
-                    value={replyVariations}
-                    onChange={setReplyVariations}
-                  />
-                </div>
+                <SubscriptionPlan type="PRO">
+                  <div className="space-y-3">
+                    <ReplyVariationsManager
+                      baseReply={baseCommentReply}
+                      onBaseReplyChange={setBaseCommentReply}
+                      value={replyVariations}
+                      onChange={setReplyVariations}
+                    />
+                  </div>
+                </SubscriptionPlan>
 
                 <Button type="submit" className="w-full" disabled={isPending}>
                   {isPending ? (
@@ -8189,21 +8200,21 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                       <li className="flex items-start gap-2">
                         <Users className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
                         <div>
-                          <span className="font-medium">Emma W</span>
+                          <span className="font-medium">Emma Rodriguez</span>
                           <p className="text-xs text-muted-foreground">Owner/Master Stylist - 15 years experience</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <Users className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
                         <div>
-                          <span className="font-medium">Simon M</span>
+                          <span className="font-medium">James Chen</span>
                           <p className="text-xs text-muted-foreground">Senior Stylist - 8 years experience</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2">
                         <Users className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
                         <div>
-                          <span className="font-medium">Sophy Williams</span>
+                          <span className="font-medium">Sophia Williams</span>
                           <p className="text-xs text-muted-foreground">Curl Specialist - 6 years experience</p>
                         </div>
                       </li>
