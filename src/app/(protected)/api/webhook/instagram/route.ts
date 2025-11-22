@@ -3324,8 +3324,7 @@ class ResponseSender {
 
         console.log("[v0] DM sent, status:", dmResult?.status)
 
-        // 2. Post the public reply to the comment (if reply text is configured)
-        const replyText = context.automation.listener?.reply
+        const replyText = context.automation.listener?.commentReply
 
         if (replyText && replyText.trim()) {
           console.log("[v0] Posting public comment reply:", replyText)
@@ -3678,10 +3677,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )
   }
 }
-
-
-
-
 
 
 
