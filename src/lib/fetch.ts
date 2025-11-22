@@ -1502,7 +1502,11 @@ export async function sendInstagramMessage(
 
 export async function replyToComment(commentId: string, message: string, token: string): Promise<AxiosResponse> {
   try {
-    console.log("[v0] Attempting to reply to comment:", commentId, "with message:", message)
+    console.log("[v0] === COMMENT REPLY DEBUG START ===")
+    console.log("[v0] Comment ID:", commentId)
+    console.log("[v0] Reply Message:", message)
+    console.log("[v0] Token (first 20 chars):", token.substring(0, 20) + "...")
+    console.log("[v0] API Endpoint:", `${process.env.INSTAGRAM_BASE_URL}/v21.0/${commentId}/replies`)
 
     const response = await axios.post(
       `${process.env.INSTAGRAM_BASE_URL}/v21.0/${commentId}/replies`,
@@ -1516,11 +1520,19 @@ export async function replyToComment(commentId: string, message: string, token: 
       },
     )
 
-    console.log("[v0] Comment reply posted successfully:", response.status, response.data)
+    console.log("[v0] Comment reply API FULL RESPONSE:", JSON.stringify(response.data, null, 2))
+    console.log("[v0] Response status:", response.status)
+    console.log("[v0] Response headers:", response.headers)
+    console.log("[v0] === COMMENT REPLY DEBUG END ===")
+
     return response
   } catch (error) {
     const axiosError = error as AxiosError
-    console.error("[v0] Error replying to comment:", axiosError.response?.data || axiosError.message)
+    console.error("[v0] === COMMENT REPLY ERROR ===")
+    console.error("[v0] Error status:", axiosError.response?.status)
+    console.error("[v0] Error data:", JSON.stringify(axiosError.response?.data, null, 2))
+    console.error("[v0] Error message:", axiosError.message)
+    console.error("[v0] === ERROR END ===")
     throw error
   }
 }
@@ -1625,5 +1637,3 @@ export async function sendDMs(
     throw error
   }
 }
-
-
