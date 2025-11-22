@@ -5595,7 +5595,6 @@
 
 
 
-
 "use client"
 
 import type React from "react"
@@ -5687,7 +5686,7 @@ const ThenAction = ({
   id,
   theme = { id: "blue", name: "Blue", primary: "light-blue", secondary: "#768BDD" },
 }: Props) => {
-  const { onSetListener, listener: Listener, onFormSubmit, register, isPending, watch } = useListener(id)
+  const { onSetListener, listener: Listener, onFormSubmit, mutate, register, isPending, watch } = useListener(id)
 
   // State management
   const [activeTab, setActiveTab] = useState("setup")
@@ -7496,8 +7495,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
     const formData = new FormData(e.currentTarget)
     const prompt = formData.get("prompt") as string
 
-    // Call the original onFormSubmit with all the data
-    onFormSubmit({
+    mutate({
       prompt,
       reply: baseCommentReply,
       replyVariations: replyVariations.length > 0 ? replyVariations : undefined,

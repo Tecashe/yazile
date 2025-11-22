@@ -1553,6 +1553,8 @@
 "use client"
 
 import type React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import {
   createAutomations,
@@ -1720,15 +1722,15 @@ export const useEditAutomation = (automationId: string) => {
 }
 
 
-
 export const useListener = (id: string) => {
   const [listener, setListener] = useState<"MESSAGE" | "SMARTAI" | null>(null)
 
   const promptSchema = z.object({
     prompt: z.string().min(1),
     reply: z.string().optional(),
-    replyVariations: z.array(z.string()).optional(),
   })
+
+  type PromptSchema = z.infer<typeof promptSchema>
 
   const { isPending, mutate } = useMutationData(
     ["create-listener"],
@@ -1737,14 +1739,26 @@ export const useListener = (id: string) => {
     "automation-info",
   )
 
-  const { errors, register, reset, watch } = useZodForm(promptSchema, mutate)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<PromptSchema>({
+    resolver: zodResolver(promptSchema),
+  })
 
-  const onFormSubmit = (data: { prompt: string; reply?: string; replyVariations?: string[] }) => {
-    mutate(data)
-  }
+  const onFormSubmit = handleSubmit((data: PromptSchema) => {
+    mutate({
+      prompt: data.prompt,
+      reply: data.reply,
+    })
+  })
 
   const onSetListener = (type: "SMARTAI" | "MESSAGE") => setListener(type)
-  return { onSetListener, register, onFormSubmit, listener, isPending, watch }
+
+  return { onSetListener, register, onFormSubmit, mutate, listener, isPending, watch, errors }
 }
 
 

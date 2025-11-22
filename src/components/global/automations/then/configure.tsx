@@ -174,7 +174,7 @@ const Configure = ({
                           <h4 className="font-medium text-purple-300">AI-Powered Responses</h4>
                           <p className="text-sm text-text-secondary mt-1">
                             Our AI will analyze each comment or message and generate a personalized response based on
-                            your brand voice and the context of the interaction.
+                            your brand voice and the context of the interaction
                           </p>
                         </div>
                       </div>
