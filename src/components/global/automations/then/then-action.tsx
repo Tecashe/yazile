@@ -5299,7 +5299,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                         >
                           <div className="font-medium text-foreground mb-1">General</div>
                           <div className="text-muted-foreground">
-                            "Thanks for commenting! Check your DMs for more details 💬"
+                            &ldquo;Thanks for commenting! Check your DMs for more details 💬&rdquo;
                           </div>
                         </button>
 
@@ -5314,7 +5314,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                         >
                           <div className="font-medium text-foreground mb-1">Casual</div>
                           <div className="text-muted-foreground">
-                            "Got it! We've sent you more information via DM 📩"
+                            &ldquo;Got it! We&apos;ve sent you more information via DM 📩&rdquo;
                           </div>
                         </button>
 
@@ -5330,7 +5330,7 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                         >
                           <div className="font-medium text-foreground mb-1">Professional</div>
                           <div className="text-muted-foreground">
-                            "Thank you for your inquiry. Please check your messages for details."
+                            &ldquo;Thank you for your inquiry. Please check your messages for details.&rdquo;
                           </div>
                         </button>
                       </div>
