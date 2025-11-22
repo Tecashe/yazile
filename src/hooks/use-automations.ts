@@ -1544,6 +1544,12 @@
 // }
 
 
+
+
+
+
+
+
 "use client"
 
 import type React from "react"
@@ -1713,7 +1719,34 @@ export const useEditAutomation = (automationId: string) => {
   }
 }
 
+
+
+
 export const useListener = (id: string) => {
+  const [listener, setListener] = useState<"MESSAGE" | "SMARTAI" | null>(null)
+
+  const promptSchema = z.object({
+    prompt: z.string().min(1),
+    reply: z.string(),
+    replyVariations: z.array(z.string()).optional(),
+  })
+
+  const { isPending, mutate } = useMutationData(
+    ["create-listener"],
+    (data: { prompt: string; reply: string; replyVariations?: string[] }) =>
+      saveListener(id, listener || "MESSAGE", data.prompt, data.reply, data.replyVariations),
+    "automation-info",
+  )
+
+  const { errors, onFormSubmit, register, reset, watch } = useZodForm(promptSchema, mutate)
+
+  const onSetListener = (type: "SMARTAI" | "MESSAGE") => setListener(type)
+  return { onSetListener, register, onFormSubmit, listener, isPending, watch }
+}
+
+
+
+export const useListenerOLd = (id: string) => {
   const [listener, setListener] = useState<"MESSAGE" | "SMARTAI" | null>(null)
 
   const promptSchema = z.object({
