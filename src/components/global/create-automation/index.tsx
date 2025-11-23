@@ -1197,11 +1197,12 @@
 
 // export default CreateAutomation
 
+
 "use client"
 
 import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
-import Loader from "./loader"
+import Loader from "../loader"
 import { useCreateAutomation } from "@/hooks/use-automations"
 import { v4 } from "uuid"
 import { usePathname } from "next/navigation"
@@ -1260,16 +1261,14 @@ const CreateAutomation = ({
       },
       {
         onSuccess: (data: any) => {
+          sessionStorage.setItem("automationJustCreated", "true")
+
           setShowSuccess(true)
 
           setTimeout(() => {
             setShowSuccess(false)
-
-            // Pass the created automation to parent for modal display
-            if (onAutomationCreated) {
-              const automationData = data?.res?.automations?.[0] || data?.data || data?.res
-              onAutomationCreated(automationData)
-            }
+            // Reload the page to fetch the latest automation data
+            window.location.reload()
           }, 800)
         },
         onError: (error: any) => {

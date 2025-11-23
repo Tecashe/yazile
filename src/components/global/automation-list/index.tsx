@@ -4012,15 +4012,23 @@ const AutomationList = ({ id }: Props) => {
     }
   }, [trashedData])
 
-  // Removed the old useEffect for newlyCreatedId
+  useEffect(() => {
+    const justCreated = sessionStorage.getItem("automationJustCreated")
 
-  const handleAutomationCreated = (automation: any) => {
-    // Refetch to get the latest data
-    refetch()
+    if (justCreated === "true" && data?.data && data.data.length > 0) {
+      // Clear the flag
+      sessionStorage.removeItem("automationJustCreated")
 
-    // Show popup with the created automation
-    setNewAutomationPopup(automation)
-  }
+      // Find the newest automation (most recent createdAt)
+      const newestAutomation = [...data.data].sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      })[0]
+
+      if (newestAutomation) {
+        setNewAutomationPopup(newestAutomation)
+      }
+    }
+  }, [data])
 
   const handleConfigureNewAutomation = () => {
     if (newAutomationPopup) {
@@ -4072,6 +4080,10 @@ const AutomationList = ({ id }: Props) => {
         },
       },
     )
+  }
+
+  const handleAutomationCreated = () => {
+    // Placeholder for handleAutomationCreated logic
   }
 
   const filteredAutomations = useMemo(() => {
