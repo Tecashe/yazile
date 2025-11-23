@@ -1267,17 +1267,20 @@ const CreateAutomation = ({
       },
       {
         onSuccess: (data: any) => {
+          console.log("[v0] Automation created successfully, storing flag and showing success animation")
           sessionStorage.setItem("automationJustCreated", "true")
           setShowSuccess(true)
 
           setTimeout(() => {
             setShowSuccess(false)
-            if (onAutomationCreated) {
-              onAutomationCreated(data)
+            console.log("[v0] Triggering loading overlay before reload")
+            if (onCreating) {
+              onCreating()
             }
             setTimeout(() => {
+              console.log("[v0] Reloading page")
               window.location.reload()
-            }, 300)
+            }, 500)
           }, 800)
         },
         onError: (error: any) => {

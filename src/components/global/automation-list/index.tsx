@@ -4748,7 +4748,6 @@
 // }
 
 // export default AutomationList
-
 "use client"
 import { useMemo, useEffect, useState, useRef } from "react"
 import { usePaths } from "@/hooks/user-nav"
@@ -4893,11 +4892,8 @@ const AutomationList = ({ id }: Props) => {
     }
   }, [data])
 
-  const handleCreatingAutomation = () => {
-    setIsCreatingAutomation(true)
-  }
-
   const handleAutomationCreatedSuccess = () => {
+    console.log("[v0] handleAutomationCreatedSuccess called, setting loading state")
     setIsCreatingAutomation(true)
   }
 
@@ -5083,8 +5079,7 @@ const AutomationList = ({ id }: Props) => {
             <CreateAutomation
               currentAutomationCount={0}
               onUpgradeClick={() => setShowPaymentPopup(true)}
-              onAutomationCreated={handleAutomationCreated}
-              onCreating={handleCreatingAutomation}
+              onCreating={handleAutomationCreatedSuccess}
             />
           </motion.div>
         </div>
@@ -5376,10 +5371,9 @@ const AutomationList = ({ id }: Props) => {
               <p className="text-muted-foreground text-lg">Manage and monitor your automated workflows</p>
             </div>
             <CreateAutomation
-              currentAutomationCount={automations.length}
+              currentAutomationCount={activeAutomations?.length || 0}
               onUpgradeClick={() => setShowPaymentPopup(true)}
-              onAutomationCreated={handleAutomationCreatedSuccess}
-              onCreating={handleCreatingAutomation}
+              onCreating={handleAutomationCreatedSuccess}
             />
           </div>
 
@@ -5822,6 +5816,7 @@ const AutomationList = ({ id }: Props) => {
 }
 
 export default AutomationList
+
 
 
 // "use client"
