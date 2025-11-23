@@ -895,7 +895,7 @@ export const SimulationTab = ({
       case "ANY_MESSAGE":
         return <Zap className="h-4 w-4 text-purple-500" />
       case "SMART_AI":
-        return <Brain className="h-4 w-4 text-yellow-500" />
+        return <Brain className="h-4 w-4 text-yellow" />
       case "SCHEDULED":
         return <Clock className="h-4 w-4 text-green-500" />
       default:

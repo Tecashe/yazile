@@ -46,7 +46,7 @@
 //               formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground transition-colors",
 //               dividerLine: "bg-border",
 //               dividerText: "text-muted-foreground",
-//               formFieldWarning: "text-yellow-500",
+//               formFieldWarning: "text-yellow",
 //               formFieldError: "text-destructive",
 //               socialButtonsBlockButton:
 //                 "border border-border hover:border-primary/50 bg-background/50 hover:bg-background/80 transition-all duration-200 backdrop-blur-sm",
@@ -135,7 +135,7 @@
 //               formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground",
 //               dividerLine: "bg-border",
 //               dividerText: "text-muted-foreground",
-//               formFieldWarning: "text-yellow-500",
+//               formFieldWarning: "text-yellow",
 //               formFieldError: "text-red-500",
 //               socialButtonsBlockButton:
 //                 "border border-border hover:border-foreground bg-background hover:bg-card transition-all duration-200",

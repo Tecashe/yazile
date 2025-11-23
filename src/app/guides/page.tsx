@@ -109,7 +109,7 @@ export default function GuidesPage() {
       case "Beginner":
         return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Beginner</Badge>
       case "Intermediate":
-        return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Intermediate</Badge>
+        return <Badge className="bg-yellow-500/10 text-yellow border-yellow-500/20">Intermediate</Badge>
       case "Advanced":
         return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Advanced</Badge>
       default:

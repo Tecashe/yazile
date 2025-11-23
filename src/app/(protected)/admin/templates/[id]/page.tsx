@@ -124,7 +124,7 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
         <div className="flex space-x-2">
           {template.featured && (
             <Badge variant="outline">
-              <Star className="h-3 w-3 mr-1 text-yellow-500" />
+              <Star className="h-3 w-3 mr-1 text-yellow" />
               Featured
             </Badge>
           )}

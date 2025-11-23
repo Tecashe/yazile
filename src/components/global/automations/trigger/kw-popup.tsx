@@ -182,7 +182,7 @@
 //           {/* Suggested keywords */}
 //           <div className="space-y-3">
 //             <h4 className="font-medium text-foreground flex items-center gap-2">
-//               <Lightbulb className="h-4 w-4 text-yellow-500" />
+//               <Lightbulb className="h-4 w-4 text-yellow" />
 //               Suggested Keywords
 //             </h4>
 //             <div className="flex flex-wrap gap-2">
@@ -491,7 +491,7 @@
 //             {/* Suggested keywords */}
 //             <div className="space-y-3">
 //               <h4 className="font-medium text-foreground flex items-center gap-2">
-//                 <Lightbulb className="h-4 w-4 text-yellow-500" />
+//                 <Lightbulb className="h-4 w-4 text-yellow" />
 //                 Suggested Keywords
 //               </h4>
 //               <div className="flex flex-wrap gap-2">
@@ -971,7 +971,7 @@ Return ONLY a JSON array of strings, nothing else.`
             {/* Suggested keywords */}
             <div className="space-y-3">
               <h4 className="font-medium text-foreground flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-yellow-500" />
+                <Lightbulb className="h-4 w-4 text-yellow" />
                 Suggested Keywords
               </h4>
               <div className="flex flex-wrap gap-2">

@@ -106,7 +106,7 @@ export default function AboutPage() {
 
               <Card className="border-border/50 bg-background/50 text-center">
                 <CardContent className="p-6">
-                  <Lightbulb className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+                  <Lightbulb className="h-12 w-12 text-yellow mx-auto mb-4" />
                   <h3 className="font-bold mb-2">Innovation</h3>
                   <p className="text-sm text-muted-foreground">
                     We constantly push boundaries to create cutting-edge solutions for modern businesses.

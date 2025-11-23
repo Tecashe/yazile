@@ -268,7 +268,7 @@ export default function FeaturesPage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div className="flex flex-col items-center text-center space-y-2">
-                <Zap className="h-8 w-8 text-yellow-500" />
+                <Zap className="h-8 w-8 text-yellow" />
                 <h3 className="font-semibold">Lightning Fast</h3>
                 <p className="text-sm text-muted-foreground">Instant responses and real-time updates</p>
               </div>

@@ -831,7 +831,7 @@ export default function TemplatesAdminPage() {
                       onCheckedChange={(checked) => handleCheckboxChange("featured", checked as boolean)}
                     />
                     <Label htmlFor="featured" className="text-sm font-medium flex items-center gap-2">
-                      <Star className="h-4 w-4 text-yellow-500" />
+                      <Star className="h-4 w-4 text-yellow" />
                       Mark as featured
                     </Label>
                   </div>
@@ -1746,7 +1746,7 @@ export default function TemplatesAdminPage() {
                                 variant="outline"
                                 className="text-xs border-yellow-300 text-yellow-700 bg-yellow-50"
                               >
-                                <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                                <Star className="h-3 w-3 mr-1 text-yellow" />
                                 Featured
                               </Badge>
                             )}

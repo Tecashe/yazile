@@ -224,8 +224,8 @@ const Configure = ({
                       </div>
                     ) : (
                       <Alert className="bg-yellow-500/10 border-yellow-500/30">
-                        <Info className="h-4 w-4 text-yellow-500" />
-                        <AlertTitle className="text-yellow-500 font-medium">Business Knowledge Required</AlertTitle>
+                        <Info className="h-4 w-4 text-yellow" />
+                        <AlertTitle className="text-yellow font-medium">Business Knowledge Required</AlertTitle>
                         <AlertDescription className="text-yellow-400">
                           For best results, add detailed information about your business in the Business Knowledge Hub.
                           <Button

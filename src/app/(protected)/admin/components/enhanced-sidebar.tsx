@@ -304,7 +304,7 @@ export function EnhancedSidebar() {
                 icon={FileText}
                 label="Message Templates"
                 isActive={pathname === "/admin/templates"}
-                color="text-yellow-500"
+                color="text-yellow"
                 badge="New"
               />
             </ul>

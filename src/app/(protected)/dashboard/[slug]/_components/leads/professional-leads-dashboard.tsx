@@ -664,7 +664,7 @@
 //         {/* Mock Data Notice */}
 //         {isMockMode && (
 //           <Alert className="border-yellow-500/30 bg-yellow-500/10">
-//             <AlertTriangle className="h-4 w-4 text-yellow-500" />
+//             <AlertTriangle className="h-4 w-4 text-yellow" />
 //             <AlertDescription className="text-yellow-200">
 //               <strong>Demo Mode Active:</strong> Displaying mock data for demonstration. Switch off demo mode to view
 //               live data when your account starts processing leads.
@@ -1421,7 +1421,7 @@
 //         {/* Mock Data Notice */}
 //         {isMockMode && (
 //           <Alert className="border-yellow-500/30 bg-yellow-500/10">
-//             <AlertTriangle className="h-4 w-4 text-yellow-500" />
+//             <AlertTriangle className="h-4 w-4 text-yellow" />
 //             <AlertDescription className="text-yellow-200">
 //               <strong>Demo Mode Active:</strong> Displaying mock data for demonstration. Switch off demo mode to view
 //               live data when your account starts processing leads.

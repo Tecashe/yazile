@@ -85,7 +85,7 @@
 //                 )}
 //                 {isStarred && (
 //                   <Badge variant="outline" className="ml-2 px-1">
-//                     <Star className="h-3 w-3 text-yellow-500" />
+//                     <Star className="h-3 w-3 text-yellow" />
 //                   </Badge>
 //                 )}
 //               </div>
@@ -112,7 +112,7 @@
 
 //                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={onToggleStar}>
 //                   <Star
-//                     className={cn("h-4 w-4", isStarred ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground")}
+//                     className={cn("h-4 w-4", isStarred ? "text-yellow fill-yellow-500" : "text-muted-foreground")}
 //                   />
 //                 </Button>
 
@@ -258,7 +258,7 @@ const ConversationItem = memo(
                 )}
                 {isStarred && (
                   <Badge variant="outline" className="ml-2 px-1">
-                    <Star className="h-3 w-3 text-yellow-500" />
+                    <Star className="h-3 w-3 text-yellow" />
                   </Badge>
                 )}
               </div>
@@ -285,7 +285,7 @@ const ConversationItem = memo(
 
                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={onToggleStar}>
                   <Star
-                    className={cn("h-4 w-4", isStarred ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground")}
+                    className={cn("h-4 w-4", isStarred ? "text-yellow fill-yellow-500" : "text-muted-foreground")}
                   />
                 </Button>
 

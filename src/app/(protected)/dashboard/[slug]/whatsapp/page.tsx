@@ -539,7 +539,7 @@ export default function WhatsAppDashboard() {
                 account.status === 'verified' 
                   ? 'bg-green-500/10 text-green-500' 
                   : account.status === 'pending'
-                  ? 'bg-yellow-500/10 text-yellow-500'
+                  ? 'bg-yellow-500/10 text-yellow'
                   : 'bg-red-500/10 text-red-500'
               }`}>
                 {account.status}

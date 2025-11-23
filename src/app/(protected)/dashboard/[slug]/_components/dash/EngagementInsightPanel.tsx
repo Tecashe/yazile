@@ -49,7 +49,7 @@ const EngagementInsightPanel: React.FC<EngagementInsightPanelProps> = ({ data })
             ? "You're receiving more DMs than comments. Consider encouraging more public interactions."
             : "You're receiving more comments than DMs. Great job fostering public discussions!",
         icon: Lightbulb,
-        color: "text-yellow-500",
+        color: "text-yellow",
       },
     ]
   }, [data])

@@ -1376,7 +1376,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
                 )}
                 {isStarred && (
                   <Badge variant="outline" className="ml-2 px-1">
-                    <Star className="h-3 w-3 text-yellow-500" />
+                    <Star className="h-3 w-3 text-yellow" />
                   </Badge>
                 )}
               </div>
@@ -1414,7 +1414,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
                   onClick={(e) => toggleStarConversation(conversation.id, e)}
                 >
                   <Star
-                    className={cn("h-4 w-4", isStarred ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground")}
+                    className={cn("h-4 w-4", isStarred ? "text-yellow fill-yellow-500" : "text-muted-foreground")}
                   />
                 </Button>
 
