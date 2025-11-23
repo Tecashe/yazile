@@ -1272,13 +1272,12 @@ const CreateAutomation = ({
 
           setTimeout(() => {
             setShowSuccess(false)
-            if (onCreating) {
-              onCreating()
+            if (onAutomationCreated) {
+              onAutomationCreated(data)
             }
-            // Reload after a brief moment to let the overlay appear
             setTimeout(() => {
               window.location.reload()
-            }, 100)
+            }, 300)
           }, 800)
         },
         onError: (error: any) => {
