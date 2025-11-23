@@ -24,7 +24,7 @@ export default async function MakeAdminPage({
     return (
       <div className="container p-6">
         <h1 className="text-2xl font-bold mb-4">Make Admin</h1>
-        <p className="text-red-500">Error making user admin: {(error as Error).message}</p>
+        <p className="text-red">Error making user admin: {(error as Error).message}</p>
       </div>
     )
   }

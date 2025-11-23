@@ -149,7 +149,7 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 text-red-500 p-3 rounded-lg flex items-center gap-2 mb-4">
+          <div className="bg-red-500/10 text-red p-3 rounded-lg flex items-center gap-2 mb-4">
             <AlertCircle className="h-4 w-4" />
             <p className="text-sm">{error}</p>
           </div>

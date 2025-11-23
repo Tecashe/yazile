@@ -125,7 +125,7 @@
 //                     onDelete()
 //                   }}
 //                 >
-//                   <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
+//                   <Trash2 size={16} className="text-muted-foreground hover:text-red" />
 //                 </Button>
 //               </div>
 
@@ -298,7 +298,7 @@ const ConversationItem = memo(
                     onDelete()
                   }}
                 >
-                  <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
+                  <Trash2 size={16} className="text-muted-foreground hover:text-red" />
                 </Button>
               </div>
 

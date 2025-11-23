@@ -77,7 +77,7 @@ export function ScheduledContentTable() {
       case "IMAGE":
         return <Image className="h-4 w-4 text-blue-500" />
       case "VIDEO":
-        return <Video className="h-4 w-4 text-red-500" />
+        return <Video className="h-4 w-4 text-red" />
       case "CAROSEL_ALBUM":
         return <FileImage className="h-4 w-4 text-green-500" />
       default:

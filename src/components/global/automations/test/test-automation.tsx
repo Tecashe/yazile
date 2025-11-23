@@ -188,7 +188,7 @@ const TestAutomation = ({
                       {testResult.success ? (
                         <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       ) : (
-                        <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <AlertCircle className="h-5 w-5 text-red flex-shrink-0 mt-0.5" />
                       )}
                       <div>
                         <p className={cn("font-medium", testResult.success ? "text-green-400" : "text-red-400")}>

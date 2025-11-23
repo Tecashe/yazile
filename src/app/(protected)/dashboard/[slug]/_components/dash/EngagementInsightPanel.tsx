@@ -34,13 +34,13 @@ const EngagementInsightPanel: React.FC<EngagementInsightPanelProps> = ({ data })
         title: "DM Engagement",
         description: `Your DM engagement is ${dmsTrend > 0 ? "up" : "down"} by ${Math.abs(dmsTrend).toFixed(1)}% compared to your average.`,
         icon: dmsTrend > 0 ? TrendingUp : TrendingDown,
-        color: dmsTrend > 0 ? "text-green-500" : "text-red-500",
+        color: dmsTrend > 0 ? "text-green-500" : "text-red",
       },
       {
         title: "Comment Activity",
         description: `Your comment activity is ${commentsTrend > 0 ? "up" : "down"} by ${Math.abs(commentsTrend).toFixed(1)}% compared to your average.`,
         icon: commentsTrend > 0 ? TrendingUp : TrendingDown,
-        color: commentsTrend > 0 ? "text-green-500" : "text-red-500",
+        color: commentsTrend > 0 ? "text-green-500" : "text-red",
       },
       {
         title: "Engagement Balance",

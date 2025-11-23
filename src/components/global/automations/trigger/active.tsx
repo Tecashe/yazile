@@ -179,8 +179,8 @@
 //                     {/* Fallback Message Display */}
 //                     {isFallback && fallbackMessage && (
 //                       <Alert className="bg-orange-500/10 border-orange-500/30 mt-3">
-//                         <CheckCircle className="h-4 w-4 text-orange-500" />
-//                         <AlertTitle className="text-orange-500 font-medium">Fallback Message</AlertTitle>
+//                         <CheckCircle className="h-4 w-4 text-orange" />
+//                         <AlertTitle className="text-orange font-medium">Fallback Message</AlertTitle>
 //                         <AlertDescription className="text-orange-400">
 //                           {fallbackMessage}
 //                         </AlertDescription>
@@ -501,8 +501,8 @@
 //                     {/* Fallback Message Display */}
 //                     {isFallback && fallbackMessage && (
 //                       <Alert className="bg-orange-500/10 border-orange-500/30 mt-3">
-//                         <CheckCircle className="h-4 w-4 text-orange-500" />
-//                         <AlertTitle className="text-orange-500 font-medium">Fallback Message</AlertTitle>
+//                         <CheckCircle className="h-4 w-4 text-orange" />
+//                         <AlertTitle className="text-orange font-medium">Fallback Message</AlertTitle>
 //                         <AlertDescription className="text-orange-400">{fallbackMessage}</AlertDescription>
 //                       </Alert>
 //                     )}
@@ -818,8 +818,8 @@ const ActiveTrigger = ({
                     {/* Fallback Message Display */}
                     {isFallback && fallbackMessage && (
                       <Alert className="bg-orange-500/10 border-orange-500/30 mt-3">
-                        <CheckCircle className="h-4 w-4 text-orange-500" />
-                        <AlertTitle className="text-orange-500 font-medium">Fallback Message</AlertTitle>
+                        <CheckCircle className="h-4 w-4 text-orange" />
+                        <AlertTitle className="text-orange font-medium">Fallback Message</AlertTitle>
                         <AlertDescription className="text-orange-400">{fallbackMessage}</AlertDescription>
                       </Alert>
                     )}

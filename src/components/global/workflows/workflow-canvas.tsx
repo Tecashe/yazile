@@ -2062,7 +2062,7 @@ export function WorkflowCanvas() {
                         height="12"
                         className="pointer-events-none"
                       >
-                        <Trash2 className="h-3 w-3 text-red-500" />
+                        <Trash2 className="h-3 w-3 text-red" />
                       </foreignObject>
                     </g>
                   )}

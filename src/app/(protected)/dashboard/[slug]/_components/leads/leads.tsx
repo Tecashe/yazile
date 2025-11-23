@@ -685,7 +685,7 @@
 //         const IconComponent = card.icon
 //         const trendIcon = card.trend === "up" ? ArrowUpRight : card.trend === "down" ? TrendingDown : Activity
 //         const trendColor =
-//           card.trend === "up" ? "text-green-500" : card.trend === "down" ? "text-red-500" : "text-blue-500"
+//           card.trend === "up" ? "text-green-500" : card.trend === "down" ? "text-red" : "text-blue-500"
 
 //         return (
 //           <Card key={index} className={`${card.color} border-l-4 hover:shadow-lg transition-all duration-200 group`}>
@@ -3029,7 +3029,7 @@
 //         const IconComponent = card.icon
 //         const trendIcon = card.trend === "up" ? ArrowUpRight : card.trend === "down" ? TrendingDown : Activity
 //         const trendColor =
-//           card.trend === "up" ? "text-green-500" : card.trend === "down" ? "text-red-500" : "text-blue-500"
+//           card.trend === "up" ? "text-green-500" : card.trend === "down" ? "text-red" : "text-blue-500"
 
 //         return (
 //           <Card key={index} className={`${card.color} border-l-4 hover:shadow-lg transition-all duration-200 group`}>
@@ -5360,7 +5360,7 @@ function PremiumAnalyticsCards({ analytics }: { analytics: any }) {
         const IconComponent = card.icon
         const trendIcon = card.trend === "up" ? ArrowUpRight : card.trend === "down" ? TrendingDown : Activity
         const trendColor =
-          card.trend === "up" ? "text-green-500" : card.trend === "down" ? "text-red-500" : "text-blue-500"
+          card.trend === "up" ? "text-green-500" : card.trend === "down" ? "text-red" : "text-blue-500"
 
         return (
           <Card key={index} className={`${card.color} border-l-4 hover:shadow-lg transition-all duration-200 group`}>

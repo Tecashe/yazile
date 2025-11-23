@@ -122,7 +122,7 @@
 //                     <span>
 //                       {req.text}
 //                       {req.required ? (
-//                         <span className="text-red-500 ml-1">*</span>
+//                         <span className="text-red ml-1">*</span>
 //                       ) : (
 //                         <span className="text-muted-foreground ml-1">(recommended)</span>
 //                       )}
@@ -409,7 +409,7 @@ export default function RequirementsModal({ platform, onClose, onConnect }: Requ
                     <span>
                       {req.text}
                       {req.required ? (
-                        <span className="text-red-500 ml-1">*</span>
+                        <span className="text-red ml-1">*</span>
                       ) : (
                         <span className="text-muted-foreground ml-1">(recommended)</span>
                       )}

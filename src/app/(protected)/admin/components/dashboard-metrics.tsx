@@ -294,11 +294,11 @@ export function DashboardMetrics() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalUsers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className={metrics.userGrowth >= 0 ? "text-green-500" : "text-red-500"}>
+              <span className={metrics.userGrowth >= 0 ? "text-green-500" : "text-red"}>
                 {metrics.userGrowth > 0 && "+"}
                 {metrics.userGrowth}%
               </span>
-              <ArrowUpRight className={`ml-1 h-3 w-3 ${metrics.userGrowth >= 0 ? "text-green-500" : "text-red-500"}`} />
+              <ArrowUpRight className={`ml-1 h-3 w-3 ${metrics.userGrowth >= 0 ? "text-green-500" : "text-red"}`} />
               <span className="ml-1">from previous period</span>
             </p>
           </CardContent>
@@ -311,12 +311,12 @@ export function DashboardMetrics() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.emailsDelivered.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className={metrics.emailGrowth >= 0 ? "text-green-500" : "text-red-500"}>
+              <span className={metrics.emailGrowth >= 0 ? "text-green-500" : "text-red"}>
                 {metrics.emailGrowth > 0 && "+"}
                 {metrics.emailGrowth}%
               </span>
               <ArrowUpRight
-                className={`ml-1 h-3 w-3 ${metrics.emailGrowth >= 0 ? "text-green-500" : "text-red-500"}`}
+                className={`ml-1 h-3 w-3 ${metrics.emailGrowth >= 0 ? "text-green-500" : "text-red"}`}
               />
               <span className="ml-1">from previous period</span>
             </p>
@@ -330,12 +330,12 @@ export function DashboardMetrics() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalMessages.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className={metrics.messageGrowth >= 0 ? "text-green-500" : "text-red-500"}>
+              <span className={metrics.messageGrowth >= 0 ? "text-green-500" : "text-red"}>
                 {metrics.messageGrowth > 0 && "+"}
                 {metrics.messageGrowth}%
               </span>
               <ArrowUpRight
-                className={`ml-1 h-3 w-3 ${metrics.messageGrowth >= 0 ? "text-green-500" : "text-red-500"}`}
+                className={`ml-1 h-3 w-3 ${metrics.messageGrowth >= 0 ? "text-green-500" : "text-red"}`}
               />
               <span className="ml-1">from previous period</span>
             </p>
@@ -349,12 +349,12 @@ export function DashboardMetrics() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalInstagramAccounts.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className={metrics.instagramGrowth >= 0 ? "text-green-500" : "text-red-500"}>
+              <span className={metrics.instagramGrowth >= 0 ? "text-green-500" : "text-red"}>
                 {metrics.instagramGrowth > 0 && "+"}
                 {metrics.instagramGrowth}%
               </span>
               <ArrowUpRight
-                className={`ml-1 h-3 w-3 ${metrics.instagramGrowth >= 0 ? "text-green-500" : "text-red-500"}`}
+                className={`ml-1 h-3 w-3 ${metrics.instagramGrowth >= 0 ? "text-green-500" : "text-red"}`}
               />
               <span className="ml-1">from previous period</span>
             </p>

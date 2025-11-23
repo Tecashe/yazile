@@ -568,7 +568,7 @@ export default function BillingPage() {
                       Incomplete
                     </span>
                   ) : subscription?.status === "PAST_DUE" ? (
-                    <span className="flex items-center text-orange-500 text-sm">
+                    <span className="flex items-center text-orange text-sm">
                       <AlertTriangle className="mr-1 h-4 w-4" />
                       Past Due
                     </span>

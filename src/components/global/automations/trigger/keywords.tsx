@@ -79,7 +79,7 @@ export const Keywords = ({
                   className={`bg-${theme.primary}/20 text-${theme.primary} flex items-center gap-x-2 capitalize py-1 px-4 rounded-full group`}
                 >
                   <p>{word.word}</p>
-                  <X className="cursor-pointer hover:text-red-500" onClick={() => deleteMutation({ id: word.id })} />
+                  <X className="cursor-pointer hover:text-red" onClick={() => deleteMutation({ id: word.id })} />
                 </motion.div>
               ),
           )}

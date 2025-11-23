@@ -1427,7 +1427,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
                     handleDeleteConversation(conversation)
                   }}
                 >
-                  <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
+                  <Trash2 size={16} className="text-muted-foreground hover:text-red" />
                 </Button>
               </div>
 
@@ -1774,7 +1774,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId }) => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className={`h-6 w-6 rounded-full ${isRecording ? "text-red-500" : ""}`}
+                                className={`h-6 w-6 rounded-full ${isRecording ? "text-red" : ""}`}
                                 onClick={handleVoiceMessage}
                               >
                                 <Mic className="h-5 w-5" />

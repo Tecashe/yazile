@@ -2126,8 +2126,8 @@ const Trigger = ({ id }: Props) => {
 
               {hasExistingDefault && (
                 <Alert className="bg-orange-500/10 border-orange-500/30 mb-4">
-                  <AlertCircle className="h-4 w-4 text-orange-500" />
-                  <AlertTitle className="text-orange-500 font-medium">Default Automation Already Set</AlertTitle>
+                  <AlertCircle className="h-4 w-4 text-orange" />
+                  <AlertTitle className="text-orange font-medium">Default Automation Already Set</AlertTitle>
                   <AlertDescription className="text-orange-400 text-sm leading-relaxed">
                     You already have a default automation set:{" "}
                     <span className="font-semibold">&ldquo;{existingDefault?.name || "Untitled"}&rdquo;</span>. Only one
@@ -2181,7 +2181,7 @@ const Trigger = ({ id }: Props) => {
                     </Alert>
                   ) : (
                     <Alert className="bg-orange-500/10 border-orange-500/30">
-                      <Info className="h-4 w-4 text-orange-500" />
+                      <Info className="h-4 w-4 text-orange" />
                       <AlertDescription className="text-orange-400 text-sm">
                         Add at least one keyword to activate this automation. We recommend 3-5 keywords for best
                         results.

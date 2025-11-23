@@ -503,7 +503,7 @@ export function ConfigurationPanel() {
                       {validation.isValid ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
+                        <XCircle className="h-5 w-5 text-red" />
                       )}
                       Workflow Status
                     </CardTitle>

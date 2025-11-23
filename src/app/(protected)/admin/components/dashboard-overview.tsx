@@ -106,7 +106,7 @@ export function DashboardOverview() {
       case "degraded":
         return "text-amber-500"
       case "down":
-        return "text-red-500"
+        return "text-red"
       default:
         return "text-muted-foreground"
     }
@@ -119,7 +119,7 @@ export function DashboardOverview() {
       case "degraded":
         return <AlertTriangle className="h-4 w-4 text-amber-500" />
       case "down":
-        return <AlertTriangle className="h-4 w-4 text-red-500" />
+        return <AlertTriangle className="h-4 w-4 text-red" />
       default:
         return null
     }

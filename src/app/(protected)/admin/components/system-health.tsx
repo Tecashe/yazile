@@ -52,7 +52,7 @@ export function SystemHealth() {
       case "degraded":
         return <AlertTriangle className="h-4 w-4 text-amber-500" />
       case "down":
-        return <AlertCircle className="h-4 w-4 text-red-500" />
+        return <AlertCircle className="h-4 w-4 text-red" />
     }
   }
 

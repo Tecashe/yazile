@@ -60,7 +60,7 @@ export default function HelpPage() {
     },
     {
       title: "Troubleshooting",
-      icon: <HelpCircle className="h-6 w-6 text-red-500" />,
+      icon: <HelpCircle className="h-6 w-6 text-red" />,
       description: "Solve common issues and problems",
       articles: ["Automation not working", "Connection issues", "Missing notifications", "Performance problems"],
     },
@@ -99,7 +99,7 @@ export default function HelpPage() {
     {
       title: "Video Call",
       description: "Schedule a screen-sharing session",
-      icon: <Video className="h-6 w-6 text-orange-500" />,
+      icon: <Video className="h-6 w-6 text-orange" />,
       availability: "By appointment",
       action: "Schedule Call",
     },
@@ -280,7 +280,7 @@ export default function HelpPage() {
 
               <Card className="border-border/50 bg-background/50 hover:border-primary/50 transition-all">
                 <CardContent className="p-4 text-center">
-                  <ExternalLink className="h-6 w-6 mx-auto mb-2 text-orange-500" />
+                  <ExternalLink className="h-6 w-6 mx-auto mb-2 text-orange" />
                   <h3 className="font-medium">Community</h3>
                   <p className="text-sm text-muted-foreground">Join discussions</p>
                 </CardContent>

@@ -54,7 +54,7 @@ const MessageStatus: React.FC<{ status: "sending" | "sent" | "error" }> = ({ sta
   }
   if (status === "error") {
     return (
-      <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-red-500 text-xs">
+      <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-red text-xs">
         Failed to send
       </motion.span>
     )

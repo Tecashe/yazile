@@ -110,7 +110,7 @@ const EngagementPulse: React.FC<{ userId: string }> = ({ userId }) => {
       </CardHeader>
       <CardContent>
         {loading && <div className="text-center py-10">Loading engagement data...</div>}
-        {error && <div className="text-center text-red-500 py-10">{error}</div>}
+        {error && <div className="text-center text-red py-10">{error}</div>}
         {!loading && !error && (
           <>
             <div className="flex items-end space-x-1 h-64 mb-4">

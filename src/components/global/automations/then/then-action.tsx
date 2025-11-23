@@ -2188,8 +2188,8 @@
 //                   exit={{ opacity: 0, y: -20 }}
 //                 >
 //                   <Alert className="bg-orange-500/10 border-orange-500/30 mb-4">
-//                     <Settings className="h-4 w-4 text-orange-500" />
-//                     <AlertTitle className="text-orange-500 font-medium">Step 2: Customize Your Profile</AlertTitle>
+//                     <Settings className="h-4 w-4 text-orange" />
+//                     <AlertTitle className="text-orange font-medium">Step 2: Customize Your Profile</AlertTitle>
 //                     <AlertDescription className="text-orange-400">
 //                       Replace the placeholder text with your specific business information. The more detailed, the
 //                       better!
@@ -4987,8 +4987,8 @@
 //                   exit={{ opacity: 0, y: -20 }}
 //                 >
 //                   <Alert className="bg-orange-500/10 border-orange-500/30 mb-4">
-//                     <Settings className="h-4 w-4 text-orange-500" />
-//                     <AlertTitle className="text-orange-500 font-medium">Step 2: Customize Your Profile</AlertTitle>
+//                     <Settings className="h-4 w-4 text-orange" />
+//                     <AlertTitle className="text-orange font-medium">Step 2: Customize Your Profile</AlertTitle>
 //                     <AlertDescription className="text-orange-400">
 //                       Replace the placeholder text with your specific business information. The more detailed, the
 //                       better!
@@ -7791,8 +7791,8 @@ Follow our latest work on Instagram [@INSTAGRAM_HANDLE]`,
                   exit={{ opacity: 0, y: -20 }}
                 >
                   <Alert className="bg-orange-500/10 border-orange-500/30 mb-4">
-                    <Settings className="h-4 w-4 text-orange-500" />
-                    <AlertTitle className="text-orange-500 font-medium">Step 2: Customize Your Profile</AlertTitle>
+                    <Settings className="h-4 w-4 text-orange" />
+                    <AlertTitle className="text-orange font-medium">Step 2: Customize Your Profile</AlertTitle>
                     <AlertDescription className="text-orange-400">
                       Replace the placeholder text with your specific business information. The more detailed, the
                       better!

@@ -56,8 +56,8 @@ export function DashboardCards({ stats }: DashboardCardsProps) {
                 </>
               ) : (
                 <>
-                  <ArrowDown className="mr-1 h-4 w-4 text-red-500" />
-                  <span className="text-red-500">{Math.abs(stats.userGrowth || 0)}%</span> from last month
+                  <ArrowDown className="mr-1 h-4 w-4 text-red" />
+                  <span className="text-red">{Math.abs(stats.userGrowth || 0)}%</span> from last month
                 </>
               )}
             </p>
@@ -88,8 +88,8 @@ export function DashboardCards({ stats }: DashboardCardsProps) {
                 </>
               ) : (
                 <>
-                  <ArrowDown className="mr-1 h-4 w-4 text-red-500" />
-                  <span className="text-red-500">{Math.abs(stats.subscriptionGrowth || 0)}%</span> from last month
+                  <ArrowDown className="mr-1 h-4 w-4 text-red" />
+                  <span className="text-red">{Math.abs(stats.subscriptionGrowth || 0)}%</span> from last month
                 </>
               )}
             </p>
@@ -122,8 +122,8 @@ export function DashboardCards({ stats }: DashboardCardsProps) {
                 </>
               ) : (
                 <>
-                  <ArrowDown className="mr-1 h-4 w-4 text-red-500" />
-                  <span className="text-red-500">{Math.abs(stats.automationGrowth || 0)}%</span> from last month
+                  <ArrowDown className="mr-1 h-4 w-4 text-red" />
+                  <span className="text-red">{Math.abs(stats.automationGrowth || 0)}%</span> from last month
                 </>
               )}
             </p>

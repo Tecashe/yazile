@@ -1447,7 +1447,7 @@
 //     return (
 //       <div className="flex items-center justify-center h-96">
 //         <div className="text-center">
-//           <XCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+//           <XCircle className="h-8 w-8 text-red mx-auto mb-4" />
 //           <p className="text-muted-foreground mb-4">Failed to load Instagram data</p>
 //           <Button onClick={handleRefreshData} variant="outline">
 //             <RefreshCw className="h-4 w-4 mr-2" />
@@ -2344,7 +2344,7 @@ export default function InstagramBusinessDashboard({ userId }: InstagramDashboar
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <XCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <XCircle className="h-8 w-8 text-red mx-auto mb-4" />
           <p className="text-muted-foreground mb-4">Failed to load Instagram data</p>
           <Button onClick={handleRefreshData} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -2494,7 +2494,7 @@ export default function InstagramBusinessDashboard({ userId }: InstagramDashboar
                   <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <Heart className="h-4 w-4 text-red-500" />
+                        <Heart className="h-4 w-4 text-red" />
                         <span>Total Likes</span>
                       </div>
                       <span className="font-semibold">{businessMetrics.totalLikes.toLocaleString()}</span>

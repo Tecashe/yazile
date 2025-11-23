@@ -73,7 +73,7 @@ export default function TermsPage() {
               </Card>
               <Card className="border-border/50 bg-background/50 text-center">
                 <CardContent className="p-6">
-                  <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-orange-500" />
+                  <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-orange" />
                   <h3 className="font-bold mb-2">Limitations</h3>
                   <p className="text-sm text-muted-foreground">Service limitations and liability</p>
                 </CardContent>

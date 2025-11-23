@@ -112,7 +112,7 @@ function StatusItem({
     <li className="flex items-start gap-3">
       <div className="mt-0.5">
         {status === "active" && <CheckCircle className="h-5 w-5 text-green-500" />}
-        {status === "inactive" && <AlertCircle className="h-5 w-5 text-red-500" />}
+        {status === "inactive" && <AlertCircle className="h-5 w-5 text-red" />}
         {status === "config" && <AlertCircle className="h-5 w-5 text-amber-500" />}
         {status === "coming" && <Circle className="h-5 w-5 text-blue-500" />}
       </div>

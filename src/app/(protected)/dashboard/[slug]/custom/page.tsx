@@ -297,9 +297,9 @@ export default function ContactPage() {
                     {submitStatus.type === "success" ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-red flex-shrink-0 mt-0.5" />
                     )}
-                    <p className={`text-sm ${submitStatus.type === "success" ? "text-green-500" : "text-red-500"}`}>
+                    <p className={`text-sm ${submitStatus.type === "success" ? "text-green-500" : "text-red"}`}>
                       {submitStatus.message}
                     </p>
                   </div>

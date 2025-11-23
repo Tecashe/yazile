@@ -64,7 +64,7 @@ export default function SuccessPage() {
             <div className="bg-red-900/30 p-4 rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-red-500"
+                className="h-12 w-12 text-red"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

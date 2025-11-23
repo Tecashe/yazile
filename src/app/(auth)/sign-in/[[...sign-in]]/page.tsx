@@ -29,7 +29,7 @@
 //               dividerLine: "bg-gray-700",
 //               dividerText: "text-gray-500",
 //               formFieldWarning: "text-amber-500",
-//               formFieldError: "text-red-500",
+//               formFieldError: "text-red",
 //               socialButtonsBlockButton:
 //                 "border-2 border-gray-700 hover:border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200",
 //               socialButtonsBlockButtonText: "text-white font-medium",
@@ -80,7 +80,7 @@
 //               dividerLine: "bg-border",
 //               dividerText: "text-muted-foreground",
 //               formFieldWarning: "text-yellow",
-//               formFieldError: "text-red-500",
+//               formFieldError: "text-red",
 //               socialButtonsBlockButton:
 //                 "border border-border hover:border-foreground bg-background hover:bg-card transition-all duration-200",
 //               socialButtonsBlockButtonText: "text-foreground",
@@ -132,7 +132,7 @@
 //               dividerLine: "bg-foreground/20",
 //               dividerText: "text-muted-foreground",
 //               formFieldWarning: "text-yellow",
-//               formFieldError: "text-red-500",
+//               formFieldError: "text-red",
 //               socialButtonsBlockButton:
 //                 "border-2 border-foreground/30 hover:border-foreground bg-background hover:bg-card transition-all duration-200",
 //               socialButtonsBlockButtonText: "text-foreground",
@@ -240,7 +240,7 @@ const Page = (props: Props) => {
               dividerLine: "bg-border",
               dividerText: "text-muted-foreground",
               formFieldWarning: "text-yellow",
-              formFieldError: "text-red-500",
+              formFieldError: "text-red",
               socialButtonsBlockButton:
                 "border-2 border-input hover:border-ring bg-background hover:bg-accent transition-all duration-200",
               socialButtonsBlockButtonText: "text-foreground",

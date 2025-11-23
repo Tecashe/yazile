@@ -10,6 +10,6 @@ export function ErrorMessage({ error }: ErrorMessageProps) {
     return null
   }
 
-  return <span className="text-red-500 text-sm mt-1">{error.message}</span>
+  return <span className="text-red text-sm mt-1">{error.message}</span>
 }
 

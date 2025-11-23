@@ -540,7 +540,7 @@ export default function WhatsAppDashboard() {
                   ? 'bg-green-500/10 text-green-500' 
                   : account.status === 'pending'
                   ? 'bg-yellow-500/10 text-yellow'
-                  : 'bg-red-500/10 text-red-500'
+                  : 'bg-red-500/10 text-red'
               }`}>
                 {account.status}
               </span>

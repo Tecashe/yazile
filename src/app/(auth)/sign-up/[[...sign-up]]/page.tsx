@@ -136,7 +136,7 @@
 //               dividerLine: "bg-border",
 //               dividerText: "text-muted-foreground",
 //               formFieldWarning: "text-yellow",
-//               formFieldError: "text-red-500",
+//               formFieldError: "text-red",
 //               socialButtonsBlockButton:
 //                 "border border-border hover:border-foreground bg-background hover:bg-card transition-all duration-200",
 //               socialButtonsBlockButtonText: "text-foreground",
@@ -445,7 +445,7 @@ const Page = (props: SignUpProps) => {
               formFieldInputShowPasswordButton: "text-muted-foreground hover:text-foreground",
               dividerLine: "bg-border",
               dividerText: "text-muted-foreground",
-              formFieldError: "text-red-500",
+              formFieldError: "text-red",
               socialButtonsBlockButton:
                 "border-2 border-input hover:border-ring bg-background hover:bg-accent transition-all duration-200",
               socialButtonsBlockButtonText: "text-foreground",

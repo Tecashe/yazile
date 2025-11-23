@@ -558,7 +558,7 @@
 
 //                   {isOffline && (
 //                     <Alert variant="destructive" className="m-4 border-red-400">
-//                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
+//                       <AlertTitle className="text-red">You are offline</AlertTitle>
 //                       <AlertDescription className="text-sm">
 //                         Showing cached messages. New messages can&apos;t be sent.
 //                       </AlertDescription>
@@ -657,10 +657,10 @@
 
 //                   {isOffline && (
 //                     <Alert variant="destructive" className="mx-4 mb-4 border-red-400">
-//                       <AlertTitle className="text-red-500">You are offline</AlertTitle>
+//                       <AlertTitle className="text-red">You are offline</AlertTitle>
 //                       <AlertDescription className="text-sm">
 //                         Showing cached conversations. Real-time updates are unavailable.
-//                         <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-500">
+//                         <Badge variant="outline" className="ml-2 bg-red-500/10 text-red border-red-500">
 //                           Offline Mode
 //                         </Badge>
 //                       </AlertDescription>
@@ -1737,7 +1737,7 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId 
 
                   {isOffline && (
                     <Alert variant="destructive" className="m-4 border-red-400">
-                      <AlertTitle className="text-red-500">You are offline</AlertTitle>
+                      <AlertTitle className="text-red">You are offline</AlertTitle>
                       <AlertDescription className="text-sm">
                         Showing cached messages. New messages can&apos;t be sent.
                       </AlertDescription>
@@ -1836,10 +1836,10 @@ const AutomationChats: React.FC<AutomationChatsProps> = ({ automationId, userId 
 
                   {isOffline && (
                     <Alert variant="destructive" className="mx-4 mb-4 border-red-400">
-                      <AlertTitle className="text-red-500">You are offline</AlertTitle>
+                      <AlertTitle className="text-red">You are offline</AlertTitle>
                       <AlertDescription className="text-sm">
                         Showing cached conversations. Real-time updates are unavailable.
-                        <Badge variant="outline" className="ml-2 bg-red-500/10 text-red-500 border-red-500">
+                        <Badge variant="outline" className="ml-2 bg-red-500/10 text-red border-red-500">
                           Offline Mode
                         </Badge>
                       </AlertDescription>

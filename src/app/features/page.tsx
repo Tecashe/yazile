@@ -194,7 +194,7 @@ export default function FeaturesPage() {
 
               <Card className="border-border/50 bg-background/50">
                 <CardHeader>
-                  <Workflow className="h-12 w-12 text-orange-500 mb-4" />
+                  <Workflow className="h-12 w-12 text-orange mb-4" />
                   <h3 className="text-xl font-bold">Custom Workflows</h3>
                 </CardHeader>
                 <CardContent>

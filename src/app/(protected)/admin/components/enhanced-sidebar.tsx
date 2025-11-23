@@ -297,7 +297,7 @@ export function EnhancedSidebar() {
                 icon={Calendar}
                 label="Scheduled Content"
                 isActive={pathname === "/admin/scheduled-content"}
-                color="text-orange-500"
+                color="text-orange"
               />
               <MenuItem
                 href="/admin/templates"
@@ -456,7 +456,7 @@ export function EnhancedSidebar() {
       <div className="border-t p-4">
         {isCollapsed ? (
           <Button variant="ghost" size="icon" className="mx-auto hover:bg-accent/50 transition-all duration-200">
-            <LogOut className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors duration-200" />
+            <LogOut className="h-4 w-4 text-muted-foreground hover:text-red transition-colors duration-200" />
           </Button>
         ) : (
           <div className="flex items-center gap-2">
@@ -469,7 +469,7 @@ export function EnhancedSidebar() {
               <span className="text-xs text-muted-foreground">Cashe@yazzil.com</span>
             </div>
             <Button variant="ghost" size="icon" className="ml-auto hover:bg-accent/50 transition-all duration-200">
-              <LogOut className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors duration-200" />
+              <LogOut className="h-4 w-4 text-muted-foreground hover:text-red transition-colors duration-200" />
             </Button>
           </div>
         )}

@@ -96,7 +96,7 @@ export default function AboutPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <Card className="border-border/50 bg-background/50 text-center">
                 <CardContent className="p-6">
-                  <Heart className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <Heart className="h-12 w-12 text-red mx-auto mb-4" />
                   <h3 className="font-bold mb-2">Customer First</h3>
                   <p className="text-sm text-muted-foreground">
                     Every decision we make is guided by what&apos;s best for our customers and their success.

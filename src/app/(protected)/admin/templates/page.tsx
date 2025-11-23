@@ -1841,7 +1841,7 @@ export default function TemplatesAdminPage() {
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="outline" size="sm" className="hover:bg-red-50">
-                              <Trash2 className="h-4 w-4 text-red-500" />
+                              <Trash2 className="h-4 w-4 text-red" />
                               <span className="sr-only">Delete</span>
                             </Button>
                           </AlertDialogTrigger>

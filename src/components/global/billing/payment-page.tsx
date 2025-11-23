@@ -1393,7 +1393,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
                   onChange={handleCardChange}
                 />
               </div>
-              {cardError && <div className="text-sm text-red-500 mt-1">{cardError}</div>}
+              {cardError && <div className="text-sm text-red mt-1">{cardError}</div>}
             </div>
 
             <div className="flex items-center space-x-2 mt-2">
@@ -1924,7 +1924,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
         )
 
       default:
-        return <div className="text-red-500">Invalid payment method</div>
+        return <div className="text-red">Invalid payment method</div>
     }
   }
 
@@ -2153,7 +2153,7 @@ const PaymentPage = ({ selectedPlan }: PaymentPageProps) => {
         )
 
       default:
-        return <div className="text-red-500">Invalid form step</div>
+        return <div className="text-red">Invalid form step</div>
     }
   }
 

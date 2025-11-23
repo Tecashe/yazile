@@ -74,7 +74,7 @@ export default function SolutionsPage() {
   const industries = [
     {
       name: "E-commerce",
-      icon: <Store className="h-8 w-8 text-orange-500" />,
+      icon: <Store className="h-8 w-8 text-orange" />,
       description: "Drive sales and customer engagement for online retailers.",
       benefits: ["Product promotion automation", "Customer service chatbots", "Influencer partnerships"],
     },

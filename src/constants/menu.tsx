@@ -215,7 +215,7 @@
 //           { id: uuid(), label: "Workflows", icon: icon(Webhook, "text-teal-500", 18) },
 //           { id: uuid(), label: "Templates", icon: icon(Layout, "text-indigo-500", 18) },
 //           { id: uuid(), label: "Custom Requests", icon: icon(Split, "text-purple-500", 18) },
-//           { id: uuid(), label: "Analytics", icon: icon(Calculator, "text-orange-500", 18) },
+//           { id: uuid(), label: "Analytics", icon: icon(Calculator, "text-orange", 18) },
 //         ],
 //       },
 //     ],
@@ -372,7 +372,7 @@ export const SIDEBAR_MENU: SideBarGroupProps[] = [
   //         {
   //           id: uuid(),
   //           label: "Analytics",
-  //           icon: icon(Calculator, "text-orange-500", 18),
+  //           icon: icon(Calculator, "text-orange", 18),
   //           description: "Track agent performance and interaction analytics",
   //         },
   //       ],

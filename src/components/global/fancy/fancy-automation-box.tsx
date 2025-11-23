@@ -90,7 +90,7 @@
 //                 key % 4 === 0 && "border-green-500/30 text-green-500",
 //                 key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                 key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                 key % 4 === 3 && "border-red-500/30 text-red-500",
+//                 key % 4 === 3 && "border-red-500/30 text-red",
 //               )}
 //             >
 //               {keyword.word}
@@ -394,7 +394,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -726,7 +726,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -1033,7 +1033,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -1456,7 +1456,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -1851,7 +1851,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -2470,7 +2470,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -3096,7 +3096,7 @@
 //                   key % 4 === 0 && "border-green-500/30 text-green-500",
 //                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
 //                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-//                   key % 4 === 3 && "border-red-500/30 text-red-500",
+//                   key % 4 === 3 && "border-red-500/30 text-red",
 //                 )}
 //               >
 //                 {keyword.word}
@@ -3727,7 +3727,7 @@ export const FancyAutomationBox: React.FC<FancyAutomationBoxProps> = ({
                   key % 4 === 0 && "border-green-500/30 text-green-500",
                   key % 4 === 1 && "border-purple-500/30 text-purple-500",
                   key % 4 === 2 && "border-yellow-500/30 text-yellow",
-                  key % 4 === 3 && "border-red-500/30 text-red-500",
+                  key % 4 === 3 && "border-red-500/30 text-red",
                 )}
               >
                 {keyword.word}

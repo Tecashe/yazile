@@ -12,7 +12,7 @@
 // }
 
 // const iconMap: Record<NotificationType, React.ReactNode> = {
-//   like: <Heart className="w-5 h-5 text-red-500" />,
+//   like: <Heart className="w-5 h-5 text-red" />,
 //   comment: <MessageCircle className="w-5 h-5 text-blue-500" />,
 //   follow: <UserPlus className="w-5 h-5 text-green-500" />,
 //   mention: <AtSign className="w-5 h-5 text-purple-500" />,

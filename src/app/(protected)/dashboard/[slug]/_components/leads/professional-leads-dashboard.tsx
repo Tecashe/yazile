@@ -675,7 +675,7 @@
 //         {/* Duplicate Alert */}
 //         {hasDuplicates && !isMockMode && (
 //           <Alert className="border-orange-500/30 bg-orange-500/10">
-//             <AlertTriangle className="h-4 w-4 text-orange-500" />
+//             <AlertTriangle className="h-4 w-4 text-orange" />
 //             <AlertDescription className="text-orange-200">
 //               Found {duplicateCount} potential duplicate leads.
 //               <Button
@@ -1432,7 +1432,7 @@
 //         {/* Duplicate Alert */}
 //         {hasDuplicates && !isMockMode && (
 //           <Alert className="border-orange-500/30 bg-orange-500/10">
-//             <AlertTriangle className="h-4 w-4 text-orange-500" />
+//             <AlertTriangle className="h-4 w-4 text-orange" />
 //             <AlertDescription className="text-orange-200">
 //               Found {duplicateCount} potential duplicate leads.
 //               <Button

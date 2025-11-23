@@ -136,7 +136,7 @@
 //                   size="icon"
 //                   className={cn(
 //                     "h-6 w-6 rounded-full",
-//                     isRecording ? "text-red-500" : "",
+//                     isRecording ? "text-red" : "",
 //                     isOffline && "opacity-50 cursor-not-allowed",
 //                   )}
 //                   onClick={!isOffline ? onVoiceMessage : undefined}
@@ -317,7 +317,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   size="icon"
                   className={cn(
                     "h-6 w-6 rounded-full",
-                    isRecording ? "text-red-500" : "",
+                    isRecording ? "text-red" : "",
                     isOffline && "opacity-50 cursor-not-allowed",
                   )}
                   onClick={!isOffline ? onVoiceMessage : undefined}

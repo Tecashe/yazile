@@ -50,7 +50,7 @@ export default function ConnectionStatus({
       badge: <Badge className="bg-amber-600 hover:bg-amber-700">Warning</Badge>,
     },
     error: {
-      icon: <XCircle className="h-5 w-5 text-red-500" />,
+      icon: <XCircle className="h-5 w-5 text-red" />,
       color: "bg-red-100 dark:bg-red-900",
       text: "No active connections",
       badge: <Badge className="bg-red-600 hover:bg-red-700">Disconnected</Badge>,

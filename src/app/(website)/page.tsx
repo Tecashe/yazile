@@ -382,7 +382,7 @@
 // //               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
 // //                 <CardContent className="p-6">
 // //                   <div className="space-y-4">
-// //                     <Workflow className="h-10 w-10 text-orange-500" />
+// //                     <Workflow className="h-10 w-10 text-orange" />
 // //                     <h3 className="text-xl font-semibold">Custom Workflows</h3>
 // //                     <p className="text-muted-foreground">
 // //                       Create custom automation workflows with our visual editor, no coding required.
@@ -1146,7 +1146,7 @@
 //               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
 //                 <CardContent className="p-6">
 //                   <div className="space-y-4">
-//                     <Workflow className="h-10 w-10 text-orange-500" />
+//                     <Workflow className="h-10 w-10 text-orange" />
 //                     <h3 className="text-xl font-semibold">Custom Automation Workflows</h3>
 //                     <p className="text-muted-foreground">
 //                       Create sophisticated DM automation sequences with our visual workflow builder, no coding required.
@@ -2044,7 +2044,7 @@
 //               <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
 //                 <CardContent className="p-4 sm:p-6">
 //                   <div className="space-y-3 sm:space-y-4">
-//                     <Workflow className="h-8 w-8 sm:h-10 sm:w-10 text-orange-500" />
+//                     <Workflow className="h-8 w-8 sm:h-10 sm:w-10 text-orange" />
 //                     <h3 className="text-lg sm:text-xl font-semibold">Custom Automation Workflows</h3>
 //                     <p className="text-sm sm:text-base text-muted-foreground">
 //                       Create sophisticated DM automation sequences with our visual workflow builder, no coding required.
