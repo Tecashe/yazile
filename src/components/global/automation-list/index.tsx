@@ -4790,6 +4790,7 @@ import { getRelativeTime } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AutomationListSkeleton } from "./automation-skeleton"
+import { LiquidMetal } from "./liquid-metal"
 
 type Keyword = {
   id: string
@@ -5108,89 +5109,44 @@ const AutomationList = ({ id }: Props) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 15 }}
-              className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-1 rounded-2xl shadow-2xl"
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
             >
-              <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 min-w-[320px]">
-                <div className="flex flex-col items-center gap-4">
-                  <motion.div
-                    animate={{
-                      y: [0, -20, 0],
-                      rotate: [0, 5, -5, 0],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: "easeInOut",
-                    }}
-                    className="relative"
+              {/* Liquid Metal Animation */}
+              <div className="h-64 w-full">
+                <LiquidMetal />
+              </div>
+
+              {/* Content */}
+              <div className="p-8 text-center">
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl font-bold text-gray-900 dark:text-white mb-2"
+                >
+                  Creating Your Automation
+                </motion.h2>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-gray-600 dark:text-gray-400 text-sm"
+                >
+                  Please wait while we set things up
+                  <motion.span
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
                   >
-                    <Rocket className="w-16 h-16 text-blue-500" />
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.5, 1, 0.5],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Number.POSITIVE_INFINITY,
-                      }}
-                      className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl"
-                    />
-                  </motion.div>
-
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      Preparing Your Automation
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Hold tight, magic is happening
-                      <motion.span
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-                      >
-                        ...
-                      </motion.span>
-                    </p>
-                  </div>
-
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ x: "-100%" }}
-                      animate={{ x: "100%" }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: "linear",
-                      }}
-                      className="h-full w-1/2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
-                    />
-                  </div>
-
-                  <div className="flex gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        animate={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0.3, 1, 0.3],
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: Number.POSITIVE_INFINITY,
-                          delay: i * 0.2,
-                        }}
-                      >
-                        <Sparkles className="w-4 h-4 text-yellow-500" />
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
+                    ...
+                  </motion.span>
+                </motion.p>
               </div>
             </motion.div>
           </motion.div>
@@ -5261,158 +5217,156 @@ const AutomationList = ({ id }: Props) => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {isCreatingAutomation && (
+      {newAutomationPopup && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="relative bg-gradient-to-br from-[#1C2D70] via-[#3352CC] to-[#1C2D70] rounded-3xl p-12 shadow-2xl max-w-md w-full mx-4"
           >
+            {/* Animated Background Glow */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="relative bg-gradient-to-br from-[#1C2D70] via-[#3352CC] to-[#1C2D70] rounded-3xl p-12 shadow-2xl max-w-md w-full mx-4"
-            >
-              {/* Animated Background Glow */}
+              className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30"
+              animate={{
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "linear",
+              }}
+            />
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center">
+              {/* Animated Rocket Icon */}
               <motion.div
-                className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30"
                 animate={{
-                  rotate: [0, 360],
+                  y: [0, -20, 0],
+                  rotate: [0, 5, -5, 0],
                 }}
                 transition={{
-                  duration: 3,
+                  duration: 2,
                   repeat: Number.POSITIVE_INFINITY,
-                  ease: "linear",
+                  ease: "easeInOut",
                 }}
-              />
+                className="mb-6"
+              >
+                <div className="relative">
+                  <motion.div
+                    className="absolute inset-0 bg-yellow-400 rounded-full blur-xl"
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.5, 0.8, 0.5],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                  />
+                  <Rocket size={64} className="text-white relative z-10" />
+                </div>
+              </motion.div>
 
-              {/* Content */}
-              <div className="relative z-10 flex flex-col items-center">
-                {/* Animated Rocket Icon */}
+              {/* Animated Stars */}
+              {Array.from({ length: 8 }).map((_, i) => (
                 <motion.div
+                  key={i}
+                  className="absolute"
+                  style={{
+                    left: `${20 + Math.random() * 60}%`,
+                    top: `${20 + Math.random() * 60}%`,
+                  }}
                   animate={{
-                    y: [0, -20, 0],
-                    rotate: [0, 5, -5, 0],
+                    scale: [0, 1, 0],
+                    rotate: [0, 180, 360],
+                    opacity: [0, 1, 0],
                   }}
                   transition={{
                     duration: 2,
                     repeat: Number.POSITIVE_INFINITY,
+                    delay: i * 0.2,
                     ease: "easeInOut",
                   }}
-                  className="mb-6"
                 >
-                  <div className="relative">
-                    <motion.div
-                      className="absolute inset-0 bg-yellow-400 rounded-full blur-xl"
-                      animate={{
-                        scale: [1, 1.5, 1],
-                        opacity: [0.5, 0.8, 0.5],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: "easeInOut",
-                      }}
-                    />
-                    <Rocket size={64} className="text-white relative z-10" />
-                  </div>
+                  <Sparkles size={16} className="text-yellow-300" />
                 </motion.div>
+              ))}
 
-                {/* Animated Stars */}
-                {Array.from({ length: 8 }).map((_, i) => (
+              {/* Title */}
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl font-bold text-white mb-3 text-center"
+              >
+                Creating Magic ✨
+              </motion.h2>
+
+              {/* Description */}
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-blue-100 text-center mb-8 text-sm"
+              >
+                Your automation is being crafted with care...
+              </motion.p>
+
+              {/* Animated Progress Bar */}
+              <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden mb-4">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{
+                    duration: 3,
+                    ease: "easeInOut",
+                    repeat: Number.POSITIVE_INFINITY,
+                  }}
+                />
+              </div>
+
+              {/* Loading Dots */}
+              <div className="flex gap-2">
+                {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="absolute"
-                    style={{
-                      left: `${20 + Math.random() * 60}%`,
-                      top: `${20 + Math.random() * 60}%`,
-                    }}
+                    className="w-3 h-3 bg-white rounded-full"
                     animate={{
-                      scale: [0, 1, 0],
-                      rotate: [0, 180, 360],
-                      opacity: [0, 1, 0],
+                      scale: [1, 1.5, 1],
+                      opacity: [0.3, 1, 0.3],
                     }}
                     transition={{
-                      duration: 2,
+                      duration: 1,
                       repeat: Number.POSITIVE_INFINITY,
                       delay: i * 0.2,
                       ease: "easeInOut",
                     }}
-                  >
-                    <Sparkles size={16} className="text-yellow-300" />
-                  </motion.div>
-                ))}
-
-                {/* Title */}
-                <motion.h2
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl font-bold text-white mb-3 text-center"
-                >
-                  Creating Magic ✨
-                </motion.h2>
-
-                {/* Description */}
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-blue-100 text-center mb-8 text-sm"
-                >
-                  Your automation is being crafted with care...
-                </motion.p>
-
-                {/* Animated Progress Bar */}
-                <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden mb-4">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 rounded-full"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{
-                      duration: 3,
-                      ease: "easeInOut",
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
                   />
-                </div>
-
-                {/* Loading Dots */}
-                <div className="flex gap-2">
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      className="w-3 h-3 bg-white rounded-full"
-                      animate={{
-                        scale: [1, 1.5, 1],
-                        opacity: [0.3, 1, 0.3],
-                      }}
-                      transition={{
-                        duration: 1,
-                        repeat: Number.POSITIVE_INFINITY,
-                        delay: i * 0.2,
-                        ease: "easeInOut",
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Fun Messages */}
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                  className="text-xs text-blue-200 mt-6 text-center"
-                >
-                  This usually takes just a moment...
-                </motion.p>
+                ))}
               </div>
-            </motion.div>
+
+              {/* Fun Messages */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="text-xs text-blue-200 mt-6 text-center"
+              >
+                This usually takes just a moment...
+              </motion.p>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12 staggeredFadeIn">
