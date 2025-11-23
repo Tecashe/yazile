@@ -1273,14 +1273,9 @@ const CreateAutomation = ({
 
           setTimeout(() => {
             setShowSuccess(false)
-            console.log("[v0] Triggering loading overlay before reload")
-            if (onCreating) {
-              onCreating()
-            }
-            setTimeout(() => {
-              console.log("[v0] Reloading page")
-              window.location.reload()
-            }, 500)
+            console.log("[v0] Storing loading flag and reloading page")
+            sessionStorage.setItem("showCreationLoading", "true")
+            window.location.reload()
           }, 800)
         },
         onError: (error: any) => {
@@ -1489,6 +1484,7 @@ const CreateAutomation = ({
 }
 
 export default CreateAutomation
+
 
 
 
