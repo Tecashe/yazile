@@ -1221,12 +1221,14 @@ type CreateAutomationProps = {
   currentAutomationCount?: number
   onUpgradeClick?: () => void
   onAutomationCreated?: (automation: any) => void
+  onCreating?: () => void
 }
 
 const CreateAutomation = ({
   currentAutomationCount = 0,
   onUpgradeClick,
   onAutomationCreated,
+  onCreating,
 }: CreateAutomationProps) => {
   const mutationId = useMemo(() => v4(), [])
   const pathname = usePathname()
@@ -1255,6 +1257,10 @@ const CreateAutomation = ({
       return
     }
 
+    if (onCreating) {
+      onCreating()
+    }
+
     mutate(
       {
         name: "Untitled",
@@ -1262,13 +1268,17 @@ const CreateAutomation = ({
       {
         onSuccess: (data: any) => {
           sessionStorage.setItem("automationJustCreated", "true")
-
           setShowSuccess(true)
 
           setTimeout(() => {
             setShowSuccess(false)
-            // Reload the page to fetch the latest automation data
-            window.location.reload()
+            if (onCreating) {
+              onCreating()
+            }
+            // Reload after a brief moment to let the overlay appear
+            setTimeout(() => {
+              window.location.reload()
+            }, 100)
           }, 800)
         },
         onError: (error: any) => {
