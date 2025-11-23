@@ -434,7 +434,7 @@ const config = {
         
         // V4 accent colors (now accessible via Tailwind) - GREEN REMOVED
         orange: "#ff6b35",
-        // green: "#00d9a3", // REMOVED
+        green: "#00d9a3", // REMOVED
         red: "#ff3366",
         yellow: "#ffd93d",
         maroon: "#c1121f",
