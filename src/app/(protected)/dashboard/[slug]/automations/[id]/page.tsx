@@ -47,7 +47,7 @@ const Page = async ({ params }: Props) => {
           <div className="flex items-center gap-x-3">
             <div className="p-2 rounded-full bg-[#2A2A2A] flex items-center justify-center">
               <svg
-                className="w-6 h-6 text-yellow-500 animate-spin-slow"
+                className="w-6 h-6 text-yellow animate-spin-slow"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
