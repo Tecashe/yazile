@@ -70,6 +70,7 @@ const Page = async ({ params }: Props) => {
         </div>
 
        
+        {/* Then section */}
         <div className="w-full max-w-4xl">
           <ThenNode id={params.id} />
         </div>

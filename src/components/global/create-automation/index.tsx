@@ -1201,10 +1201,10 @@
 
 import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
-import Loader from "../loader"
+import Loader from "./loader"
 import { useCreateAutomation } from "@/hooks/use-automations"
 import { v4 } from "uuid"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Check, Zap, Lock, AlertCircle, Crown, Sparkles } from "lucide-react"
 import { useSubscription } from "@/contexts/subscription-context"
@@ -1219,12 +1219,15 @@ const PLAN_LIMITS = {
 type CreateAutomationProps = {
   currentAutomationCount?: number
   onUpgradeClick?: () => void
-  onCreating?: (isCreating: boolean) => void
+  onAutomationCreated?: (automation: any) => void
 }
 
-const CreateAutomation = ({ currentAutomationCount = 0, onUpgradeClick, onCreating }: CreateAutomationProps) => {
+const CreateAutomation = ({
+  currentAutomationCount = 0,
+  onUpgradeClick,
+  onAutomationCreated,
+}: CreateAutomationProps) => {
   const mutationId = useMemo(() => v4(), [])
-  const router = useRouter()
   const pathname = usePathname()
   const [showSuccess, setShowSuccess] = useState(false)
   const [showLimitWarning, setShowLimitWarning] = useState(false)
@@ -1251,35 +1254,26 @@ const CreateAutomation = ({ currentAutomationCount = 0, onUpgradeClick, onCreati
       return
     }
 
-    const slugMatch = pathname.match(/^\/dashboard\/([^/]+)/)
-    const slug = slugMatch ? slugMatch[1] : ""
-
-    onCreating?.(true)
-
     mutate(
       {
         name: "Untitled",
       },
       {
         onSuccess: (data: any) => {
-          console.log("[v0] Automation created successfully:", data)
+          setShowSuccess(true)
 
-          const automationId = data?.res?.automations?.[0]?.id || data?.data?.id || data?.res?.id
-
-          if (automationId) {
-            setShowSuccess(true)
-
-            router.push(`/dashboard/${slug}/automations/${automationId}`)
-            // Note: Don't call onCreating(false) here - let loading persist until page fully loads
-          } else {
-            console.error("[v0] No automation ID returned from server:", data)
+          setTimeout(() => {
             setShowSuccess(false)
-            onCreating?.(false)
-          }
+
+            // Pass the created automation to parent for modal display
+            if (onAutomationCreated) {
+              const automationData = data?.res?.automations?.[0] || data?.data || data?.res
+              onAutomationCreated(automationData)
+            }
+          }, 800)
         },
         onError: (error: any) => {
           console.error("[v0] Error creating automation:", error)
-          onCreating?.(false)
         },
       },
     )
@@ -1469,7 +1463,7 @@ const CreateAutomation = ({ currentAutomationCount = 0, onUpgradeClick, onCreati
                 <Button
                   size="sm"
                   className="mt-2 h-7 text-xs bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  onClick={onUpgradeClick || (() => router.push("/dashboard/billing"))}
+                  onClick={onUpgradeClick || (() => (window.location.href = "/dashboard/billing"))}
                 >
                   <Crown size={12} className="mr-1" />
                   Upgrade Now

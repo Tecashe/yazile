@@ -3922,7 +3922,7 @@ import {
   RotateCcw,
   AlertTriangle,
   Archive,
-  Loader2,
+  Settings,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import PaymentPopup from "../stripe/payment-popup"
@@ -3996,10 +3996,8 @@ const AutomationList = ({ id }: Props) => {
   const [showTrashSidebar, setShowTrashSidebar] = useState(false)
   const [trashSearchQuery, setTrashSearchQuery] = useState("")
 
-  const [isCreatingAutomation, setIsCreatingAutomation] = useState(false)
-
   // ✅ New state for highlighting newly created automation
-  const [newlyCreatedId, setNewlyCreatedId] = useState<string | null>(null)
+  const [newAutomationPopup, setNewAutomationPopup] = useState<Automation | null>(null)
   const newAutomationRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -4014,33 +4012,21 @@ const AutomationList = ({ id }: Props) => {
     }
   }, [trashedData])
 
-  useEffect(() => {
-    if (latestVariable && latestVariable.status === "success" && automations.length > 0) {
-      // Get the most recently created automation
-      const sortedByDate = [...automations].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-      const newestAutomation = sortedByDate[0]
+  // Removed the old useEffect for newlyCreatedId
 
-      // Only highlight if it's actually new (created in last 5 seconds)
-      const createdAt = new Date(newestAutomation.createdAt).getTime()
-      const now = Date.now()
-      if (now - createdAt < 5000) {
-        setNewlyCreatedId(newestAutomation.id)
+  const handleAutomationCreated = (automation: any) => {
+    // Refetch to get the latest data
+    refetch()
 
-        setTimeout(() => {
-          newAutomationRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          })
-        }, 300)
+    // Show popup with the created automation
+    setNewAutomationPopup(automation)
+  }
 
-        setTimeout(() => {
-          setNewlyCreatedId(null)
-        }, 8000)
-      }
+  const handleConfigureNewAutomation = () => {
+    if (newAutomationPopup) {
+      router.push(`${pathname}/${newAutomationPopup.id}`)
     }
-  }, [latestVariable, automations])
+  }
 
   const handleDelete = (automationId: string, type: "trash" | "permanent") => {
     if (type === "trash") {
@@ -4132,45 +4118,63 @@ const AutomationList = ({ id }: Props) => {
     return (
       <div className="min-h-screen bg-background">
         <AnimatePresence>
-          {isCreatingAutomation && (
+          {newAutomationPopup && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50"
+              className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
+              onClick={() => setNewAutomationPopup(null)}
             >
               <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-card border-2 border-primary/30 p-8 rounded-2xl shadow-2xl max-w-md mx-4"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="bg-background border-2 border-primary/30 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex flex-col items-center gap-6">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                    className="relative"
-                  >
-                    <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                    <Loader2 className="w-16 h-16 text-primary relative z-10" />
-                  </motion.div>
-
-                  <div className="text-center space-y-2">
-                    <h3 className="text-2xl font-bold">Creating Your Automation</h3>
-                    <p className="text-muted-foreground">
-                      Setting up your automation and preparing the configuration page...
-                    </p>
+                <div className="p-6 border-b border-border/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold flex items-center gap-2">
+                        <span className="text-2xl">🎉</span>
+                        Automation Created!
+                      </h3>
+                      <p className="text-muted-foreground mt-1">Configure your automation to get started</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setNewAutomationPopup(null)}
+                      className="rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
                   </div>
+                </div>
 
-                  <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-primary to-primary/50"
-                      initial={{ width: "0%" }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 20, ease: "linear" }}
-                    />
+                <ScrollArea className="max-h-[60vh] p-6">
+                  <FancyAutomationBox
+                    automation={newAutomationPopup}
+                    onDelete={() => {}}
+                    pathname={pathname}
+                    isOptimistic={false}
+                  />
+                </ScrollArea>
+
+                <div className="p-6 border-t border-border/50 bg-secondary/20">
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleConfigureNewAutomation}
+                      className="flex-1 bg-gradient-to-br from-[#3352CC] to-[#1C2D70] hover:opacity-80"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Configure Automation
+                    </Button>
+                    <Button variant="outline" onClick={() => setNewAutomationPopup(null)} className="flex-1">
+                      Maybe Later
+                    </Button>
                   </div>
-
-                  <p className="text-sm text-muted-foreground">This may take up to 20 seconds</p>
                 </div>
               </motion.div>
             </motion.div>
@@ -4196,7 +4200,7 @@ const AutomationList = ({ id }: Props) => {
             <CreateAutomation
               currentAutomationCount={0}
               onUpgradeClick={() => setShowPaymentPopup(true)}
-              onCreating={setIsCreatingAutomation}
+              onAutomationCreated={handleAutomationCreated}
             />
           </motion.div>
         </div>
@@ -4216,45 +4220,63 @@ const AutomationList = ({ id }: Props) => {
   return (
     <div className="min-h-screen bg-background">
       <AnimatePresence>
-        {isCreatingAutomation && (
+        {newAutomationPopup && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
+            onClick={() => setNewAutomationPopup(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="bg-card border-2 border-primary/30 p-8 rounded-2xl shadow-2xl max-w-md mx-4"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-background border-2 border-primary/30 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex flex-col items-center gap-6">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                  <Loader2 className="w-16 h-16 text-primary relative z-10" />
-                </motion.div>
-
-                <div className="text-center space-y-2">
-                  <h3 className="text-2xl font-bold">Creating Your Automation</h3>
-                  <p className="text-muted-foreground">
-                    Setting up your automation and preparing the configuration page...
-                  </p>
+              <div className="p-6 border-b border-border/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold flex items-center gap-2">
+                      <span className="text-2xl">🎉</span>
+                      Automation Created!
+                    </h3>
+                    <p className="text-muted-foreground mt-1">Configure your automation to get started</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setNewAutomationPopup(null)}
+                    className="rounded-full"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
                 </div>
+              </div>
 
-                <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-primary to-primary/50"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 20, ease: "linear" }}
-                  />
+              <ScrollArea className="max-h-[60vh] p-6">
+                <FancyAutomationBox
+                  automation={newAutomationPopup}
+                  onDelete={() => {}}
+                  pathname={pathname}
+                  isOptimistic={false}
+                />
+              </ScrollArea>
+
+              <div className="p-6 border-t border-border/50 bg-secondary/20">
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleConfigureNewAutomation}
+                    className="flex-1 bg-gradient-to-br from-[#3352CC] to-[#1C2D70] hover:opacity-80"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configure Automation
+                  </Button>
+                  <Button variant="outline" onClick={() => setNewAutomationPopup(null)} className="flex-1">
+                    Maybe Later
+                  </Button>
                 </div>
-
-                <p className="text-sm text-muted-foreground">This may take up to 20 seconds</p>
               </div>
             </motion.div>
           </motion.div>
@@ -4271,7 +4293,7 @@ const AutomationList = ({ id }: Props) => {
             <CreateAutomation
               currentAutomationCount={automations.length}
               onUpgradeClick={() => setShowPaymentPopup(true)}
-              onCreating={setIsCreatingAutomation}
+              onAutomationCreated={handleAutomationCreated}
             />
           </div>
 
@@ -4399,68 +4421,10 @@ const AutomationList = ({ id }: Props) => {
               className={viewMode === "grid" ? "grid grid-cols-1 lg:grid-cols-2 gap-6" : "flex flex-col gap-6"}
             >
               {filteredAutomations.map((automation, index) => {
-                const isNew = automation.id === newlyCreatedId
-
+                // Removed new automation highlighting logic
                 return (
-                  <motion.div
-                    key={automation.id}
-                    ref={isNew ? newAutomationRef : null}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="relative"
-                  >
-                    {/* ✅ Highlight ring for new automation */}
-                    {isNew && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="absolute -inset-1 bg-gradient-to-r from-green-500/30 via-emerald-500/30 to-teal-500/30 rounded-xl blur-lg"
-                        style={{
-                          animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                        }}
-                      />
-                    )}
-
-                    {/* ✅ "NEW" badge */}
-                    {isNew && (
-                      <>
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute -top-3 left-4 z-10"
-                        >
-                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg">
-                            <Sparkles className="w-3 h-3 mr-1" />
-                            NEW
-                          </Badge>
-                        </motion.div>
-
-                        {/* ✅ Quick configure button */}
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="absolute -top-3 right-4 z-10"
-                        >
-                          <Button
-                            size="sm"
-                            onClick={() => router.push(`${pathname}/${automation.id}`)}
-                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg border-0 h-8 gap-1"
-                          >
-                            Configure Now
-                            <motion.span
-                              animate={{ x: [0, 3, 0] }}
-                              transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-                            >
-                              →
-                            </motion.span>
-                          </Button>
-                        </motion.div>
-                      </>
-                    )}
-
-                    <div className={`relative ${isNew ? "ring-2 ring-green-500/50 rounded-xl" : ""}`}>
+                  <motion.div key={automation.id} className="relative">
+                    <div className={`relative`}>
                       <FancyAutomationBox
                         automation={automation}
                         onDelete={() => {
@@ -4772,7 +4736,6 @@ const AutomationList = ({ id }: Props) => {
 }
 
 export default AutomationList
-
 
 
 
