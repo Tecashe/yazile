@@ -6738,17 +6738,32 @@ const AutomationList = ({ id }: Props) => {
   }, [trashedData])
 
   const handleAutomationCreated = async (automation: any) => {
-    console.log("[v0] Automation created, waiting for refetch...", automation)
+    console.log("[v0] handleAutomationCreated called with:", automation)
 
-    // The useCreateAutomation hook already triggers refetchQueries, so we just wait a bit
-    // for the refetch to complete, then find the automation in the fresh data
-    await refetch()
+    try {
+      const result = await refetch()
+      console.log("[v0] Refetch complete, result:", result)
 
-    console.log("[v0] Refetch complete, showing popup")
-    setIsCreatingAutomation(false)
+      setIsCreatingAutomation(false)
 
-    // Use the automation data passed from the mutation
-    setNewAutomationPopup(automation)
+      if (automation?.id && automation?.name) {
+        console.log("[v0] Using automation from mutation, showing popup")
+        setNewAutomationPopup(automation)
+      } else {
+        console.log("[v0] Automation data incomplete, fetching from refetched data")
+        // Fallback: find the newest automation from refetched data
+        if (result?.data?.data && result.data.data.length > 0) {
+          const newest = result.data.data[0]
+          console.log("[v0] Found newest automation:", newest)
+          setNewAutomationPopup(newest)
+        } else {
+          console.error("[v0] No automation data found after refetch")
+        }
+      }
+    } catch (error) {
+      console.error("[v0] Error in handleAutomationCreated:", error)
+      setIsCreatingAutomation(false)
+    }
   }
 
   const handleConfigureNewAutomation = () => {
@@ -7546,7 +7561,6 @@ const AutomationList = ({ id }: Props) => {
 }
 
 export default AutomationList
-
 
 
 // "use client"
