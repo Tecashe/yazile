@@ -1749,6 +1749,512 @@
 
 // export default Trigger
 
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import ActiveTrigger from "./active"
+// import { Separator } from "@/components/ui/separator"
+// import ThenAction from "../then/then-action"
+// import { AUTOMATION_TRIGGERS } from "@/constants/automation"
+// import { useTriggers } from "@/hooks/use-automations"
+// import { cn } from "@/lib/utils"
+// import { KeywordsPopup } from "./kw-popup"
+// import { Button } from "@/components/ui/button"
+// import Loader from "../../loader"
+// import { useQueryAutomation } from "@/hooks/user-queries"
+// import { motion } from "framer-motion"
+// import {
+//   PlusCircle,
+//   PlayCircle,
+//   Info,
+//   KeySquare,
+//   ChevronRight,
+//   MessageSquare,
+//   Zap,
+//   ChevronLeft,
+//   Plus,
+//   CheckCircle2,
+//   AlertCircle,
+//   Lock,
+// } from "lucide-react"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import FloatingPanel from "../../panel"
+// import { ContextCard } from "../context"
+// import { SimulationTab } from "../simulation"
+// import { SetupGuide } from "../guide"
+// import { WebsiteAnalyzer } from "../analyzer"
+// import { Card, CardContent } from "@/components/ui/card"
+// import { Badge } from "@/components/ui/badge"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+// import { useDefaultAutomation } from "@/hooks/use-create-automations"
+
+// type Props = {
+//   id: string
+// }
+
+// const Trigger = ({ id }: Props) => {
+//   const { types, onSetTrigger, onSaveTrigger, isPending } = useTriggers(id)
+//   const { data } = useQueryAutomation(id)
+//   const { data: existingDefault } = useDefaultAutomation(id)
+//   const [showTip, setShowTip] = useState(true)
+//   const [activeTab, setActiveTab] = useState("setup")
+//   const [triggerMode, setTriggerMode] = useState<"KEYWORDS" | "ALL_MESSAGES">("KEYWORDS")
+//   const [isEditing, setIsEditing] = useState(false)
+
+//   const isFallback = triggerMode === "ALL_MESSAGES"
+//   const hasExistingDefault = !!existingDefault && existingDefault.id !== id
+
+//   useEffect(() => {
+//     if (data?.data?.listenMode) {
+//       setTriggerMode(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES")
+//     } else if (data?.data?.isFallback) {
+//       setTriggerMode("ALL_MESSAGES")
+//     }
+//   }, [data?.data?.listenMode, data?.data?.isFallback])
+
+//   const handleSaveTrigger = () => {
+//     const currentKeywords = data?.data?.keywords?.map((k) => k.word) || []
+//     onSaveTrigger({
+//       isFallback,
+//       listenMode: triggerMode,
+//       keywords: currentKeywords,
+//     })
+//     setActiveTab("configure")
+//   }
+
+//   const tabs = ["setup", "trigger", "configure", "simulation"]
+//   const currentTabIndex = tabs.indexOf(activeTab)
+
+//   const goToNextTab = () => {
+//     if (currentTabIndex < tabs.length - 1) {
+//       setActiveTab(tabs[currentTabIndex + 1])
+//     }
+//   }
+
+//   const goToPrevTab = () => {
+//     if (currentTabIndex > 0) {
+//       setActiveTab(tabs[currentTabIndex - 1])
+//     }
+//   }
+
+//   const handleEdit = () => {
+//     setIsEditing(true)
+//     setActiveTab("trigger")
+//   }
+
+//   const handleUpdate = () => {
+//     setIsEditing(true)
+//     setActiveTab("configure")
+//   }
+
+//   const currentKeywords = data?.data?.keywords || []
+//   const hasKeywords = currentKeywords.length > 0
+
+//   if (data?.data && data?.data?.trigger.length > 0 && !isEditing) {
+//     return (
+//       <div className="flex flex-col items-center w-full">
+//         <ActiveTrigger
+//           type={data.data.trigger[0].type}
+//           keywords={data.data.keywords}
+//           listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
+//           isFallback={data.data.isFallback}
+//           onEdit={handleEdit}
+//           onUpdate={handleUpdate}
+//         />
+
+//         {data?.data?.trigger.length > 1 && (
+//           <>
+//             <div className="relative w-full md:w-6/12 my-6">
+//               <p className="absolute transform px-2 -translate-y-1/2 top-1/2 -translate-x-1/2 left-1/2 bg-background-90 text-text-secondary">
+//                 or
+//               </p>
+//               <Separator orientation="horizontal" className="border-muted border-[1px]" />
+//             </div>
+//             <ActiveTrigger
+//               type={data.data.trigger[1].type}
+//               keywords={data.data.keywords}
+//               listenMode={(data.data.listenMode as "KEYWORDS" | "ALL_MESSAGES") || "KEYWORDS"}
+//               isFallback={data.data.isFallback}
+//               onEdit={handleEdit}
+//               onUpdate={handleUpdate}
+//             />
+//           </>
+//         )}
+
+//         {!data.data.listener && <ThenAction id={id} />}
+//       </div>
+//     )
+//   }
+
+//   const responseType = data?.data?.listener?.listener || "MESSAGE"
+
+//   return (
+//     <FloatingPanel
+//       title={isEditing ? "Update Automation" : "Create Automation"}
+//       trigger={
+//         <motion.div
+//           className="group relative overflow-hidden rounded-xl mt-4 w-full"
+//           whileHover={{ scale: 1.01 }}
+//           whileTap={{ scale: 0.98 }}
+//         >
+//           <div className="absolute inset-0 bg-light-blue opacity-20 rounded-xl"></div>
+//           <div className="absolute inset-0 rounded-xl shimmerBorder"></div>
+//           <div className="relative m-[2px] bg-background-90 rounded-lg p-5">
+//             <div className="flex items-center justify-center gap-3">
+//               <PlusCircle className="h-5 w-5 text-[#768BDD]" />
+//               <p className="text-[#768BDD] font-bold">{isEditing ? "Update automation" : "Configure automation"}</p>
+//             </div>
+//           </div>
+//         </motion.div>
+//       }
+//     >
+//       <div className="flex flex-col gap-4">
+//         <div className="flex justify-between items-center mb-2">
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={goToPrevTab}
+//             disabled={currentTabIndex === 0}
+//             className="flex items-center gap-1 bg-transparent"
+//           >
+//             <ChevronLeft className="h-4 w-4" />
+//             <span className="hidden sm:inline">Previous</span>
+//           </Button>
+
+//           <div className="flex items-center gap-2 text-sm text-muted-foreground">
+//             <span>{currentTabIndex + 1}</span>
+//             <span>/</span>
+//             <span>{tabs.length}</span>
+//           </div>
+
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={goToNextTab}
+//             disabled={currentTabIndex === tabs.length - 1}
+//             className="flex items-center gap-1 bg-transparent"
+//           >
+//             <span className="hidden sm:inline">Next</span>
+//             <ChevronRight className="h-4 w-4" />
+//           </Button>
+//         </div>
+
+//         <Tabs value={activeTab} onValueChange={setActiveTab}>
+//           <TabsList className="grid grid-cols-2 sm:grid-cols-4 mb-4">
+//             <TabsTrigger value="setup" className="text-xs sm:text-sm">
+//               <Info className="h-4 w-4 sm:mr-1" />
+//               <span className="hidden sm:inline">Guide</span>
+//             </TabsTrigger>
+//             <TabsTrigger value="trigger" className="text-xs sm:text-sm">
+//               <KeySquare className="h-4 w-4 sm:mr-1" />
+//               <span className="hidden sm:inline">Trigger</span>
+//             </TabsTrigger>
+//             <TabsTrigger value="configure" className="text-xs sm:text-sm">
+//               <ChevronRight className="h-4 w-4 sm:mr-1" />
+//               <span className="hidden sm:inline">Configure</span>
+//             </TabsTrigger>
+//             <TabsTrigger value="simulation" className="text-xs sm:text-sm">
+//               <PlayCircle className="h-4 w-4 sm:mr-1" />
+//               <span className="hidden sm:inline">Test</span>
+//             </TabsTrigger>
+//           </TabsList>
+
+//           <TabsContent value="setup">
+//             <SetupGuide />
+//           </TabsContent>
+
+//           <TabsContent value="trigger" className="space-y-4">
+//             {showTip && <ContextCard context="trigger" onClose={() => setShowTip(false)} />}
+
+//             <h3 className="text-lg font-medium">Select Trigger Type</h3>
+
+//             <div className="grid grid-cols-1 gap-3">
+//               {AUTOMATION_TRIGGERS.map((trigger) => (
+//                 <motion.div
+//                   key={trigger.id}
+//                   whileHover={{ scale: 1.01 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={() => onSetTrigger(trigger.type)}
+//                   className={cn(
+//                     "rounded-xl flex cursor-pointer flex-col p-4 gap-3",
+//                     !types?.find((t) => t === trigger.type)
+//                       ? "bg-background-80"
+//                       : `bg-gradient-to-br from-[#3352CC] to-[#1C2D70]`,
+//                   )}
+//                 >
+//                   <div className="flex gap-3 items-center">
+//                     <div className="p-2 bg-black/20 rounded-lg">{trigger.icon}</div>
+//                     <p className="font-semibold text-white">{trigger.label}</p>
+//                   </div>
+//                   <p className="text-sm text-slate-300">{trigger.description}</p>
+//                 </motion.div>
+//               ))}
+//             </div>
+
+//             <Button
+//               onClick={handleSaveTrigger}
+//               disabled={types?.length === 0}
+//               className={cn(
+//                 "w-full py-6 text-white font-medium",
+//                 types?.length === 0 ? "bg-in-active" : `bg-gradient-to-br from-[#3352CC] to-[#1C2D70]`,
+//               )}
+//             >
+//               <Loader state={isPending}>Continue to Configuration</Loader>
+//             </Button>
+//           </TabsContent>
+
+//           <TabsContent value="configure" className="space-y-4">
+//             <div>
+//               <h3 className="text-base sm:text-lg font-medium mb-2">How Should This Automation Trigger?</h3>
+//               <p className="text-xs sm:text-sm text-slate-400 mb-4 leading-relaxed">
+//                 Choose when your automation should respond to customer messages
+//               </p>
+
+//               <div className="grid grid-cols-1 gap-3 mb-6">
+//                 {/* Keyword Mode */}
+//                 <Card
+//                   className={cn(
+//                     "cursor-pointer transition-all duration-200 relative overflow-hidden",
+//                     triggerMode === "KEYWORDS"
+//                       ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70] border-[#3352CC] ring-2 ring-[#3352CC]/50"
+//                       : "bg-background-80 hover:bg-background-70 border-background-70",
+//                   )}
+//                   onClick={() => setTriggerMode("KEYWORDS")}
+//                 >
+//                   <CardContent className="p-4 sm:p-5">
+//                     <div className="flex items-start gap-3">
+//                       <div className="p-2 sm:p-3 bg-black/20 rounded-lg shrink-0">
+//                         <KeySquare className="h-5 w-5 text-white" />
+//                       </div>
+//                       <div className="flex-1 min-w-0">
+//                         <div className="flex items-start justify-between gap-2 mb-2">
+//                           <div className="flex items-center gap-2 flex-wrap">
+//                             <h4 className="font-semibold text-white text-base sm:text-lg">Specific Keywords</h4>
+//                             <Badge
+//                               variant="outline"
+//                               className="bg-green-500/20 text-green-300 text-xs border-green-500/30"
+//                             >
+//                               Recommended
+//                             </Badge>
+//                           </div>
+//                           {triggerMode === "KEYWORDS" && <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />}
+//                         </div>
+//                         <p className="text-xs sm:text-sm text-slate-300 mb-3 leading-relaxed">
+//                           Trigger only when customers use specific keywords like &ldquo;help&rdquo;,
+//                           &ldquo;pricing&rdquo;, or &ldquo;support&rdquo;
+//                         </p>
+//                         <div className="space-y-1.5 text-xs text-slate-400">
+//                           <div className="flex items-start gap-2">
+//                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0 mt-1.5"></div>
+//                             <span className="leading-relaxed">Targeted, relevant responses</span>
+//                           </div>
+//                           <div className="flex items-start gap-2">
+//                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0 mt-1.5"></div>
+//                             <span className="leading-relaxed">Full control over when automation triggers</span>
+//                           </div>
+//                           <div className="flex items-start gap-2">
+//                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full shrink-0 mt-1.5"></div>
+//                             <span className="leading-relaxed">Prevents unwanted or irrelevant responses</span>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </CardContent>
+//                 </Card>
+
+//                 {/* Listen to Everything Mode */}
+//                 <Card
+//                   className={cn(
+//                     "transition-all duration-200 relative overflow-hidden",
+//                     hasExistingDefault ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
+//                     triggerMode === "ALL_MESSAGES"
+//                       ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480] border-[#7C21D6] ring-2 ring-[#7C21D6]/50"
+//                       : "bg-background-80 hover:bg-background-70 border-background-70",
+//                   )}
+//                   onClick={() => {
+//                     if (!hasExistingDefault) {
+//                       setTriggerMode("ALL_MESSAGES")
+//                     }
+//                   }}
+//                 >
+//                   <CardContent className="p-4 sm:p-5">
+//                     <div className="flex items-start gap-3">
+//                       <div className="p-2 sm:p-3 bg-black/20 rounded-lg shrink-0">
+//                         {hasExistingDefault ? (
+//                           <Lock className="h-5 w-5 text-white" />
+//                         ) : (
+//                           <MessageSquare className="h-5 w-5 text-white" />
+//                         )}
+//                       </div>
+//                       <div className="flex-1 min-w-0">
+//                         <div className="flex items-start justify-between gap-2 mb-2">
+//                           <div className="flex items-center gap-2 flex-wrap">
+//                             <h4 className="font-semibold text-white text-base sm:text-lg">Listen to Everything</h4>
+//                             <Badge
+//                               variant="outline"
+//                               className="bg-purple-500/20 text-purple-300 text-xs border-purple-500/30"
+//                             >
+//                               Advanced
+//                             </Badge>
+//                           </div>
+//                           {triggerMode === "ALL_MESSAGES" && !hasExistingDefault && (
+//                             <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
+//                           )}
+//                         </div>
+//                         <p className="text-xs sm:text-sm text-slate-300 mb-3 leading-relaxed">
+//                           Respond to any message from customers, perfect for AI-powered conversations
+//                         </p>
+//                         <div className="space-y-1.5 text-xs text-slate-400">
+//                           <div className="flex items-start gap-2">
+//                             <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0 mt-1.5"></div>
+//                             <span className="leading-relaxed">Natural, flowing conversations</span>
+//                           </div>
+//                           <div className="flex items-start gap-2">
+//                             <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0 mt-1.5"></div>
+//                             <span className="leading-relaxed">AI detects intent automatically</span>
+//                           </div>
+//                           <div className="flex items-start gap-2">
+//                             <div className="w-1.5 h-1.5 bg-purple-400 rounded-full shrink-0 mt-1.5"></div>
+//                             <span className="leading-relaxed">Works as fallback for unmatched messages</span>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </CardContent>
+//                 </Card>
+//               </div>
+
+//               {hasExistingDefault && (
+//                 <Alert className="bg-orange-500/10 border-orange-500/30 mb-4">
+//                   <AlertCircle className="h-4 w-4 text-orange" />
+//                   <AlertTitle className="text-orange font-medium">Default Automation Already Set</AlertTitle>
+//                   <AlertDescription className="text-orange-400 text-sm leading-relaxed">
+//                     You already have a default automation set:{" "}
+//                     <span className="font-semibold">&ldquo;{existingDefault?.name || "Untitled"}&rdquo;</span>. Only one
+//                     automation can listen to all messages at a time. To use this option, please edit or delete your
+//                     existing default automation first.
+//                   </AlertDescription>
+//                 </Alert>
+//               )}
+
+//               {triggerMode === "KEYWORDS" && (
+//                 <div className="space-y-3">
+//                   <div className="flex justify-between items-center">
+//                     <h4 className="text-base font-medium text-white">Your Keywords</h4>
+//                     <KeywordsPopup
+//                       id={id}
+//                       trigger={
+//                         <Button variant="outline" size="sm" className="bg-transparent">
+//                           <Plus className="h-4 w-4 mr-1" />
+//                           <span className="hidden sm:inline">Manage Keywords</span>
+//                           <span className="sm:hidden">Add</span>
+//                         </Button>
+//                       }
+//                     />
+//                   </div>
+
+//                   <div className="flex flex-wrap gap-2 min-h-[60px] p-3 sm:p-4 bg-background-80 rounded-lg border-2 border-dashed border-muted-foreground/20">
+//                     {hasKeywords ? (
+//                       currentKeywords.map((keywordObj) => (
+//                         <Badge
+//                           key={keywordObj.id}
+//                           variant="secondary"
+//                           className="bg-[#3352CC]/20 text-[#768BDD] border-[#3352CC]/30"
+//                         >
+//                           {keywordObj.word}
+//                         </Badge>
+//                       ))
+//                     ) : (
+//                       <p className="text-muted-foreground text-sm">
+//                         No keywords added yet. Click &ldquo;Manage Keywords&rdquo; to add some.
+//                       </p>
+//                     )}
+//                   </div>
+
+//                   {hasKeywords ? (
+//                     <Alert className="bg-green-500/10 border-green-500/30">
+//                       <CheckCircle2 className="h-4 w-4 text-green-500" />
+//                       <AlertDescription className="text-green-400 text-sm">
+//                         {currentKeywords.length} keyword{currentKeywords.length !== 1 ? "s" : ""} configured. Your
+//                         automation will trigger when customers use these words.
+//                       </AlertDescription>
+//                     </Alert>
+//                   ) : (
+//                     <Alert className="bg-orange-500/10 border-orange-500/30">
+//                       <Info className="h-4 w-4 text-orange" />
+//                       <AlertDescription className="text-orange-400 text-sm">
+//                         Add at least one keyword to activate this automation. We recommend 3-5 keywords for best
+//                         results.
+//                       </AlertDescription>
+//                     </Alert>
+//                   )}
+//                 </div>
+//               )}
+
+//               {triggerMode === "ALL_MESSAGES" && (
+//                 <Alert className="bg-purple-500/10 border-purple-500/30">
+//                   <Zap className="h-4 w-4 text-purple-500" />
+//                   <AlertTitle className="text-purple-500 font-medium">Smart AI Intent Detection</AlertTitle>
+//                   <AlertDescription className="text-purple-400 text-sm">
+//                     Your automation will respond to any message from customers. The AI automatically detects customer
+//                     intent and provides relevant responses without needing specific keywords. This mode also acts as a
+//                     fallback for messages that don&apos;t match other automations.
+//                   </AlertDescription>
+//                 </Alert>
+//               )}
+
+//               {responseType === "SMARTAI" && (
+//                 <div className="mt-4">
+//                   <h3 className="text-lg font-medium mb-3">Analyze Your Business</h3>
+//                   <WebsiteAnalyzer
+//                     onAnalysisComplete={(analysis) => {
+//                       console.log("Website analysis complete:", analysis)
+//                     }}
+//                   />
+//                 </div>
+//               )}
+//             </div>
+
+//             <Button
+//               onClick={() => {
+//                 const currentKeywords = data?.data?.keywords?.map((k) => k.word) || []
+//                 onSaveTrigger({
+//                   isFallback,
+//                   listenMode: triggerMode,
+//                   keywords: currentKeywords,
+//                 })
+//                 setIsEditing(false)
+//               }}
+//               disabled={types?.length === 0 || (triggerMode === "KEYWORDS" && !hasKeywords)}
+//               className={cn(
+//                 "w-full py-6 text-white font-medium",
+//                 types?.length === 0 || (triggerMode === "KEYWORDS" && !hasKeywords)
+//                   ? "bg-in-active"
+//                   : triggerMode === "ALL_MESSAGES"
+//                     ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480]"
+//                     : "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]",
+//               )}
+//             >
+//               <Loader state={isPending}>{isEditing ? "Update Automation" : "Save Configuration"}</Loader>
+//             </Button>
+//           </TabsContent>
+
+//           <TabsContent value="simulation">
+//             <SimulationTab
+//               keywords={currentKeywords.map((k) => k.word)}
+//               responseMessage={data?.data?.listener?.prompt || ""}
+//               responseType={data?.data?.listener?.listener || "MESSAGE"}
+//             />
+//           </TabsContent>
+//         </Tabs>
+//       </div>
+//     </FloatingPanel>
+//   )
+// }
+
+// export default Trigger
+
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -1800,6 +2306,8 @@ const Trigger = ({ id }: Props) => {
   const [activeTab, setActiveTab] = useState("setup")
   const [triggerMode, setTriggerMode] = useState<"KEYWORDS" | "ALL_MESSAGES">("KEYWORDS")
   const [isEditing, setIsEditing] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const [showValidationAlert, setShowValidationAlert] = useState(false)
 
   const isFallback = triggerMode === "ALL_MESSAGES"
   const hasExistingDefault = !!existingDefault && existingDefault.id !== id
@@ -1813,13 +2321,56 @@ const Trigger = ({ id }: Props) => {
   }, [data?.data?.listenMode, data?.data?.isFallback])
 
   const handleSaveTrigger = () => {
+    // Just navigate to configure tab, don't save yet
+    setActiveTab("configure")
+  }
+
+  const validateConfiguration = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = []
+
+    // Check if trigger type is selected
+    if (!types || types.length === 0) {
+      errors.push("Please select at least one trigger type in the Trigger tab")
+    }
+
+    // Check trigger mode specific requirements
+    if (triggerMode === "KEYWORDS") {
+      const currentKeywords = data?.data?.keywords || []
+      if (currentKeywords.length === 0) {
+        errors.push("Please add at least one keyword in the Configure tab")
+      }
+    } else if (triggerMode === "ALL_MESSAGES") {
+      if (hasExistingDefault) {
+        errors.push(
+          "You already have a default automation. Please edit or delete it before creating another one"
+        )
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    }
+  }
+
+  const handleFinalSave = () => {
+    const validation = validateConfiguration()
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors)
+      setShowValidationAlert(true)
+      return
+    }
+
     const currentKeywords = data?.data?.keywords?.map((k) => k.word) || []
     onSaveTrigger({
       isFallback,
       listenMode: triggerMode,
       keywords: currentKeywords,
     })
-    setActiveTab("configure")
+    setIsEditing(false)
+    setValidationErrors([])
+    setShowValidationAlert(false)
   }
 
   const tabs = ["setup", "trigger", "configure", "simulation"]
@@ -1939,19 +2490,39 @@ const Trigger = ({ id }: Props) => {
           </Button>
         </div>
 
+        {showValidationAlert && validationErrors.length > 0 && (
+          <Alert className="bg-red-500/10 border-red-500/30">
+            <AlertCircle className="h-4 w-4 text-red-500" />
+            <AlertTitle className="text-red-500 font-medium">Configuration Incomplete</AlertTitle>
+            <AlertDescription className="text-red-400 text-sm">
+              <ul className="list-disc list-inside space-y-1 mt-2">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-2 sm:grid-cols-4 mb-4">
             <TabsTrigger value="setup" className="text-xs sm:text-sm">
               <Info className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Guide</span>
             </TabsTrigger>
-            <TabsTrigger value="trigger" className="text-xs sm:text-sm">
+            <TabsTrigger value="trigger" className="text-xs sm:text-sm relative">
               <KeySquare className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Trigger</span>
+              {(!types || types.length === 0) && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="configure" className="text-xs sm:text-sm">
+            <TabsTrigger value="configure" className="text-xs sm:text-sm relative">
               <ChevronRight className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Configure</span>
+              {triggerMode === "KEYWORDS" && !hasKeywords && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="simulation" className="text-xs sm:text-sm">
               <PlayCircle className="h-4 w-4 sm:mr-1" />
@@ -1967,6 +2538,15 @@ const Trigger = ({ id }: Props) => {
             {showTip && <ContextCard context="trigger" onClose={() => setShowTip(false)} />}
 
             <h3 className="text-lg font-medium">Select Trigger Type</h3>
+
+            {(!types || types.length === 0) && (
+              <Alert className="bg-orange-500/10 border-orange-500/30">
+                <AlertCircle className="h-4 w-4 text-orange" />
+                <AlertDescription className="text-orange-400 text-sm">
+                  Please select at least one trigger type to continue
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="grid grid-cols-1 gap-3">
               {AUTOMATION_TRIGGERS.map((trigger) => (
@@ -1999,7 +2579,7 @@ const Trigger = ({ id }: Props) => {
                 types?.length === 0 ? "bg-in-active" : `bg-gradient-to-br from-[#3352CC] to-[#1C2D70]`,
               )}
             >
-              <Loader state={isPending}>Continue to Configuration</Loader>
+              Continue to Configuration
             </Button>
           </TabsContent>
 
@@ -2216,23 +2796,12 @@ const Trigger = ({ id }: Props) => {
             </div>
 
             <Button
-              onClick={() => {
-                const currentKeywords = data?.data?.keywords?.map((k) => k.word) || []
-                onSaveTrigger({
-                  isFallback,
-                  listenMode: triggerMode,
-                  keywords: currentKeywords,
-                })
-                setIsEditing(false)
-              }}
-              disabled={types?.length === 0 || (triggerMode === "KEYWORDS" && !hasKeywords)}
+              onClick={handleFinalSave}
               className={cn(
                 "w-full py-6 text-white font-medium",
-                types?.length === 0 || (triggerMode === "KEYWORDS" && !hasKeywords)
-                  ? "bg-in-active"
-                  : triggerMode === "ALL_MESSAGES"
-                    ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480]"
-                    : "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]",
+                triggerMode === "ALL_MESSAGES"
+                  ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480]"
+                  : "bg-gradient-to-br from-[#3352CC] to-[#1C2D70]",
               )}
             >
               <Loader state={isPending}>{isEditing ? "Update Automation" : "Save Configuration"}</Loader>
