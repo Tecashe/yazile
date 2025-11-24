@@ -1556,13 +1556,16 @@ const CreateAutomation = ({
       {
         onSuccess: (data: any) => {
           console.log("[v0] Automation created successfully:", data)
+          console.log("[v0] Response res object:", data?.res)
+          console.log("[v0] Response automations array:", data?.res?.automations)
 
           setShowSuccess(true)
           setTimeout(() => {
             setShowSuccess(false)
 
-            if (onAutomationCreated && data?.res?.automations?.[0]) {
-              onAutomationCreated(data.res.automations[0])
+            if (onAutomationCreated) {
+              console.log("[v0] Calling onAutomationCreated with data:", data)
+              onAutomationCreated(data)
             }
           }, 800)
         },
