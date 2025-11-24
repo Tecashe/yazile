@@ -2557,7 +2557,7 @@ const Trigger = ({ id }: Props) => {
                   onClick={() => onSetTrigger(trigger.type)}
                   className={cn(
                     "rounded-xl flex cursor-pointer flex-col p-4 gap-3",
-                    !types?.find((t) => t === trigger.type)
+                    !types?.find((t: string) => t === trigger.type)
                       ? "bg-background-80"
                       : `bg-gradient-to-br from-[#3352CC] to-[#1C2D70]`,
                   )}
