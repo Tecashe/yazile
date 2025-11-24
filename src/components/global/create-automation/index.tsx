@@ -1198,6 +1198,293 @@
 // export default CreateAutomation
 
 
+// "use client"
+
+// import { Button } from "@/components/ui/button"
+// import { useMemo, useState } from "react"
+// import Loader from "../loader"
+// import { useCreateAutomation } from "@/hooks/use-automations"
+// import { v4 } from "uuid"
+// import { usePathname } from "next/navigation"
+// import { motion, AnimatePresence } from "framer-motion"
+// import { Check, Zap, Lock, AlertCircle, Crown, Sparkles } from "lucide-react"
+// import { useSubscription } from "@/contexts/subscription-context"
+
+// // Configuration for plan limits
+// const PLAN_LIMITS = {
+//   FREE: 2,
+//   PRO: 50,
+//   ENTERPRISE: 999,
+// }
+
+// type CreateAutomationProps = {
+//   currentAutomationCount?: number
+//   onUpgradeClick?: () => void
+//   onAutomationCreated?: (automation: any) => void
+//   onCreating?: () => void
+// }
+
+// const CreateAutomation = ({
+//   currentAutomationCount = 0,
+//   onUpgradeClick,
+//   onAutomationCreated,
+//   onCreating,
+// }: CreateAutomationProps) => {
+//   const mutationId = useMemo(() => v4(), [])
+//   const pathname = usePathname()
+//   const [showSuccess, setShowSuccess] = useState(false)
+//   const [showLimitWarning, setShowLimitWarning] = useState(false)
+
+//   const { subscription, isLoading: subscriptionLoading } = useSubscription()
+//   const { isPending, mutate } = useCreateAutomation(mutationId)
+
+//   const currentPlan = subscription?.plan || "FREE"
+//   const automationLimit = PLAN_LIMITS[currentPlan]
+//   const remainingAutomations = Math.max(0, automationLimit - currentAutomationCount)
+//   const isAtLimit = currentAutomationCount >= automationLimit
+//   const isNearLimit = remainingAutomations <= 1 && remainingAutomations > 0
+
+//   const handleCreateAutomation = () => {
+//     // If at limit, show warning and trigger upgrade popup
+//     if (isAtLimit) {
+//       setShowLimitWarning(true)
+//       setTimeout(() => setShowLimitWarning(false), 3000)
+
+//       // Trigger the upgrade popup if callback provided
+//       if (onUpgradeClick) {
+//         onUpgradeClick()
+//       }
+//       return
+//     }
+
+//     if (onCreating) {
+//       onCreating()
+//     }
+
+//     mutate(
+//       {
+//         name: "Untitled",
+//       },
+//       {
+//         onSuccess: (data: any) => {
+//           console.log("[v0] Automation created successfully, storing flag and showing success animation")
+//           sessionStorage.setItem("automationJustCreated", "true")
+//           setShowSuccess(true)
+
+//           setTimeout(() => {
+//             setShowSuccess(false)
+//             console.log("[v0] Storing loading flag and reloading page")
+//             sessionStorage.setItem("showCreationLoading", "true")
+//             window.location.reload()
+//           }, 800)
+//         },
+//         onError: (error: any) => {
+//           console.error("[v0] Error creating automation:", error)
+//         },
+//       },
+//     )
+//   }
+
+//   const particles = useMemo(() => Array.from({ length: 20 }), [])
+
+//   const getPlanBadge = () => {
+//     if (currentPlan === "FREE") {
+//       return (
+//         <div className="flex items-center gap-1 text-xs text-gray-400">
+//           <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+//           Free Plan
+//         </div>
+//       )
+//     }
+//     if (currentPlan === "PRO") {
+//       return (
+//         <div className="flex items-center gap-1 text-xs text-purple-400">
+//           <Crown size={12} />
+//           Pro Plan
+//         </div>
+//       )
+//     }
+//     return (
+//       <div className="flex items-center gap-1 text-xs text-yellow-400">
+//         <Sparkles size={12} />
+//         Enterprise
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="relative">
+//       {/* Main Button Container */}
+//       <motion.div
+//         whileHover={{ scale: isAtLimit ? 1 : 1.05 }}
+//         whileTap={{ scale: isAtLimit ? 1 : 0.95 }}
+//         className="relative"
+//       >
+//         <Button
+//           className={`lg:px-10 py-6 text-white rounded-full font-medium shadow-lg transition-all duration-300 ease-in-out relative overflow-hidden ${
+//             isAtLimit
+//               ? "bg-gradient-to-br from-gray-400 to-gray-600 cursor-not-allowed opacity-70"
+//               : "bg-gradient-to-br from-[#3352CC] to-[#1C2D70] hover:opacity-80"
+//           }`}
+//           onClick={handleCreateAutomation}
+//           disabled={isPending || showSuccess || isAtLimit || subscriptionLoading}
+//         >
+//           <AnimatePresence mode="wait">
+//             {showLimitWarning ? (
+//               <motion.div
+//                 key="warning"
+//                 initial={{ opacity: 0, scale: 0.8 }}
+//                 animate={{ opacity: 1, scale: 1 }}
+//                 exit={{ opacity: 0, scale: 0.8 }}
+//                 className="absolute inset-0 flex items-center justify-center bg-red-500"
+//               >
+//                 <Lock className="text-white mr-2" size={20} />
+//                 <span className="font-semibold">Limit Reached!</span>
+//               </motion.div>
+//             ) : showSuccess ? (
+//               <motion.div
+//                 key="success"
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 exit={{ opacity: 0 }}
+//                 className="absolute inset-0 flex items-center justify-center"
+//               >
+//                 <motion.div
+//                   initial={{ scale: 0, rotate: -180 }}
+//                   animate={{ scale: 1, rotate: 0 }}
+//                   transition={{ type: "spring", damping: 10, stiffness: 100 }}
+//                   className="bg-green-500 rounded-full p-2"
+//                 >
+//                   <Check className="text-white" size={24} />
+//                 </motion.div>
+//                 {particles.map((_, index) => (
+//                   <motion.div
+//                     key={index}
+//                     className="absolute w-1 h-1 bg-yellow-300 rounded-full"
+//                     initial={{ x: 0, y: 0, opacity: 1 }}
+//                     animate={{
+//                       x: Math.random() * 100 - 50,
+//                       y: Math.random() * 100 - 50,
+//                       opacity: 0,
+//                       scale: Math.random() * 3 + 1,
+//                     }}
+//                     transition={{ duration: 1, delay: index * 0.02 }}
+//                   />
+//                 ))}
+//               </motion.div>
+//             ) : (
+//               <motion.div
+//                 key="button-content"
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 exit={{ opacity: 0 }}
+//                 className="flex items-center justify-center"
+//               >
+//                 <Loader state={isPending}>
+//                   {isAtLimit ? <Lock size={20} /> : <Zap />}
+//                   <span className="lg:inline hidden">{isAtLimit ? "Limit Reached" : "Create Automation"}</span>
+//                 </Loader>
+//               </motion.div>
+//             )}
+//           </AnimatePresence>
+//         </Button>
+//       </motion.div>
+
+//       {/* Usage Info Below Button */}
+//       <motion.div
+//         initial={{ opacity: 0, y: -10 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="mt-3 flex items-center justify-between gap-3"
+//       >
+//         <div className="flex-1">
+//           {/* Progress Bar */}
+//           <div className="relative h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+//             <motion.div
+//               initial={{ width: 0 }}
+//               animate={{
+//                 width: `${(currentAutomationCount / automationLimit) * 100}%`,
+//               }}
+//               transition={{ duration: 0.5, ease: "easeOut" }}
+//               className={`h-full rounded-full ${
+//                 isAtLimit
+//                   ? "bg-red-500"
+//                   : isNearLimit
+//                     ? "bg-yellow-500"
+//                     : "bg-gradient-to-r from-[#3352CC] to-[#1C2D70]"
+//               }`}
+//             />
+//           </div>
+
+//           {/* Usage Text */}
+//           <div className="flex items-center justify-between mt-1.5">
+//             <span
+//               className={`text-xs font-medium ${
+//                 isAtLimit ? "text-red-600" : isNearLimit ? "text-yellow-600" : "text-gray-600 dark:text-gray-400"
+//               }`}
+//             >
+//               {currentAutomationCount} / {automationLimit} automations
+//             </span>
+//             {getPlanBadge()}
+//           </div>
+//         </div>
+//       </motion.div>
+
+//       {/* Upgrade Prompt - Shows when at or near limit on FREE plan */}
+//       <AnimatePresence>
+//         {(isAtLimit || isNearLimit) && currentPlan === "FREE" && (
+//           <motion.div
+//             initial={{ opacity: 0, y: -10, scale: 0.95 }}
+//             animate={{ opacity: 1, y: 0, scale: 1 }}
+//             exit={{ opacity: 0, y: -10, scale: 0.95 }}
+//             className={`mt-3 p-3 rounded-lg border ${
+//               isAtLimit
+//                 ? "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50"
+//                 : "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900/50"
+//             }`}
+//           >
+//             <div className="flex items-start gap-2">
+//               <AlertCircle
+//                 size={16}
+//                 className={
+//                   isAtLimit ? "text-red-600 dark:text-red-400 mt-0.5" : "text-yellow-600 dark:text-yellow-400 mt-0.5"
+//                 }
+//               />
+//               <div className="flex-1">
+//                 <p
+//                   className={`text-sm font-medium ${
+//                     isAtLimit ? "text-red-900 dark:text-red-300" : "text-yellow-900 dark:text-yellow-300"
+//                   }`}
+//                 >
+//                   {isAtLimit
+//                     ? "You've reached your automation limit"
+//                     : `Only ${remainingAutomations} automation${remainingAutomations === 1 ? "" : "s"} left!`}
+//                 </p>
+//                 <p
+//                   className={`text-xs mt-1 ${
+//                     isAtLimit ? "text-red-700 dark:text-red-400" : "text-yellow-700 dark:text-yellow-400"
+//                   }`}
+//                 >
+//                   Upgrade to Pro for 50 automations and unlock advanced features.
+//                 </p>
+//                 <Button
+//                   size="sm"
+//                   className="mt-2 h-7 text-xs bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+//                   onClick={onUpgradeClick || (() => (window.location.href = "/dashboard/billing"))}
+//                 >
+//                   <Crown size={12} className="mr-1" />
+//                   Upgrade Now
+//                 </Button>
+//               </div>
+//             </div>
+//           </motion.div>
+//         )}
+//       </AnimatePresence>
+//     </div>
+//   )
+// }
+
+// export default CreateAutomation
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -1267,19 +1554,19 @@ const CreateAutomation = ({
       },
       {
         onSuccess: (data: any) => {
-          console.log("[v0] Automation created successfully, storing flag and showing success animation")
-          sessionStorage.setItem("automationJustCreated", "true")
-          setShowSuccess(true)
+          console.log("[v0] Automation created successfully")
 
+          setShowSuccess(true)
           setTimeout(() => {
             setShowSuccess(false)
-            console.log("[v0] Storing loading flag and reloading page")
-            sessionStorage.setItem("showCreationLoading", "true")
+            // Store flag to show popup after reload
+            sessionStorage.setItem("automationJustCreated", "true")
+            // Reload to get fresh data
             window.location.reload()
           }, 800)
         },
         onError: (error: any) => {
-          console.error("[v0] Error creating automation:", error)
+          console.error("Error creating automation:", error)
         },
       },
     )
@@ -1484,7 +1771,6 @@ const CreateAutomation = ({
 }
 
 export default CreateAutomation
-
 
 
 
