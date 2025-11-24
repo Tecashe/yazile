@@ -248,7 +248,7 @@ export function ManualVariationsManager({ variations, onChange, isEditMode }: Ma
         <Card className="bg-background-90/50 border-dashed border-border/50">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              No variations added yet. Click "Add Variation" to create different versions of your comment reply.
+              No variations added yet. Click &ldquo;Add Variation&rdquo; to create different versions of your comment reply.
             </p>
           </CardContent>
         </Card>
