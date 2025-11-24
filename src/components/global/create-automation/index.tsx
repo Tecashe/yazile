@@ -1544,9 +1544,7 @@ const CreateAutomation = ({
       return
     }
 
-    if (onCreating) {
-      onCreating()
-    }
+    sessionStorage.setItem("automationJustCreated", "true")
 
     mutate(
       {
@@ -1554,22 +1552,19 @@ const CreateAutomation = ({
       },
       {
         onSuccess: (data: any) => {
-          console.log("[v0] Automation created successfully")
-
-          setShowSuccess(true)
-          setTimeout(() => {
-            setShowSuccess(false)
-            // Store flag to show popup after reload
-            sessionStorage.setItem("automationJustCreated", "true")
-            // Reload to get fresh data
-            window.location.reload()
-          }, 200)
+          // Mutation will complete in background, reload happens immediately
         },
         onError: (error: any) => {
           console.error("Error creating automation:", error)
+          sessionStorage.removeItem("automationJustCreated")
         },
       },
     )
+
+    // Reload immediately after starting mutation, don't wait for it to complete
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   }
 
   const particles = useMemo(() => Array.from({ length: 20 }), [])
@@ -1771,7 +1766,6 @@ const CreateAutomation = ({
 }
 
 export default CreateAutomation
-
 
 
 
