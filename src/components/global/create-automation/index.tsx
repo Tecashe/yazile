@@ -1563,7 +1563,7 @@ const CreateAutomation = ({
             sessionStorage.setItem("automationJustCreated", "true")
             // Reload to get fresh data
             window.location.reload()
-          }, 800)
+          }, 200)
         },
         onError: (error: any) => {
           console.error("Error creating automation:", error)
