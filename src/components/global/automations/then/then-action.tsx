@@ -8303,7 +8303,6 @@
 // export default ThenAction
 
 
-
 "use client"
 
 import type React from "react"
@@ -8317,7 +8316,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import {
   PlusCircle,
   MessageSquare,
@@ -8329,13 +8328,6 @@ import {
   Zap,
   Target,
   Info,
-  Heart,
-  Send,
-  Instagram,
-  User,
-  MessageCircle,
-  Eye,
-  Sparkles,
 } from "lucide-react"
 import FloatingPanel from "../../panel"
 import { ContextCard } from "../context"
@@ -8357,152 +8349,41 @@ type Props = {
   }
 }
 
-// Instagram Mock Preview Component - Shows how the automation will look
-const InstagramMockPreview = ({
-  commentReply,
-  businessName = "your_business",
-  isAI = false,
-}: {
-  commentReply: string
-  businessName?: string
-  isAI?: boolean
-}) => {
-  const [showReply, setShowReply] = useState(false)
-  const [liked, setLiked] = useState(false)
+const useTypingPlaceholder = (phrases: string[], typingSpeed = 50, pauseDuration = 2000) => {
+  const [placeholder, setPlaceholder] = useState("")
+  const [phraseIndex, setPhraseIndex] = useState(0)
+  const [charIndex, setCharIndex] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
-    if (commentReply) {
-      const timer = setTimeout(() => setShowReply(true), 500)
-      return () => clearTimeout(timer)
-    } else {
-      setShowReply(false)
-    }
-  }, [commentReply])
+    const currentPhrase = phrases[phraseIndex]
 
-  return (
-    <div className="bg-background-90 rounded-2xl border border-background-80 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 sm:p-5 border-b border-background-80">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 p-[2px]">
-            <div className="w-full h-full rounded-full bg-background-90 flex items-center justify-center">
-              <Instagram className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-          </div>
-          <div>
-            <p className="text-white font-semibold text-base sm:text-lg">Instagram Preview</p>
-            <p className="text-muted-foreground text-sm">See how your auto-reply looks</p>
-          </div>
-        </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-sm px-3 py-1",
-            isAI
-              ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
-              : "bg-blue-500/10 border-blue-500/30 text-blue-400",
-          )}
-        >
-          {isAI ? "Smart AI" : "Standard"}
-        </Badge>
-      </div>
+    const timeout = setTimeout(
+      () => {
+        if (!isDeleting) {
+          if (charIndex < currentPhrase.length) {
+            setPlaceholder(currentPhrase.slice(0, charIndex + 1))
+            setCharIndex(charIndex + 1)
+          } else {
+            setTimeout(() => setIsDeleting(true), pauseDuration)
+          }
+        } else {
+          if (charIndex > 0) {
+            setPlaceholder(currentPhrase.slice(0, charIndex - 1))
+            setCharIndex(charIndex - 1)
+          } else {
+            setIsDeleting(false)
+            setPhraseIndex((phraseIndex + 1) % phrases.length)
+          }
+        }
+      },
+      isDeleting ? typingSpeed / 2 : typingSpeed,
+    )
 
-      {/* Mock Post */}
-      <div className="p-4 sm:p-5">
-        {/* Post Image Placeholder */}
-        <div className="aspect-square bg-gradient-to-br from-background-80 to-background-90 rounded-xl mb-4 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 rounded-full bg-background-80 flex items-center justify-center">
-              <Instagram className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground text-sm">Your Instagram Post</p>
-          </div>
-        </div>
+    return () => clearTimeout(timeout)
+  }, [charIndex, isDeleting, phraseIndex, phrases, typingSpeed, pauseDuration])
 
-        {/* Post Actions */}
-        <div className="flex items-center gap-5 mb-4">
-          <button onClick={() => setLiked(!liked)} className="transition-transform hover:scale-110">
-            <Heart className={cn("w-7 h-7 sm:w-8 sm:h-8", liked ? "fill-red-500 text-red-500" : "text-white")} />
-          </button>
-          <MessageCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-          <Send className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-        </div>
-
-        {/* Comments Section */}
-        <div className="space-y-4">
-          {/* Example User Comment */}
-          <div className="flex gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex-shrink-0" />
-            <div className="flex-1">
-              <div className="bg-background-80 rounded-2xl p-3 sm:p-4">
-                <p className="text-white font-semibold text-sm sm:text-base">happy_customer</p>
-                <p className="text-gray-300 text-sm sm:text-base mt-1">
-                  Hi! I love your products. Can you tell me more about pricing?
-                </p>
-              </div>
-              <p className="text-muted-foreground text-xs mt-2 ml-2">2 minutes ago</p>
-            </div>
-          </div>
-
-          {/* Your Auto-Reply */}
-          <AnimatePresence>
-            {showReply && commentReply && (
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="flex gap-3 ml-6 sm:ml-8"
-              >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div
-                    className={cn(
-                      "rounded-2xl p-3 sm:p-4",
-                      isAI
-                        ? "bg-purple-500/20 border border-purple-500/30"
-                        : "bg-blue-500/20 border border-blue-500/30",
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-white font-semibold text-sm sm:text-base">{businessName}</p>
-                      {isAI && <Sparkles className="w-4 h-4 text-purple-400" />}
-                      <Badge variant="outline" className="text-xs bg-background-80 border-background-80">
-                        Auto-Reply
-                      </Badge>
-                    </div>
-                    <p className="text-gray-200 text-sm sm:text-base mt-1 whitespace-pre-wrap">
-                      {commentReply || "Your automatic reply will appear here..."}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 mt-2 ml-2">
-                    <p className="text-muted-foreground text-xs">Just now</p>
-                    {isAI && (
-                      <span className="text-purple-400 text-xs flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" /> AI Generated
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Empty State */}
-          {!commentReply && (
-            <div className="ml-6 sm:ml-8 p-4 sm:p-5 border-2 border-dashed border-background-80 rounded-2xl text-center">
-              <Eye className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-muted-foreground text-sm sm:text-base">
-                Set up your comment reply below to see a live preview here
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
+  return placeholder
 }
 
 const ThenAction = ({
@@ -8511,7 +8392,7 @@ const ThenAction = ({
 }: Props) => {
   const { onSetListener, listener: Listener, onFormSubmit, mutate, register, isPending, watch } = useListener(id)
 
-  // State management - simplified
+  // State management
   const [activeTab, setActiveTab] = useState("profile")
   const [showTip, setShowTip] = useState(true)
   const [selectedTemplate, setSelectedTemplate] = useState<string>("")
@@ -8527,6 +8408,21 @@ const ThenAction = ({
 
   const [replyVariations, setReplyVariations] = useState<string[]>([])
   const [baseCommentReply, setBaseCommentReply] = useState("")
+
+  const businessPlaceholder = useTypingPlaceholder([
+    "We sell fresh bread, cakes, and pastries...",
+    "Our bakery is open Monday to Saturday, 7am to 6pm...",
+    "We offer free delivery for orders over $30...",
+    "Our most popular item is the sourdough bread at $6...",
+    "Yes, we have gluten-free options available daily...",
+  ])
+
+  const promptPlaceholder = useTypingPlaceholder([
+    "Be friendly and thank them for their comment...",
+    "If they ask about prices, share our current deals...",
+    "Always invite them to visit our shop or DM us...",
+    "Mention our delivery options if they ask about orders...",
+  ])
 
   useEffect(() => {
     const fetchBusinessDescription = async () => {
@@ -8654,35 +8550,38 @@ const ThenAction = ({
         </motion.div>
       }
     >
-      <div className="flex flex-col gap-6 sm:gap-8 max-w-7xl mx-auto">
-        {/* Simple Progress Header */}
-        <div className="bg-background-80 p-5 sm:p-6 lg:p-8 rounded-2xl">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl sm:text-2xl font-semibold text-white flex items-center">
-              <Target className="h-6 w-6 sm:h-7 sm:w-7 mr-3 text-light-blue" />
-              Your Progress
+      <div className="flex flex-col gap-8 sm:gap-10 lg:gap-12 w-full max-w-none px-2 sm:px-4 lg:px-6">
+        {/* Progress Header - Larger */}
+        <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white flex items-center">
+              <Target className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-light-blue" />
+              Your Setup Progress
             </h2>
-            <Badge variant="outline" className="bg-background-90 text-muted-foreground text-sm px-3 py-1">
-              {completedSteps.length}/2 Done
+            <Badge
+              variant="outline"
+              className="bg-background-90 text-muted-foreground text-base px-4 py-2 self-start sm:self-auto"
+            >
+              {completedSteps.length} of 2 steps done
             </Badge>
           </div>
 
-          <Progress value={setupProgress} className="mb-6 h-3" />
+          <Progress value={setupProgress} className="mb-8 h-4" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[
               {
                 step: 1,
                 title: "Tell Us About Your Business",
                 icon: Briefcase,
-                description: "What do you sell? What are your hours? Tell us everything!",
+                description: "Share what you sell, your hours, prices, and anything customers might ask about",
                 tab: "profile",
               },
               {
                 step: 2,
-                title: "Set Up Auto-Replies",
+                title: "Set Up Your Auto-Replies",
                 icon: MessageSquare,
-                description: "Choose how to reply to comments and DMs automatically",
+                description: "Choose how to automatically respond when someone comments on your posts",
                 tab: "automation",
               },
             ].map(({ step, title, icon: Icon, description, tab }) => {
@@ -8697,35 +8596,35 @@ const ThenAction = ({
                   )}
                   onClick={() => setActiveTab(tab)}
                 >
-                  <CardContent className="p-5 sm:p-6">
-                    <div className="flex items-start gap-4">
+                  <CardContent className="p-6 sm:p-8">
+                    <div className="flex items-start gap-5">
                       <div
                         className={cn(
-                          "p-3 sm:p-4 rounded-xl",
+                          "p-4 sm:p-5 rounded-xl flex-shrink-0",
                           status === "completed" && "bg-green-500/20",
                           status === "pending" && "bg-background-80",
                         )}
                       >
                         {status === "completed" ? (
-                          <CheckCircle className="h-6 w-6 sm:h-7 sm:w-7 text-green-500" />
+                          <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-500" />
                         ) : (
-                          <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-light-blue" />
+                          <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-light-blue" />
                         )}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-muted-foreground text-sm font-medium">Step {step}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                          <span className="text-muted-foreground text-base font-medium">Step {step}</span>
                           {status === "completed" && (
                             <Badge
                               variant="outline"
-                              className="bg-green-500/10 border-green-500/30 text-green-400 text-xs"
+                              className="bg-green-500/10 border-green-500/30 text-green-400 text-sm"
                             >
                               Done!
                             </Badge>
                           )}
                         </div>
-                        <h4 className="text-white font-semibold text-base sm:text-lg">{title}</h4>
-                        <p className="text-muted-foreground text-sm mt-1">{description}</p>
+                        <h4 className="text-white font-semibold text-lg sm:text-xl lg:text-2xl">{title}</h4>
+                        <p className="text-muted-foreground text-base sm:text-lg mt-2">{description}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -8735,62 +8634,62 @@ const ThenAction = ({
           </div>
         </div>
 
-        {/* Simplified Tabs - Only Profile and Automation */}
+        {/* Tabs - Larger */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 bg-background-80 p-1.5 rounded-xl h-auto">
+          <TabsList className="grid grid-cols-2 bg-background-80 p-2 rounded-xl h-auto">
             <TabsTrigger
               value="profile"
-              className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-3 sm:py-4 text-sm sm:text-base font-medium"
+              className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
             >
-              <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
               Your Business
             </TabsTrigger>
             <TabsTrigger
               value="automation"
-              className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-3 sm:py-4 text-sm sm:text-base font-medium"
+              className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
             >
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
               Auto-Replies
             </TabsTrigger>
           </TabsList>
 
           {/* Business Profile Tab */}
-          <TabsContent value="profile" className="space-y-6 mt-6">
-            <div className="bg-background-80 p-5 sm:p-6 lg:p-8 rounded-2xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+          <TabsContent value="profile" className="space-y-8 mt-8">
+            <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
                 <div>
-                  <h3 className="text-white font-semibold text-lg sm:text-xl flex items-center">
-                    <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 mr-3 text-light-blue" />
+                  <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center">
+                    <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
                     Tell Us About Your Business
                   </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base mt-1">
+                  <p className="text-muted-foreground text-base sm:text-lg mt-2 ml-10 sm:ml-11 lg:ml-12">
                     This helps us create better auto-replies for your customers
                   </p>
                 </div>
                 {businessProfile && (
                   <Badge
                     variant="outline"
-                    className="bg-green-500/10 border-green-500/30 text-green-400 self-start sm:self-auto"
+                    className="bg-green-500/10 border-green-500/30 text-green-400 self-start lg:self-auto text-base px-4 py-2"
                   >
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-5 w-5 mr-2" />
                     Ready to Save
                   </Badge>
                 )}
               </div>
 
-              <div className="space-y-5">
-                <div className="space-y-3">
-                  <Label htmlFor="business-profile" className="text-base sm:text-lg text-white font-medium">
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <Label htmlFor="business-profile" className="text-lg sm:text-xl text-white font-medium">
                     What should customers know about you?
                   </Label>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-base sm:text-lg">
                     Include things like: what you sell, your prices, business hours, location, and any common questions
                     customers ask.
                   </p>
                   {isLoading ? (
-                    <div className="bg-background-90 border border-background-80 rounded-xl min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
-                      <div className="flex items-center text-muted-foreground">
-                        <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                    <div className="bg-background-90 border border-background-80 rounded-xl min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] flex items-center justify-center">
+                      <div className="flex items-center text-muted-foreground text-lg">
+                        <Loader2 className="h-6 w-6 mr-3 animate-spin" />
                         Loading your business info...
                       </div>
                     </div>
@@ -8798,43 +8697,25 @@ const ThenAction = ({
                     <Textarea
                       id="business-profile"
                       ref={textareaRef}
-                      placeholder={`Example:
-
-Hi! We're Sarah's Bakery, a family-owned bakery in downtown Austin.
-
-What we sell:
-- Fresh bread (sourdough, whole wheat, rye) - $6-8
-- Cupcakes - $4 each or $40/dozen
-- Custom cakes - starting at $50
-
-Hours: Mon-Sat 7am-6pm, Closed Sundays
-
-We offer free delivery for orders over $30 within 5 miles.
-
-Common questions:
-Q: Do you make gluten-free items?
-A: Yes! We have gluten-free bread and cupcakes available daily.
-
-Q: How far in advance for custom cakes?
-A: Please order at least 3 days ahead for custom cakes.`}
-                      className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-2 focus:ring-light-blue/50 min-h-[300px] sm:min-h-[400px] text-base rounded-xl p-4 sm:p-5"
+                      placeholder={businessProfile ? undefined : businessPlaceholder + "|"}
+                      className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-2 focus:ring-light-blue/50 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] text-base sm:text-lg rounded-xl p-5 sm:p-6"
                       value={businessProfile}
                       onChange={(e) => setBusinessProfile(e.target.value)}
                     />
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-background-80">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4 mr-2" />
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-background-80">
+                  <div className="flex items-center text-base text-muted-foreground">
+                    <Clock className="h-5 w-5 mr-2" />
                     <span>
                       {lastUpdated ? `Last saved: ${new Date(lastUpdated).toLocaleString()}` : "Not saved yet"}
                     </span>
                   </div>
-                  <div className="flex gap-3 w-full sm:w-auto">
+                  <div className="flex gap-4 w-full sm:w-auto">
                     <Button
                       variant="outline"
-                      className="border-background-80 text-muted-foreground hover:bg-background-90 bg-transparent flex-1 sm:flex-none h-12"
+                      className="border-background-80 text-muted-foreground hover:bg-background-90 bg-transparent flex-1 sm:flex-none h-14 text-base"
                       onClick={() => {
                         setBusinessProfile(fetchedBusinessDescription || "")
                       }}
@@ -8843,23 +8724,23 @@ A: Please order at least 3 days ahead for custom cakes.`}
                       {fetchedBusinessDescription ? "Reset Changes" : "Clear"}
                     </Button>
                     <Button
-                      className="bg-light-blue hover:bg-light-blue/90 text-white flex-1 sm:flex-none h-12 text-base font-medium"
+                      className="bg-light-blue hover:bg-light-blue/90 text-white flex-1 sm:flex-none h-14 text-base sm:text-lg font-medium px-8"
                       onClick={handleSaveProfile}
                       disabled={isSaving || !businessProfile.trim() || isLoading}
                     >
                       {isSaving ? (
                         <>
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          <Loader2 className="h-5 w-5 mr-3 animate-spin" />
                           Saving...
                         </>
                       ) : saveSuccess ? (
                         <>
-                          <CheckCircle className="h-5 w-5 mr-2" />
+                          <CheckCircle className="h-5 w-5 mr-3" />
                           Saved!
                         </>
                       ) : (
                         <>
-                          <Save className="h-5 w-5 mr-2" />
+                          <Save className="h-5 w-5 mr-3" />
                           Save & Continue
                         </>
                       )}
@@ -8869,13 +8750,15 @@ A: Please order at least 3 days ahead for custom cakes.`}
               </div>
             </div>
 
-            {/* Helpful Tips */}
-            <Alert className="bg-blue-500/10 border-blue-500/30">
-              <Info className="h-5 w-5 text-blue-400" />
-              <AlertTitle className="text-blue-400 font-semibold text-base">Tips for Better Auto-Replies</AlertTitle>
-              <AlertDescription className="text-blue-300 text-sm sm:text-base">
-                <ul className="list-disc list-inside space-y-2 mt-3">
-                  <li>List your products/services with prices</li>
+            {/* Helpful Tips - Larger */}
+            <Alert className="bg-blue-500/10 border-blue-500/30 p-6 sm:p-8">
+              <Info className="h-6 w-6 text-blue-400" />
+              <AlertTitle className="text-blue-400 font-semibold text-lg sm:text-xl">
+                Tips for Better Auto-Replies
+              </AlertTitle>
+              <AlertDescription className="text-blue-300 text-base sm:text-lg">
+                <ul className="list-disc list-inside space-y-3 mt-4">
+                  <li>List your products or services with their prices</li>
                   <li>Include your business hours and location</li>
                   <li>Add answers to questions customers ask a lot</li>
                   <li>Mention any current deals or promotions</li>
@@ -8885,23 +8768,20 @@ A: Please order at least 3 days ahead for custom cakes.`}
           </TabsContent>
 
           {/* Automation Tab */}
-          <TabsContent value="automation" className="space-y-6 mt-6">
+          <TabsContent value="automation" className="space-y-8 mt-8">
             {showTip && <ContextCard context="response" onClose={() => setShowTip(false)} />}
 
-            {/* Instagram Preview */}
-            <InstagramMockPreview commentReply={baseCommentReply} isAI={Listener === "SMARTAI"} />
-
-            <div className="bg-background-80 p-5 sm:p-6 lg:p-8 rounded-2xl">
-              <h3 className="text-white font-semibold text-lg sm:text-xl flex items-center mb-6">
-                <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 mr-3 text-light-blue" />
+            <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+              <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center mb-4">
+                <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
                 Choose Your Reply Style
               </h3>
 
-              <p className="text-muted-foreground text-sm sm:text-base mb-6">
-                Pick how you want to reply to comments on your Instagram posts:
+              <p className="text-muted-foreground text-base sm:text-lg mb-8 ml-10 sm:ml-11 lg:ml-12">
+                Pick how you want to automatically reply when someone comments on your Instagram posts:
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {AUTOMATION_LISTENERS.map((listener) =>
                   listener.type === "SMARTAI" ? (
                     <SubscriptionPlan key={listener.type} type="PRO">
@@ -8913,22 +8793,22 @@ A: Please order at least 3 days ahead for custom cakes.`}
                           Listener === listener.type
                             ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480] border-purple-500/50"
                             : "bg-background-90 border-background-80 hover:border-purple-500/30",
-                          "p-5 sm:p-6 rounded-2xl flex flex-col gap-y-3 cursor-pointer transition-all duration-200 h-full border-2",
+                          "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
                         )}
                       >
-                        <div className="flex gap-x-3 items-center">
-                          <div className="p-2.5 rounded-xl bg-purple-500/20">{listener.icon}</div>
+                        <div className="flex gap-x-4 items-center">
+                          <div className="p-3 sm:p-4 rounded-xl bg-purple-500/20">{listener.icon}</div>
                           <div>
-                            <p className="font-semibold text-base sm:text-lg text-white">{listener.label}</p>
+                            <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
                             <Badge
                               variant="outline"
-                              className="text-xs bg-purple-500/20 border-purple-500/30 text-purple-300 mt-1"
+                              className="text-sm bg-purple-500/20 border-purple-500/30 text-purple-300 mt-2"
                             >
                               PRO Feature
                             </Badge>
                           </div>
                         </div>
-                        <p className="text-sm sm:text-base text-gray-300">{listener.description}</p>
+                        <p className="text-base sm:text-lg text-gray-300">{listener.description}</p>
                       </motion.div>
                     </SubscriptionPlan>
                   ) : (
@@ -8941,35 +8821,35 @@ A: Please order at least 3 days ahead for custom cakes.`}
                         Listener === listener.type
                           ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70] border-blue-500/50"
                           : "bg-background-90 border-background-80 hover:border-blue-500/30",
-                        "p-5 sm:p-6 rounded-2xl flex flex-col gap-y-3 cursor-pointer transition-all duration-200 h-full border-2",
+                        "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
                       )}
                     >
-                      <div className="flex gap-x-3 items-center">
-                        <div className="p-2.5 rounded-xl bg-blue-500/20">{listener.icon}</div>
-                        <p className="font-semibold text-base sm:text-lg text-white">{listener.label}</p>
+                      <div className="flex gap-x-4 items-center">
+                        <div className="p-3 sm:p-4 rounded-xl bg-blue-500/20">{listener.icon}</div>
+                        <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
                       </div>
-                      <p className="text-sm sm:text-base text-gray-300">{listener.description}</p>
+                      <p className="text-base sm:text-lg text-gray-300">{listener.description}</p>
                     </motion.div>
                   ),
                 )}
               </div>
 
-              <form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
+              <form onSubmit={handleFormSubmit} className="flex flex-col gap-6">
                 {Listener && (
                   <>
                     {/* AI Instructions */}
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <Label
                         htmlFor="prompt"
-                        className="text-base sm:text-lg font-medium flex items-center gap-2 text-white"
+                        className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
                       >
                         {Listener === "SMARTAI" ? "Tell the AI How to Reply" : "Your Reply Instructions"}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground cursor-help" />
+                              <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
                             </TooltipTrigger>
-                            <TooltipContent className="max-w-xs text-sm">
+                            <TooltipContent className="max-w-sm text-base p-4">
                               <p>
                                 {Listener === "SMARTAI"
                                   ? "Give the AI instructions on how to respond to customers. It will use your business profile to craft personalized replies."
@@ -8983,13 +8863,9 @@ A: Please order at least 3 days ahead for custom cakes.`}
                         {...register("prompt")}
                         id="prompt"
                         name="prompt"
-                        placeholder={
-                          Listener === "SMARTAI"
-                            ? "Example: Be friendly and helpful. If someone asks about prices, tell them about our current deals. Always thank them for their interest!"
-                            : "Example: Thank customers for their comment and invite them to check our profile for more info."
-                        }
-                        className="min-h-[120px] sm:min-h-[150px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base rounded-xl p-4"
-                        rows={4}
+                        placeholder={promptPlaceholder + "|"}
+                        className="min-h-[200px] sm:min-h-[250px] lg:min-h-[300px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
+                        rows={6}
                       />
                     </div>
 
@@ -9006,17 +8882,17 @@ A: Please order at least 3 days ahead for custom cakes.`}
 
                     <Button
                       type="submit"
-                      className="w-full h-14 text-base sm:text-lg font-semibold bg-light-blue hover:bg-light-blue/90"
+                      className="w-full h-16 text-lg sm:text-xl font-semibold bg-light-blue hover:bg-light-blue/90 mt-4"
                       disabled={isPending}
                     >
                       {isPending ? (
                         <>
-                          <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
                           Saving Your Auto-Reply...
                         </>
                       ) : (
                         <>
-                          <Save className="mr-3 h-5 w-5" />
+                          <Save className="mr-3 h-6 w-6" />
                           Save & Start Auto-Replying
                         </>
                       )}
@@ -9025,9 +8901,9 @@ A: Please order at least 3 days ahead for custom cakes.`}
                 )}
 
                 {!Listener && (
-                  <div className="text-center py-8 sm:py-12 border-2 border-dashed border-background-80 rounded-2xl">
-                    <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground text-base sm:text-lg">
+                  <div className="text-center py-12 sm:py-16 lg:py-20 border-2 border-dashed border-background-80 rounded-2xl">
+                    <MessageSquare className="h-16 w-16 sm:h-20 sm:w-20 mx-auto mb-6 text-muted-foreground" />
+                    <p className="text-muted-foreground text-lg sm:text-xl">
                       Choose a reply style above to get started
                     </p>
                   </div>
