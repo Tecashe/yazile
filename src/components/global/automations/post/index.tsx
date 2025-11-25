@@ -441,13 +441,257 @@
 
 // export default PostButton
 
+// "use client"
+// import { useAutomationPosts } from "@/hooks/use-automations"
+// import { useQueryAutomationPosts } from "@/hooks/user-queries"
+// import { useState } from "react"
+// import FloatingPanel from "../../panel"
+// import type { InstagramPostProps } from "@/types/posts.type"
+// import { CheckCircle, Search, Filter, SlidersHorizontal, PlusCircle, X } from "lucide-react"
+// import Image from "next/image"
+// import { cn } from "@/lib/utils"
+// import { Button } from "@/components/ui/button"
+// import Loader from "../../loader"
+// import { motion } from "framer-motion"
+// import { InstagramBlue } from "@/icons"
+// import { Input } from "@/components/ui/input"
+
+// type Props = {
+//   id: string
+//   theme?: {
+//     id: string
+//     name: string
+//     primary: string
+//     secondary: string
+//   }
+// }
+
+// const PostButton = ({
+//   id,
+//   theme = { id: "blue", name: "Blue", primary: "light-blue", secondary: "#768BDD" },
+// }: Props) => {
+//   const { data } = useQueryAutomationPosts()
+//   const { posts, onSelectPost, mutate, isPending } = useAutomationPosts(id)
+
+//   const [searchTerm, setSearchTerm] = useState("")
+//   const [sortBy, setSortBy] = useState<"recent" | "popular">("recent")
+
+//   // Helper function to get the correct thumbnail for different media types
+//   const getPostThumbnail = (post: InstagramPostProps) => {
+//     if (post.media_type === "VIDEO") {
+//       return post.thumbnail_url || post.media_url || "/placeholder.svg"
+//     }
+//     if (post.media_type === "CAROSEL_ALBUM") {
+//       return post.children?.data?.[0]?.media_url || post.media_url || "/placeholder.svg"
+//     }
+//     return post.media_url || "/placeholder.svg"
+//   }
+
+//   // Filter and sort published posts
+//   const filteredPosts =
+//     data?.status === 200
+//       ? data.data.data
+//           .filter(
+//             (post: InstagramPostProps) =>
+//               post.caption?.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm === "",
+//           )
+//           .sort((a: InstagramPostProps, b: InstagramPostProps) => {
+//             if (sortBy === "recent") {
+//               return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
+//             } else {
+//               return (0 || 0) - (0 || 0)
+//             }
+//           })
+//       : []
+
+//   // Handle save
+//   const handleSave = () => {
+//     mutate({ posts })
+//   }
+
+//   return (
+//     <FloatingPanel
+//       title="Select posts to monitor"
+//       trigger={
+//         <Button className="bg-gradient-to-r from-[#3352CC] to-[#1C2D70] text-white font-medium">
+//           <PlusCircle className="mr-2 h-4 w-4" />
+//           Attach posts
+//         </Button>
+//       }
+//     >
+//       {data?.status === 200 ? (
+//         <div className="flex flex-col gap-y-4 w-full">
+//           <div className="flex items-center gap-3 mb-1">
+//             <InstagramBlue />
+//             <p className="text-lg font-medium text-white">Select posts to monitor</p>
+//           </div>
+
+//           <div className="bg-background-80 p-3 rounded-xl">
+//             <div className="flex flex-col md:flex-row gap-3">
+//               <div className="relative flex-grow">
+//                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
+//                 <Input
+//                   placeholder="Search posts..."
+//                   value={searchTerm}
+//                   onChange={(e) => setSearchTerm(e.target.value)}
+//                   className="pl-9 bg-background-90 border-none"
+//                 />
+//               </div>
+
+//               <div className="flex gap-2">
+//                 <Button
+//                   variant="outline"
+//                   size="sm"
+//                   onClick={() => setSortBy("recent")}
+//                   className={cn(
+//                     "border-background-90 bg-background-90",
+//                     sortBy === "recent" && "border-light-blue text-light-blue",
+//                   )}
+//                 >
+//                   <Filter className="h-4 w-4 mr-1" /> Recent
+//                 </Button>
+//                 <Button
+//                   variant="outline"
+//                   size="sm"
+//                   onClick={() => setSortBy("popular")}
+//                   className={cn(
+//                     "border-background-90 bg-background-90",
+//                     sortBy === "popular" && "border-light-blue text-light-blue",
+//                   )}
+//                 >
+//                   <SlidersHorizontal className="h-4 w-4 mr-1" /> Popular
+//                 </Button>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Published Posts Grid */}
+//           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+//             {filteredPosts.map((post: InstagramPostProps) => (
+//               <motion.div
+//                 whileHover={{ scale: 1.05 }}
+//                 whileTap={{ scale: 0.95 }}
+//                 className="relative aspect-square rounded-lg cursor-pointer overflow-hidden group"
+//                 key={post.id}
+//                 onClick={() =>
+//                   onSelectPost({
+//                     postid: post.id,
+//                     media: post.media_type === "VIDEO" ? (post.thumbnail_url || post.media_url) : post.media_url,
+//                     mediaType: post.media_type,
+//                     caption: post.caption,
+//                   })
+//                 }
+//               >
+//                 <div
+//                   className={cn(
+//                     "absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100",
+//                     posts.find((p) => p.postid === post.id) && "opacity-100",
+//                   )}
+//                 />
+
+//                 {posts.find((p) => p.postid === post.id) && (
+//                   <div className="absolute inset-0 flex items-center justify-center z-10">
+//                     <CheckCircle className="h-10 w-10 text-light-blue" />
+//                   </div>
+//                 )}
+
+//                 <Image
+//                   fill
+//                   sizes="100vw"
+//                   src={getPostThumbnail(post)}
+//                   alt="post image"
+//                   className="object-cover transition-all duration-300 group-hover:scale-110"
+//                 />
+
+//                 <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+//                   <p className="text-white text-xs line-clamp-2">{post.caption}</p>
+//                 </div>
+//               </motion.div>
+//             ))}
+//           </div>
+
+//           {/* Selected Posts Preview */}
+//           {posts.length > 0 && (
+//             <div className="mt-3 pt-3 border-t border-background-80">
+//               <div className="flex items-center justify-between mb-2">
+//                 <h4 className="text-sm font-medium flex items-center">
+//                   Selected Posts ({posts.length})
+//                 </h4>
+//                 <Button
+//                   variant="ghost"
+//                   size="sm"
+//                   className="h-8 text-xs text-keyword-red hover:text-keyword-red hover:bg-keyword-red/10"
+//                   onClick={() => {
+//                     // Clear all selected posts
+//                     posts.forEach((post) => onSelectPost(post))
+//                   }}
+//                 >
+//                   Clear all
+//                 </Button>
+//               </div>
+
+//               <div className="flex gap-2 overflow-x-auto py-1 pb-2">
+//                 {posts.map((post) => (
+//                   <div key={post.postid} className="relative flex-shrink-0 w-16 h-16 rounded-md overflow-hidden group">
+//                     <Image
+//                       src={post.media || "/placeholder.svg?height=64&width=64"}
+//                       alt="Selected post"
+//                       fill
+//                       sizes="64px"
+//                       className="object-cover"
+//                     />
+//                     <div
+//                       className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+//                       onClick={() => onSelectPost(post)}
+//                     >
+//                       <X className="h-4 w-4 text-white" />
+//                     </div>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+
+//           <Button
+//             onClick={handleSave}
+//             disabled={posts.length === 0}
+//             className="bg-gradient-to-br w-full from-[#3352CC] font-medium text-white to-[#1C2D70]"
+//           >
+//             <Loader state={isPending}>
+//               Attach {posts.length} Post{posts.length !== 1 && "s"}
+//             </Loader>
+//           </Button>
+//         </div>
+//       ) : (
+//         <div className="flex flex-col items-center justify-center p-8 text-center">
+//           <div className="p-4 rounded-full bg-background-80 mb-4">
+//             <InstagramBlue />
+//           </div>
+//           <p className="text-white font-medium">No posts found</p>
+//           <p className="text-sm text-text-secondary mt-1 max-w-xs">
+//             Connect your Instagram account to see posts or create new content to monitor
+//           </p>
+//           <Button
+//             className="bg-gradient-to-br from-[#3352CC] to-[#1C2D70] mt-4"
+//             onClick={() => window.open("https://instagram.com", "_blank")}
+//           >
+//             Connect Instagram
+//           </Button>
+//         </div>
+//       )}
+//     </FloatingPanel>
+//   )
+// }
+
+// export default PostButton
+
 "use client"
 import { useAutomationPosts } from "@/hooks/use-automations"
 import { useQueryAutomationPosts } from "@/hooks/user-queries"
 import { useState } from "react"
 import FloatingPanel from "../../panel"
 import type { InstagramPostProps } from "@/types/posts.type"
-import { CheckCircle, Search, Filter, SlidersHorizontal, PlusCircle, X } from "lucide-react"
+import { CheckCircle, Search, Filter, SlidersHorizontal, PlusCircle, X, ImageIcon } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -513,138 +757,159 @@ const PostButton = ({
     <FloatingPanel
       title="Select posts to monitor"
       trigger={
-        <Button className="bg-gradient-to-r from-[#3352CC] to-[#1C2D70] text-white font-medium">
-          <PlusCircle className="mr-2 h-4 w-4" />
+        <Button className="bg-gradient-to-r from-[#3352CC] to-[#1C2D70] text-white font-medium h-12 px-6 text-base">
+          <PlusCircle className="mr-2 h-5 w-5" />
           Attach posts
         </Button>
       }
     >
       {data?.status === 200 ? (
-        <div className="flex flex-col gap-y-4 w-full">
-          <div className="flex items-center gap-3 mb-1">
-            <InstagramBlue />
-            <p className="text-lg font-medium text-white">Select posts to monitor</p>
+        <div className="flex flex-col gap-y-6 w-full min-w-[320px] sm:min-w-[500px] lg:min-w-[600px]">
+          <div className="flex items-center gap-4 pb-4 border-b border-background-80">
+            <div className="p-3 bg-gradient-to-br from-[#3352CC]/20 to-[#1C2D70]/20 rounded-xl">
+              <InstagramBlue />
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-semibold text-white">Select posts to monitor</p>
+              <p className="text-sm text-text-secondary mt-1">Choose which posts this automation will respond to</p>
+            </div>
           </div>
 
-          <div className="bg-background-80 p-3 rounded-xl">
-            <div className="flex flex-col md:flex-row gap-3">
+          <div className="bg-background-80 p-4 sm:p-5 rounded-xl">
+            <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-text-secondary" />
                 <Input
-                  placeholder="Search posts..."
+                  placeholder="Search posts by caption..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 bg-background-90 border-none"
+                  className="pl-12 h-12 text-base bg-background-90 border-none rounded-xl"
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => setSortBy("recent")}
                   className={cn(
-                    "border-background-90 bg-background-90",
-                    sortBy === "recent" && "border-light-blue text-light-blue",
+                    "h-12 px-4 border-background-90 bg-background-90 rounded-xl",
+                    sortBy === "recent" && "border-light-blue text-light-blue border-2",
                   )}
                 >
-                  <Filter className="h-4 w-4 mr-1" /> Recent
+                  <Filter className="h-4 w-4 mr-2" /> Recent
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => setSortBy("popular")}
                   className={cn(
-                    "border-background-90 bg-background-90",
-                    sortBy === "popular" && "border-light-blue text-light-blue",
+                    "h-12 px-4 border-background-90 bg-background-90 rounded-xl",
+                    sortBy === "popular" && "border-light-blue text-light-blue border-2",
                   )}
                 >
-                  <SlidersHorizontal className="h-4 w-4 mr-1" /> Popular
+                  <SlidersHorizontal className="h-4 w-4 mr-2" /> Popular
                 </Button>
               </div>
             </div>
           </div>
 
           {/* Published Posts Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {filteredPosts.map((post: InstagramPostProps) => (
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative aspect-square rounded-lg cursor-pointer overflow-hidden group"
-                key={post.id}
-                onClick={() =>
-                  onSelectPost({
-                    postid: post.id,
-                    media: post.media_type === "VIDEO" ? (post.thumbnail_url || post.media_url) : post.media_url,
-                    mediaType: post.media_type,
-                    caption: post.caption,
-                  })
-                }
-              >
-                <div
-                  className={cn(
-                    "absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100",
-                    posts.find((p) => p.postid === post.id) && "opacity-100",
+          {filteredPosts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredPosts.map((post: InstagramPostProps) => (
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="relative aspect-square rounded-xl cursor-pointer overflow-hidden group shadow-md"
+                  key={post.id}
+                  onClick={() =>
+                    onSelectPost({
+                      postid: post.id,
+                      media: post.media_type === "VIDEO" ? post.thumbnail_url || post.media_url : post.media_url,
+                      mediaType: post.media_type,
+                      caption: post.caption,
+                    })
+                  }
+                >
+                  <div
+                    className={cn(
+                      "absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10",
+                      posts.find((p) => p.postid === post.id) && "opacity-100 bg-[#3352CC]/30",
+                    )}
+                  />
+
+                  {posts.find((p) => p.postid === post.id) && (
+                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                      <div className="p-3 bg-[#3352CC] rounded-full shadow-lg">
+                        <CheckCircle className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
                   )}
-                />
 
-                {posts.find((p) => p.postid === post.id) && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <CheckCircle className="h-10 w-10 text-light-blue" />
+                  <Image
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    src={getPostThumbnail(post) || "/placeholder.svg"}
+                    alt="post image"
+                    className="object-cover transition-all duration-300 group-hover:scale-105"
+                  />
+
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    <p className="text-white text-sm line-clamp-2">{post.caption}</p>
                   </div>
-                )}
-
-                <Image
-                  fill
-                  sizes="100vw"
-                  src={getPostThumbnail(post)}
-                  alt="post image"
-                  className="object-cover transition-all duration-300 group-hover:scale-110"
-                />
-
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <p className="text-white text-xs line-clamp-2">{post.caption}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="p-4 bg-background-80 rounded-full mb-4">
+                <ImageIcon className="h-8 w-8 text-text-secondary" />
+              </div>
+              <p className="text-white font-medium">No posts match your search</p>
+              <p className="text-sm text-text-secondary mt-1">Try adjusting your search term</p>
+            </div>
+          )}
 
           {/* Selected Posts Preview */}
           {posts.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-background-80">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium flex items-center">
-                  Selected Posts ({posts.length})
+            <div className="pt-5 border-t border-background-80">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-base font-semibold flex items-center gap-2">
+                  <span className="px-3 py-1 bg-[#3352CC]/20 rounded-full text-[#768BDD]">{posts.length}</span>
+                  Selected Posts
                 </h4>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-xs text-keyword-red hover:text-keyword-red hover:bg-keyword-red/10"
+                  className="h-10 px-4 text-sm text-keyword-red hover:text-keyword-red hover:bg-keyword-red/10 rounded-xl"
                   onClick={() => {
-                    // Clear all selected posts
                     posts.forEach((post) => onSelectPost(post))
                   }}
                 >
+                  <X className="h-4 w-4 mr-1" />
                   Clear all
                 </Button>
               </div>
 
-              <div className="flex gap-2 overflow-x-auto py-1 pb-2">
+              <div className="flex gap-3 overflow-x-auto py-2 pb-3">
                 {posts.map((post) => (
-                  <div key={post.postid} className="relative flex-shrink-0 w-16 h-16 rounded-md overflow-hidden group">
+                  <div
+                    key={post.postid}
+                    className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden group shadow-md"
+                  >
                     <Image
-                      src={post.media || "/placeholder.svg?height=64&width=64"}
+                      src={post.media || "/placeholder.svg?height=80&width=80"}
                       alt="Selected post"
                       fill
-                      sizes="64px"
+                      sizes="80px"
                       className="object-cover"
                     />
                     <div
-                      className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                       onClick={() => onSelectPost(post)}
                     >
-                      <X className="h-4 w-4 text-white" />
+                      <X className="h-5 w-5 text-white" />
                     </div>
                   </div>
                 ))}
@@ -655,7 +920,7 @@ const PostButton = ({
           <Button
             onClick={handleSave}
             disabled={posts.length === 0}
-            className="bg-gradient-to-br w-full from-[#3352CC] font-medium text-white to-[#1C2D70]"
+            className="bg-gradient-to-br w-full h-14 text-lg font-medium from-[#3352CC] text-white to-[#1C2D70] rounded-xl"
           >
             <Loader state={isPending}>
               Attach {posts.length} Post{posts.length !== 1 && "s"}
@@ -663,16 +928,16 @@ const PostButton = ({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center p-8 text-center">
-          <div className="p-4 rounded-full bg-background-80 mb-4">
+        <div className="flex flex-col items-center justify-center p-10 sm:p-14 text-center min-w-[320px] sm:min-w-[450px]">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-background-80 to-background-90 mb-6 shadow-lg">
             <InstagramBlue />
           </div>
-          <p className="text-white font-medium">No posts found</p>
-          <p className="text-sm text-text-secondary mt-1 max-w-xs">
+          <p className="text-xl font-semibold text-white">No posts found</p>
+          <p className="text-base text-text-secondary mt-2 max-w-sm">
             Connect your Instagram account to see posts or create new content to monitor
           </p>
           <Button
-            className="bg-gradient-to-br from-[#3352CC] to-[#1C2D70] mt-4"
+            className="bg-gradient-to-br from-[#3352CC] to-[#1C2D70] mt-6 h-12 px-8 text-base"
             onClick={() => window.open("https://instagram.com", "_blank")}
           >
             Connect Instagram
