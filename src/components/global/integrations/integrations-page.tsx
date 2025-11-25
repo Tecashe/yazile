@@ -3171,7 +3171,7 @@ const socialPlatforms: SocialPlatform[] = [
     displayName: "Instagram",
     icon: Instagram,
     description: "Connect your Instagram business or creator account",
-    features: ["Automated posting", "DM automation", "Analytics tracking", "Content management"],
+    features: ["DM automation", "Analytics tracking", "Content management"],
     requirements: [
       "Business or Creator account type",
       "Connected Facebook page",
