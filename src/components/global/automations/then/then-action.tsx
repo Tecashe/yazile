@@ -8395,7 +8395,6 @@ const ThenAction = ({
   // State management
   const [activeTab, setActiveTab] = useState("profile")
   const [showTip, setShowTip] = useState(true)
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("")
   const [businessProfile, setBusinessProfile] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -8494,14 +8493,6 @@ const ThenAction = ({
     }
   }
 
-  const handleSelectMessageTemplate = (content: string) => {
-    setSelectedTemplate(content)
-    const textarea = document.querySelector('textarea[name="prompt"]') as HTMLTextAreaElement
-    if (textarea) {
-      textarea.value = content
-      textarea.focus()
-    }
-  }
 
   const getStepStatus = (step: number) => {
     if (completedSteps.includes(step)) return "completed"
@@ -8843,7 +8834,7 @@ const ThenAction = ({
                         htmlFor="prompt"
                         className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
                       >
-                        {Listener === "SMARTAI" ? "Tell the AI How to Reply" : "Your Reply Instructions"}
+                        {Listener === "SMARTAI" ? "Tell the AI How to Reply" : "Manually write the DM reply"}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -8853,7 +8844,7 @@ const ThenAction = ({
                               <p>
                                 {Listener === "SMARTAI"
                                   ? "Give the AI instructions on how to respond to customers. It will use your business profile to craft personalized replies."
-                                  : "Write instructions for how to respond to customer comments."}
+                                  : "Write what message you want to be sent to their Dm."}
                               </p>
                             </TooltipContent>
                           </Tooltip>
