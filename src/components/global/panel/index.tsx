@@ -74,7 +74,6 @@
 // }
 
 // export default FloatingPanel
-
 "use client"
 
 import type React from "react"
@@ -88,14 +87,28 @@ type Props = {
   trigger: React.ReactNode
   children: React.ReactNode
   className?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-const FloatingPanel = ({ title, trigger, children, className }: Props) => {
-  const [isOpen, setIsOpen] = useState(false)
+const FloatingPanel = ({ title, trigger, children, className, open, onOpenChange }: Props) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalIsOpen
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(newOpen)
+    } else {
+      setInternalIsOpen(newOpen)
+    }
+  }
+
   const panelRef = useRef<HTMLDivElement>(null)
   const [isMobile, setIsMobile] = useState(false)
 
-  useOnClickOutside(panelRef, () => setIsOpen(false))
+  useOnClickOutside(panelRef, () => handleOpenChange(false))
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -118,7 +131,7 @@ const FloatingPanel = ({ title, trigger, children, className }: Props) => {
 
   return (
     <>
-      <div onClick={() => setIsOpen(true)} className="cursor-pointer hoverScale">
+      <div onClick={() => handleOpenChange(true)} className="cursor-pointer hoverScale">
         {trigger}
       </div>
 
@@ -129,7 +142,7 @@ const FloatingPanel = ({ title, trigger, children, className }: Props) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6 lg:p-8 floatingPanelBackdrop"
-            onClick={() => setIsOpen(false)}
+            onClick={() => handleOpenChange(false)}
           >
             <motion.div
               ref={panelRef}
@@ -152,7 +165,7 @@ const FloatingPanel = ({ title, trigger, children, className }: Props) => {
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">{title}</h2>
                     <button
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => handleOpenChange(false)}
                       className="p-2 rounded-full hover:bg-background-80 transition-colors"
                     >
                       <X className="w-6 h-6" />
