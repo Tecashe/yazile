@@ -4117,9 +4117,12 @@ export function SocialIntegrationsPage({
   // Transform real user data into the format needed for our components
   const transformUserData = () => {
     console.log("[v0] userData:", userData)
-    console.log("[v0] userData.integrations:", userData?.integrations)
+    console.log("[v0] userData.data:", userData?.data)
+    console.log("[v0] userData.data.integrations:", userData?.data?.integrations)
 
-    if (!userData?.integrations || !Array.isArray(userData.integrations)) {
+    const data = userData?.data || userData
+
+    if (!data?.integrations || !Array.isArray(data.integrations)) {
       console.log("[v0] No integrations found or not an array")
       return {
         instagram: [],
@@ -4127,7 +4130,7 @@ export function SocialIntegrationsPage({
     }
 
     try {
-      const instagramAccounts = userData.integrations
+      const instagramAccounts = data.integrations
         .filter((integration: any) => integration && integration.name === "INSTAGRAM")
         .map((integration: any) => {
           console.log("[v0] Raw Instagram integration:", integration)
@@ -4335,7 +4338,8 @@ export function SocialIntegrationsPage({
   const handleRefreshData = async () => {
     setIsRefreshing(true)
     try {
-      const userId = userData?.clerkId || "User"
+      const data = userData?.data || userData
+      const userId = data?.clerkId || "User"
       const result = await onRefreshData(userId || "237462617")
 
       if (result.status === 200) {
