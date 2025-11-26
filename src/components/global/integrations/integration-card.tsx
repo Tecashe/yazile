@@ -599,15 +599,18 @@
 //     </motion.div>
 //   )
 // }
+
+
 "use client"
 
 import type React from "react"
 
 import { useState, useCallback, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check, ExternalLink, Loader2, AlertCircle, Zap, User } from "lucide-react"
+import { Check, ExternalLink, Loader2, AlertCircle, Zap, Users, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { useIntegrations, type IntegrationStrategy, type ConnectionStatus } from "@/hooks/use-integration"
 
@@ -636,7 +639,6 @@ export function IntegrationCard({
 }: IntegrationCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [localConnecting, setLocalConnecting] = useState(false)
-  const [imageError, setImageError] = useState(false)
 
   const { getConnectionStatus, getIntegration, startConnection, isLoading } = useIntegrations({
     onUserInfo,
@@ -658,9 +660,7 @@ export function IntegrationCard({
     }
   }, [integration, strategy])
 
-  useEffect(() => {
-    setImageError(false)
-  }, [integration?.profilePicture])
+  useEffect(() => {}, [integration?.profilePicture])
 
   const handleConnect = useCallback(async () => {
     if (comingSoon || isConnected || isConnecting) return
@@ -836,54 +836,70 @@ export function IntegrationCard({
               transition={{ duration: 0.2 }}
               className="mt-4 overflow-hidden"
             >
-              <div className="flex items-center gap-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-4">
-                {/* Profile Picture */}
-                <div className="relative shrink-0">
-                  <div className="h-14 w-14 rounded-full overflow-hidden ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-background">
-                    {integration.profilePicture && !imageError ? (
-                      <img
-                        src={integration.profilePicture || "/placeholder.svg"}
+              <div className="rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-4">
+                {/* Profile Picture using Avatar */}
+                <div className="flex items-center gap-4">
+                  <div className="relative shrink-0">
+                    <Avatar className="h-14 w-14 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-background">
+                      <AvatarImage
+                        src={integration.profilePicture || undefined}
                         alt={integration.username || "Profile"}
-                        className="h-full w-full object-cover"
-                        onError={() => {
-                          console.log("[v0] Image failed to load:", integration.profilePicture)
-                          setImageError(true)
-                        }}
-                        onLoad={() => {
-                          console.log("[v0] Image loaded successfully")
-                        }}
-                        referrerPolicy="no-referrer"
                       />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-emerald-500/20 text-emerald-600">
-                        <User className="h-6 w-6" />
-                      </div>
+                      <AvatarFallback className="bg-emerald-500/20 text-emerald-600">
+                        {integration.username ? integration.username[0].toUpperCase() : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md">
+                      <Check className="h-3 w-3" />
+                    </div>
+                  </div>
+
+                  {/* User Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground truncate">
+                      {integration.fullName || integration.username || "Connected Account"}
+                    </p>
+                    {integration.username && (
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400 truncate">@{integration.username}</p>
                     )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md">
-                    <Check className="h-3 w-3" />
+
+                  {/* Active indicator */}
+                  <div className="shrink-0">
+                    <Zap className="h-5 w-5 text-emerald-500" />
                   </div>
                 </div>
 
-                {/* User Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground truncate">
-                    {integration.fullName || integration.username || "Connected Account"}
-                  </p>
-                  {integration.username && (
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400 truncate">@{integration.username}</p>
-                  )}
-                  {integration.followersCount !== null && integration.followersCount !== undefined && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {integration.followersCount.toLocaleString()} followers
-                    </p>
-                  )}
-                </div>
-
-                {/* Active indicator */}
-                <div className="shrink-0">
-                  <Zap className="h-5 w-5 text-emerald-500" />
-                </div>
+                {(integration.followersCount !== null ||
+                  integration.followingCount !== null ||
+                  integration.postsCount !== null) && (
+                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-emerald-500/20">
+                    <div className="text-center flex-1">
+                      <p className="text-lg font-bold text-foreground">
+                        {integration.followersCount?.toLocaleString() ?? "N/A"}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <Users className="h-3 w-3" /> Followers
+                      </p>
+                    </div>
+                    <div className="text-center flex-1">
+                      <p className="text-lg font-bold text-foreground">
+                        {integration.followingCount?.toLocaleString() ?? "N/A"}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <Users className="h-3 w-3" /> Following
+                      </p>
+                    </div>
+                    <div className="text-center flex-1">
+                      <p className="text-lg font-bold text-foreground">
+                        {integration.postsCount?.toLocaleString() ?? "N/A"}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <ImageIcon className="h-3 w-3" /> Posts
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
