@@ -8916,6 +8916,7 @@
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { useListener } from "@/hooks/use-automations"
+import { useQueryUser } from "@/hooks/user-queries"
 import { AUTOMATION_LISTENERS } from "@/constants/automation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -8951,7 +8952,6 @@ import { ReplyVariationsManager } from "./reply-variations-manager"
 
 type Props = {
   id: string
-  isPro?: boolean
   theme?: {
     id: string
     name: string
@@ -8999,13 +8999,22 @@ const useTypingPlaceholder = (phrases: string[], typingSpeed = 50, pauseDuration
 
 const ThenAction = ({
   id,
-  isPro = false,
   theme = { id: "blue", name: "Blue", primary: "light-blue", secondary: "#768BDD" },
-}: Props) => {
+}: {
+  id: string
+  theme?: {
+    id: string
+    name: string
+    primary: string
+    secondary: string
+  }
+}) => {
   const { onSetListener, listener: Listener, onFormSubmit, mutate, register, isPending, watch } = useListener(id)
 
-  // State management
-  const [activeTab, setActiveTab] = useState(isPro ? "profile" : "automation")
+  const { data: userData, isLoading: isSubscriptionLoading } = useQueryUser()
+  const isPro = userData?.data?.subscription?.plan === "PRO"
+
+  const [activeTab, setActiveTab] = useState("automation")
   const [showTip, setShowTip] = useState(true)
   const [businessProfile, setBusinessProfile] = useState("")
   const [isSaving, setIsSaving] = useState(false)
@@ -9049,6 +9058,23 @@ const ThenAction = ({
     "Always invite them to visit our shop or DM us...",
     "Mention our delivery options if they ask about orders...",
   ])
+
+  const getStepStatus = (step: number) => {
+    if (completedSteps.includes(step)) return "completed"
+    if (step === 1) return "active"
+    return "pending"
+  }
+
+  useEffect(() => {
+    if (!isSubscriptionLoading) {
+      if (isPro) {
+        setActiveTab("profile")
+      } else {
+        setActiveTab("automation")
+        setIsLoading(false)
+      }
+    }
+  }, [isPro, isSubscriptionLoading])
 
   useEffect(() => {
     if (!isPro) {
@@ -9126,11 +9152,6 @@ const ThenAction = ({
     }
   }
 
-  const getStepStatus = (step: number) => {
-    if (completedSteps.includes(step)) return "completed"
-    return "pending"
-  }
-
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -9180,6 +9201,38 @@ const ThenAction = ({
           tab: "automation",
         },
       ]
+
+  if (isSubscriptionLoading) {
+    return (
+      <FloatingPanel
+        title="Instagram Auto-Reply Setup"
+        trigger={
+          <motion.div
+            className="group relative overflow-hidden rounded-xl mt-4 w-full"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="absolute inset-0 bg-light-blue opacity-20 rounded-xl"></div>
+            <div className="absolute inset-0 rounded-xl shimmerBorder"></div>
+            <div className="relative m-[2px] bg-background-90 rounded-lg p-5 sm:p-6">
+              <div className="flex items-center justify-center gap-3">
+                <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-[#768BDD]" />
+                <p className="text-[#768BDD] font-bold text-base sm:text-lg">Set Up Auto-Replies</p>
+              </div>
+              <p className="text-center text-muted-foreground text-sm mt-2">
+                Automatically reply to Instagram comments and DMs
+              </p>
+            </div>
+          </motion.div>
+        }
+      >
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-light-blue" />
+          <span className="ml-3 text-muted-foreground">Loading your plan...</span>
+        </div>
+      </FloatingPanel>
+    )
+  }
 
   return (
     <FloatingPanel
@@ -9569,7 +9622,7 @@ const ThenAction = ({
                           <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent className="max-w-sm text-base p-4">
-                          <p>This message will be sent directly to the users DMs when they comment on your post.</p>
+                          <p>This message will be sent directly to the user&apos;s DMs when they comment on your post.</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -9707,7 +9760,7 @@ const ThenAction = ({
                           <Lock className="h-4 w-4 text-purple-400" />
                         </div>
                         <p className="text-muted-foreground">
-                          Create multiple reply variations so your responses don&apos;t look robotic. Instagram loves
+                          Create multiple reply variations so your responses don&apso;t look robotic. Instagram loves
                           variety!
                         </p>
                       </div>
