@@ -101,7 +101,7 @@ export default async function DashboardPage() {
       </div>       
 
       <div className="flex gap-5 lg:flex-row flex-col">
-        {/* <EngagementInsights /> */}
+        <EngagementInsights />
         <DashboardAnalyticsCharts />
       </div> 
       
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* <div className="border-[1px] relative border-in-active/50 p-5 rounded-xl">
+      <div className="border-[1px] relative border-in-active/50 p-5 rounded-xl">
         <span className="flex gap-x-1 z-50 items-center mb-5">
           <BarDuoToneBlue />
           <div className="z-0">
@@ -144,9 +144,9 @@ export default async function DashboardPage() {
             <EnhancedMetricsCard />
           </div>
         </div>
-      </div> */}
+      </div> 
 
-      {/* <div className="container mx-auto p-6 space-y-6">
+       <div className="container mx-auto p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
           <Suspense fallback={<Card className="w-full h-[300px] animate-pulse" />}>
             {dashboardData.data ? (
@@ -161,7 +161,7 @@ export default async function DashboardPage() {
           </Suspense>
         
         </div>
-      </div> */}
+      </div>
     </div>
   )
 }
