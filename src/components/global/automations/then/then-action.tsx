@@ -9569,7 +9569,7 @@ const ThenAction = ({
                           <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent className="max-w-sm text-base p-4">
-                          <p>This message will be sent directly to the user's DMs when they comment on your post.</p>
+                          <p>This message will be sent directly to the users DMs when they comment on your post.</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -9707,7 +9707,7 @@ const ThenAction = ({
                           <Lock className="h-4 w-4 text-purple-400" />
                         </div>
                         <p className="text-muted-foreground">
-                          Create multiple reply variations so your responses don't look robotic. Instagram loves
+                          Create multiple reply variations so your responses don&apos;t look robotic. Instagram loves
                           variety!
                         </p>
                       </div>
