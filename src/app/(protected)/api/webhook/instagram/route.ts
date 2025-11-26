@@ -4312,7 +4312,7 @@ class ResponseSender {
           sendDMs(
             context.payload.pageId,
             context.payload.senderId,
-            instagramMessage as any,
+            instagramMessage.text,
             token,
             quickReplies,
             buttons,
