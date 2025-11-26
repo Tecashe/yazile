@@ -3963,8 +3963,6 @@ import {
   Youtube,
   Clock,
   Zap,
-  Users,
-  ImageIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -3985,7 +3983,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useSearchParams } from "next/navigation"
 import RequirementsModal from "./requirements-modal"
 import ConnectionStatus from "./connection-status"
-import { useIntegrations, type IntegrationStrategy } from "@/hooks/use-integrations"
+import { useIntegrations, type IntegrationStrategy } from "@/hooks/use-integration"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 // Custom WhatsApp icon component
@@ -4213,7 +4211,7 @@ export function SocialIntegrationsPage({
   }
 
   const handleShowDeauthorizeDialog = (platform: string, id: string) => {
-    const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc) => acc.id === id)
+    const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc: { id: string }) => acc.id === id)
     const platformData = socialPlatforms.find((p) => p.id === platform)
     const accountName =
       platform === "instagram"
@@ -4247,7 +4245,7 @@ export function SocialIntegrationsPage({
 
     try {
       if (platform === "instagram") {
-        const account = connectedAccounts.instagram.find((acc) => acc.id === accountId)
+        const account = connectedAccounts.instagram.find((acc: { id: string }) => acc.id === accountId)
 
         if (!account?.accessToken) {
           throw new Error("Access token not found")
@@ -4504,65 +4502,49 @@ export function SocialIntegrationsPage({
 
                 <CardContent className="flex-grow space-y-4">
                   {!platform.comingSoon && platform.id === "instagram" && connectedAccounts.instagram.length > 0 && (
-                    <div className="rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-4">
-                      {connectedAccounts.instagram.map((account) => (
-                        <div key={account.id}>
-                          <div className="flex items-center gap-4">
-                            <div className="relative shrink-0">
-                              <Avatar className="h-14 w-14 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-background">
-                                <AvatarImage src={account.avatar || undefined} alt={account.username || "Profile"} />
-                                <AvatarFallback className="bg-emerald-500/20 text-emerald-600">
-                                  {account.username ? account.username[0].toUpperCase() : "U"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md">
-                                <CheckCircle className="h-3 w-3" />
+                    <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20">
+                      {connectedAccounts.instagram.map((account: { username: any; avatar: any; id: React.Key | null | undefined }) => {
+                        const username = String(account.username || "")
+                        const fullName = String((account as any).fullName || "")
+                        const avatar = String(account.avatar || "")
+                        const followersCount = (account as any).followersCount as number | undefined
+                        const followingCount = (account as any).followingCount as number | undefined
+                        const postsCount = (account as any).postsCount as number | undefined
+
+                        return (
+                          <div key={account.id} className="flex items-center gap-4">
+                            <Avatar className="h-14 w-14 border-2 border-pink-500/30">
+                              <AvatarImage src={avatar || "/placeholder.svg"} alt={username} />
+                              <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-600 text-white">
+                                {username ? username[0].toUpperCase() : "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-semibold text-foreground">{fullName || username}</p>
+                              <p className="text-sm text-muted-foreground">@{username}</p>
+                              <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                                {followersCount !== undefined && (
+                                  <span>
+                                    <strong className="text-foreground">{followersCount.toLocaleString()}</strong>{" "}
+                                    followers
+                                  </span>
+                                )}
+                                {followingCount !== undefined && (
+                                  <span>
+                                    <strong className="text-foreground">{followingCount.toLocaleString()}</strong>{" "}
+                                    following
+                                  </span>
+                                )}
+                                {postsCount !== undefined && (
+                                  <span>
+                                    <strong className="text-foreground">{postsCount.toLocaleString()}</strong> posts
+                                  </span>
+                                )}
                               </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-foreground truncate">
-                                {account.fullName || account.username || "Connected Account"}
-                              </p>
-                              {account.username && (
-                                <p className="text-sm text-emerald-600 dark:text-emerald-400 truncate">
-                                  @{account.username}
-                                </p>
-                              )}
                             </div>
                           </div>
-
-                          {(account.followersCount !== undefined ||
-                            account.followingCount !== undefined ||
-                            account.postsCount !== undefined) && (
-                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-emerald-500/20">
-                              <div className="text-center flex-1">
-                                <p className="text-lg font-bold text-foreground">
-                                  {account.followersCount?.toLocaleString() ?? "N/A"}
-                                </p>
-                                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                  <Users className="h-3 w-3" /> Followers
-                                </p>
-                              </div>
-                              <div className="text-center flex-1">
-                                <p className="text-lg font-bold text-foreground">
-                                  {account.followingCount?.toLocaleString() ?? "N/A"}
-                                </p>
-                                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                  <Users className="h-3 w-3" /> Following
-                                </p>
-                              </div>
-                              <div className="text-center flex-1">
-                                <p className="text-lg font-bold text-foreground">
-                                  {account.postsCount?.toLocaleString() ?? "N/A"}
-                                </p>
-                                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                  <ImageIcon className="h-3 w-3" /> Posts
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
 
