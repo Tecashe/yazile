@@ -2,6 +2,8 @@
 
 import { client } from '@/lib/prisma'
 
+// In your queries.ts file, update the findUser function:
+
 export const findUser = async (clerkId: string) => {
   return await client.user.findUnique({
     where: {
@@ -15,11 +17,37 @@ export const findUser = async (clerkId: string) => {
           token: true,
           expiresAt: true,
           name: true,
+          // <CHANGE> Added these fields for Instagram profile display
+          username: true,
+          fullName: true,
+          profilePicture: true,
+          followersCount: true,
+          followingCount: true,
+          postsCount: true,
         },
       },
     },
   })
 }
+
+// export const findUser = async (clerkId: string) => {
+//   return await client.user.findUnique({
+//     where: {
+//       clerkId,
+//     },
+//     include: {
+//       subscription: true,
+//       integrations: {
+//         select: {
+//           id: true,
+//           token: true,
+//           expiresAt: true,
+//           name: true,
+//         },
+//       },
+//     },
+//   })
+// }
 
 export const createUser = async (
   clerkId: string,
