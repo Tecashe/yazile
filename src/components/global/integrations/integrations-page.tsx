@@ -3102,6 +3102,847 @@
 // export default SocialIntegrationsPage
 
 
+// "use client"
+
+// import type React from "react"
+
+// import { useState, useEffect } from "react"
+// import { motion } from "framer-motion"
+// import {
+//   Instagram,
+//   Plus,
+//   CheckCircle,
+//   AlertCircle,
+//   RefreshCw,
+//   Loader2,
+//   Trash2,
+//   Shield,
+//   MessageCircle,
+//   Facebook,
+//   Youtube,
+//   Clock,
+//   Zap,
+// } from "lucide-react"
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+// import { Badge } from "@/components/ui/badge"
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "@/components/ui/alert-dialog"
+// import { useToast } from "@/hooks/use-toast"
+// import { useQueryClient } from "@tanstack/react-query"
+// import { useSearchParams } from "next/navigation"
+// import RequirementsModal from "./requirements-modal"
+// import AccountsList from "./accounts-list"
+// import ConnectionStatus from "./connection-status"
+// import { useIntegrations, type IntegrationStrategy } from "@/hooks/use-integration"
+
+// // Custom WhatsApp icon component
+// const WhatsAppIcon = ({ className }: { className?: string }) => (
+//   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+//     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
+//   </svg>
+// )
+
+// interface SocialPlatform {
+//   id: string
+//   name: string
+//   displayName: string
+//   icon: React.ComponentType<{ className?: string }>
+//   description: string
+//   features: string[]
+//   requirements: string[]
+//   comingSoon?: boolean
+//   category: "messaging" | "social" | "video"
+// }
+
+// const socialPlatforms: SocialPlatform[] = [
+//   {
+//     id: "instagram",
+//     name: "INSTAGRAM",
+//     displayName: "Instagram",
+//     icon: Instagram,
+//     description: "Connect your Instagram business or creator account",
+//     features: ["DM automation", "Analytics tracking", "Content management"],
+//     requirements: [
+//       "Business or Creator account type",
+//       "Connected Facebook page",
+//       "Public account or appropriate permissions",
+//     ],
+//     category: "social",
+//   },
+//   {
+//     id: "whatsapp",
+//     name: "WHATSAPP",
+//     displayName: "WhatsApp Business",
+//     icon: WhatsAppIcon,
+//     description: "Automate customer conversations and support",
+//     features: ["Automated replies", "Customer support bots", "Message templates", "Broadcast messaging"],
+//     requirements: ["WhatsApp Business account", "Verified business profile", "Phone number verification"],
+//     category: "messaging",
+//     comingSoon: true,
+//   },
+//   {
+//     id: "facebook",
+//     name: "FACEBOOK",
+//     displayName: "Facebook",
+//     icon: Facebook,
+//     description: "Manage pages and automate customer interactions",
+//     features: ["Page management", "Messenger automation", "Post scheduling", "Comment management"],
+//     requirements: ["Facebook Business account", "Page admin access", "Business verification"],
+//     category: "social",
+//     comingSoon: true,
+//   },
+// ]
+
+// interface SocialIntegrationsPageProps {
+//   onUserInfo: () => Promise<{ status: number; data?: any }>
+//   onOAuthInstagram: (strategy: IntegrationStrategy) => void | undefined | Promise<void>
+//   onDeauthorize: (accountId: string, accessToken: string) => Promise<{ status: number; message: string }>
+//   onRefreshData: (userId: string) => Promise<{ status: number; message?: string }>
+// }
+
+// export function SocialIntegrationsPage({
+//   onUserInfo,
+//   onOAuthInstagram,
+//   onDeauthorize,
+//   onRefreshData,
+// }: SocialIntegrationsPageProps) {
+//   const [showRequirements, setShowRequirements] = useState<string | null>(null)
+//   const [isRefreshing, setIsRefreshing] = useState(false)
+//   const [isConnecting, setIsConnecting] = useState<{ [key: string]: boolean }>({})
+//   const [showDeauthorizeDialog, setShowDeauthorizeDialog] = useState<{
+//     show: boolean
+//     platform: string
+//     accountId: string
+//     accountName: string
+//   }>({
+//     show: false,
+//     platform: "",
+//     accountId: "",
+//     accountName: "",
+//   })
+//   const [isDeauthorizing, setIsDeauthorizing] = useState(false)
+//   const [selectedCategory, setSelectedCategory] = useState<string>("all")
+//   const { toast } = useToast()
+//   const queryClient = useQueryClient()
+//   const searchParams = useSearchParams()
+
+//   const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false)
+//   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false)
+//   const [selectedPlatform, setSelectedPlatform] = useState<string>("")
+//   const [deauthorizationProgress, setDeauthorizationProgress] = useState<{
+//     show: boolean
+//     step: "confirming" | "revoking" | "removing" | "completed" | "error"
+//     message: string
+//   }>({
+//     show: false,
+//     step: "confirming",
+//     message: "",
+//   })
+
+//   // Use the integrations hook for optimistic UI
+//   const { userData, isLoading, isFetching, startConnection, clearAllPendingConnections, getConnectionStatus } =
+//     useIntegrations({
+//       onUserInfo,
+//       refetchInterval: 30000,
+//     })
+
+//   // Check for OAuth code in URL (for Instagram callback)
+//   const code = searchParams.get("code")
+
+//   // Handle Instagram OAuth callback
+//   useEffect(() => {
+//     if (code) {
+//       clearAllPendingConnections()
+//       toast({
+//         title: "Instagram Connected",
+//         description: "Your Instagram account has been successfully connected.",
+//         duration: 5000,
+//       })
+//       queryClient.invalidateQueries({ queryKey: ["user-profile"] })
+//       setIsConnecting({})
+//     }
+//   }, [code, toast, queryClient, clearAllPendingConnections])
+
+//   // Transform real user data into the format needed for our components
+//   const transformUserData = () => {
+//     if (!userData?.integrations || !Array.isArray(userData.integrations)) {
+//       return {
+//         instagram: [],
+//       }
+//     }
+
+//     try {
+//       const instagramAccounts = userData.integrations
+//         .filter((integration: any) => integration && integration.name === "INSTAGRAM")
+//         .map((integration: any) => ({
+//           id: integration.id || `instagram-${Math.random().toString(36).substr(2, 9)}`,
+//           username: integration.username || integration.instagramId || "",
+//           avatar: integration.profilePicture || "",
+//           isActive: true,
+//           accessToken: integration.token,
+//         }))
+
+//       return {
+//         instagram: instagramAccounts,
+//       }
+//     } catch (error) {
+//       console.error("Error transforming user data:", error)
+//       return {
+//         instagram: [],
+//       }
+//     }
+//   }
+
+//   const connectedAccounts = transformUserData()
+
+//   // Enhanced OAuth connection handler with optimistic UI
+//   const handleOAuthConnection = async (platform: string, strategy: IntegrationStrategy) => {
+//     setIsConnecting((prev) => ({ ...prev, [platform]: true }))
+//     startConnection(strategy) // Set optimistic pending state
+
+//     try {
+//       const result = await onOAuthInstagram(strategy)
+//       if (result) {
+//         await result
+//       }
+//     } catch (error) {
+//       console.error(`Error connecting ${platform}:`, error)
+//       toast({
+//         title: "Connection Failed",
+//         description: `Failed to connect your ${platform} account. Please try again.`,
+//         variant: "destructive",
+//         duration: 3000,
+//       })
+//       setIsConnecting((prev) => ({ ...prev, [platform]: false }))
+//     }
+//   }
+
+//   const handleAddAccount = async (platformId: string) => {
+//     const platform = socialPlatforms.find((p) => p.id === platformId)
+
+//     if (platform?.comingSoon) {
+//       toast({
+//         title: "Coming Soon!",
+//         description: `${platform.displayName} integration is currently under development. Stay tuned!`,
+//         duration: 3000,
+//       })
+//       return
+//     }
+
+//     // Check if account is already connected - enforce single account limit for Instagram
+//     const isInstagramConnected = connectedAccounts.instagram.length > 0
+
+//     if (platformId === "instagram" && isInstagramConnected) {
+//       toast({
+//         title: "Single Account Limit",
+//         description:
+//           "You can only connect one Instagram account. Please disconnect your current account first if you want to connect a different one.",
+//         duration: 5000,
+//       })
+//       return
+//     }
+
+//     setSelectedPlatform(platformId)
+//     setShowPrivacyDialog(true)
+//   }
+
+//   // Handle connection after requirements modal
+//   const handleConnectAfterRequirements = async (platform: string) => {
+//     setShowRequirements(null)
+
+//     if (platform === "instagram") {
+//       await handleOAuthConnection("instagram", "INSTAGRAM")
+//     }
+//   }
+
+//   const handleShowDeauthorizeDialog = (platform: string, id: string) => {
+//     const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc: { id: string }) => acc.id === id)
+//     const platformData = socialPlatforms.find((p) => p.id === platform)
+//     const accountName =
+//       platform === "instagram"
+//         ? (account as any)?.username || "Instagram Account"
+//         : `${platformData?.displayName} Account`
+
+//     setShowDeauthorizeDialog({
+//       show: true,
+//       platform,
+//       accountId: id,
+//       accountName,
+//     })
+//   }
+
+//   // Handle deauthorization (currently only works for Instagram)
+//   const handleDeauthorizeAccount = async () => {
+//     const { platform, accountId, accountName } = showDeauthorizeDialog
+
+//     setDeauthorizationProgress({
+//       show: true,
+//       step: "revoking",
+//       message: `Revoking access permissions for ${accountName}...`,
+//     })
+
+//     setShowDeauthorizeDialog({
+//       show: false,
+//       platform: "",
+//       accountId: "",
+//       accountName: "",
+//     })
+
+//     try {
+//       if (platform === "instagram") {
+//         const account = connectedAccounts.instagram.find((acc: { id: string }) => acc.id === accountId)
+
+//         if (!account?.accessToken) {
+//           throw new Error("Access token not found")
+//         }
+
+//         setDeauthorizationProgress((prev) => ({
+//           ...prev,
+//           step: "revoking",
+//           message: `Revoking Instagram permissions for ${accountName}...`,
+//         }))
+
+//         const result = await onDeauthorize(accountId, account.accessToken)
+
+//         if (result.status === 200) {
+//           setDeauthorizationProgress((prev) => ({
+//             ...prev,
+//             step: "removing",
+//             message: "Removing account from your integrations...",
+//           }))
+
+//           await new Promise((resolve) => setTimeout(resolve, 1500))
+
+//           setDeauthorizationProgress((prev) => ({
+//             ...prev,
+//             step: "completed",
+//             message: `${accountName} has been successfully disconnected!`,
+//           }))
+
+//           toast({
+//             title: "Account Disconnected",
+//             description: `${accountName} has been successfully deauthorized and removed.`,
+//             duration: 3000,
+//           })
+
+//           queryClient.invalidateQueries({ queryKey: ["user-profile"] })
+
+//           setTimeout(() => {
+//             setDeauthorizationProgress({
+//               show: false,
+//               step: "confirming",
+//               message: "",
+//             })
+//           }, 2000)
+//         } else {
+//           throw new Error(result.message || "Deauthorization failed")
+//         }
+//       }
+//     } catch (error) {
+//       console.error(`Error deauthorizing ${platform}:`, error)
+
+//       setDeauthorizationProgress((prev) => ({
+//         ...prev,
+//         step: "error",
+//         message: `Failed to disconnect ${accountName}. Please try again or remove access manually from your ${platform} settings.`,
+//       }))
+
+//       toast({
+//         title: "Disconnection Failed",
+//         description: `Failed to deauthorize ${accountName}. Please try again or remove access manually from your ${platform} settings.`,
+//         variant: "destructive",
+//         duration: 5000,
+//       })
+
+//       setTimeout(() => {
+//         setDeauthorizationProgress({
+//           show: false,
+//           step: "confirming",
+//           message: "",
+//         })
+//       }, 5000)
+//     }
+//   }
+
+//   const handleRemoveAccount = (platform: string, id: string) => {
+//     handleShowDeauthorizeDialog(platform, id)
+//   }
+
+//   const handleRefreshData = async () => {
+//     setIsRefreshing(true)
+//     try {
+//       const userId = userData?.clerkId || "User"
+//       const result = await onRefreshData(userId || "237462617")
+
+//       if (result.status === 200) {
+//         toast({
+//           title: "Data Refreshed",
+//           description: "Your Instagram data has been successfully updated.",
+//           duration: 3000,
+//         })
+//         queryClient.invalidateQueries({ queryKey: ["user-profile"] })
+//       } else {
+//         toast({
+//           title: "Refresh Failed",
+//           description: result.message || "Failed to refresh Instagram data.",
+//           variant: "destructive",
+//           duration: 3000,
+//         })
+//       }
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: "An unexpected error occurred.",
+//         variant: "destructive",
+//         duration: 3000,
+//       })
+//     } finally {
+//       setIsRefreshing(false)
+//     }
+//   }
+
+//   const containerVariants = {
+//     hidden: { opacity: 0 },
+//     visible: {
+//       opacity: 1,
+//       transition: {
+//         staggerChildren: 0.1,
+//       },
+//     },
+//   }
+
+//   const itemVariants = {
+//     hidden: { y: 20, opacity: 0 },
+//     visible: {
+//       y: 0,
+//       opacity: 1,
+//       transition: {
+//         type: "spring",
+//         stiffness: 100,
+//       },
+//     },
+//   }
+
+//   const filteredPlatforms =
+//     selectedCategory === "all"
+//       ? socialPlatforms
+//       : socialPlatforms.filter((platform) => platform.category === selectedCategory)
+
+//   const categoryColors = {
+//     all: "bg-primary",
+//     messaging: "bg-green-500",
+//     social: "bg-blue-500",
+//     video: "bg-red-500",
+//   }
+
+//   // Get optimistic connection status for Instagram
+//   const instagramConnectionStatus = getConnectionStatus("INSTAGRAM")
+//   const isInstagramConnecting = instagramConnectionStatus === "connecting"
+
+//   return (
+//     <div className="container max-w-6xl py-10 space-y-8">
+//       <motion.div
+//         initial={{ opacity: 0, y: -20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         transition={{ duration: 0.5 }}
+//         className="space-y-2"
+//       >
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center space-x-3">
+//             <Zap className="h-8 w-8 text-primary" />
+//             <div>
+//               <h1 className="text-3xl font-bold tracking-tight">Social Media Integrations</h1>
+//               <p className="text-muted-foreground">Connect and automate your social media accounts</p>
+//             </div>
+//           </div>
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={handleRefreshData}
+//             disabled={isRefreshing}
+//             className="flex items-center gap-2 bg-transparent"
+//           >
+//             {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+//             Refresh Data
+//           </Button>
+//         </div>
+//       </motion.div>
+
+//       <Alert className="float bg-accent border-border">
+//         <Zap className="h-4 w-4 text-primary" />
+//         <AlertTitle className="text-accent-foreground">Automation Benefits</AlertTitle>
+//         <AlertDescription className="text-accent-foreground">
+//           Connect your social media accounts to enable automated posting, customer support, engagement tracking, and
+//           comprehensive content management across all platforms.
+//         </AlertDescription>
+//       </Alert>
+
+//       {/* Category Filter */}
+//       <div className="flex flex-wrap gap-2">
+//         {[
+//           { id: "all", label: "All Platforms", icon: Zap },
+//           { id: "messaging", label: "Messaging", icon: MessageCircle },
+//           { id: "social", label: "Social Networks", icon: Instagram },
+//           { id: "video", label: "Video Platforms", icon: Youtube },
+//         ].map((category) => {
+//           const Icon = category.icon
+//           return (
+//             <Button
+//               key={category.id}
+//               variant={selectedCategory === category.id ? "default" : "outline"}
+//               size="sm"
+//               onClick={() => setSelectedCategory(category.id)}
+//               className={`${selectedCategory === category.id ? categoryColors[category.id as keyof typeof categoryColors] : ""}`}
+//             >
+//               <Icon className="h-4 w-4 mr-2" />
+//               {category.label}
+//             </Button>
+//           )
+//         })}
+//       </div>
+
+//       <ConnectionStatus
+//         platform="instagram"
+//         accounts={connectedAccounts.instagram}
+//         onRefresh={handleRefreshData}
+//         isRefreshing={isRefreshing || isFetching}
+//       />
+
+//       <motion.div
+//         variants={containerVariants}
+//         initial="hidden"
+//         animate="visible"
+//         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+//       >
+//         {filteredPlatforms.map((platform) => {
+//           const Icon = platform.icon
+//           const isConnected = platform.id === "instagram" ? connectedAccounts.instagram.length > 0 : false
+//           const isPlatformConnecting =
+//             isConnecting[platform.id] || (platform.id === "instagram" && isInstagramConnecting)
+
+//           return (
+//             <motion.div key={platform.id} variants={itemVariants}>
+//               <Card className="h-full flex flex-col relative overflow-hidden border-border/50 hover:border-primary/30 transition-all duration-300">
+//                 {platform.comingSoon && (
+//                   <Badge
+//                     variant="secondary"
+//                     className="absolute top-4 right-4 z-10 bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
+//                   >
+//                     <Clock className="h-3 w-3 mr-1" />
+//                     Coming Soon
+//                   </Badge>
+//                 )}
+
+//                 <CardHeader className="flex-shrink-0">
+//                   <div className="flex items-center space-x-3">
+//                     <div className={`p-2 rounded-lg ${platform.comingSoon ? "bg-muted" : "bg-primary/10"}`}>
+//                       <Icon className={`h-6 w-6 ${platform.comingSoon ? "text-muted-foreground" : "text-primary"}`} />
+//                     </div>
+//                     <div>
+//                       <CardTitle className="text-lg">{platform.displayName}</CardTitle>
+//                       <CardDescription className="text-sm">{platform.description}</CardDescription>
+//                     </div>
+//                   </div>
+//                 </CardHeader>
+
+//                 <CardContent className="flex-grow space-y-4">
+//                   <div>
+//                     <h4 className="text-sm font-medium mb-2">Key Features:</h4>
+//                     <ul className="space-y-1">
+//                       {platform.features.slice(0, 3).map((feature, index) => (
+//                         <li key={index} className="flex items-center text-sm text-muted-foreground">
+//                           <CheckCircle className="h-3 w-3 text-chart-2 mr-2 flex-shrink-0" />
+//                           {feature}
+//                         </li>
+//                       ))}
+//                     </ul>
+//                   </div>
+
+//                   {!platform.comingSoon && platform.id === "instagram" && (
+//                     <div>
+//                       <AccountsList
+//                         accounts={connectedAccounts.instagram.map((account: { id: any; username: any; avatar: any; isActive: any; accessToken: any }) => ({
+//                           id: account.id,
+//                           title: account.username,
+//                           subtitle: `${account.username}`,
+//                           avatar: account.avatar || "",
+//                           isActive: account.isActive,
+//                           platform: "instagram",
+//                           token: account.accessToken,
+//                         }))}
+//                         onRemove={async (id, token) => handleRemoveAccount("instagram", id)}
+//                       />
+//                     </div>
+//                   )}
+//                 </CardContent>
+
+//                 <CardFooter className="flex-shrink-0 border-t p-4">
+//                   <Button
+//                     onClick={() => handleAddAccount(platform.id)}
+//                     disabled={isPlatformConnecting || (platform.id === "instagram" && isConnected)}
+//                     className={`w-full ${
+//                       platform.comingSoon
+//                         ? "bg-muted hover:bg-muted/80 text-muted-foreground cursor-not-allowed"
+//                         : isConnected
+//                           ? "bg-chart-2 hover:bg-chart-2/90 text-chart-2-foreground"
+//                           : "bg-primary hover:bg-primary/90 text-primary-foreground"
+//                     }`}
+//                     variant={platform.comingSoon ? "secondary" : "default"}
+//                   >
+//                     {platform.comingSoon ? (
+//                       <>
+//                         <Clock className="mr-2 h-4 w-4" /> Coming Soon
+//                       </>
+//                     ) : isPlatformConnecting ? (
+//                       <>
+//                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Connecting...
+//                       </>
+//                     ) : isConnected ? (
+//                       <>
+//                         <CheckCircle className="mr-2 h-4 w-4" /> Connected
+//                       </>
+//                     ) : (
+//                       <>
+//                         <Plus className="mr-2 h-4 w-4" /> Connect Account
+//                       </>
+//                     )}
+//                   </Button>
+//                 </CardFooter>
+//               </Card>
+//             </motion.div>
+//           )
+//         })}
+//       </motion.div>
+
+//       {showRequirements && (
+//         <RequirementsModal
+//           platform={showRequirements}
+//           onClose={() => setShowRequirements(null)}
+//           onConnect={() => handleConnectAfterRequirements(showRequirements)}
+//         />
+//       )}
+
+//       {/* Deauthorization Confirmation Dialog */}
+//       <AlertDialog
+//         open={showDeauthorizeDialog.show}
+//         onOpenChange={(open) =>
+//           !open && setShowDeauthorizeDialog({ show: false, platform: "", accountId: "", accountName: "" })
+//         }
+//       >
+//         <AlertDialogContent>
+//           <AlertDialogHeader>
+//             <AlertDialogTitle className="flex items-center gap-2">
+//               <Shield className="h-5 w-5 text-destructive" />
+//               Deauthorize Account
+//             </AlertDialogTitle>
+//             <AlertDialogDescription className="space-y-2">
+//               <p>
+//                 Are you sure you want to deauthorize <strong>{showDeauthorizeDialog.accountName}</strong>?
+//               </p>
+//               <p className="text-sm text-muted-foreground">This action will:</p>
+//               <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+//                 <li>Revoke all access permissions for this account</li>
+//                 <li>Remove the account from your connected integrations</li>
+//                 <li>Stop all automated posting and data syncing</li>
+//                 <li>Delete stored account data from our servers</li>
+//               </ul>
+//               <p className="text-sm font-medium text-chart-4">
+//                 You&apos;ll need to reconnect the account to use it again.
+//               </p>
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           <AlertDialogFooter>
+//             <AlertDialogCancel disabled={isDeauthorizing}>Cancel</AlertDialogCancel>
+//             <AlertDialogAction
+//               onClick={handleDeauthorizeAccount}
+//               disabled={isDeauthorizing}
+//               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+//             >
+//               {isDeauthorizing ? (
+//                 <>
+//                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                   Deauthorizing...
+//                 </>
+//               ) : (
+//                 <>
+//                   <Trash2 className="mr-2 h-4 w-4" />
+//                   Deauthorize
+//                 </>
+//               )}
+//             </AlertDialogAction>
+//           </AlertDialogFooter>
+//         </AlertDialogContent>
+//       </AlertDialog>
+
+//       {/* Privacy Policy Agreement Dialog */}
+//       <AlertDialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+//         <AlertDialogContent className="max-w-md">
+//           <AlertDialogHeader>
+//             <AlertDialogTitle className="flex items-center gap-2">
+//               <Shield className="h-5 w-5 text-primary" />
+//               Privacy & Data Usage
+//             </AlertDialogTitle>
+//             <AlertDialogDescription className="space-y-4">
+//               <p>
+//                 Before connecting your {socialPlatforms.find((p) => p.id === selectedPlatform)?.displayName} account,
+//                 please review our privacy policy to understand how we handle your data.
+//               </p>
+//               <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+//                 <h4 className="font-medium text-sm">We will access:</h4>
+//                 <ul className="text-sm space-y-1">
+//                   <li className="flex items-center gap-2">
+//                     <CheckCircle className="h-3 w-3 text-chart-2" />
+//                     Basic profile information
+//                   </li>
+//                   <li className="flex items-center gap-2">
+//                     <CheckCircle className="h-3 w-3 text-chart-2" />
+//                     Posts and media content
+//                   </li>
+//                   <li className="flex items-center gap-2">
+//                     <CheckCircle className="h-3 w-3 text-chart-2" />
+//                     Engagement metrics
+//                   </li>
+//                 </ul>
+//               </div>
+//               <div className="flex items-start space-x-2">
+//                 <input
+//                   type="checkbox"
+//                   id="privacy-checkbox"
+//                   checked={privacyPolicyAccepted}
+//                   onChange={(e) => setPrivacyPolicyAccepted(e.target.checked)}
+//                   className="mt-1"
+//                 />
+//                 <label htmlFor="privacy-checkbox" className="text-sm">
+//                   I have read and agree to the{" "}
+//                   <a
+//                     href="https://www.yazzil.com/privacy"
+//                     target="_blank"
+//                     rel="noopener noreferrer"
+//                     className="text-primary hover:text-primary/80 underline"
+//                   >
+//                     Privacy Policy
+//                   </a>
+//                 </label>
+//               </div>
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           <AlertDialogFooter>
+//             <AlertDialogCancel
+//               onClick={() => {
+//                 setPrivacyPolicyAccepted(false)
+//                 setShowPrivacyDialog(false)
+//                 setSelectedPlatform("")
+//               }}
+//             >
+//               Cancel
+//             </AlertDialogCancel>
+//             <AlertDialogAction
+//               onClick={() => {
+//                 if (privacyPolicyAccepted) {
+//                   setShowPrivacyDialog(false)
+//                   setShowRequirements(selectedPlatform)
+//                   setPrivacyPolicyAccepted(false)
+//                   setSelectedPlatform("")
+//                 }
+//               }}
+//               disabled={!privacyPolicyAccepted}
+//               className="bg-primary hover:bg-primary/90 text-primary-foreground"
+//             >
+//               Continue
+//             </AlertDialogAction>
+//           </AlertDialogFooter>
+//         </AlertDialogContent>
+//       </AlertDialog>
+
+//       {/* Deauthorization Progress Dialog */}
+//       <AlertDialog open={deauthorizationProgress.show} onOpenChange={() => {}}>
+//         <AlertDialogContent className="max-w-md">
+//           <AlertDialogHeader>
+//             <AlertDialogTitle className="flex items-center gap-2">
+//               {deauthorizationProgress.step === "completed" ? (
+//                 <CheckCircle className="h-5 w-5 text-chart-2" />
+//               ) : deauthorizationProgress.step === "error" ? (
+//                 <AlertCircle className="h-5 w-5 text-destructive" />
+//               ) : (
+//                 <Loader2 className="h-5 w-5 text-primary animate-spin" />
+//               )}
+//               {deauthorizationProgress.step === "completed"
+//                 ? "Disconnected Successfully"
+//                 : deauthorizationProgress.step === "error"
+//                   ? "Disconnection Failed"
+//                   : "Disconnecting Account"}
+//             </AlertDialogTitle>
+//             <AlertDialogDescription className="space-y-4">
+//               <p>{deauthorizationProgress.message}</p>
+
+//               {deauthorizationProgress.step !== "error" && deauthorizationProgress.step !== "completed" && (
+//                 <div className="space-y-2">
+//                   <div className="flex justify-between text-sm">
+//                     <span>Progress</span>
+//                     <span>{deauthorizationProgress.step === "revoking" ? "1/2" : "2/2"}</span>
+//                   </div>
+//                   <div className="w-full bg-muted rounded-full h-2">
+//                     <div
+//                       className="bg-primary h-2 rounded-full transition-all duration-500"
+//                       style={{
+//                         width: deauthorizationProgress.step === "revoking" ? "50%" : "100%",
+//                       }}
+//                     />
+//                   </div>
+//                 </div>
+//               )}
+
+//               {deauthorizationProgress.step === "completed" && (
+//                 <div className="bg-accent p-3 rounded-lg">
+//                   <p className="text-sm text-accent-foreground">
+//                     Your account has been successfully disconnected. You can now connect a different account if needed.
+//                   </p>
+//                 </div>
+//               )}
+
+//               {deauthorizationProgress.step === "error" && (
+//                 <div className="bg-destructive/10 p-3 rounded-lg">
+//                   <p className="text-sm text-destructive">
+//                     Please try again or manually revoke access from your social media settings.
+//                   </p>
+//                 </div>
+//               )}
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           {(deauthorizationProgress.step === "completed" || deauthorizationProgress.step === "error") && (
+//             <AlertDialogFooter>
+//               <AlertDialogAction
+//                 onClick={() =>
+//                   setDeauthorizationProgress({
+//                     show: false,
+//                     step: "confirming",
+//                     message: "",
+//                   })
+//                 }
+//               >
+//                 Close
+//               </AlertDialogAction>
+//             </AlertDialogFooter>
+//           )}
+//         </AlertDialogContent>
+//       </AlertDialog>
+//     </div>
+//   )
+// }
+
+// // Default export for compatibility
+// export default SocialIntegrationsPage
+
 "use client"
 
 import type React from "react"
@@ -3122,6 +3963,8 @@ import {
   Youtube,
   Clock,
   Zap,
+  Users,
+  ImageIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -3141,9 +3984,9 @@ import { useToast } from "@/hooks/use-toast"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSearchParams } from "next/navigation"
 import RequirementsModal from "./requirements-modal"
-import AccountsList from "./accounts-list"
 import ConnectionStatus from "./connection-status"
-import { useIntegrations, type IntegrationStrategy } from "@/hooks/use-integration"
+import { useIntegrations, type IntegrationStrategy } from "@/hooks/use-integrations"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 // Custom WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -3171,7 +4014,7 @@ const socialPlatforms: SocialPlatform[] = [
     displayName: "Instagram",
     icon: Instagram,
     description: "Connect your Instagram business or creator account",
-    features: ["DM automation", "Analytics tracking", "Content management"],
+    features: ["Automated posting", "DM automation", "Analytics tracking", "Content management"],
     requirements: [
       "Business or Creator account type",
       "Connected Facebook page",
@@ -3290,6 +4133,10 @@ export function SocialIntegrationsPage({
           avatar: integration.profilePicture || "",
           isActive: true,
           accessToken: integration.token,
+          fullName: integration.fullName || "",
+          followersCount: integration.followersCount || undefined,
+          followingCount: integration.followingCount || undefined,
+          postsCount: integration.postsCount || undefined,
         }))
 
       return {
@@ -3366,7 +4213,7 @@ export function SocialIntegrationsPage({
   }
 
   const handleShowDeauthorizeDialog = (platform: string, id: string) => {
-    const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc: { id: string }) => acc.id === id)
+    const account = connectedAccounts[platform as keyof typeof connectedAccounts]?.find((acc) => acc.id === id)
     const platformData = socialPlatforms.find((p) => p.id === platform)
     const accountName =
       platform === "instagram"
@@ -3400,7 +4247,7 @@ export function SocialIntegrationsPage({
 
     try {
       if (platform === "instagram") {
-        const account = connectedAccounts.instagram.find((acc: { id: string }) => acc.id === accountId)
+        const account = connectedAccounts.instagram.find((acc) => acc.id === accountId)
 
         if (!account?.accessToken) {
           throw new Error("Access token not found")
@@ -3656,6 +4503,69 @@ export function SocialIntegrationsPage({
                 </CardHeader>
 
                 <CardContent className="flex-grow space-y-4">
+                  {!platform.comingSoon && platform.id === "instagram" && connectedAccounts.instagram.length > 0 && (
+                    <div className="rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-4">
+                      {connectedAccounts.instagram.map((account) => (
+                        <div key={account.id}>
+                          <div className="flex items-center gap-4">
+                            <div className="relative shrink-0">
+                              <Avatar className="h-14 w-14 ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-background">
+                                <AvatarImage src={account.avatar || undefined} alt={account.username || "Profile"} />
+                                <AvatarFallback className="bg-emerald-500/20 text-emerald-600">
+                                  {account.username ? account.username[0].toUpperCase() : "U"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md">
+                                <CheckCircle className="h-3 w-3" />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground truncate">
+                                {account.fullName || account.username || "Connected Account"}
+                              </p>
+                              {account.username && (
+                                <p className="text-sm text-emerald-600 dark:text-emerald-400 truncate">
+                                  @{account.username}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {(account.followersCount !== undefined ||
+                            account.followingCount !== undefined ||
+                            account.postsCount !== undefined) && (
+                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-emerald-500/20">
+                              <div className="text-center flex-1">
+                                <p className="text-lg font-bold text-foreground">
+                                  {account.followersCount?.toLocaleString() ?? "N/A"}
+                                </p>
+                                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                  <Users className="h-3 w-3" /> Followers
+                                </p>
+                              </div>
+                              <div className="text-center flex-1">
+                                <p className="text-lg font-bold text-foreground">
+                                  {account.followingCount?.toLocaleString() ?? "N/A"}
+                                </p>
+                                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                  <Users className="h-3 w-3" /> Following
+                                </p>
+                              </div>
+                              <div className="text-center flex-1">
+                                <p className="text-lg font-bold text-foreground">
+                                  {account.postsCount?.toLocaleString() ?? "N/A"}
+                                </p>
+                                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                  <ImageIcon className="h-3 w-3" /> Posts
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div>
                     <h4 className="text-sm font-medium mb-2">Key Features:</h4>
                     <ul className="space-y-1">
@@ -3667,23 +4577,6 @@ export function SocialIntegrationsPage({
                       ))}
                     </ul>
                   </div>
-
-                  {!platform.comingSoon && platform.id === "instagram" && (
-                    <div>
-                      <AccountsList
-                        accounts={connectedAccounts.instagram.map((account: { id: any; username: any; avatar: any; isActive: any; accessToken: any }) => ({
-                          id: account.id,
-                          title: account.username,
-                          subtitle: `${account.username}`,
-                          avatar: account.avatar || "",
-                          isActive: account.isActive,
-                          platform: "instagram",
-                          token: account.accessToken,
-                        }))}
-                        onRemove={async (id, token) => handleRemoveAccount("instagram", id)}
-                      />
-                    </div>
-                  )}
                 </CardContent>
 
                 <CardFooter className="flex-shrink-0 border-t p-4">
