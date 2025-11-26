@@ -8303,6 +8303,614 @@
 // export default ThenAction
 
 
+// "use client"
+
+// import type React from "react"
+// import { useState, useRef, useEffect } from "react"
+// import { useListener } from "@/hooks/use-automations"
+// import { AUTOMATION_LISTENERS } from "@/constants/automation"
+// import { cn } from "@/lib/utils"
+// import { Button } from "@/components/ui/button"
+// import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+// import { Badge } from "@/components/ui/badge"
+// import { Card, CardContent } from "@/components/ui/card"
+// import { Textarea } from "@/components/ui/textarea"
+// import { Label } from "@/components/ui/label"
+// import { motion } from "framer-motion"
+// import {
+//   PlusCircle,
+//   MessageSquare,
+//   Briefcase,
+//   Save,
+//   Clock,
+//   CheckCircle,
+//   Loader2,
+//   Zap,
+//   Target,
+//   Info,
+// } from "lucide-react"
+// import FloatingPanel from "../../panel"
+// import { ContextCard } from "../context"
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+// import { getBusinessProfile, updateBusinessProfile } from "@/actions/business"
+// import { toast } from "@/hooks/use-toast"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+// import { Progress } from "@/components/ui/progress"
+// import { SubscriptionPlan } from "../../subscription-plan"
+// import { ReplyVariationsManager } from "./reply-variations-manager"
+
+// type Props = {
+//   id: string
+//   theme?: {
+//     id: string
+//     name: string
+//     primary: string
+//     secondary: string
+//   }
+// }
+
+// const useTypingPlaceholder = (phrases: string[], typingSpeed = 50, pauseDuration = 2000) => {
+//   const [placeholder, setPlaceholder] = useState("")
+//   const [phraseIndex, setPhraseIndex] = useState(0)
+//   const [charIndex, setCharIndex] = useState(0)
+//   const [isDeleting, setIsDeleting] = useState(false)
+
+//   useEffect(() => {
+//     const currentPhrase = phrases[phraseIndex]
+
+//     const timeout = setTimeout(
+//       () => {
+//         if (!isDeleting) {
+//           if (charIndex < currentPhrase.length) {
+//             setPlaceholder(currentPhrase.slice(0, charIndex + 1))
+//             setCharIndex(charIndex + 1)
+//           } else {
+//             setTimeout(() => setIsDeleting(true), pauseDuration)
+//           }
+//         } else {
+//           if (charIndex > 0) {
+//             setPlaceholder(currentPhrase.slice(0, charIndex - 1))
+//             setCharIndex(charIndex - 1)
+//           } else {
+//             setIsDeleting(false)
+//             setPhraseIndex((phraseIndex + 1) % phrases.length)
+//           }
+//         }
+//       },
+//       isDeleting ? typingSpeed / 2 : typingSpeed,
+//     )
+
+//     return () => clearTimeout(timeout)
+//   }, [charIndex, isDeleting, phraseIndex, phrases, typingSpeed, pauseDuration])
+
+//   return placeholder
+// }
+
+// const ThenAction = ({
+//   id,
+//   theme = { id: "blue", name: "Blue", primary: "light-blue", secondary: "#768BDD" },
+// }: Props) => {
+//   const { onSetListener, listener: Listener, onFormSubmit, mutate, register, isPending, watch } = useListener(id)
+
+//   // State management
+//   const [activeTab, setActiveTab] = useState("profile")
+//   const [showTip, setShowTip] = useState(true)
+//   const [businessProfile, setBusinessProfile] = useState("")
+//   const [isSaving, setIsSaving] = useState(false)
+//   const [saveSuccess, setSaveSuccess] = useState(false)
+//   const [completedSteps, setCompletedSteps] = useState<number[]>([])
+//   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+//   const [fetchedBusinessDescription, setFetchedBusinessDescription] = useState("")
+//   const [isLoading, setIsLoading] = useState(true)
+//   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+
+//   const [replyVariations, setReplyVariations] = useState<string[]>([])
+//   const [baseCommentReply, setBaseCommentReply] = useState("")
+
+//   const businessPlaceholder = useTypingPlaceholder([
+//     "We sell fresh bread, cakes, and pastries...",
+//     "Our bakery is open Monday to Saturday, 7am to 6pm...",
+//     "We offer free delivery for orders over $30...",
+//     "Our most popular item is the sourdough bread at $6...",
+//     "Yes, we have gluten-free options available daily...",
+//   ])
+
+//   const promptPlaceholder = useTypingPlaceholder([
+//     "Be friendly and thank them for their comment...",
+//     "If they ask about prices, share our current deals...",
+//     "Always invite them to visit our shop or DM us...",
+//     "Mention our delivery options if they ask about orders...",
+//   ])
+
+//   useEffect(() => {
+//     const fetchBusinessDescription = async () => {
+//       try {
+//         const result = await getBusinessProfile()
+//         if (result.status === 200 && result.data?.businessDescription) {
+//           setFetchedBusinessDescription(result.data.businessDescription)
+//           setBusinessProfile(result.data.businessDescription)
+//           setLastUpdated(result.data.updatedAt.toISOString())
+//           setCompletedSteps((prev) => [...prev.filter((s) => s !== 1), 1])
+//         }
+//       } catch (error) {
+//         console.error("Error fetching business description:", error)
+//       } finally {
+//         setIsLoading(false)
+//       }
+//     }
+
+//     fetchBusinessDescription()
+//   }, [])
+
+//   const setupProgress = (completedSteps.length / 2) * 100
+
+//   const handleSaveProfile = async () => {
+//     if (!businessProfile.trim()) {
+//       toast({
+//         title: "Oops!",
+//         description: "Please tell us about your business before saving",
+//         variant: "destructive",
+//       })
+//       return
+//     }
+
+//     setIsSaving(true)
+//     try {
+//       const result = await updateBusinessProfile({
+//         businessDescription: businessProfile,
+//       })
+
+//       if (result.status === 200) {
+//         setSaveSuccess(true)
+//         setLastUpdated(new Date().toISOString())
+//         setCompletedSteps((prev) => [...prev.filter((s) => s !== 1), 1])
+//         toast({
+//           title: "Saved!",
+//           description: "Your business info is saved. Now let's set up your auto-replies!",
+//           variant: "default",
+//         })
+
+//         setTimeout(() => {
+//           setActiveTab("automation")
+//         }, 1500)
+
+//         setTimeout(() => {
+//           setSaveSuccess(false)
+//         }, 3000)
+//       } else {
+//         throw new Error(result.error || "Failed to save")
+//       }
+//     } catch (error) {
+//       console.error("Error saving business profile:", error)
+//       toast({
+//         title: "Something went wrong",
+//         description: "Could not save. Please try again.",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsSaving(false)
+//     }
+//   }
+
+
+//   const getStepStatus = (step: number) => {
+//     if (completedSteps.includes(step)) return "completed"
+//     return "pending"
+//   }
+
+//   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault()
+//     const formData = new FormData(e.currentTarget)
+//     const prompt = formData.get("prompt") as string
+
+//     mutate({
+//       prompt,
+//       reply: baseCommentReply,
+//       replyVariations: replyVariations.length > 0 ? replyVariations : undefined,
+//     })
+
+//     setCompletedSteps((prev) => [...prev.filter((s) => s !== 2), 2])
+//     toast({
+//       title: "Automation Saved!",
+//       description: "Your Instagram auto-replies are now active.",
+//       variant: "default",
+//     })
+//   }
+
+//   return (
+//     <FloatingPanel
+//       title="Instagram Auto-Reply Setup"
+//       trigger={
+//         <motion.div
+//           className="group relative overflow-hidden rounded-xl mt-4 w-full"
+//           whileHover={{ scale: 1.02 }}
+//           whileTap={{ scale: 0.98 }}
+//         >
+//           <div className="absolute inset-0 bg-light-blue opacity-20 rounded-xl"></div>
+//           <div className="absolute inset-0 rounded-xl shimmerBorder"></div>
+//           <div className="relative m-[2px] bg-background-90 rounded-lg p-5 sm:p-6">
+//             <div className="flex items-center justify-center gap-3">
+//               <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-[#768BDD]" />
+//               <p className="text-[#768BDD] font-bold text-base sm:text-lg">Set Up Auto-Replies</p>
+//             </div>
+//             <p className="text-center text-muted-foreground text-sm mt-2">
+//               Automatically reply to Instagram comments and DMs
+//             </p>
+//           </div>
+//         </motion.div>
+//       }
+//     >
+//       <div className="flex flex-col gap-8 sm:gap-10 lg:gap-12 w-full max-w-none px-2 sm:px-4 lg:px-6">
+//         {/* Progress Header - Larger */}
+//         <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+//           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+//             <h2 className="text-2xl sm:text-3xl font-semibold text-white flex items-center">
+//               <Target className="h-7 w-7 sm:h-8 sm:w-8 mr-3 text-light-blue" />
+//               Your Setup Progress
+//             </h2>
+//             <Badge
+//               variant="outline"
+//               className="bg-background-90 text-muted-foreground text-base px-4 py-2 self-start sm:self-auto"
+//             >
+//               {completedSteps.length} of 2 steps done
+//             </Badge>
+//           </div>
+
+//           <Progress value={setupProgress} className="mb-8 h-4" />
+
+//           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//             {[
+//               {
+//                 step: 1,
+//                 title: "Tell Us About Your Business",
+//                 icon: Briefcase,
+//                 description: "Share what you sell, your hours, prices, and anything customers might ask about",
+//                 tab: "profile",
+//               },
+//               {
+//                 step: 2,
+//                 title: "Set Up Your Auto-Replies",
+//                 icon: MessageSquare,
+//                 description: "Choose how to automatically respond when someone comments on your posts",
+//                 tab: "automation",
+//               },
+//             ].map(({ step, title, icon: Icon, description, tab }) => {
+//               const status = getStepStatus(step)
+//               return (
+//                 <Card
+//                   key={step}
+//                   className={cn(
+//                     "cursor-pointer transition-all duration-200 hover:scale-[1.02]",
+//                     status === "completed" && "bg-green-500/10 border-green-500/30",
+//                     status === "pending" && "bg-background-90 border-background-80 hover:border-light-blue/30",
+//                   )}
+//                   onClick={() => setActiveTab(tab)}
+//                 >
+//                   <CardContent className="p-6 sm:p-8">
+//                     <div className="flex items-start gap-5">
+//                       <div
+//                         className={cn(
+//                           "p-4 sm:p-5 rounded-xl flex-shrink-0",
+//                           status === "completed" && "bg-green-500/20",
+//                           status === "pending" && "bg-background-80",
+//                         )}
+//                       >
+//                         {status === "completed" ? (
+//                           <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-500" />
+//                         ) : (
+//                           <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-light-blue" />
+//                         )}
+//                       </div>
+//                       <div className="flex-1 min-w-0">
+//                         <div className="flex items-center gap-3 mb-2 flex-wrap">
+//                           <span className="text-muted-foreground text-base font-medium">Step {step}</span>
+//                           {status === "completed" && (
+//                             <Badge
+//                               variant="outline"
+//                               className="bg-green-500/10 border-green-500/30 text-green-400 text-sm"
+//                             >
+//                               Done!
+//                             </Badge>
+//                           )}
+//                         </div>
+//                         <h4 className="text-white font-semibold text-lg sm:text-xl lg:text-2xl">{title}</h4>
+//                         <p className="text-muted-foreground text-base sm:text-lg mt-2">{description}</p>
+//                       </div>
+//                     </div>
+//                   </CardContent>
+//                 </Card>
+//               )
+//             })}
+//           </div>
+//         </div>
+
+//         {/* Tabs - Larger */}
+//         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+//           <TabsList className="grid grid-cols-2 bg-background-80 p-2 rounded-xl h-auto">
+//             <TabsTrigger
+//               value="profile"
+//               className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
+//             >
+//               <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
+//               Your Business
+//             </TabsTrigger>
+//             <TabsTrigger
+//               value="automation"
+//               className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
+//             >
+//               <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
+//               Auto-Replies
+//             </TabsTrigger>
+//           </TabsList>
+
+//           {/* Business Profile Tab */}
+//           <TabsContent value="profile" className="space-y-8 mt-8">
+//             <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+//               <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
+//                 <div>
+//                   <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center">
+//                     <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
+//                     Tell Us About Your Business
+//                   </h3>
+//                   <p className="text-muted-foreground text-base sm:text-lg mt-2 ml-10 sm:ml-11 lg:ml-12">
+//                     This helps us create better auto-replies for your customers
+//                   </p>
+//                 </div>
+//                 {businessProfile && (
+//                   <Badge
+//                     variant="outline"
+//                     className="bg-green-500/10 border-green-500/30 text-green-400 self-start lg:self-auto text-base px-4 py-2"
+//                   >
+//                     <CheckCircle className="h-5 w-5 mr-2" />
+//                     Ready to Save
+//                   </Badge>
+//                 )}
+//               </div>
+
+//               <div className="space-y-6">
+//                 <div className="space-y-4">
+//                   <Label htmlFor="business-profile" className="text-lg sm:text-xl text-white font-medium">
+//                     What should customers know about you?
+//                   </Label>
+//                   <p className="text-muted-foreground text-base sm:text-lg">
+//                     Include things like: what you sell, your prices, business hours, location, and any common questions
+//                     customers ask.
+//                   </p>
+//                   {isLoading ? (
+//                     <div className="bg-background-90 border border-background-80 rounded-xl min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] flex items-center justify-center">
+//                       <div className="flex items-center text-muted-foreground text-lg">
+//                         <Loader2 className="h-6 w-6 mr-3 animate-spin" />
+//                         Loading your business info...
+//                       </div>
+//                     </div>
+//                   ) : (
+//                     <Textarea
+//                       id="business-profile"
+//                       ref={textareaRef}
+//                       placeholder={businessProfile ? undefined : businessPlaceholder + "|"}
+//                       className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-2 focus:ring-light-blue/50 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] text-base sm:text-lg rounded-xl p-5 sm:p-6"
+//                       value={businessProfile}
+//                       onChange={(e) => setBusinessProfile(e.target.value)}
+//                     />
+//                   )}
+//                 </div>
+
+//                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-background-80">
+//                   <div className="flex items-center text-base text-muted-foreground">
+//                     <Clock className="h-5 w-5 mr-2" />
+//                     <span>
+//                       {lastUpdated ? `Last saved: ${new Date(lastUpdated).toLocaleString()}` : "Not saved yet"}
+//                     </span>
+//                   </div>
+//                   <div className="flex gap-4 w-full sm:w-auto">
+//                     <Button
+//                       variant="outline"
+//                       className="border-background-80 text-muted-foreground hover:bg-background-90 bg-transparent flex-1 sm:flex-none h-14 text-base"
+//                       onClick={() => {
+//                         setBusinessProfile(fetchedBusinessDescription || "")
+//                       }}
+//                       disabled={isLoading}
+//                     >
+//                       {fetchedBusinessDescription ? "Reset Changes" : "Clear"}
+//                     </Button>
+//                     <Button
+//                       className="bg-light-blue hover:bg-light-blue/90 text-white flex-1 sm:flex-none h-14 text-base sm:text-lg font-medium px-8"
+//                       onClick={handleSaveProfile}
+//                       disabled={isSaving || !businessProfile.trim() || isLoading}
+//                     >
+//                       {isSaving ? (
+//                         <>
+//                           <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+//                           Saving...
+//                         </>
+//                       ) : saveSuccess ? (
+//                         <>
+//                           <CheckCircle className="h-5 w-5 mr-3" />
+//                           Saved!
+//                         </>
+//                       ) : (
+//                         <>
+//                           <Save className="h-5 w-5 mr-3" />
+//                           Save & Continue
+//                         </>
+//                       )}
+//                     </Button>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Helpful Tips - Larger */}
+//             <Alert className="bg-blue-500/10 border-blue-500/30 p-6 sm:p-8">
+//               <Info className="h-6 w-6 text-blue-400" />
+//               <AlertTitle className="text-blue-400 font-semibold text-lg sm:text-xl">
+//                 Tips for Better Auto-Replies
+//               </AlertTitle>
+//               <AlertDescription className="text-blue-300 text-base sm:text-lg">
+//                 <ul className="list-disc list-inside space-y-3 mt-4">
+//                   <li>List your products or services with their prices</li>
+//                   <li>Include your business hours and location</li>
+//                   <li>Add answers to questions customers ask a lot</li>
+//                   <li>Mention any current deals or promotions</li>
+//                 </ul>
+//               </AlertDescription>
+//             </Alert>
+//           </TabsContent>
+
+//           {/* Automation Tab */}
+//           <TabsContent value="automation" className="space-y-8 mt-8">
+//             {showTip && <ContextCard context="response" onClose={() => setShowTip(false)} />}
+
+//             <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+//               <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center mb-4">
+//                 <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
+//                 Choose Your Reply Style
+//               </h3>
+
+//               <p className="text-muted-foreground text-base sm:text-lg mb-8 ml-10 sm:ml-11 lg:ml-12">
+//                 Pick how you want to automatically reply when someone comments on your Instagram posts:
+//               </p>
+
+//               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+//                 {AUTOMATION_LISTENERS.map((listener) =>
+//                   listener.type === "SMARTAI" ? (
+//                     <SubscriptionPlan key={listener.type} type="PRO">
+//                       <motion.div
+//                         whileHover={{ scale: 1.02 }}
+//                         whileTap={{ scale: 0.98 }}
+//                         onClick={() => onSetListener(listener.type)}
+//                         className={cn(
+//                           Listener === listener.type
+//                             ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480] border-purple-500/50"
+//                             : "bg-background-90 border-background-80 hover:border-purple-500/30",
+//                           "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
+//                         )}
+//                       >
+//                         <div className="flex gap-x-4 items-center">
+//                           <div className="p-3 sm:p-4 rounded-xl bg-purple-500/20">{listener.icon}</div>
+//                           <div>
+//                             <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
+//                             <Badge
+//                               variant="outline"
+//                               className="text-sm bg-purple-500/20 border-purple-500/30 text-purple-300 mt-2"
+//                             >
+//                               PRO Feature
+//                             </Badge>
+//                           </div>
+//                         </div>
+//                         <p className="text-base sm:text-lg text-gray-300">{listener.description}</p>
+//                       </motion.div>
+//                     </SubscriptionPlan>
+//                   ) : (
+//                     <motion.div
+//                       whileHover={{ scale: 1.02 }}
+//                       whileTap={{ scale: 0.98 }}
+//                       onClick={() => onSetListener(listener.type)}
+//                       key={listener.id}
+//                       className={cn(
+//                         Listener === listener.type
+//                           ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70] border-blue-500/50"
+//                           : "bg-background-90 border-background-80 hover:border-blue-500/30",
+//                         "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
+//                       )}
+//                     >
+//                       <div className="flex gap-x-4 items-center">
+//                         <div className="p-3 sm:p-4 rounded-xl bg-blue-500/20">{listener.icon}</div>
+//                         <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
+//                       </div>
+//                       <p className="text-base sm:text-lg text-gray-300">{listener.description}</p>
+//                     </motion.div>
+//                   ),
+//                 )}
+//               </div>
+
+//               <form onSubmit={handleFormSubmit} className="flex flex-col gap-6">
+//                 {Listener && (
+//                   <>
+//                     {/* AI Instructions */}
+//                     <div className="space-y-4">
+//                       <Label
+//                         htmlFor="prompt"
+//                         className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
+//                       >
+//                         {Listener === "SMARTAI" ? "Tell the AI How to Reply" : "Manually write the DM reply"}
+//                         <TooltipProvider>
+//                           <Tooltip>
+//                             <TooltipTrigger asChild>
+//                               <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
+//                             </TooltipTrigger>
+//                             <TooltipContent className="max-w-sm text-base p-4">
+//                               <p>
+//                                 {Listener === "SMARTAI"
+//                                   ? "Give the AI instructions on how to respond to customers. It will use your business profile to craft personalized replies."
+//                                   : "Write what message you want to be sent to their Dm."}
+//                               </p>
+//                             </TooltipContent>
+//                           </Tooltip>
+//                         </TooltipProvider>
+//                       </Label>
+//                       <Textarea
+//                         {...register("prompt")}
+//                         id="prompt"
+//                         name="prompt"
+//                         placeholder={promptPlaceholder + "|"}
+//                         className="min-h-[200px] sm:min-h-[250px] lg:min-h-[300px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
+//                         rows={6}
+//                       />
+//                     </div>
+
+//                     <SubscriptionPlan type="PRO">
+//                       <div className="space-y-4">
+//                         <ReplyVariationsManager
+//                           baseReply={baseCommentReply}
+//                           onBaseReplyChange={setBaseCommentReply}
+//                           value={replyVariations}
+//                           onChange={setReplyVariations}
+//                         />
+//                       </div>
+//                     </SubscriptionPlan>
+
+//                     <Button
+//                       type="submit"
+//                       className="w-full h-16 text-lg sm:text-xl font-semibold bg-light-blue hover:bg-light-blue/90 mt-4"
+//                       disabled={isPending}
+//                     >
+//                       {isPending ? (
+//                         <>
+//                           <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+//                           Saving Your Auto-Reply...
+//                         </>
+//                       ) : (
+//                         <>
+//                           <Save className="mr-3 h-6 w-6" />
+//                           Save & Start Auto-Replying
+//                         </>
+//                       )}
+//                     </Button>
+//                   </>
+//                 )}
+
+//                 {!Listener && (
+//                   <div className="text-center py-12 sm:py-16 lg:py-20 border-2 border-dashed border-background-80 rounded-2xl">
+//                     <MessageSquare className="h-16 w-16 sm:h-20 sm:w-20 mx-auto mb-6 text-muted-foreground" />
+//                     <p className="text-muted-foreground text-lg sm:text-xl">
+//                       Choose a reply style above to get started
+//                     </p>
+//                   </div>
+//                 )}
+//               </form>
+//             </div>
+//           </TabsContent>
+//         </Tabs>
+//       </div>
+//     </FloatingPanel>
+//   )
+// }
+
+// export default ThenAction
+
+
 "use client"
 
 import type React from "react"
@@ -8328,6 +8936,8 @@ import {
   Zap,
   Target,
   Info,
+  Lock,
+  Crown,
 } from "lucide-react"
 import FloatingPanel from "../../panel"
 import { ContextCard } from "../context"
@@ -8341,6 +8951,7 @@ import { ReplyVariationsManager } from "./reply-variations-manager"
 
 type Props = {
   id: string
+  isPro?: boolean
   theme?: {
     id: string
     name: string
@@ -8388,12 +8999,13 @@ const useTypingPlaceholder = (phrases: string[], typingSpeed = 50, pauseDuration
 
 const ThenAction = ({
   id,
+  isPro = false,
   theme = { id: "blue", name: "Blue", primary: "light-blue", secondary: "#768BDD" },
 }: Props) => {
   const { onSetListener, listener: Listener, onFormSubmit, mutate, register, isPending, watch } = useListener(id)
 
   // State management
-  const [activeTab, setActiveTab] = useState("profile")
+  const [activeTab, setActiveTab] = useState(isPro ? "profile" : "automation")
   const [showTip, setShowTip] = useState(true)
   const [businessProfile, setBusinessProfile] = useState("")
   const [isSaving, setIsSaving] = useState(false)
@@ -8407,6 +9019,21 @@ const ThenAction = ({
 
   const [replyVariations, setReplyVariations] = useState<string[]>([])
   const [baseCommentReply, setBaseCommentReply] = useState("")
+
+  const [dmMessage, setDmMessage] = useState("")
+  const [commentReply, setCommentReply] = useState("")
+
+  const dmPlaceholder = useTypingPlaceholder([
+    "Hello! Thanks for reaching out. Here is your coupon code: ABC123...",
+    "Hi there! Check out our latest deals at...",
+    "Thanks for your interest! Your discount code is XYZ789...",
+  ])
+
+  const commentPlaceholder = useTypingPlaceholder([
+    "Hey! Check your DMs, I sent you something special...",
+    "Thanks for commenting! I just DM'd you the details...",
+    "Check your inbox! I sent you the info you requested...",
+  ])
 
   const businessPlaceholder = useTypingPlaceholder([
     "We sell fresh bread, cakes, and pastries...",
@@ -8424,6 +9051,11 @@ const ThenAction = ({
   ])
 
   useEffect(() => {
+    if (!isPro) {
+      setIsLoading(false)
+      return
+    }
+
     const fetchBusinessDescription = async () => {
       try {
         const result = await getBusinessProfile()
@@ -8441,9 +9073,10 @@ const ThenAction = ({
     }
 
     fetchBusinessDescription()
-  }, [])
+  }, [isPro])
 
-  const setupProgress = (completedSteps.length / 2) * 100
+  const totalSteps = isPro ? 2 : 1
+  const setupProgress = (completedSteps.length / totalSteps) * 100
 
   const handleSaveProfile = async () => {
     if (!businessProfile.trim()) {
@@ -8493,7 +9126,6 @@ const ThenAction = ({
     }
   }
 
-
   const getStepStatus = (step: number) => {
     if (completedSteps.includes(step)) return "completed"
     return "pending"
@@ -8505,18 +9137,49 @@ const ThenAction = ({
     const prompt = formData.get("prompt") as string
 
     mutate({
-      prompt,
-      reply: baseCommentReply,
-      replyVariations: replyVariations.length > 0 ? replyVariations : undefined,
+      prompt: isPro ? prompt : dmMessage,
+      reply: isPro ? baseCommentReply : commentReply,
+      replyVariations: isPro && replyVariations.length > 0 ? replyVariations : undefined,
     })
 
-    setCompletedSteps((prev) => [...prev.filter((s) => s !== 2), 2])
+    setCompletedSteps((prev) => [...prev.filter((s) => s !== (isPro ? 2 : 1)), isPro ? 2 : 1])
     toast({
       title: "Automation Saved!",
       description: "Your Instagram auto-replies are now active.",
       variant: "default",
     })
   }
+
+  const handleProFeatureClick = () => {
+    // This will trigger the SubscriptionPlan modal
+  }
+
+  const steps = isPro
+    ? [
+        {
+          step: 1,
+          title: "Tell Us About Your Business",
+          icon: Briefcase,
+          description: "Share what you sell, your hours, prices, and anything customers might ask about",
+          tab: "profile",
+        },
+        {
+          step: 2,
+          title: "Set Up Your Auto-Replies",
+          icon: MessageSquare,
+          description: "Choose how to automatically respond when someone comments on your posts",
+          tab: "automation",
+        },
+      ]
+    : [
+        {
+          step: 1,
+          title: "Set Up Your Auto-Replies",
+          icon: MessageSquare,
+          description: "Write your DM message and comment reply",
+          tab: "automation",
+        },
+      ]
 
   return (
     <FloatingPanel
@@ -8542,7 +9205,7 @@ const ThenAction = ({
       }
     >
       <div className="flex flex-col gap-8 sm:gap-10 lg:gap-12 w-full max-w-none px-2 sm:px-4 lg:px-6">
-        {/* Progress Header - Larger */}
+        {/* Progress Header */}
         <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
             <h2 className="text-2xl sm:text-3xl font-semibold text-white flex items-center">
@@ -8553,29 +9216,14 @@ const ThenAction = ({
               variant="outline"
               className="bg-background-90 text-muted-foreground text-base px-4 py-2 self-start sm:self-auto"
             >
-              {completedSteps.length} of 2 steps done
+              {completedSteps.length} of {totalSteps} steps done
             </Badge>
           </div>
 
           <Progress value={setupProgress} className="mb-8 h-4" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {[
-              {
-                step: 1,
-                title: "Tell Us About Your Business",
-                icon: Briefcase,
-                description: "Share what you sell, your hours, prices, and anything customers might ask about",
-                tab: "profile",
-              },
-              {
-                step: 2,
-                title: "Set Up Your Auto-Replies",
-                icon: MessageSquare,
-                description: "Choose how to automatically respond when someone comments on your posts",
-                tab: "automation",
-              },
-            ].map(({ step, title, icon: Icon, description, tab }) => {
+          <div className={cn("grid gap-6", isPro ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1")}>
+            {steps.map(({ step, title, icon: Icon, description, tab }) => {
               const status = getStepStatus(step)
               return (
                 <Card
@@ -8625,284 +9273,451 @@ const ThenAction = ({
           </div>
         </div>
 
-        {/* Tabs - Larger */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 bg-background-80 p-2 rounded-xl h-auto">
-            <TabsTrigger
-              value="profile"
-              className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
-            >
-              <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
-              Your Business
-            </TabsTrigger>
-            <TabsTrigger
-              value="automation"
-              className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
-            >
-              <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
-              Auto-Replies
-            </TabsTrigger>
-          </TabsList>
+        {isPro ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-2 bg-background-80 p-2 rounded-xl h-auto">
+              <TabsTrigger
+                value="profile"
+                className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
+              >
+                <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
+                Your Business
+              </TabsTrigger>
+              <TabsTrigger
+                value="automation"
+                className="data-[state=active]:bg-light-blue data-[state=active]:text-white rounded-lg py-4 sm:py-5 text-base sm:text-lg font-medium"
+              >
+                <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
+                Auto-Replies
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Business Profile Tab */}
-          <TabsContent value="profile" className="space-y-8 mt-8">
-            <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
-                <div>
-                  <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center">
-                    <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
-                    Tell Us About Your Business
-                  </h3>
-                  <p className="text-muted-foreground text-base sm:text-lg mt-2 ml-10 sm:ml-11 lg:ml-12">
-                    This helps us create better auto-replies for your customers
-                  </p>
-                </div>
-                {businessProfile && (
-                  <Badge
-                    variant="outline"
-                    className="bg-green-500/10 border-green-500/30 text-green-400 self-start lg:self-auto text-base px-4 py-2"
-                  >
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    Ready to Save
-                  </Badge>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <Label htmlFor="business-profile" className="text-lg sm:text-xl text-white font-medium">
-                    What should customers know about you?
-                  </Label>
-                  <p className="text-muted-foreground text-base sm:text-lg">
-                    Include things like: what you sell, your prices, business hours, location, and any common questions
-                    customers ask.
-                  </p>
-                  {isLoading ? (
-                    <div className="bg-background-90 border border-background-80 rounded-xl min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] flex items-center justify-center">
-                      <div className="flex items-center text-muted-foreground text-lg">
-                        <Loader2 className="h-6 w-6 mr-3 animate-spin" />
-                        Loading your business info...
-                      </div>
-                    </div>
-                  ) : (
-                    <Textarea
-                      id="business-profile"
-                      ref={textareaRef}
-                      placeholder={businessProfile ? undefined : businessPlaceholder + "|"}
-                      className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-2 focus:ring-light-blue/50 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] text-base sm:text-lg rounded-xl p-5 sm:p-6"
-                      value={businessProfile}
-                      onChange={(e) => setBusinessProfile(e.target.value)}
-                    />
+            {/* Business Profile Tab - PRO ONLY */}
+            <TabsContent value="profile" className="space-y-8 mt-8">
+              <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
+                  <div>
+                    <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center">
+                      <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
+                      Tell Us About Your Business
+                    </h3>
+                    <p className="text-muted-foreground text-base sm:text-lg mt-2 ml-10 sm:ml-11 lg:ml-12">
+                      This helps us create better auto-replies for your customers
+                    </p>
+                  </div>
+                  {businessProfile && (
+                    <Badge
+                      variant="outline"
+                      className="bg-green-500/10 border-green-500/30 text-green-400 self-start lg:self-auto text-base px-4 py-2"
+                    >
+                      <CheckCircle className="h-5 w-5 mr-2" />
+                      Ready to Save
+                    </Badge>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-background-80">
-                  <div className="flex items-center text-base text-muted-foreground">
-                    <Clock className="h-5 w-5 mr-2" />
-                    <span>
-                      {lastUpdated ? `Last saved: ${new Date(lastUpdated).toLocaleString()}` : "Not saved yet"}
-                    </span>
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <Label htmlFor="business-profile" className="text-lg sm:text-xl text-white font-medium">
+                      What should customers know about you?
+                    </Label>
+                    <p className="text-muted-foreground text-base sm:text-lg">
+                      Include things like: what you sell, your prices, business hours, location, and any common
+                      questions customers ask.
+                    </p>
+                    {isLoading ? (
+                      <div className="bg-background-90 border border-background-80 rounded-xl min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] flex items-center justify-center">
+                        <div className="flex items-center text-muted-foreground text-lg">
+                          <Loader2 className="h-6 w-6 mr-3 animate-spin" />
+                          Loading your business info...
+                        </div>
+                      </div>
+                    ) : (
+                      <Textarea
+                        id="business-profile"
+                        ref={textareaRef}
+                        placeholder={businessProfile ? undefined : businessPlaceholder + "|"}
+                        className="bg-background-90 outline-none border-background-80 ring-0 focus:ring-2 focus:ring-light-blue/50 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] text-base sm:text-lg rounded-xl p-5 sm:p-6"
+                        value={businessProfile}
+                        onChange={(e) => setBusinessProfile(e.target.value)}
+                      />
+                    )}
                   </div>
-                  <div className="flex gap-4 w-full sm:w-auto">
-                    <Button
-                      variant="outline"
-                      className="border-background-80 text-muted-foreground hover:bg-background-90 bg-transparent flex-1 sm:flex-none h-14 text-base"
-                      onClick={() => {
-                        setBusinessProfile(fetchedBusinessDescription || "")
-                      }}
-                      disabled={isLoading}
-                    >
-                      {fetchedBusinessDescription ? "Reset Changes" : "Clear"}
-                    </Button>
-                    <Button
-                      className="bg-light-blue hover:bg-light-blue/90 text-white flex-1 sm:flex-none h-14 text-base sm:text-lg font-medium px-8"
-                      onClick={handleSaveProfile}
-                      disabled={isSaving || !businessProfile.trim() || isLoading}
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-                          Saving...
-                        </>
-                      ) : saveSuccess ? (
-                        <>
-                          <CheckCircle className="h-5 w-5 mr-3" />
-                          Saved!
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-5 w-5 mr-3" />
-                          Save & Continue
-                        </>
-                      )}
-                    </Button>
+
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 border-t border-background-80">
+                    <div className="flex items-center text-base text-muted-foreground">
+                      <Clock className="h-5 w-5 mr-2" />
+                      <span>
+                        {lastUpdated ? `Last saved: ${new Date(lastUpdated).toLocaleString()}` : "Not saved yet"}
+                      </span>
+                    </div>
+                    <div className="flex gap-4 w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        className="border-background-80 text-muted-foreground hover:bg-background-90 bg-transparent flex-1 sm:flex-none h-14 text-base"
+                        onClick={() => {
+                          setBusinessProfile(fetchedBusinessDescription || "")
+                        }}
+                        disabled={isLoading}
+                      >
+                        {fetchedBusinessDescription ? "Reset Changes" : "Clear"}
+                      </Button>
+                      <Button
+                        className="bg-light-blue hover:bg-light-blue/90 text-white flex-1 sm:flex-none h-14 text-base sm:text-lg font-medium px-8"
+                        onClick={handleSaveProfile}
+                        disabled={isSaving || !businessProfile.trim() || isLoading}
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                            Saving...
+                          </>
+                        ) : saveSuccess ? (
+                          <>
+                            <CheckCircle className="h-5 w-5 mr-3" />
+                            Saved!
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-5 w-5 mr-3" />
+                            Save & Continue
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Helpful Tips - Larger */}
-            <Alert className="bg-blue-500/10 border-blue-500/30 p-6 sm:p-8">
-              <Info className="h-6 w-6 text-blue-400" />
-              <AlertTitle className="text-blue-400 font-semibold text-lg sm:text-xl">
-                Tips for Better Auto-Replies
-              </AlertTitle>
-              <AlertDescription className="text-blue-300 text-base sm:text-lg">
-                <ul className="list-disc list-inside space-y-3 mt-4">
-                  <li>List your products or services with their prices</li>
-                  <li>Include your business hours and location</li>
-                  <li>Add answers to questions customers ask a lot</li>
-                  <li>Mention any current deals or promotions</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
-          </TabsContent>
+              <Alert className="bg-blue-500/10 border-blue-500/30 p-6 sm:p-8">
+                <Info className="h-6 w-6 text-blue-400" />
+                <AlertTitle className="text-blue-400 font-semibold text-lg sm:text-xl">
+                  Tips for Better Auto-Replies
+                </AlertTitle>
+                <AlertDescription className="text-blue-300 text-base sm:text-lg">
+                  <ul className="list-disc list-inside space-y-3 mt-4">
+                    <li>List your products or services with their prices</li>
+                    <li>Include your business hours and location</li>
+                    <li>Add answers to questions customers ask a lot</li>
+                    <li>Mention any current deals or promotions</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            </TabsContent>
 
-          {/* Automation Tab */}
-          <TabsContent value="automation" className="space-y-8 mt-8">
-            {showTip && <ContextCard context="response" onClose={() => setShowTip(false)} />}
+            {/* Automation Tab - PRO VERSION */}
+            <TabsContent value="automation" className="space-y-8 mt-8">
+              {showTip && <ContextCard context="response" onClose={() => setShowTip(false)} />}
 
-            <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
-              <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center mb-4">
-                <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
-                Choose Your Reply Style
-              </h3>
+              <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+                <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center mb-4">
+                  <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
+                  Choose Your Reply Style
+                </h3>
 
-              <p className="text-muted-foreground text-base sm:text-lg mb-8 ml-10 sm:ml-11 lg:ml-12">
-                Pick how you want to automatically reply when someone comments on your Instagram posts:
-              </p>
+                <p className="text-muted-foreground text-base sm:text-lg mb-8 ml-10 sm:ml-11 lg:ml-12">
+                  Pick how you want to automatically reply when someone comments on your Instagram posts:
+                </p>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {AUTOMATION_LISTENERS.map((listener) =>
-                  listener.type === "SMARTAI" ? (
-                    <SubscriptionPlan key={listener.type} type="PRO">
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => onSetListener(listener.type)}
-                        className={cn(
-                          Listener === listener.type
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {AUTOMATION_LISTENERS.map((listener) => (
+                    <motion.div
+                      key={listener.type}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => onSetListener(listener.type)}
+                      className={cn(
+                        Listener === listener.type
+                          ? listener.type === "SMARTAI"
                             ? "bg-gradient-to-br from-[#7C21D6] to-[#4A1480] border-purple-500/50"
-                            : "bg-background-90 border-background-80 hover:border-purple-500/30",
-                          "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
-                        )}
-                      >
-                        <div className="flex gap-x-4 items-center">
-                          <div className="p-3 sm:p-4 rounded-xl bg-purple-500/20">{listener.icon}</div>
-                          <div>
-                            <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
+                            : "bg-gradient-to-br from-[#3352CC] to-[#1C2D70] border-blue-500/50"
+                          : listener.type === "SMARTAI"
+                            ? "bg-background-90 border-background-80 hover:border-purple-500/30"
+                            : "bg-background-90 border-background-80 hover:border-blue-500/30",
+                        "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
+                      )}
+                    >
+                      <div className="flex gap-x-4 items-center">
+                        <div
+                          className={cn(
+                            "p-3 sm:p-4 rounded-xl",
+                            listener.type === "SMARTAI" ? "bg-purple-500/20" : "bg-blue-500/20",
+                          )}
+                        >
+                          {listener.icon}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
+                          {listener.type === "SMARTAI" && (
                             <Badge
                               variant="outline"
                               className="text-sm bg-purple-500/20 border-purple-500/30 text-purple-300 mt-2"
                             >
                               PRO Feature
                             </Badge>
-                          </div>
+                          )}
                         </div>
-                        <p className="text-base sm:text-lg text-gray-300">{listener.description}</p>
-                      </motion.div>
-                    </SubscriptionPlan>
-                  ) : (
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => onSetListener(listener.type)}
-                      key={listener.id}
-                      className={cn(
-                        Listener === listener.type
-                          ? "bg-gradient-to-br from-[#3352CC] to-[#1C2D70] border-blue-500/50"
-                          : "bg-background-90 border-background-80 hover:border-blue-500/30",
-                        "p-6 sm:p-8 rounded-2xl flex flex-col gap-y-4 cursor-pointer transition-all duration-200 h-full border-2",
-                      )}
-                    >
-                      <div className="flex gap-x-4 items-center">
-                        <div className="p-3 sm:p-4 rounded-xl bg-blue-500/20">{listener.icon}</div>
-                        <p className="font-semibold text-lg sm:text-xl text-white">{listener.label}</p>
                       </div>
                       <p className="text-base sm:text-lg text-gray-300">{listener.description}</p>
                     </motion.div>
-                  ),
-                )}
-              </div>
+                  ))}
+                </div>
 
-              <form onSubmit={handleFormSubmit} className="flex flex-col gap-6">
-                {Listener && (
-                  <>
-                    {/* AI Instructions */}
-                    <div className="space-y-4">
-                      <Label
-                        htmlFor="prompt"
-                        className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
-                      >
-                        {Listener === "SMARTAI" ? "Tell the AI How to Reply" : "Manually write the DM reply"}
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-sm text-base p-4">
-                              <p>
-                                {Listener === "SMARTAI"
-                                  ? "Give the AI instructions on how to respond to customers. It will use your business profile to craft personalized replies."
-                                  : "Write what message you want to be sent to their Dm."}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </Label>
-                      <Textarea
-                        {...register("prompt")}
-                        id="prompt"
-                        name="prompt"
-                        placeholder={promptPlaceholder + "|"}
-                        className="min-h-[200px] sm:min-h-[250px] lg:min-h-[300px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
-                        rows={6}
-                      />
-                    </div>
-
-                    <SubscriptionPlan type="PRO">
+                <form onSubmit={handleFormSubmit} className="flex flex-col gap-6">
+                  {Listener && (
+                    <>
                       <div className="space-y-4">
-                        <ReplyVariationsManager
-                          baseReply={baseCommentReply}
-                          onBaseReplyChange={setBaseCommentReply}
-                          value={replyVariations}
-                          onChange={setReplyVariations}
+                        <Label
+                          htmlFor="prompt"
+                          className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
+                        >
+                          {Listener === "SMARTAI" ? "Tell the AI How to Reply" : "Manually write the DM reply"}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm text-base p-4">
+                                <p>
+                                  {Listener === "SMARTAI"
+                                    ? "Give the AI instructions on how to respond to customers. It will use your business profile to craft personalized replies."
+                                    : "Write what message you want to be sent to their DM."}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
+                        <Textarea
+                          {...register("prompt")}
+                          id="prompt"
+                          name="prompt"
+                          placeholder={promptPlaceholder + "|"}
+                          className="min-h-[200px] sm:min-h-[250px] lg:min-h-[300px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
+                          rows={6}
                         />
                       </div>
-                    </SubscriptionPlan>
 
-                    <Button
-                      type="submit"
-                      className="w-full h-16 text-lg sm:text-xl font-semibold bg-light-blue hover:bg-light-blue/90 mt-4"
-                      disabled={isPending}
-                    >
-                      {isPending ? (
-                        <>
-                          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                          Saving Your Auto-Reply...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-3 h-6 w-6" />
-                          Save & Start Auto-Replying
-                        </>
-                      )}
-                    </Button>
-                  </>
-                )}
+                      <SubscriptionPlan type="PRO">
+                        <div className="space-y-4">
+                          <ReplyVariationsManager
+                            baseReply={baseCommentReply}
+                            onBaseReplyChange={setBaseCommentReply}
+                            value={replyVariations}
+                            onChange={setReplyVariations}
+                          />
+                        </div>
+                      </SubscriptionPlan>
 
-                {!Listener && (
-                  <div className="text-center py-12 sm:py-16 lg:py-20 border-2 border-dashed border-background-80 rounded-2xl">
-                    <MessageSquare className="h-16 w-16 sm:h-20 sm:w-20 mx-auto mb-6 text-muted-foreground" />
-                    <p className="text-muted-foreground text-lg sm:text-xl">
-                      Choose a reply style above to get started
-                    </p>
-                  </div>
-                )}
+                      <Button
+                        type="submit"
+                        className="w-full h-16 text-lg sm:text-xl font-semibold bg-light-blue hover:bg-light-blue/90 mt-4"
+                        disabled={isPending}
+                      >
+                        {isPending ? (
+                          <>
+                            <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                            Saving Your Auto-Reply...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-3 h-6 w-6" />
+                            Save & Start Auto-Replying
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  )}
+
+                  {!Listener && (
+                    <div className="text-center py-12 sm:py-16 lg:py-20 border-2 border-dashed border-background-80 rounded-2xl">
+                      <MessageSquare className="h-16 w-16 sm:h-20 sm:w-20 mx-auto mb-6 text-muted-foreground" />
+                      <p className="text-muted-foreground text-lg sm:text-xl">
+                        Choose a reply style above to get started
+                      </p>
+                    </div>
+                  )}
+                </form>
+              </div>
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <div className="space-y-8">
+            {showTip && <ContextCard context="response" onClose={() => setShowTip(false)} />}
+
+            {/* Main Form for FREE Users */}
+            <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl">
+              <h3 className="text-white font-semibold text-xl sm:text-2xl lg:text-3xl flex items-center mb-4">
+                <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mr-4 text-light-blue" />
+                Set Up Your Auto-Replies
+              </h3>
+
+              <p className="text-muted-foreground text-base sm:text-lg mb-8 ml-10 sm:ml-11 lg:ml-12">
+                Write the messages that will be sent automatically when someone comments on your posts.
+              </p>
+
+              <form onSubmit={handleFormSubmit} className="flex flex-col gap-8">
+                {/* DM Message Field */}
+                <div className="space-y-4">
+                  <Label
+                    htmlFor="dm-message"
+                    className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
+                  >
+                    Message to Send in DMs
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm text-base p-4">
+                          <p>This message will be sent directly to the user's DMs when they comment on your post.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Textarea
+                    id="dm-message"
+                    placeholder={dmPlaceholder + "|"}
+                    className="min-h-[150px] sm:min-h-[180px] lg:min-h-[200px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
+                    value={dmMessage}
+                    onChange={(e) => setDmMessage(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+
+                {/* Comment Reply Field */}
+                <div className="space-y-4">
+                  <Label
+                    htmlFor="comment-reply"
+                    className="text-lg sm:text-xl font-medium flex items-center gap-3 text-white"
+                  >
+                    Reply to Their Comment
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm text-base p-4">
+                          <p>
+                            This message will be posted as a reply to their comment, letting them know to check their
+                            DMs.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Textarea
+                    id="comment-reply"
+                    placeholder={commentPlaceholder + "|"}
+                    className="min-h-[120px] sm:min-h-[150px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
+                    value={commentReply}
+                    onChange={(e) => setCommentReply(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-16 text-lg sm:text-xl font-semibold bg-light-blue hover:bg-light-blue/90 mt-4"
+                  disabled={isPending || !dmMessage.trim() || !commentReply.trim()}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                      Saving Your Auto-Reply...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-3 h-6 w-6" />
+                      Save & Start Auto-Replying
+                    </>
+                  )}
+                </Button>
               </form>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            {/* PRO Features Preview - Visible but Disabled for FREE Users */}
+            <div className="bg-background-80 p-6 sm:p-8 lg:p-10 rounded-2xl border-2 border-dashed border-purple-500/30">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-white font-semibold text-xl sm:text-2xl flex items-center">
+                  <Crown className="h-6 w-6 sm:h-7 sm:w-7 mr-4 text-purple-400" />
+                  PRO Features
+                </h3>
+                <Badge
+                  variant="outline"
+                  className="bg-purple-500/10 border-purple-500/30 text-purple-300 text-sm px-3 py-1"
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Upgrade to Unlock
+                </Badge>
+              </div>
+
+              <div className="space-y-6 opacity-60">
+                {/* AI-Powered Replies Preview */}
+                <SubscriptionPlan type="PRO">
+                  <div className="p-6 rounded-xl bg-background-90 border border-purple-500/20 cursor-pointer hover:border-purple-500/40 transition-colors">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-purple-500/20">
+                        <Zap className="h-6 w-6 text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className="font-semibold text-lg text-white">AI-Powered Smart Replies</p>
+                          <Lock className="h-4 w-4 text-purple-400" />
+                        </div>
+                        <p className="text-muted-foreground">
+                          Let AI craft personalized responses based on your business profile. Each reply is unique and
+                          contextual.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </SubscriptionPlan>
+
+                {/* Business Profile Preview */}
+                <SubscriptionPlan type="PRO">
+                  <div className="p-6 rounded-xl bg-background-90 border border-purple-500/20 cursor-pointer hover:border-purple-500/40 transition-colors">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-purple-500/20">
+                        <Briefcase className="h-6 w-6 text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className="font-semibold text-lg text-white">Business Profile for AI Context</p>
+                          <Lock className="h-4 w-4 text-purple-400" />
+                        </div>
+                        <p className="text-muted-foreground">
+                          Add your business details so AI knows about your products, prices, and hours to give accurate
+                          replies.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </SubscriptionPlan>
+
+                {/* Reply Variations Preview */}
+                <SubscriptionPlan type="PRO">
+                  <div className="p-6 rounded-xl bg-background-90 border border-purple-500/20 cursor-pointer hover:border-purple-500/40 transition-colors">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-purple-500/20">
+                        <MessageSquare className="h-6 w-6 text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className="font-semibold text-lg text-white">Reply Variations</p>
+                          <Lock className="h-4 w-4 text-purple-400" />
+                        </div>
+                        <p className="text-muted-foreground">
+                          Create multiple reply variations so your responses don't look robotic. Instagram loves
+                          variety!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </SubscriptionPlan>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </FloatingPanel>
   )
