@@ -4116,7 +4116,11 @@ export function SocialIntegrationsPage({
 
   // Transform real user data into the format needed for our components
   const transformUserData = () => {
+    console.log("[v0] userData:", userData)
+    console.log("[v0] userData.integrations:", userData?.integrations)
+
     if (!userData?.integrations || !Array.isArray(userData.integrations)) {
+      console.log("[v0] No integrations found or not an array")
       return {
         instagram: [],
       }
@@ -4125,23 +4129,27 @@ export function SocialIntegrationsPage({
     try {
       const instagramAccounts = userData.integrations
         .filter((integration: any) => integration && integration.name === "INSTAGRAM")
-        .map((integration: any) => ({
-          id: integration.id || `instagram-${Math.random().toString(36).substr(2, 9)}`,
-          username: integration.username || integration.instagramId || "",
-          avatar: integration.profilePicture || "",
-          isActive: true,
-          accessToken: integration.token,
-          fullName: integration.fullName || "",
-          followersCount: integration.followersCount || undefined,
-          followingCount: integration.followingCount || undefined,
-          postsCount: integration.postsCount || undefined,
-        }))
+        .map((integration: any) => {
+          console.log("[v0] Raw Instagram integration:", integration)
+          return {
+            id: integration.id || `instagram-${Math.random().toString(36).substr(2, 9)}`,
+            username: integration.username || integration.instagramId || "",
+            avatar: integration.profilePicture || "",
+            isActive: true,
+            accessToken: integration.token,
+            fullName: integration.fullName || "",
+            followersCount: integration.followersCount || undefined,
+            followingCount: integration.followingCount || undefined,
+            postsCount: integration.postsCount || undefined,
+          }
+        })
 
+      console.log("[v0] Transformed Instagram accounts:", instagramAccounts)
       return {
         instagram: instagramAccounts,
       }
     } catch (error) {
-      console.error("Error transforming user data:", error)
+      console.error("[v0] Error transforming user data:", error)
       return {
         instagram: [],
       }
@@ -4149,6 +4157,7 @@ export function SocialIntegrationsPage({
   }
 
   const connectedAccounts = transformUserData()
+  console.log("[v0] connectedAccounts:", connectedAccounts)
 
   // Enhanced OAuth connection handler with optimistic UI
   const handleOAuthConnection = async (platform: string, strategy: IntegrationStrategy) => {
