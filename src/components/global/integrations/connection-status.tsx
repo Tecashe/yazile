@@ -331,7 +331,7 @@ export function ConnectionStatus({
                 <>
                   <Wifi className={cn("h-4 w-4", config.color)} />
                   <span className="text-sm font-medium text-foreground">
-                    {activeAccounts.length}/{totalAccounts}
+                    {activeAccounts.length}
                   </span>
                 </>
               ) : (
