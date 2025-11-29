@@ -81,7 +81,7 @@ export default function Layout({
             }}
           />
           
-          {/* Secondary overlay images for depth */}
+      
           <div 
             className="absolute top-0 right-0 w-1/2 h-1/2 bg-cover bg-center bg-no-repeat opacity-15 rotate-12 bg-float-reverse"
             style={{
