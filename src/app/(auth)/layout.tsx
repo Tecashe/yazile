@@ -339,9 +339,6 @@ const imageSets = {
     "/images/auth/ecommerce-1.jpg",
     "/images/auth/ecommerce-2.jpg",
     "/images/auth/ecommerce-3.jpg",
-    "/images/auth/ecommerce-4.jpg",
-    "/images/auth/ecommerce-5.jpg",
-    "/images/auth/ecommerce-6.jpg",
   ],
 }
 
@@ -369,10 +366,10 @@ function BentoCell({ cellIndex, direction, parallax, mousePosition, className = 
         setTimeout(() => {
           setCurrentSetIndex((prev) => (prev + 1) % 3)
           setIsTransitioning(false)
-        }, 600)
+        }, 2000)
       },
-      3000 + cellIndex * 500,
-    ) // Stagger the transitions
+      8000 + cellIndex * 1500,
+    )
 
     return () => clearInterval(interval)
   }, [cellIndex])
@@ -419,13 +416,13 @@ function BentoCell({ cellIndex, direction, parallax, mousePosition, className = 
         <img
           src={currentImage || "/placeholder.svg"}
           alt=""
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-600 ease-out ${getTransitionClasses()}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-[2000ms] ease-in-out ${getTransitionClasses()}`}
         />
         {/* Next Image (slides in) */}
         <img
           src={nextImage || "/placeholder.svg"}
           alt=""
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-600 ease-out ${
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-[2000ms] ease-in-out ${
             isTransitioning ? "translate-x-0 translate-y-0 opacity-100" : `${getEnterClasses()} opacity-0`
           }`}
         />
@@ -457,12 +454,7 @@ export default function AuthLayout({
   const parallaxValues = [0.4, -0.3, 0.5, -0.4, 0.3, -0.5]
 
   return (
-    <div className="h-screen bg-slate-50 relative overflow-hidden flex">
-      {/* Subtle decorative background */}
-      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-coral/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-mint/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" />
-      <div className="absolute top-1/2 left-1/3 w-[400px] h-[400px] bg-sunflower/5 rounded-full blur-3xl" />
-
+    <div className="h-screen bg-coral relative overflow-hidden flex">
       {/* Left Side - Bento Grid */}
       <div className="hidden lg:flex flex-1 items-center justify-center p-6 xl:p-10">
         <div
@@ -533,8 +525,8 @@ export default function AuthLayout({
         >
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-14 h-14 bg-coral rounded-2xl flex items-center justify-center shadow-xl shadow-coral/25">
-              <Instagram className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/10">
+              <Instagram className="w-7 h-7 text-coral" />
             </div>
           </div>
 
@@ -542,7 +534,7 @@ export default function AuthLayout({
           <Suspense
             fallback={
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-coral" />
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
               </div>
             }
           >
