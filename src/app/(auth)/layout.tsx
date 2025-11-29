@@ -71,9 +71,9 @@ export default function Layout({
       `}</style>
 
       <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-        {/* Background Images with Subtle Movement */}
+       
         <div className="absolute inset-0 z-0">
-          {/* Main background image */}
+        
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 bg-float"
             style={{
