@@ -339,6 +339,9 @@ const imageSets = {
     "/images/auth/ecommerce-1.jpg",
     "/images/auth/ecommerce-2.jpg",
     "/images/auth/ecommerce-3.jpg",
+    "/images/auth/ecommerce-4.jpg",
+    "/images/auth/ecommerce-5.jpg",
+    "/images/auth/ecommerce-6.jpg",
   ],
 }
 
@@ -366,9 +369,9 @@ function BentoCell({ cellIndex, direction, parallax, mousePosition, className = 
         setTimeout(() => {
           setCurrentSetIndex((prev) => (prev + 1) % 3)
           setIsTransitioning(false)
-        }, 2000)
+        }, 1500) // Transition takes 1.5 seconds
       },
-      8000 + cellIndex * 1500,
+      12000 + cellIndex * 2000, // 12-22 seconds per cell before switching
     )
 
     return () => clearInterval(interval)
