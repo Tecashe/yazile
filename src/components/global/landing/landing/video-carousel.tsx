@@ -289,7 +289,7 @@ const videos: VideoCard[] = [
   },
 ]
 
-export default function VideoCarousel() {
+export function VideoCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
