@@ -77,7 +77,7 @@ export default function Layout({
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 bg-float"
             style={{
-              backgroundImage: "url('/images/bg-main.png')"
+              backgroundImage: "url('/images/bg-main.jpg')"
             }}
           />
           
