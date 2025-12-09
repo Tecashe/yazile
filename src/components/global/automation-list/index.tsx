@@ -6844,7 +6844,7 @@ const AutomationList = ({ id }: Props) => {
     return <AutomationListSkeleton />
   }
 
-  if (!automations.length) {
+  if (!isLoading && !data?.data?.length) {
     return (
       <div className="min-h-screen bg-background">
         <AnimatePresence>
