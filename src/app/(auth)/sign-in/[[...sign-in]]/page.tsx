@@ -223,22 +223,7 @@ const Page = (props: Props) => {
 
       {/* SignIn Component */}
       <div className="w-full max-w-sm">
-        <SignIn
-              appearance={{
-                baseTheme: dark,
-                elements: {
-                  rootBox: "w-full",
-                  card: "bg-white shadow-none",
-                  headerTitle: "text-neutral-900",
-                  headerSubtitle: "text-neutral-500",
-                  socialButtonsBlockButton: "bg-neutral-100 border-neutral-200 text-neutral-900 hover:bg-neutral-200",
-                  formFieldLabel: "text-neutral-700",
-                  formFieldInput: "bg-neutral-50 border-neutral-200 text-neutral-900",
-                  formButtonPrimary: "bg-neutral-900 hover:bg-neutral-800",
-                  footerActionLink: "text-neutral-900 hover:text-neutral-700",
-                },
-              }}
-            />
+        <SignIn/>
         {/* <SignIn
           appearance={{
             elements: {
