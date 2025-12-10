@@ -717,6 +717,710 @@
 // export default BusinessOnboarding
 
 
+// "use client"
+
+// import { useState, useEffect, useCallback, useMemo } from "react"
+// import { motion, AnimatePresence } from "framer-motion"
+// import {
+//   Globe,
+//   Building,
+//   MessageSquare,
+//   Sparkles,
+//   ArrowRight,
+//   Check,
+//   Loader2,
+//   Rocket,
+//   Target,
+//   Users,
+//   TrendingUp,
+//   CreditCard,
+//   ShoppingBag,
+//   Calendar,
+//   Headphones,
+//   FileText,
+//   Star,
+//   MessageCircle,
+//   Zap,
+//   ArrowLeft,
+// } from "lucide-react"
+// import { createBusinessProfile, getUserAutomations } from "@/actions/business"
+// import { createAutomationGoals } from "@/actions/business/automationgoals"
+// import { toast } from "@/hooks/use-toast"
+// import { useRouter } from "next/navigation"
+
+// // Type definitions
+// interface Automation {
+//   id: string
+//   name: string
+//   active: boolean
+//   platform: string
+//   createdAt: Date
+// }
+
+// interface FormData {
+//   businessName: string
+//   businessType: string
+//   businessDescription: string
+//   website: string
+//   responseLanguage: string
+//   automationGoals: string[]
+// }
+
+// const BusinessOnboarding = () => {
+//   const [currentStep, setCurrentStep] = useState<number>(0)
+//   const [formData, setFormData] = useState<FormData>({
+//     businessName: "",
+//     businessType: "",
+//     businessDescription: "",
+//     website: "",
+//     responseLanguage: "English",
+//     automationGoals: [],
+//   })
+//   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+//   const [isComplete, setIsComplete] = useState<boolean>(false)
+//   const [availableAutomations, setAvailableAutomations] = useState<Automation[]>([])
+//   const router = useRouter()
+
+//   useEffect(() => {
+//     const fetchAutomations = async () => {
+//       try {
+//         const result = await getUserAutomations()
+//         if (result.status === 200) {
+//           setAvailableAutomations(result.data as Automation[])
+//         }
+//       } catch (error) {
+//         console.error("Error fetching automations:", error)
+//       }
+//     }
+//     fetchAutomations()
+//   }, [])
+
+//   const steps = [
+//     {
+//       id: "welcome",
+//       title: "Welcome to Yazzil Automations",
+//       subtitle: "Transform your DMs into a powerful business tool",
+//     },
+//     { id: "basics", title: "Tell Us About Your Business", subtitle: "Basic information to get started" },
+//     { id: "details", title: "Business Details", subtitle: "Help us understand what you do" },
+//     { id: "goals", title: "Automation Goals", subtitle: "What do you want to achieve with DM automation?" },
+//     { id: "preferences", title: "Communication Preferences", subtitle: "How should we interact with your customers?" },
+//   ]
+
+//   const businessTypes = [
+//     "E-commerce",
+//     "SaaS",
+//     "Consulting",
+//     "Healthcare",
+//     "Education",
+//     "Real Estate",
+//     "Finance",
+//     "Marketing Agency",
+//     "Restaurant",
+//     "Retail",
+//     "Fitness & Wellness",
+//     "Beauty & Cosmetics",
+//     "Other",
+//   ]
+
+//   const languages = [
+//     "English",
+//     "Spanish",
+//     "French",
+//     "German",
+//     "Italian",
+//     "Portuguese",
+//     "Chinese",
+//     "Japanese",
+//     "Arabic",
+//     "Other",
+//   ]
+
+//   const automationGoals = [
+//     {
+//       id: "payments",
+//       title: "Payment Processing",
+//       description: "Generate and send payment links directly in DMs",
+//       icon: CreditCard,
+//       color: "from-orange-500 to-red-500",
+//       popular: true,
+//     },
+//     {
+//       id: "ecommerce",
+//       title: "E-commerce Integration",
+//       description: "Product recommendations, inventory checks, and order management",
+//       icon: ShoppingBag,
+//       color: "from-emerald-500 to-teal-500",
+//       popular: true,
+//     },
+//     {
+//       id: "booking",
+//       title: "Appointment Booking",
+//       description: "Schedule meetings, consultations, and service appointments",
+//       icon: Calendar,
+//       color: "from-blue-500 to-cyan-500",
+//       popular: true,
+//     },
+//     {
+//       id: "support",
+//       title: "Customer Support",
+//       description: "24/7 customer service, FAQ responses, and issue resolution",
+//       icon: Headphones,
+//       color: "from-purple-500 to-pink-500",
+//       popular: false,
+//     },
+//     {
+//       id: "lead_qualification",
+//       title: "Lead Qualification",
+//       description: "Qualify prospects and collect contact information automatically",
+//       icon: Users,
+//       color: "from-amber-500 to-orange-500",
+//       popular: true,
+//     },
+//     {
+//       id: "content_delivery",
+//       title: "Content & Resources",
+//       description: "Share PDFs, guides, catalogs, and educational materials",
+//       icon: FileText,
+//       color: "from-indigo-500 to-violet-500",
+//       popular: false,
+//     },
+//     {
+//       id: "reviews_feedback",
+//       title: "Reviews & Feedback",
+//       description: "Collect customer reviews and feedback automatically",
+//       icon: Star,
+//       color: "from-yellow-500 to-amber-500",
+//       popular: false,
+//     },
+//     {
+//       id: "personalized_messaging",
+//       title: "Personalized Marketing",
+//       description: "Send targeted offers and personalized messages based on user behavior",
+//       icon: MessageCircle,
+//       color: "from-rose-500 to-pink-500",
+//       popular: true,
+//     },
+//   ]
+
+//   const handleInputChange = useCallback((field: keyof FormData, value: string) => {
+//     setFormData((prev) => ({ ...prev, [field]: value }))
+//   }, [])
+
+//   const toggleGoal = useCallback((goalId: string) => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       automationGoals: prev.automationGoals.includes(goalId)
+//         ? prev.automationGoals.filter((id) => id !== goalId)
+//         : [...prev.automationGoals, goalId],
+//     }))
+//   }, [])
+
+//   const handleNext = () => {
+//     if (currentStep < steps.length - 1) {
+//       setCurrentStep((prev) => prev + 1)
+//     } else {
+//       handleSubmit()
+//     }
+//   }
+
+//   const handleSubmit = async () => {
+//     setIsSubmitting(true)
+//     try {
+//       const automationId = availableAutomations.length > 0 ? availableAutomations[0].id : undefined
+//       const businessData = {
+//         businessName: formData.businessName,
+//         businessType: formData.businessType,
+//         businessDescription: formData.businessDescription,
+//         website: formData.website,
+//         responseLanguage: formData.responseLanguage,
+//         automationId,
+//       }
+
+//       const result = await createBusinessProfile(businessData)
+
+//       if (result.status === 201 && result.data) {
+//         if (formData.automationGoals.length > 0) {
+//           await createAutomationGoals(result.data.id, formData.automationGoals)
+//         }
+//         setIsComplete(true)
+//         toast({
+//           title: "Success! 🎉",
+//           description: "Your business profile has been created successfully.",
+//           variant: "default",
+//         })
+//       } else {
+//         throw new Error(result.error || "Failed to create business profile")
+//       }
+//     } catch (error) {
+//       console.error("Error creating business profile:", error)
+//       toast({
+//         title: "Error",
+//         description: "Failed to create business profile. Please try again.",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setIsSubmitting(false)
+//     }
+//   }
+
+//   const canProceed = () => {
+//     switch (currentStep) {
+//       case 0:
+//         return true
+//       case 1:
+//         return formData.businessName.trim() && formData.businessType
+//       case 2:
+//         return formData.businessDescription.trim() && formData.website.trim()
+//       case 3:
+//         return formData.automationGoals.length > 0
+//       case 4:
+//         return formData.responseLanguage
+//       default:
+//         return false
+//     }
+//   }
+
+//   // Welcome Step - Bento Grid Layout
+//   const WelcomeStep = () => (
+//     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+//       {/* Hero Section */}
+//       <div className="text-center space-y-4">
+//         <motion.div
+//           initial={{ scale: 0 }}
+//           animate={{ scale: 1 }}
+//           transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+//           className="relative mx-auto w-20 h-20"
+//         >
+//           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] rounded-2xl blur-xl opacity-50" />
+//           <div className="relative glass-card rounded-2xl w-full h-full flex items-center justify-center">
+//             <Sparkles className="h-10 w-10 text-[hsl(var(--color-orange))]" />
+//           </div>
+//         </motion.div>
+//         <h2 className="text-3xl md:text-4xl font-bold text-foreground text-balance">Transform Your Instagram DMs</h2>
+//         <p className="text-muted-foreground max-w-xl mx-auto text-balance">
+//           Join thousands of businesses using AI to automate DMs, increase sales, and provide 24/7 customer support.
+//         </p>
+//       </div>
+
+//       {/* Bento Grid */}
+//       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//         {[
+//           {
+//             icon: Users,
+//             title: "Engage 24/7",
+//             desc: "Never miss a DM again",
+//             gradient: "from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))]",
+//           },
+//           {
+//             icon: TrendingUp,
+//             title: "Increase Sales",
+//             desc: "Convert more followers",
+//             gradient: "from-[hsl(var(--color-purple))] to-[hsl(var(--color-red))]",
+//           },
+//           {
+//             icon: Rocket,
+//             title: "Save Time",
+//             desc: "Automate repetitive tasks",
+//             gradient: "from-[hsl(var(--color-yellow))] to-[hsl(var(--color-orange))]",
+//           },
+//         ].map((feature, idx) => (
+//           <motion.div
+//             key={idx}
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             transition={{ delay: 0.2 + idx * 0.1 }}
+//             className="group glass-card glass-card-hover rounded-2xl p-6 relative overflow-hidden"
+//           >
+//             {/* Gradient accent */}
+//             <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${feature.gradient} opacity-80`} />
+//             <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.gradient} mb-4`}>
+//               <feature.icon className="h-6 w-6 text-white" />
+//             </div>
+//             <h3 className="font-semibold text-foreground mb-1">{feature.title}</h3>
+//             <p className="text-sm text-muted-foreground">{feature.desc}</p>
+//           </motion.div>
+//         ))}
+//       </div>
+//     </motion.div>
+//   )
+
+//   // Basics Step
+//   const BasicsStep = useMemo(
+//     () => (
+//       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+//         <div className="space-y-6">
+//           {/* Business Name */}
+//           <div className="glass-card rounded-2xl p-6">
+//             <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-4">
+//               <Building className="h-4 w-4 text-[hsl(var(--color-orange))]" />
+//               Business Name
+//             </label>
+//             <input
+//               key="businessName"
+//               type="text"
+//               value={formData.businessName}
+//               onChange={(e) => handleInputChange("businessName", e.target.value)}
+//               className="w-full px-4 py-3 glass-input rounded-xl text-foreground placeholder-muted-foreground focus:outline-none transition-all"
+//               placeholder="Enter your business name"
+//             />
+//           </div>
+
+//           {/* Business Type */}
+//           <div className="glass-card rounded-2xl p-6">
+//             <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-4">
+//               <Target className="h-4 w-4 text-[hsl(var(--color-purple))]" />
+//               Business Type
+//             </label>
+//             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+//               {businessTypes.map((type) => (
+//                 <motion.button
+//                   key={type}
+//                   whileHover={{ scale: 1.02 }}
+//                   whileTap={{ scale: 0.98 }}
+//                   onClick={() => handleInputChange("businessType", type)}
+//                   className={`p-3 rounded-xl text-sm font-medium transition-all border ${
+//                     formData.businessType === type
+//                       ? "bg-gradient-to-br from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] text-white border-transparent shadow-lg shadow-orange-500/20"
+//                       : "glass-card border-white/10 text-foreground hover:border-[hsl(var(--color-orange))/50]"
+//                   }`}
+//                 >
+//                   {type}
+//                 </motion.button>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+//     ),
+//     [formData.businessName, formData.businessType, handleInputChange],
+//   )
+
+//   // Details Step
+//   const DetailsStep = useMemo(
+//     () => (
+//       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+//         {/* Website URL */}
+//         <div className="glass-card rounded-2xl p-6">
+//           <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-4">
+//             <Globe className="h-4 w-4 text-[hsl(var(--color-orange))]" />
+//             Website URL
+//           </label>
+//           <div className="relative">
+//             <Globe className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+//             <input
+//               key="website"
+//               type="url"
+//               value={formData.website}
+//               onChange={(e) => handleInputChange("website", e.target.value)}
+//               className="w-full pl-12 pr-4 py-3 glass-input rounded-xl text-foreground placeholder-muted-foreground focus:outline-none transition-all"
+//               placeholder="https://yourwebsite.com"
+//             />
+//           </div>
+//         </div>
+
+//         {/* Business Description */}
+//         <div className="glass-card rounded-2xl p-6">
+//           <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-4">
+//             <FileText className="h-4 w-4 text-[hsl(var(--color-purple))]" />
+//             Business Description
+//           </label>
+//           <textarea
+//             key="businessDescription"
+//             value={formData.businessDescription}
+//             onChange={(e) => handleInputChange("businessDescription", e.target.value)}
+//             className="w-full px-4 py-3 glass-input rounded-xl text-foreground placeholder-muted-foreground focus:outline-none transition-all h-48 resize-none"
+//             placeholder="Provide a comprehensive description of your business including:
+
+// • What products or services you offer
+// • Who your target customers are
+// • Your unique value proposition
+// • Your brand voice and communication style
+
+// This helps our AI provide better, personalized responses."
+//           />
+//           <div className="flex justify-between items-center mt-3">
+//             <p className="text-xs text-muted-foreground">Detailed descriptions help our AI provide better responses.</p>
+//             <span className="text-xs text-muted-foreground px-2 py-1 glass-card rounded-full">
+//               {formData.businessDescription.length}/2000
+//             </span>
+//           </div>
+//         </div>
+//       </motion.div>
+//     ),
+//     [formData.website, formData.businessDescription, handleInputChange],
+//   )
+
+//   // Goals Step - Bento Grid
+//   const GoalsStep = () => (
+//     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+//       <div className="text-center mb-6">
+//         <p className="text-muted-foreground">Select your automation goals. You can always add more later.</p>
+//       </div>
+
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//         {automationGoals.map((goal, idx) => (
+//           <motion.div
+//             key={goal.id}
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             transition={{ delay: idx * 0.05 }}
+//             whileHover={{ scale: 1.02 }}
+//             whileTap={{ scale: 0.98 }}
+//             onClick={() => toggleGoal(goal.id)}
+//             className={`relative p-5 rounded-2xl cursor-pointer transition-all overflow-hidden ${
+//               formData.automationGoals.includes(goal.id)
+//                 ? "glass-card border-2 border-[hsl(var(--color-orange))]"
+//                 : "glass-card glass-card-hover border border-white/10"
+//             }`}
+//           >
+//             {/* Selected gradient overlay */}
+//             {formData.automationGoals.includes(goal.id) && (
+//               <div className={`absolute inset-0 bg-gradient-to-br ${goal.color} opacity-10`} />
+//             )}
+
+//             {/* Popular badge */}
+//             {goal.popular && (
+//               <div className="absolute -top-1 -right-1 bg-gradient-to-r from-[hsl(var(--color-yellow))] to-[hsl(var(--color-orange))] text-black text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+//                 Popular
+//               </div>
+//             )}
+
+//             <div className="relative flex items-start gap-4">
+//               <div className={`p-3 rounded-xl bg-gradient-to-br ${goal.color} shrink-0`}>
+//                 <goal.icon className="h-5 w-5 text-white" />
+//               </div>
+//               <div className="flex-1 min-w-0">
+//                 <h3 className="font-semibold text-foreground mb-1">{goal.title}</h3>
+//                 <p className="text-sm text-muted-foreground">{goal.description}</p>
+//               </div>
+//               {formData.automationGoals.includes(goal.id) && (
+//                 <div className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] flex items-center justify-center">
+//                   <Check className="h-4 w-4 text-white" />
+//                 </div>
+//               )}
+//             </div>
+//           </motion.div>
+//         ))}
+//       </div>
+
+//       <div className="text-center">
+//         <span className="inline-flex items-center gap-2 px-4 py-2 glass-card rounded-full text-sm text-muted-foreground">
+//           <Zap className="h-4 w-4 text-[hsl(var(--color-orange))]" />
+//           Selected: {formData.automationGoals.length} goal{formData.automationGoals.length !== 1 ? "s" : ""}
+//         </span>
+//       </div>
+//     </motion.div>
+//   )
+
+//   // Preferences Step
+//   const PreferencesStep = () => (
+//     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+//       <div className="glass-card rounded-2xl p-6">
+//         <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-4">
+//           <MessageSquare className="h-4 w-4 text-[hsl(var(--color-orange))]" />
+//           Preferred Response Language
+//         </label>
+//         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+//           {languages.map((language) => (
+//             <motion.button
+//               key={language}
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               onClick={() => handleInputChange("responseLanguage", language)}
+//               className={`p-3 rounded-xl text-sm font-medium transition-all border ${
+//                 formData.responseLanguage === language
+//                   ? "bg-gradient-to-br from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] text-white border-transparent shadow-lg shadow-orange-500/20"
+//                   : "glass-card border-white/10 text-foreground hover:border-[hsl(var(--color-orange))/50]"
+//               }`}
+//             >
+//               {language}
+//             </motion.button>
+//           ))}
+//         </div>
+//       </div>
+//     </motion.div>
+//   )
+
+//   // Success Step
+//   const SuccessStep = () => (
+//     <motion.div
+//       initial={{ opacity: 0, scale: 0.9 }}
+//       animate={{ opacity: 1, scale: 1 }}
+//       className="text-center space-y-8 py-8"
+//     >
+//       <motion.div
+//         initial={{ scale: 0 }}
+//         animate={{ scale: 1 }}
+//         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+//         className="relative mx-auto w-24 h-24"
+//       >
+//         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] rounded-full blur-xl opacity-50 animate-pulse" />
+//         <div className="relative glass-card rounded-full w-full h-full flex items-center justify-center border-2 border-[hsl(var(--color-orange))]">
+//           <Check className="h-12 w-12 text-[hsl(var(--color-orange))]" />
+//         </div>
+//       </motion.div>
+
+//       <div className="space-y-4">
+//         <h2 className="text-3xl md:text-4xl font-bold text-foreground">Welcome Aboard! 🚀</h2>
+//         <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+//           Your business profile has been created. You&apos;re now ready to set up your Instagram DM automation!
+//         </p>
+//       </div>
+
+//       {/* Selected Goals Summary */}
+//       <div className="glass-card rounded-2xl p-6 max-w-md mx-auto">
+//         <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2 justify-center">
+//           <Zap className="h-4 w-4 text-[hsl(var(--color-orange))]" />
+//           Selected Goals
+//         </h3>
+//         <div className="flex flex-wrap gap-2 justify-center">
+//           {formData.automationGoals.map((goalId) => {
+//             const goal = automationGoals.find((g) => g.id === goalId)
+//             return (
+//               <span
+//                 key={goalId}
+//                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-gradient-to-r ${goal?.color} text-white`}
+//               >
+//                 {goal?.icon && <goal.icon className="h-3.5 w-3.5" />}
+//                 {goal?.title}
+//               </span>
+//             )
+//           })}
+//         </div>
+//       </div>
+
+//       <motion.button
+//         whileHover={{ scale: 1.05 }}
+//         whileTap={{ scale: 0.95 }}
+//         onClick={() => router.push("/dashboard")}
+//         className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] text-white rounded-xl font-semibold shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all"
+//       >
+//         Continue to Dashboard
+//         <ArrowRight className="h-5 w-5" />
+//       </motion.button>
+//     </motion.div>
+//   )
+
+//   const renderStepContent = () => {
+//     if (isComplete) return <SuccessStep />
+//     switch (currentStep) {
+//       case 0:
+//         return <WelcomeStep />
+//       case 1:
+//         return BasicsStep
+//       case 2:
+//         return DetailsStep
+//       case 3:
+//         return <GoalsStep />
+//       case 4:
+//         return <PreferencesStep />
+//       default:
+//         return <WelcomeStep />
+//     }
+//   }
+
+//   if (isComplete) {
+//     return (
+//       <div className="min-h-screen bg-background flex items-center justify-center p-4">
+//         {/* Background gradient */}
+//         <div className="fixed inset-0 bg-gradient-to-br from-[hsl(var(--color-orange))/5] via-transparent to-[hsl(var(--color-purple))/5] pointer-events-none" />
+//         <div className="max-w-4xl mx-auto relative">
+//           <SuccessStep />
+//         </div>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-background p-4 md:p-8">
+//       {/* Background gradient effects */}
+//       <div className="fixed inset-0 bg-gradient-to-br from-[hsl(var(--color-orange))/5] via-transparent to-[hsl(var(--color-purple))/5] pointer-events-none" />
+//       <div className="fixed top-0 left-1/4 w-96 h-96 bg-[hsl(var(--color-orange))] rounded-full blur-[128px] opacity-10 pointer-events-none" />
+//       <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-[hsl(var(--color-purple))] rounded-full blur-[128px] opacity-10 pointer-events-none" />
+
+//       {/* Main Content */}
+//       <div className="max-w-4xl mx-auto relative">
+//         <motion.div layout className="glass-card bento-shadow-lg rounded-3xl p-6 md:p-10 relative overflow-hidden">
+//           {/* Decorative top accent */}
+//           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--color-orange))] via-[hsl(var(--color-red))] to-[hsl(var(--color-purple))]" />
+
+//           {/* Step Header */}
+//           <div className="text-center mb-8">
+//             <motion.h2
+//               key={`title-${currentStep}`}
+//               initial={{ opacity: 0, y: -10 }}
+//               animate={{ opacity: 1, y: 0 }}
+//               className="text-2xl md:text-3xl font-bold text-foreground mb-2 text-balance"
+//             >
+//               {steps[currentStep].title}
+//             </motion.h2>
+//             <motion.p
+//               key={`subtitle-${currentStep}`}
+//               initial={{ opacity: 0 }}
+//               animate={{ opacity: 1 }}
+//               className="text-muted-foreground"
+//             >
+//               {steps[currentStep].subtitle}
+//             </motion.p>
+//           </div>
+
+//           {/* Step Content */}
+//           <div className="min-h-[400px]">
+//             <AnimatePresence mode="wait">
+//               <div key={currentStep}>{renderStepContent()}</div>
+//             </AnimatePresence>
+//           </div>
+
+//           {/* Navigation */}
+//           <div className="flex justify-between items-center mt-8 pt-6 border-t border-white/10">
+//             <motion.button
+//               whileHover={{ x: -4 }}
+//               onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+//               disabled={currentStep === 0}
+//               className="flex items-center gap-2 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+//             >
+//               <ArrowLeft className="h-4 w-4" />
+//               Back
+//             </motion.button>
+
+//             <motion.button
+//               whileHover={{ scale: canProceed() ? 1.02 : 1 }}
+//               whileTap={{ scale: canProceed() ? 0.98 : 1 }}
+//               onClick={handleNext}
+//               disabled={!canProceed() || isSubmitting}
+//               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+//                 canProceed()
+//                   ? "bg-gradient-to-r from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] text-white shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40"
+//                   : "bg-muted text-muted-foreground cursor-not-allowed"
+//               }`}
+//             >
+//               {isSubmitting ? (
+//                 <>
+//                   <Loader2 className="h-4 w-4 animate-spin" />
+//                   Creating Profile...
+//                 </>
+//               ) : currentStep === steps.length - 1 ? (
+//                 <>
+//                   Complete Setup
+//                   <Check className="h-4 w-4" />
+//                 </>
+//               ) : (
+//                 <>
+//                   Continue
+//                   <ArrowRight className="h-4 w-4" />
+//                 </>
+//               )}
+//             </motion.button>
+//           </div>
+//         </motion.div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default BusinessOnboarding
+
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
@@ -725,7 +1429,6 @@ import {
   Globe,
   Building,
   MessageSquare,
-  Sparkles,
   ArrowRight,
   Check,
   Loader2,
@@ -994,7 +1697,7 @@ const BusinessOnboarding = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--color-orange))] to-[hsl(var(--color-red))] rounded-2xl blur-xl opacity-50" />
           <div className="relative glass-card rounded-2xl w-full h-full flex items-center justify-center">
-            <Sparkles className="h-10 w-10 text-[hsl(var(--color-orange))]" />
+            <img src="/branded-original.png" alt="Yazzil Logo" className="h-10 w-10" />
           </div>
         </motion.div>
         <h2 className="text-3xl md:text-4xl font-bold text-foreground text-balance">Transform Your Instagram DMs</h2>
