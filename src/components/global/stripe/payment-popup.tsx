@@ -36,7 +36,7 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro",
-    price: "$49.99",
+    price: "$15.00",
     period: "per month",
     icon: Zap,
     features: ["AI-powered Intelligent replies", "50 automations", "Detailed Sentiment Analysis","Lead Qualification and CRM intelligent syncing"],
