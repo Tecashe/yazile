@@ -605,7 +605,7 @@ export async function fetchEnhancedBusinessVariables(
       Logger.info("Skipping Voiceflow session upsert - missing required IDs or context")
     }
 
-    // Build enhanced variables with tenant informationn 
+    // Build enhanced variables with tenant information
     const result: Record<string, string> = {
       // Core business information
       business_profile: profileContent || "Professional business assistant",
