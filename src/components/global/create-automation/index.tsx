@@ -1698,7 +1698,7 @@ const CreateAutomation = ({
           </div>
 
           {/* Usage Text */}
-          <div className="flex items-center justify-between mt-1.5">
+          {/* <div className="flex items-center justify-between mt-1.5">
             <span
               className={`text-xs font-medium ${
                 isAtLimit ? "text-red-600" : isNearLimit ? "text-yellow-600" : "text-gray-600 dark:text-gray-400"
@@ -1707,7 +1707,7 @@ const CreateAutomation = ({
               {currentAutomationCount} / {automationLimit} automations
             </span>
             {getPlanBadge()}
-          </div>
+          </div> */}
         </div>
       </motion.div>
 
