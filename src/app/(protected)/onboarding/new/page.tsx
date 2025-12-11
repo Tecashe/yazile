@@ -2068,7 +2068,7 @@ This helps our AI provide better, personalized responses."
             </motion.p>
           </div>
 
-          {/* Step Content */}
+          {/* Step Content*/}
           <div className="min-h-[400px]">
             <AnimatePresence mode="wait">
               <div key={currentStep}>{renderStepContent()}</div>
