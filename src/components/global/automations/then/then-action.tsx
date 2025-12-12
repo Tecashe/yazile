@@ -10481,7 +10481,6 @@ const ThenAction = ({
                           placeholder={promptPlaceholder + "|"}
                           className="min-h-[200px] sm:min-h-[250px] lg:min-h-[300px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
                           rows={6}
-                          defaultValue={existingListener?.prompt || ""}
                         />
                       </div>
 
@@ -10571,7 +10570,6 @@ const ThenAction = ({
                     value={dmMessage}
                     onChange={(e) => setDmMessage(e.target.value)}
                     rows={4}
-                    defaultValue={existingListener?.prompt || ""}
                   />
                 </div>
 
@@ -10603,7 +10601,6 @@ const ThenAction = ({
                     value={commentReply}
                     onChange={(e) => setCommentReply(e.target.value)}
                     rows={3}
-                    defaultValue={existingListener?.commentReply || ""}
                   />
                 </div>
 

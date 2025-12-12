@@ -1037,8 +1037,8 @@ const ThenNode = ({ id, theme = { id: "blue", name: "Blue", primary: "light-blue
                   <div className="mt-6">
                     <FloatingPanel
                       trigger={
-                        <Button variant="outline" className="w-full h-12 text-base bg-transparent">
-                          <Settings className="mr-2 h-5 w-5" />
+                        <Button variant="outline" size="default" className="h-10 bg-transparent">
+                          <Settings className="mr-2 h-4 w-4" />
                           Configure Response
                         </Button>
                       }
