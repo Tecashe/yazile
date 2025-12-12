@@ -2432,8 +2432,8 @@ const Trigger = ({ id }: Props) => {
           </>
         )}
 
-        {/* {!data.data.listener && <ThenAction id={id} />} */}
-        <ThenAction id={id} />
+        {!data.data.listener && <ThenAction id={id} />}
+        
       </div>
     )
   }
