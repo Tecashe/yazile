@@ -1,6 +1,5 @@
 import { getAutomationInfo } from "@/actions/automations"
 import PostNode from "@/components/global/automations/post/node"
-import ThenAction from "@/components/global/automations/then/then-action"
 import Trigger from "@/components/global/automations/trigger"
 import AutomationsBreadCrumb from "@/components/global/bread-crumbs/automations"
 
@@ -62,10 +61,6 @@ const Page = async ({ params }: Props) => {
             <h2 className="text-lg sm:text-xl font-semibold text-white/90">When...</h2>
           </div>
           <Trigger id={params.id} />
-        </div>
-
-        <div className="w-full max-w-7xl">
-          <ThenAction id={params.id} />
         </div>
 
         {/* Post section */}
