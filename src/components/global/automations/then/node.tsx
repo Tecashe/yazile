@@ -745,6 +745,7 @@ const ThenNode = ({
   onEdit,
 }: Props) => {
   const { data } = useQueryAutomation(id)
+  console.log("[v0] ThenNode render, onEdit=", typeof onEdit)
   const commentTrigger = data?.data?.trigger.find((t) => t.type === "COMMENT")
   const [copied, setCopied] = useState(false)
   const [businessProfile, setBusinessProfile] = useState<string | null>(null)
@@ -856,7 +857,15 @@ const ThenNode = ({
                           </>
                         )}
                       </Button>
-                      <Button variant="outline" size="default" className="h-10 bg-transparent" onClick={onEdit}>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        className="h-10 bg-transparent"
+                        onClick={() => {
+                          console.log("[v0] Edit button clicked, onEdit=", onEdit)
+                          onEdit?.()
+                        }}
+                      >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
@@ -1056,7 +1065,14 @@ const ThenNode = ({
 
                   {/* Configure Button */}
                   <div className="mt-6">
-                    <Button variant="outline" className="w-full h-12 text-base bg-transparent" onClick={onEdit}>
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 text-base bg-transparent"
+                      onClick={() => {
+                        console.log("[v0] Configure Response button clicked, onEdit=", onEdit)
+                        onEdit?.()
+                      }}
+                    >
                       <Settings className="mr-2 h-5 w-5" />
                       Configure Response
                     </Button>

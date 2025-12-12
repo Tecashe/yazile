@@ -10082,6 +10082,7 @@ const ThenAction = ({
   }
 
   const handleEdit = () => {
+    console.log("[v0] handleEdit called in ThenAction")
     setIsEditing(true)
     setActiveTab("automation")
   }
@@ -10113,41 +10114,22 @@ const ThenAction = ({
         },
       ]
 
+  console.log("[v0] ThenAction render - automationData?.data?.listener:", automationData?.data?.listener)
+  console.log("[v0] ThenAction render - isEditing:", isEditing)
+  console.log("[v0] ThenAction render - should show ThenNode:", !!(automationData?.data?.listener && !isEditing))
+
+  console.log("[v0] ThenAction render:", {
+    hasListener: !!automationData?.data?.listener,
+    isEditing,
+    shouldShowNode: automationData?.data?.listener && !isEditing,
+  })
+
   if (automationData?.data?.listener && !isEditing) {
+    console.log("[v0] Returning ThenNode")
     return <ThenNode id={id} onEdit={handleEdit} />
   }
 
-  if (isSubscriptionLoading) {
-    return (
-      <FloatingPanel
-        title="Instagram Auto-Reply Setup"
-        trigger={
-          <motion.div
-            className="group relative overflow-hidden rounded-xl mt-4 w-full"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="absolute inset-0 bg-light-blue opacity-20 rounded-xl"></div>
-            <div className="absolute inset-0 rounded-xl shimmerBorder"></div>
-            <div className="relative m-[2px] bg-background-90 rounded-lg p-5 sm:p-6">
-              <div className="flex items-center justify-center gap-3">
-                <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-[#768BDD]" />
-                <p className="text-[#768BDD] font-bold text-base sm:text-lg">Set Up Auto-Replies</p>
-              </div>
-              <p className="text-center text-muted-foreground text-sm mt-2">
-                Automatically reply to Instagram comments and DMs
-              </p>
-            </div>
-          </motion.div>
-        }
-      >
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-light-blue" />
-          <span className="ml-3 text-muted-foreground">Loading your plan...</span>
-        </div>
-      </FloatingPanel>
-    )
-  }
+  console.log("[v0] Rendering FloatingPanel button")
 
   return (
     <FloatingPanel
