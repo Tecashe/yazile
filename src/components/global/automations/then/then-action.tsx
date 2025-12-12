@@ -9819,6 +9819,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { useListener } from "@/hooks/use-automations"
 import { useQueryUser } from "@/hooks/user-queries"
+import { useQueryAutomation } from "@/hooks/user-queries"
 import { AUTOMATION_LISTENERS } from "@/constants/automation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -9916,6 +9917,9 @@ const ThenAction = ({
   const { data: userData, isLoading: isSubscriptionLoading } = useQueryUser()
   const isPro = userData?.data?.subscription?.plan === "PRO"
 
+  const { data: automationData } = useQueryAutomation(id)
+  const existingListener = automationData?.data?.listener
+
   const [activeTab, setActiveTab] = useState("automation")
   const [showTip, setShowTip] = useState(true)
   const [businessProfile, setBusinessProfile] = useState("")
@@ -10002,6 +10006,34 @@ const ThenAction = ({
 
     fetchBusinessDescription()
   }, [isPro])
+
+  useEffect(() => {
+    if (existingListener) {
+      if (existingListener.listener) {
+        onSetListener(existingListener.listener)
+      }
+
+      if (isPro) {
+        if (existingListener.prompt) {
+          // The prompt field is controlled by react-hook-form register
+          // We need to set it via form default values in useListener hook
+        }
+        if (existingListener.commentReply) {
+          setBaseCommentReply(existingListener.commentReply)
+        }
+        if (existingListener.commentReplyVariations && existingListener.commentReplyVariations.length > 0) {
+          setReplyVariations(existingListener.commentReplyVariations)
+        }
+      } else {
+        if (existingListener.prompt) {
+          setDmMessage(existingListener.prompt)
+        }
+        if (existingListener.commentReply) {
+          setCommentReply(existingListener.commentReply)
+        }
+      }
+    }
+  }, [existingListener, isPro, onSetListener])
 
   const totalSteps = isPro ? 2 : 1
   const setupProgress = (completedSteps.length / totalSteps) * 100
@@ -10449,6 +10481,7 @@ const ThenAction = ({
                           placeholder={promptPlaceholder + "|"}
                           className="min-h-[200px] sm:min-h-[250px] lg:min-h-[300px] resize-none bg-background-90 border-background-80 focus:ring-2 focus:ring-light-blue/50 text-base sm:text-lg rounded-xl p-5 sm:p-6"
                           rows={6}
+                          defaultValue={existingListener?.prompt || ""}
                         />
                       </div>
 
@@ -10538,6 +10571,7 @@ const ThenAction = ({
                     value={dmMessage}
                     onChange={(e) => setDmMessage(e.target.value)}
                     rows={4}
+                    defaultValue={existingListener?.prompt || ""}
                   />
                 </div>
 
@@ -10569,6 +10603,7 @@ const ThenAction = ({
                     value={commentReply}
                     onChange={(e) => setCommentReply(e.target.value)}
                     rows={3}
+                    defaultValue={existingListener?.commentReply || ""}
                   />
                 </div>
 
