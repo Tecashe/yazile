@@ -82,8 +82,7 @@ const Page = async ({ params }: Props) => {
   )
 }
 
-
-
+export default Page
 
 
 
