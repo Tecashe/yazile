@@ -10082,7 +10082,6 @@ const ThenAction = ({
   }
 
   const handleEdit = () => {
-    console.log("[v0] handleEdit called in ThenAction")
     setIsEditing(true)
     setActiveTab("automation")
   }
@@ -10114,22 +10113,9 @@ const ThenAction = ({
         },
       ]
 
-  console.log("[v0] ThenAction render - automationData?.data?.listener:", automationData?.data?.listener)
-  console.log("[v0] ThenAction render - isEditing:", isEditing)
-  console.log("[v0] ThenAction render - should show ThenNode:", !!(automationData?.data?.listener && !isEditing))
-
-  console.log("[v0] ThenAction render:", {
-    hasListener: !!automationData?.data?.listener,
-    isEditing,
-    shouldShowNode: automationData?.data?.listener && !isEditing,
-  })
-
   if (automationData?.data?.listener && !isEditing) {
-    console.log("[v0] Returning ThenNode")
     return <ThenNode id={id} onEdit={handleEdit} />
   }
-
-  console.log("[v0] Rendering FloatingPanel button")
 
   return (
     <FloatingPanel
