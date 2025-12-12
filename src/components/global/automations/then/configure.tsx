@@ -380,8 +380,6 @@
 // }
 
 // export default Configure
-
-
 "use client"
 
 import { useQueryAutomation } from "@/hooks/user-queries"
@@ -777,4 +775,3 @@ const Configure = ({
 }
 
 export default Configure
-
