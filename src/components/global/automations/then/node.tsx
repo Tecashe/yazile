@@ -697,7 +697,6 @@
 // }
 
 // export default ThenNode
-
 "use client"
 import { useQueryAutomation } from "@/hooks/user-queries"
 import { PlaneBlue, SmartAi } from "@/icons"
@@ -856,7 +855,19 @@ const ThenNode = ({
                           </>
                         )}
                       </Button>
-                      <Button variant="outline" size="default" className="h-10 bg-transparent" onClick={onEdit}>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        className="h-10 bg-transparent"
+                        onClick={() => {
+                          console.log("[v0] Edit button clicked, onEdit is:", typeof onEdit)
+                          if (onEdit) {
+                            onEdit()
+                          } else {
+                            console.log("[v0] onEdit is undefined!")
+                          }
+                        }}
+                      >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>

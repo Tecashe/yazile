@@ -1,8 +1,6 @@
-
 import { getAutomationInfo } from "@/actions/automations"
 import PostNode from "@/components/global/automations/post/node"
-import ThenNode from "@/components/global/automations/then/node"
-import TestAutomation from "@/components/global/automations/test/test-automation"
+import ThenSection from "@/components/global/automations/then/then-section"
 import Trigger from "@/components/global/automations/trigger"
 import AutomationsBreadCrumb from "@/components/global/bread-crumbs/automations"
 
@@ -66,17 +64,14 @@ const Page = async ({ params }: Props) => {
           <Trigger id={params.id} />
         </div>
 
-        {/* Then section */}
         <div className="w-full max-w-7xl">
-          <ThenNode id={params.id} />
+          <ThenSection id={params.id} />
         </div>
 
         {/* Post section */}
         <div className="w-full max-w-7xl">
           <PostNode id={params.id} />
         </div>
-
-       
       </div>
     </HydrationBoundary>
   )
